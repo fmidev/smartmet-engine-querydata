@@ -1,0 +1,26 @@
+// Enable the following line and re-run the protocol compiler (protoc)
+// to generatete extremely fast parsing, serialization, and other code.
+//
+option optimize_for = SPEED;
+
+package SmartMet;
+
+message QueryDataMessage
+{
+ // Human-readable name of the sending host (REQUIRED)
+ required string name = 1;
+
+ // Info of a single producer in the QEngine
+ message ProducerInfo
+ {
+   required string prodname = 1;
+   repeated string origintimes = 2;
+ }
+
+ // Producer infos of a single QEngine instance
+ repeated ProducerInfo prodinfos = 2;	
+
+ // Identifiers of sending host groups
+ repeated string handlers = 3;
+
+}
