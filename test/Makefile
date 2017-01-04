@@ -21,8 +21,8 @@ INCLUDES = \
 LIBS = \
 	../querydata.so \
 	-lsmartmet-spine \
-	-lsmartmet_newbase \
-	-lsmartmet_gis \
+	-lsmartmet-newbase \
+	-lsmartmet-gis \
 	`pkg-config --libs libconfig++` \
 	-lboost_date_time \
 	-lboost_thread \

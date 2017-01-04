@@ -85,9 +85,9 @@ endif
 
 LIBS = -L$(libdir) \
 	-lsmartmet-spine \
-	-lsmartmet_gis \
-	-lsmartmet_macgyver \
-	-lsmartmet_newbase \
+	-lsmartmet-gis \
+	-lsmartmet-macgyver \
+	-lsmartmet-newbase \
 	-lboost_date_time \
 	-lboost_thread \
 	-lboost_filesystem \
