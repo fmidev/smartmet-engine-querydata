@@ -80,6 +80,10 @@ Model::Model(const boost::filesystem::path& filename,
     if (!itsFullGrid)
       itsValidPoints.reset(new ValidPoints(qi));
 
+    // Initializing the LatLon cache may be slow, we do not wish to
+    // release the model until the cache has been initialized.
+    itsQueryData->LatLonCache();
+
     // Requesting the valid times repeatedly is slow if we have to do
     // a time conversion to ptime every time - hence we optimize
 

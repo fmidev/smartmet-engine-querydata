@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 17.1.9
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -67,6 +67,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Jan  9 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.9-2.fmi
+- The Model now initializes the LatLonCache to avoid race conditions later on
+
 * Mon Jan  9 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.9-1.fmi
 - Reduced write locking during repository updates to avoid race conditions
 
