@@ -299,19 +299,16 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
   {
     const Producer& producer = itsProducerMap.find(id)->second;
 
-    // The write lock is needed only for protecting the removal of models
+    // For each loaded file check that it still exists. If not, unload it
+
+    BOOST_FOREACH (const auto& file_status, *status)
     {
-      SmartMet::Spine::WriteLock lock(itsMutex);
-
-      // For each loaded file check that it still exists. If not, unload it
-
-      BOOST_FOREACH (const auto& file_status, *status)
+      if (file_status.second == Fmi::DirectoryMonitor::DELETE ||
+          file_status.second == Fmi::DirectoryMonitor::MODIFY)
       {
-        if (file_status.second == Fmi::DirectoryMonitor::DELETE ||
-            file_status.second == Fmi::DirectoryMonitor::MODIFY)
-        {
-          itsRepo.remove(producer, file_status.first);
-        }
+        // The write lock is needed only for protecting the removal of models
+        SmartMet::Spine::WriteLock lock(itsMutex);
+        itsRepo.remove(producer, file_status.first);
       }
     }
 

@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 17.1.4
+Version: 17.1.9
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -67,6 +67,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Jan  9 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.9-1.fmi
+- Reduced write locking during repository updates to avoid race conditions
+
 * Wed Jan  4 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.4-1.fmi
 - Changed to use renamed SmartMet base libraries
 
