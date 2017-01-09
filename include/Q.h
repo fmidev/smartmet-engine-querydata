@@ -253,6 +253,6 @@ inline std::size_t hash_value(const Q& theQ)
   return hash_value(*theQ);
 }
 
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet

@@ -691,6 +691,6 @@ std::string SynchronizerConfig::getFailedReason() const
   return itsFailedReason;
 }
 
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet

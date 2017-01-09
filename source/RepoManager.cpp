@@ -481,8 +481,8 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
   }
 }
 
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet
 
 // ======================================================================

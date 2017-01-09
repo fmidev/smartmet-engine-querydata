@@ -107,8 +107,8 @@ inline std::size_t hash_value(const SharedModel& theModel)
   return hash_value(*theModel);
 }
 
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet
 
 // ======================================================================

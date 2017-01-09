@@ -19,8 +19,8 @@ typedef boost::posix_time::ptime OriginTime;
 typedef std::set<OriginTime> OriginTimes;
 typedef boost::posix_time::time_period OriginTimePeriod;
 
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet
 
 // ======================================================================

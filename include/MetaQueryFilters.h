@@ -33,6 +33,6 @@ bool filterLevelValues(const MetaData& prop, const MetaQueryOptions& options);
 
 bool filterSynchro(const MetaData& prop, const std::vector<bp::ptime>& originTimes);
 
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet

@@ -11,6 +11,6 @@ namespace Engine
 namespace Querydata
 {
 typedef std::list<boost::posix_time::ptime> ValidTimeList;
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet

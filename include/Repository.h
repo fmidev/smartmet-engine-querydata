@@ -89,8 +89,8 @@ class Repository
 
 };  // class Repository
 
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet
 
 // ======================================================================

@@ -789,9 +789,9 @@ ValuesPtr Engine::getValues(const Q& theQ,
   }
 }
 
-}  // namspace QueryData
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace QueryData
+}  // namespace Engine
+}  // namespace SmartMet
 
 // DYNAMIC MODULE CREATION TOOLS
 

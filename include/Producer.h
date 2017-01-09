@@ -71,8 +71,8 @@ struct ProducerConfig
 
 ProducerConfig parse_producerinfo(const Producer& producer, const libconfig::Setting& setting);
 
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet
 
 // ======================================================================

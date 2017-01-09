@@ -142,8 +142,8 @@ class Engine : public SmartMet::Spine::SmartMetEngine
 
 };  // class Engine
 
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet
 
 // ======================================================================

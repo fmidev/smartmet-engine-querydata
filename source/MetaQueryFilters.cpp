@@ -317,6 +317,6 @@ bool filterBoundingBox(const MetaData& prop, const MetaQueryOptions& options)
   }
 }
 
-}  // namspace Q
-}  // namspace Engine
-}  // namspace SmartMet
+}  // namespace Q
+}  // namespace Engine
+}  // namespace SmartMet
