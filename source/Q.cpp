@@ -1414,7 +1414,7 @@ void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
  */
 // ----------------------------------------------------------------------
 
-const checkedVector<NFmiPoint> &QImpl::latLonCache() const
+boost::shared_ptr<std::vector<NFmiPoint>> QImpl::latLonCache() const
 {
   try
   {

@@ -8,6 +8,7 @@
 
 #include "Repository.h"
 #include <spine/Thread.h>
+#include <macgyver/Cache.h>
 #include <macgyver/DirectoryMonitor.h>
 #include <memory>
 
@@ -17,6 +18,9 @@ namespace Engine
 {
 namespace Querydata
 {
+// Collection of files
+using Files = std::vector<boost::filesystem::path>;
+
 struct RepoManager
 {
   // construction & destruction
@@ -74,7 +78,7 @@ struct RepoManager
   Repository itsRepo;
 
  private:
-  void load(Producer producer, boost::filesystem::path file);
+  void load(Producer producer, Files files);
 
   Fmi::DirectoryMonitor::Watcher id(const Producer& producer) const;
   RepoManager();
@@ -84,6 +88,10 @@ struct RepoManager
   bool itsReady;
   int itsMaxThreadCount;
   bool itsShutdownRequested;
+
+  using LatLonCache = Fmi::Cache::Cache<std::size_t, boost::shared_ptr<std::vector<NFmiPoint>>>;
+
+  LatLonCache itsLatLonCache;
 };
 
 }  // namespace Q

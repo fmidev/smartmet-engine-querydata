@@ -84,7 +84,9 @@ RepoManager::RepoManager(const std::string& configfile)
       itsThreadCount(0),
       itsReady(false),
       itsMaxThreadCount(10),  // default if not configured
-      itsShutdownRequested(false)
+      itsShutdownRequested(false),
+      itsLatLonCache(500)  // TODO: hard coded 500 different grids
+
 {
   try
   {
@@ -299,58 +301,72 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
   {
     const Producer& producer = itsProducerMap.find(id)->second;
 
-    // For each loaded file check that it still exists. If not, unload it
+    // Collect names of files to be unloaded or loaded
 
+    Files removals;
+    Files additions;
     BOOST_FOREACH (const auto& file_status, *status)
     {
       if (file_status.second == Fmi::DirectoryMonitor::DELETE ||
           file_status.second == Fmi::DirectoryMonitor::MODIFY)
       {
-        // The write lock is needed only for protecting the removal of models
-        SmartMet::Spine::WriteLock lock(itsMutex);
-        itsRepo.remove(producer, file_status.first);
+        removals.push_back(file_status.first);
       }
-    }
-
-    // Now we no longer modify data members, but start new threads which
-    // race against getting a write lock.
-
-    BOOST_FOREACH (const auto& file_status, *status)
-    {
-      if (itsShutdownRequested)
-        break;
-
-      if (file_status.second == Fmi::DirectoryMonitor::CREATE ||
-          file_status.second == Fmi::DirectoryMonitor::MODIFY)
+      else if (file_status.second == Fmi::DirectoryMonitor::CREATE ||
+               file_status.second == Fmi::DirectoryMonitor::MODIFY)
       {
-        // We limit the number of threads to avoid exhausting the
-        // system due to 100s of simultaneous querydata loading threads
-        bool ok = false;
-        while (!ok)
-        {
-          {
-            SmartMet::Spine::ReadLock lock(itsThreadCountMutex);
-            if (itsThreadCount <= itsMaxThreadCount)
-              ok = true;
-          }
-          if (!ok)
-            boost::this_thread::sleep(boost::posix_time::milliseconds(50));
-        }
-
-        // Note: We are really counting scheduled threads, not
-        // ones which have actually started. Hence the counter
-        // should be here and not in the load method.
-        {
-          SmartMet::Spine::WriteLock lock(itsThreadCountMutex);
-          ++itsThreadCount;
-        }
-#if 0
-        std::cerr << ANSI_FG_GREEN << "Threads: " << itsThreadCount
-            << " " << filename << ANSI_FG_DEFAULT << std::endl;
-#endif
-        boost::thread thrd(boost::bind(&RepoManager::load, this, producer, file_status.first));
+        additions.push_back(file_status.first);
       }
     }
+
+    // Handle deleted files
+
+    if (!removals.empty())
+    {
+      // Take the lock only when needed
+      SmartMet::Spine::WriteLock lock(itsMutex);
+      BOOST_FOREACH (const auto& file, removals)
+        itsRepo.remove(producer, file);
+    }
+
+    // Done if there are no additions
+
+    if (additions.empty())
+      return;
+
+    // We limit the number of threads to avoid exhausting the system
+
+    bool ok = false;
+    while (!ok && !itsShutdownRequested)
+    {
+      {
+        SmartMet::Spine::ReadLock lock(itsThreadCountMutex);
+        if (itsThreadCount <= itsMaxThreadCount)
+          ok = true;
+      }
+      if (!ok)
+        boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+    }
+
+    // Abort if there is a shut down request
+    if (itsShutdownRequested)
+      return;
+
+    // Note: We are really counting scheduled threads, not
+    // ones which have actually started. Hence the counter
+    // should be here and not in the load method.
+    {
+      SmartMet::Spine::WriteLock lock(itsThreadCountMutex);
+      ++itsThreadCount;
+    }
+
+// Handle new or modified files
+
+#if 0
+	std::cerr << ANSI_FG_GREEN << "Threads: " << itsThreadCount
+			  << " " << filename << ANSI_FG_DEFAULT << std::endl;
+#endif
+    boost::thread thrd(boost::bind(&RepoManager::load, this, producer, additions));
   }
   catch (...)
   {
@@ -367,21 +383,33 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
  */
 // ----------------------------------------------------------------------
 
-void RepoManager::load(Producer producer, boost::filesystem::path filename)
+void RepoManager::load(Producer producer, Files files)
 {
-  try
+  // Just in case
+  if (files.empty())
+    return;
+
+  if (itsShutdownRequested)
   {
-    // catch exceptions during data load to prevent crashes
+    SmartMet::Spine::WriteLock lock(itsThreadCountMutex);
+    --itsThreadCount;
+    return;
+  }
 
-    if (itsShutdownRequested)
-    {
-      SmartMet::Spine::WriteLock lock(itsThreadCountMutex);
-      --itsThreadCount;
-      return;
-    }
+  // We expect timestamps and want the newest file first
+  std::sort(files.rbegin(), files.rend());
 
-    const ProducerConfig& conf = producerConfig(producer);
+  const ProducerConfig& conf = producerConfig(producer);
 
+  unsigned int successful_loads = 0;
+
+  for (const auto& filename : files)
+  {
+    // Done if the remaining files would not be accepted for being older
+    if (successful_loads >= conf.number_to_keep)
+      break;
+
+    // files may be corrupt, hence we catch exceptions
     try
     {
       if (itsVerbose)
@@ -402,14 +430,22 @@ void RepoManager::load(Producer producer, boost::filesystem::path filename)
         std::cout << msg.str() << std::flush;
       }
 
+      // Update latlon-cache if necessary. In any case make sure model cache is up to date
+
+      auto hash = model->gridHashValue();
+      auto latlons = itsLatLonCache.find(hash);  // cached coordinates, if any
+      if (!latlons)
+        itsLatLonCache.insert(hash, model->makeLatLonCache());  // calc latloncache and cache it
+      else
+        model->setLatLonCache(*latlons);  // set model cache from our cache
+
       {
         // update structures safely
 
         SmartMet::Spine::WriteLock lock(itsMutex);
-
         itsRepo.add(producer, model);
-
-        itsRepo.resize(producer, producerConfig(producer).number_to_keep);
+        ++successful_loads;
+        itsRepo.resize(producer, conf.number_to_keep);
       }
     }
     catch (...)
@@ -417,29 +453,16 @@ void RepoManager::load(Producer producer, boost::filesystem::path filename)
       SmartMet::Spine::Exception exception(BCP, "QEngine failed to load the file!", NULL);
       exception.addParameter("File", filename.c_str());
       std::cerr << exception.getStackTrace();
-
-      // std::ostringstream msg;
-      // msg << ANSI_FG_RED << log_time_str() << " QENGINE FAILED TO LOAD " << filename
-      //    << " BECAUSE: " << e.what() << ANSI_FG_DEFAULT << std::endl;
-      // std::cerr << msg.str() << std::flush;
     }
+  }  // for all files
 
-    {
-      SmartMet::Spine::WriteLock lock(itsThreadCountMutex);
-      --itsThreadCount;
-      // Initial scan complete?
-      if (itsThreadCount == 0 && itsMonitor.ready())
-        itsReady = true;
-#if 0
-    std::cerr << ANSI_FG_RED << "Threads: " << itsThreadCount
-          << " " << filename << ANSI_FG_DEFAULT << std::endl;
-#endif
-    }
-  }
-  catch (...)
-  {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
-  }
+  SmartMet::Spine::WriteLock lock(itsThreadCountMutex);
+  --itsThreadCount;
+
+  // Set ready flag if the scan is complete. Only the 1st full scan changes the state.
+
+  if (itsThreadCount == 0 && itsMonitor.ready())
+    itsReady = true;
 }
 
 // ----------------------------------------------------------------------

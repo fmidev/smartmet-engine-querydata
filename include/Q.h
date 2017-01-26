@@ -180,7 +180,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                       const NFmiMetTime& theInterpolatedTime,
                       float wantedPressureLevel);
 
-  const checkedVector<NFmiPoint>& latLonCache() const;
+  boost::shared_ptr<std::vector<NFmiPoint>> latLonCache() const;
 
   // Gridded landscaping; Load dem values and water flags for native (sub)grid or for given
   // locations

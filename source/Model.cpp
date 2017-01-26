@@ -80,10 +80,6 @@ Model::Model(const boost::filesystem::path& filename,
     if (!itsFullGrid)
       itsValidPoints.reset(new ValidPoints(qi));
 
-    // Initializing the LatLon cache may be slow, we do not wish to
-    // release the model until the cache has been initialized.
-    itsQueryData->LatLonCache();
-
     // Requesting the valid times repeatedly is slow if we have to do
     // a time conversion to ptime every time - hence we optimize
 
@@ -379,6 +375,39 @@ void Model::release(boost::shared_ptr<NFmiFastQueryInfo> theInfo) const
   {
     throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
   }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ *\ brief Return the hash value for the grid in the querydata
+ */
+// ----------------------------------------------------------------------
+
+std::size_t Model::gridHashValue() const
+{
+  return itsQueryData->GridHashValue();
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Set the LatLonCache for the querydata from external cache
+ */
+// ----------------------------------------------------------------------
+
+void Model::setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache)
+{
+  itsQueryData->SetLatLonCache(theCache);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Make querydata latlon cache and return it
+ */
+// ----------------------------------------------------------------------
+
+boost::shared_ptr<std::vector<NFmiPoint>> Model::makeLatLonCache()
+{
+  return itsQueryData->LatLonCache();
 }
 
 // ----------------------------------------------------------------------

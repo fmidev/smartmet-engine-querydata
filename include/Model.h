@@ -63,6 +63,10 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
 
   NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist) const;
 
+  std::size_t gridHashValue() const;
+  void setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache);
+  boost::shared_ptr<std::vector<NFmiPoint>> makeLatLonCache();
+
  private:
   Model();
   Model(const Model& theModel);
@@ -100,7 +104,7 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
 
 typedef boost::shared_ptr<Model> SharedModel;
 typedef std::list<SharedModel> SharedModelList;
-typedef std::list<std::pair<SharedModel, ValidTimeList> > SharedModelTimeList;
+typedef std::list<std::pair<SharedModel, ValidTimeList>> SharedModelTimeList;
 
 inline std::size_t hash_value(const SharedModel& theModel)
 {
