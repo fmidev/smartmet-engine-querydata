@@ -558,9 +558,9 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         for (qi->ResetParam(); qi->NextParam(false);)
         {
           int paramID = boost::numeric_cast<int>(qi->Param().GetParamIdent());
-          const std::string paramName = SmartMet::Spine::ParameterFactory::instance().name(paramID);
+          std::string paramName = SmartMet::Spine::ParameterFactory::instance().name(paramID);
           if (!paramName.empty())
-            params.push_back(std::string(paramName));
+            params.push_back(paramName);
           else
             params.push_back(Fmi::to_string(paramID));
 
