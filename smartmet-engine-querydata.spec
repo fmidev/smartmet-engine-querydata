@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 17.1.26
+Version: 17.2.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -67,6 +67,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Feb  3 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.3-1.fmi
+- Admin-plugin now reports querydata level values too
+
 * Thu Jan 26 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.1.26-1.fmi
 - Added caching for NFmiQueryData object LatLonCache objects
 - Optimized update algorithms to utilize the latlon cache

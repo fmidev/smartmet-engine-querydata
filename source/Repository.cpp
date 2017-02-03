@@ -521,6 +521,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
                                       "RI",
                                       "Path",
                                       "Parameters",
+                                      "Levels",
                                       "Projection",
                                       "OriginTime",
                                       "MinTime",
@@ -556,6 +557,14 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
           int paramID = boost::numeric_cast<int>(qi->Param().GetParamIdent());
           const std::string paramName = SmartMet::Spine::ParameterFactory::instance().name(paramID);
           params.push_back(std::string(paramName));
+        }
+
+        // Get the available levelvalues
+        std::list<std::string> levels;
+        for (qi->ResetLevel(); qi->NextLevel();)
+        {
+          float level = qi->Level()->LevelValue();
+          levels.push_back(Fmi::to_string(level));
         }
 
         // Get projection string
@@ -596,6 +605,11 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         // Insert parameters
         std::string parameters = boost::algorithm::join(params, ", ");
         resultTable->set(column, row, parameters);
+        ++column;
+
+        // Insert levels
+        std::string levs = boost::algorithm::join(levels, ", ");
+        resultTable->set(column, row, levs);
         ++column;
 
         // Insert projection string
