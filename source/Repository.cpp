@@ -17,6 +17,7 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/algorithm/string/join.hpp>
+#include <boost/regex.hpp>
 #include <stdexcept>
 #include <sstream>
 
@@ -521,6 +522,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
                                       "RI",
                                       "Path",
                                       "Parameters",
+                                      "Descriptions",
                                       "Levels",
                                       "Projection",
                                       "OriginTime",
@@ -552,11 +554,17 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
 
         // Get the parameter list from querydatainfo
         std::list<std::string> params;
+        std::list<std::string> descriptions;
         for (qi->ResetParam(); qi->NextParam(false);)
         {
           int paramID = boost::numeric_cast<int>(qi->Param().GetParamIdent());
           const std::string paramName = SmartMet::Spine::ParameterFactory::instance().name(paramID);
-          params.push_back(std::string(paramName));
+          if (!paramName.empty())
+            params.push_back(std::string(paramName));
+          else
+            params.push_back(Fmi::to_string(paramID));
+
+          descriptions.push_back(qi->Param().GetParamName().CharPtr());
         }
 
         // Get the available levelvalues
@@ -564,7 +572,10 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         for (qi->ResetLevel(); qi->NextLevel();)
         {
           float level = qi->Level()->LevelValue();
-          levels.push_back(Fmi::to_string(level));
+          if (level != kFloatMissing)
+            levels.push_back(Fmi::to_string(level));
+          else
+            levels.push_back("-");
         }
 
         // Get projection string
@@ -582,6 +593,12 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         {
           projectionText = qi->Area()->AreaStr();
         }
+
+        // For nicer output in browsers we replace for example ",PROJCS" with ", PROJCS"
+        boost::regex rex(",([A-Z])");
+        projectionText = boost::regex_replace(projectionText, rex, ", $1");
+
+        // Create the table
 
         int column = 0;
 
@@ -605,6 +622,11 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         // Insert parameters
         std::string parameters = boost::algorithm::join(params, ", ");
         resultTable->set(column, row, parameters);
+        ++column;
+
+        // Insert parameter descriptions
+        std::string descs = boost::algorithm::join(descriptions, ", ");
+        resultTable->set(column, row, descs);
         ++column;
 
         // Insert levels

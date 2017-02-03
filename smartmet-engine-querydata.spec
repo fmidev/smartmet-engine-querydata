@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 17.2.3
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -67,6 +67,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Feb  3 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.3-2.fmi
+- Added parameter descriptions to repository report
+- Report parameter number if the name of the parameter is not known
+- Improved WKT output
+
 * Fri Feb  3 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.3-1.fmi
 - Admin-plugin now reports querydata level values too
 
