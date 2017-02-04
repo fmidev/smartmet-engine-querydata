@@ -47,9 +47,9 @@ SmartMet %{SPECNAME} development headers.
 %prep
 rm -rf $RPM_BUILD_ROOT
 
-%setup -q -n engines/%{DIRNAME}
+%setup -q -n engines/%{SPECNAME}
  
-%build -q -n engines/%{DIRNAME}
+%build -q -n engines/%{SPECNAME}
 make %{_smp_mflags}
 
 %install
