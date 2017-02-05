@@ -8,10 +8,10 @@
 
 #include <spine/Thread.h>
 #include <boost/asio.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/array.hpp>
 #include <boost/optional.hpp>
 
+#include <memory>
 #include <string>
 
 #include <spine/ConfigBase.h>
@@ -143,7 +143,7 @@ class Synchronizer
 
   boost::array<char, 32768> itsSocketBuffer;
 
-  boost::scoped_ptr<boost::thread> itsCommThread;
+  std::unique_ptr<boost::thread> itsCommThread;
 
   std::string itsSendBuffer;
 

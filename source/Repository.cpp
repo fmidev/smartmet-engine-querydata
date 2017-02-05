@@ -529,7 +529,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
                                       "MinTime",
                                       "MaxTime"};
 
-    boost::scoped_ptr<Fmi::TimeFormatter> timeFormatter(Fmi::TimeFormatter::create(timeFormat));
+    std::unique_ptr<Fmi::TimeFormatter> timeFormatter(Fmi::TimeFormatter::create(timeFormat));
 
     boost::shared_ptr<SmartMet::Spine::Table> resultTable(new SmartMet::Spine::Table);
 
