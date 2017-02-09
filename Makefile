@@ -109,20 +109,20 @@ INSTALL_DATA = install -p -m 664
 
 # Compilation directories
 
-vpath %.cpp source
-vpath %.h include
+vpath %.cpp $(SUBNAME)
+vpath %.h $(SUBNAME)
 vpath %.o $(objdir)
 
 # The files to be compiled
 PB_SRCS = $(wildcard *.proto)
-COMPILED_PB_SRCS = $(patsubst %.proto, source/%.pb.cpp, $(PB_SRCS))
-COMPILED_PB_HDRS = $(patsubst %.proto, include/%.pb.h, $(PB_SRCS))
+COMPILED_PB_SRCS = $(patsubst %.proto, $(SUBNAME)/%.pb.cpp, $(PB_SRCS))
+COMPILED_PB_HDRS = $(patsubst %.proto, $(SUBNAME)/%.pb.h, $(PB_SRCS))
 
-SRCS = $(filter-out %.pb.cpp, $(wildcard source/*.cpp)) $(COMPILED_PB_SRCS)
-HDRS = $(filter-out %.pb.h, $(wildcard include/*.h)) $(COMPILED_PB_HDRS)
+SRCS = $(filter-out %.pb.cpp, $(wildcard $(SUBNAME)/*.cpp)) $(COMPILED_PB_SRCS)
+HDRS = $(filter-out %.pb.h, $(wildcard $(SUBNAME)/*.h)) $(COMPILED_PB_HDRS)
 OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
 
-INCLUDES := -Iinclude $(INCLUDES)
+INCLUDES := -I$(SUBDIR) $(INCLUDES)
 
 .PHONY: test rpm
 
@@ -137,12 +137,12 @@ $(LIBFILE): $(SRCS) $(OBJS)
 	$(CXX) $(CFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJS) $(LIBS)
 
 clean:
-	rm -f $(LIBFILE) $(OBJS) *~ source/*~ include/*~
-	rm -f source/QueryDataMessage.pb.cpp include/QueryDataMessage.pb.h
+	rm -f $(LIBFILE) $(OBJS) *~ $(SUBNAME)/*~
+	rm -f $(SUBNAME)/QueryDataMessage.pb.cpp $(SUBNAME)/QueryDataMessage.pb.h
 	rm -rf obj
 
 format:
-	clang-format -i -style=file include/*.h source/*.cpp test/*.cpp
+	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
 
 install:
 	@mkdir -p $(includedir)/$(INCDIR)
@@ -163,7 +163,7 @@ objdir:
 rpm: clean protoc
 	if [ -e $(SPEC).spec ]; \
 	then \
-	  tar -czvf $(SPEC).tar.gz --transform "s,^,engines/$(SPEC)/," * ; \
+	  tar -czvf $(SPEC).tar.gz --transform "s,^,$(SPEC)/," * ; \
 	  rpmbuild -ta $(SPEC).tar.gz ; \
 	  rm -f $(SPEC).tar.gz ; \
 	else \
@@ -172,19 +172,15 @@ rpm: clean protoc
 
 .SUFFIXES: $(SUFFIXES) .cpp
 
-obj/%.o: %.cpp; $(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
-
-.cpp.o:
-	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $(objdir)/$@ $<
+obj/%.o: %.cpp
+	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
 protoc: $(COMPILED_PB_SRCS)
 
-source/%.pb.cpp: %.proto; mkdir -p tmp
+querydata/%.pb.cpp: %.proto; mkdir -p tmp
 	protoc --cpp_out=tmp QueryDataMessage.proto
-	mv tmp/QueryDataMessage.pb.h include/
-	mv tmp/QueryDataMessage.pb.cc source/QueryDataMessage.pb.cpp
+	mv tmp/QueryDataMessage.pb.h $(SUBNAME)/
+	mv tmp/QueryDataMessage.pb.cc $(SUBNAME)/QueryDataMessage.pb.cpp
 	rm -rf tmp 
 
-ifneq ($(wildcard obj/*.d),)
 -include $(wildcard obj/*.d)
-endif
