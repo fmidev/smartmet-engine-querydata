@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 17.2.3
-Release: 2%{?dist}.fmi
+Version: 17.2.11
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -12,8 +12,8 @@ Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 17.1.24
-BuildRequires: smartmet-library-newbase-devel >= 17.1.26
+BuildRequires: smartmet-library-spine-devel >= 17.2.3
+BuildRequires: smartmet-library-newbase-devel >= 17.2.10
 BuildRequires: smartmet-library-macgyver-devel >= 17.1.18
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -24,11 +24,11 @@ Requires: boost-iostreams
 Requires: boost-regex
 Requires: boost-thread
 Requires: boost-system
-Requires: smartmet-library-newbase >= 17.1.26
+Requires: smartmet-library-newbase >= 17.2.10
 Requires: smartmet-library-macgyver >= 17.1.18
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 17.1.24
+Requires: smartmet-library-spine >= 17.2.3
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -67,6 +67,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sat Feb 11 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.11-1.fmi
+- Repackaged due to newbase CreateNewArea API change
+
 * Fri Feb  3 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.2.3-2.fmi
 - Added parameter descriptions to repository report
 - Report parameter number if the name of the parameter is not known
