@@ -12,7 +12,7 @@
 #include <spine/ParameterFactory.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
-#include <macgyver/String.h>
+#include <macgyver/StringConversion.h>
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>

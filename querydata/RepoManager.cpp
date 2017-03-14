@@ -38,7 +38,7 @@
 #include <newbase/NFmiQueryData.h>
 
 #include <macgyver/AnsiEscapeCodes.h>
-#include <macgyver/String.h>
+#include <macgyver/StringConversion.h>
 #include <macgyver/TypeName.h>
 
 #include <boost/bind.hpp>
