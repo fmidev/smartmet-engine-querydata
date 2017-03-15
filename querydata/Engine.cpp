@@ -724,7 +724,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 {
   try
   {
-    auto qhash = hash_value(theQ);
+    auto qhash = theQ->gridHashValue();
 
     // Handle native coordinates first
     if (theSR == nullptr)

@@ -3116,6 +3116,19 @@ bool QImpl::selectLevel(double theLevel)
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Retrun the grid hash value
+ *
+ * Note: All models are required to have the same grid
+ */
+// ----------------------------------------------------------------------
+
+std::size_t QImpl::gridHashValue() const
+{
+  return itsModels.front()->gridHashValue();
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Calculate a hash for the object
  */
 // ----------------------------------------------------------------------

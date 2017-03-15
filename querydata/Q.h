@@ -68,6 +68,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   bool isFullGrid() const;
 
   friend std::size_t hash_value(const QImpl& theQ);
+  std::size_t gridHashValue() const;
 
   NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist) const;
 
