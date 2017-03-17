@@ -199,7 +199,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   // sample data into a new projection
 
-  boost::shared_ptr<QImpl> sample(const SmartMet::Spine::Parameter& theParameter,
+  boost::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
                                   const boost::posix_time::ptime& theTime,
                                   const OGRSpatialReference& theCrs,
                                   double theXmin,
@@ -211,21 +211,21 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                                   const Fmi::LandCover& theLandCover);
 
   // one location, one timestep
-  SmartMet::Spine::TimeSeries::Value value(ParameterOptions& param,
-                                           const boost::local_time::local_date_time& ldt);
+  Spine::TimeSeries::Value value(ParameterOptions& param,
+                                 const boost::local_time::local_date_time& ldt);
   // one location, many timesteps
-  SmartMet::Spine::TimeSeries::TimeSeriesPtr values(
-      ParameterOptions& param, const SmartMet::Spine::TimeSeriesGenerator::LocalTimeList& tlist);
+  Spine::TimeSeries::TimeSeriesPtr values(ParameterOptions& param,
+                                          const Spine::TimeSeriesGenerator::LocalTimeList& tlist);
   // many locations (indexmask), many timesteps
-  SmartMet::Spine::TimeSeries::TimeSeriesGroupPtr values(
+  Spine::TimeSeries::TimeSeriesGroupPtr values(
       ParameterOptions& param,
       const NFmiIndexMask& indexmask,
-      const SmartMet::Spine::TimeSeriesGenerator::LocalTimeList& tlist);
+      const Spine::TimeSeriesGenerator::LocalTimeList& tlist);
   // many locations (llist), many timesteps
-  SmartMet::Spine::TimeSeries::TimeSeriesGroupPtr values(
+  Spine::TimeSeries::TimeSeriesGroupPtr values(
       ParameterOptions& param,
-      const SmartMet::Spine::LocationList& llist,
-      const SmartMet::Spine::TimeSeriesGenerator::LocalTimeList& tlist,
+      const Spine::LocationList& llist,
+      const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
       const double& maxdistance);
 
   bool selectLevel(double theLevel);

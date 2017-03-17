@@ -98,7 +98,7 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   // The info is returned via a proxy which returns the info back
   // to the pool.
 
-  mutable SmartMet::Spine::MutexType itsQueryInfoPoolMutex;
+  mutable Spine::MutexType itsQueryInfoPoolMutex;
   mutable std::list<SharedInfo> itsQueryInfoPool;
 };
 

@@ -51,7 +51,7 @@ struct RepoManager
 
   // data members
 
-  mutable SmartMet::Spine::MutexType itsMutex;  // mutexes should always be mutable
+  mutable Spine::MutexType itsMutex;  // mutexes should always be mutable
   const std::string itsConfigFile;
   libconfig::Config itsConfig;
   bool itsVerbose;
@@ -83,7 +83,7 @@ struct RepoManager
   Fmi::DirectoryMonitor::Watcher id(const Producer& producer) const;
   RepoManager();
 
-  SmartMet::Spine::MutexType itsThreadCountMutex;
+  Spine::MutexType itsThreadCountMutex;
   int itsThreadCount;
   bool itsReady;
   int itsMaxThreadCount;

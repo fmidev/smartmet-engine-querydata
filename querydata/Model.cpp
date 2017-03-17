@@ -51,7 +51,7 @@ Model::Model(const boost::filesystem::path& filename,
   try
   {
     if (!itsQueryData)
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Failed to initialize NFmiQueryData object from '" + filename.string() + "'!");
 
     itsOriginTime = itsQueryData->OriginTime();
@@ -98,7 +98,7 @@ Model::Model(const boost::filesystem::path& filename,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -157,7 +157,7 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -318,7 +318,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -343,7 +343,7 @@ SharedInfo Model::info() const
 {
   try
   {
-    SmartMet::Spine::WriteLock lock(itsQueryInfoPoolMutex);
+    Spine::WriteLock lock(itsQueryInfoPoolMutex);
     if (itsQueryInfoPool.empty())
     {
       auto qinfo = boost::make_shared<NFmiFastQueryInfo>(itsQueryData.get());
@@ -360,7 +360,7 @@ SharedInfo Model::info() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -368,12 +368,12 @@ void Model::release(boost::shared_ptr<NFmiFastQueryInfo> theInfo) const
 {
   try
   {
-    SmartMet::Spine::WriteLock lock(itsQueryInfoPoolMutex);
+    Spine::WriteLock lock(itsQueryInfoPoolMutex);
     itsQueryInfoPool.push_front(theInfo);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

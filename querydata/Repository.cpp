@@ -52,7 +52,7 @@ void Repository::add(const ProducerConfig& config)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -78,8 +78,7 @@ void Repository::add(const Producer& producer, SharedModel model)
           itsProducers.insert(Producers::value_type(producer, SharedModels()));
 
       if (!ok)
-        throw SmartMet::Spine::Exception(
-            BCP, "Failed to add new model for producer '" + producer + "'!");
+        throw Spine::Exception(BCP, "Failed to add new model for producer '" + producer + "'!");
     }
 
     // And insert the model for the producer
@@ -116,7 +115,7 @@ void Repository::add(const Producer& producer, SharedModel model)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -146,7 +145,7 @@ OriginTimes Repository::originTimes(const Producer& producer) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -174,13 +173,13 @@ Q Repository::get(const Producer& producer) const
     Producers::const_iterator producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Repository get (1): No data available for producer '" + producer + "'!");
 
     const SharedModels& time_model = producer_model->second;
 
     if (time_model.empty())
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Repository get (2): No data available for producer '" + producer + "'!");
 
     // newest origintime is at the end
@@ -190,7 +189,7 @@ Q Repository::get(const Producer& producer) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -207,13 +206,13 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
     Producers::const_iterator producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Repository get (3): No data available for producer '" + producer + "'!");
 
     const SharedModels& models = producer_model->second;
 
     if (models.empty())
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Repository get (4): No data available for producer '" + producer + "'!");
 
     SharedModels::const_iterator time_model;
@@ -246,13 +245,13 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
 
 #endif
 
-    throw SmartMet::Spine::Exception(BCP,
-                                     "Repository get: No data available for producer '" + producer +
-                                         "' with origintime == " + to_simple_string(origintime));
+    throw Spine::Exception(BCP,
+                           "Repository get: No data available for producer '" + producer +
+                               "' with origintime == " + to_simple_string(origintime));
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -271,13 +270,13 @@ Q Repository::getAll(const Producer& producer) const
     Producers::const_iterator producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Repository getPeriod: No data available for producer '" + producer + "'");
 
     const SharedModels& models = producer_model->second;
 
     if (models.empty())
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Repository getPeriod: No data available for producer '" + producer + "'");
 
     // Construct a vector of datas
@@ -294,7 +293,7 @@ Q Repository::getAll(const Producer& producer) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -311,13 +310,13 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
     Producers::iterator producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Repository remove: No data available for producer '" + producer + "'");
 
     SharedModels& models = producer_model->second;
 
     if (models.empty())
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Repository remove: No data available for producer '" + producer + "'");
 
     for (SharedModels::iterator time_model = models.begin(), end = models.end(); time_model != end;
@@ -336,7 +335,7 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -353,7 +352,7 @@ void Repository::resize(const Producer& producer, std::size_t limit)
     Producers::iterator producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Repository resize: no data available for producer '" + producer + "'");
 
     SharedModels& models = producer_model->second;
@@ -377,7 +376,7 @@ void Repository::resize(const Producer& producer, std::size_t limit)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -401,7 +400,7 @@ bool leveltype_ok(const std::string& modeltype, const std::string& wantedtype)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -436,7 +435,7 @@ bool Repository::contains(const Repository::SharedModels& models,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -507,7 +506,7 @@ Producer Repository::find(const ProducerList& producerlist,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -531,7 +530,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
 
     std::unique_ptr<Fmi::TimeFormatter> timeFormatter(Fmi::TimeFormatter::create(timeFormat));
 
-    boost::shared_ptr<SmartMet::Spine::Table> resultTable(new SmartMet::Spine::Table);
+    boost::shared_ptr<Spine::Table> resultTable(new Spine::Table);
 
     int row = 0;
 
@@ -558,7 +557,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         for (qi->ResetParam(); qi->NextParam(false);)
         {
           int paramID = boost::numeric_cast<int>(qi->Param().GetParamIdent());
-          std::string paramName = SmartMet::Spine::ParameterFactory::instance().name(paramID);
+          std::string paramName = Spine::ParameterFactory::instance().name(paramID);
           if (!paramName.empty())
             params.push_back(paramName);
           else
@@ -656,7 +655,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
 
     // Insert headers
 
-    SmartMet::Spine::TableFormatter::Names headers;
+    Spine::TableFormatter::Names headers;
 
     BOOST_FOREACH (const auto& p, ContentTableHeaders)
     {
@@ -667,7 +666,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -735,7 +734,7 @@ std::list<MetaData> Repository::getRepoMetadata(const MetaQueryOptions& theOptio
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -762,7 +761,7 @@ std::list<MetaData> Repository::getRepoMetadata() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -794,7 +793,7 @@ Repository::MetaObject Repository::getSynchroInfos() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -811,7 +810,7 @@ Repository::SharedModels Repository::getAllModels(const Producer& producer) cons
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

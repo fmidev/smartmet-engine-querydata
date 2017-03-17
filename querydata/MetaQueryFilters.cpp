@@ -12,7 +12,7 @@ namespace Engine
 {
 namespace Querydata
 {
-using namespace SmartMet::Spine;
+using namespace Spine;
 
 namespace bg = boost::geometry;
 
@@ -43,7 +43,7 @@ bool filterProducer(const MetaData& prop, const MetaQueryOptions& options)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -70,7 +70,7 @@ bool filterOriginTime(const MetaData& prop, const MetaQueryOptions& options)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -97,7 +97,7 @@ bool filterFirstTime(const MetaData& prop, const MetaQueryOptions& options)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -124,7 +124,7 @@ bool filterLastTime(const MetaData& prop, const MetaQueryOptions& options)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -164,7 +164,7 @@ bool filterParameters(const MetaData& prop, const MetaQueryOptions& options)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -204,7 +204,7 @@ bool filterLevelTypes(const MetaData& prop, const MetaQueryOptions& options)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -244,7 +244,7 @@ bool filterLevelValues(const MetaData& prop, const MetaQueryOptions& options)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -266,7 +266,7 @@ bool filterSynchro(const MetaData& prop, const std::vector<bp::ptime>& originTim
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -313,7 +313,7 @@ bool filterBoundingBox(const MetaData& prop, const MetaQueryOptions& options)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

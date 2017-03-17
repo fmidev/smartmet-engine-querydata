@@ -7,9 +7,9 @@ namespace Engine
 {
 namespace Querydata
 {
-ParameterOptions::ParameterOptions(const SmartMet::Spine::Parameter& theParam,
+ParameterOptions::ParameterOptions(const Spine::Parameter& theParam,
                                    const Producer& theProducer,
-                                   const SmartMet::Spine::Location& theLocation,
+                                   const Spine::Location& theLocation,
                                    const std::string& theCountry,
                                    const std::string& thePlace,
                                    const Fmi::TimeFormatter& theTimeFormatter,

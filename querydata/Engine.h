@@ -46,7 +46,7 @@ struct CacheReportingStruct
   int values_cache_size;
 };
 
-class Engine : public SmartMet::Spine::SmartMetEngine
+class Engine : public Spine::SmartMetEngine
 {
  private:
   friend class Synchronizer;
@@ -124,7 +124,7 @@ class Engine : public SmartMet::Spine::SmartMetEngine
   boost::optional<ProducerMap> getSyncProducers(const std::string& syncGroup) const;
 
   // Start synchronization with other QEngines
-  void startSynchronize(SmartMet::Spine::Reactor* theReactor);
+  void startSynchronize(Spine::Reactor* theReactor);
 
   // get producer's configuration
   const ProducerConfig& getProducerConfig(const std::string& producer) const;

@@ -93,7 +93,7 @@ RepoManager::RepoManager(const std::string& configfile)
     // This lock is unnecessary since it is not possible to access
     // the object before it has been fully constructed.
 
-    // SmartMet::Spine::WriteLock lock(mutex);
+    // Spine::WriteLock lock(mutex);
 
     // Phase 0: Parse configuration file
 
@@ -109,12 +109,12 @@ RepoManager::RepoManager(const std::string& configfile)
       // Phase 1: Establish producer setting
 
       if (!itsConfig.exists("producers"))
-        throw SmartMet::Spine::Exception(BCP, "Configuration file must specify the producers");
+        throw Spine::Exception(BCP, "Configuration file must specify the producers");
 
       const libconfig::Setting& prods = itsConfig.lookup("producers");
 
       if (!prods.isArray())
-        throw SmartMet::Spine::Exception(BCP, "Configured value of 'producers' must be an array");
+        throw Spine::Exception(BCP, "Configured value of 'producers' must be an array");
 
       // Phase 2: Parse individual producer settings
 
@@ -123,7 +123,7 @@ RepoManager::RepoManager(const std::string& configfile)
         Producer prod = prods[i];
 
         if (!itsConfig.exists(prod))
-          throw SmartMet::Spine::Exception(BCP, "Producer settings for " + prod + " are missing");
+          throw Spine::Exception(BCP, "Producer settings for " + prod + " are missing");
 
         ProducerConfig pinfo = parse_producerinfo(prod, itsConfig.lookup(prod));
 
@@ -134,18 +134,18 @@ RepoManager::RepoManager(const std::string& configfile)
     }
     catch (libconfig::ParseException& e)
     {
-      throw SmartMet::Spine::Exception(BCP,
-                                       "Qengine configuration error '" + std::string(e.getError()) +
-                                           "' on line " + std::to_string(e.getLine()));
+      throw Spine::Exception(BCP,
+                             "Qengine configuration error '" + std::string(e.getError()) +
+                                 "' on line " + std::to_string(e.getLine()));
     }
     catch (libconfig::ConfigException&)
     {
-      throw SmartMet::Spine::Exception(BCP, "Qengine configuration error");
+      throw Spine::Exception(BCP, "Qengine configuration error");
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -186,7 +186,7 @@ void RepoManager::init()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -213,7 +213,7 @@ void RepoManager::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -240,11 +240,11 @@ Fmi::DirectoryMonitor::Watcher RepoManager::id(const Producer& producer) const
         return it.first;
     }
 
-    throw SmartMet::Spine::Exception(BCP, "Request for unknown producer!");
+    throw Spine::Exception(BCP, "Request for unknown producer!");
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -270,7 +270,7 @@ void RepoManager::error(Fmi::DirectoryMonitor::Watcher /* id */,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -324,7 +324,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     if (!removals.empty())
     {
       // Take the lock only when needed
-      SmartMet::Spine::WriteLock lock(itsMutex);
+      Spine::WriteLock lock(itsMutex);
       BOOST_FOREACH (const auto& file, removals)
         itsRepo.remove(producer, file);
     }
@@ -340,7 +340,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     while (!ok && !itsShutdownRequested)
     {
       {
-        SmartMet::Spine::ReadLock lock(itsThreadCountMutex);
+        Spine::ReadLock lock(itsThreadCountMutex);
         if (itsThreadCount <= itsMaxThreadCount)
           ok = true;
       }
@@ -356,7 +356,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     // ones which have actually started. Hence the counter
     // should be here and not in the load method.
     {
-      SmartMet::Spine::WriteLock lock(itsThreadCountMutex);
+      Spine::WriteLock lock(itsThreadCountMutex);
       ++itsThreadCount;
     }
 
@@ -370,7 +370,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -391,7 +391,7 @@ void RepoManager::load(Producer producer, Files files)
 
   if (itsShutdownRequested)
   {
-    SmartMet::Spine::WriteLock lock(itsThreadCountMutex);
+    Spine::WriteLock lock(itsThreadCountMutex);
     --itsThreadCount;
     return;
   }
@@ -415,7 +415,7 @@ void RepoManager::load(Producer producer, Files files)
       if (itsVerbose)
       {
         std::ostringstream msg;
-        msg << SmartMet::Spine::log_time_str() << " QENGINE LOAD " << filename << std::endl;
+        msg << Spine::log_time_str() << " QENGINE LOAD " << filename << std::endl;
         std::cout << msg.str() << std::flush;
       }
 
@@ -425,7 +425,7 @@ void RepoManager::load(Producer producer, Files files)
       if (itsVerbose)
       {
         std::ostringstream msg;
-        msg << SmartMet::Spine::log_time_str() << " QENGINE ORIGINTIME for " << filename << " is "
+        msg << Spine::log_time_str() << " QENGINE ORIGINTIME for " << filename << " is "
             << model->originTime() << std::endl;
         std::cout << msg.str() << std::flush;
       }
@@ -442,7 +442,7 @@ void RepoManager::load(Producer producer, Files files)
       {
         // update structures safely
 
-        SmartMet::Spine::WriteLock lock(itsMutex);
+        Spine::WriteLock lock(itsMutex);
         itsRepo.add(producer, model);
         ++successful_loads;
         itsRepo.resize(producer, conf.number_to_keep);
@@ -450,13 +450,13 @@ void RepoManager::load(Producer producer, Files files)
     }
     catch (...)
     {
-      SmartMet::Spine::Exception exception(BCP, "QEngine failed to load the file!", NULL);
+      Spine::Exception exception(BCP, "QEngine failed to load the file!", NULL);
       exception.addParameter("File", filename.c_str());
       std::cerr << exception.getStackTrace();
     }
   }  // for all files
 
-  SmartMet::Spine::WriteLock lock(itsThreadCountMutex);
+  Spine::WriteLock lock(itsThreadCountMutex);
   --itsThreadCount;
 
   // Set ready flag if the scan is complete. Only the 1st full scan changes the state.
@@ -487,7 +487,7 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
   {
     // I think there should be a lock here but using one
     // jams the server. Must study more carefully.
-    // SmartMet::Spine::ReadLock lock(mutex);
+    // Spine::ReadLock lock(mutex);
 
     BOOST_FOREACH (const ProducerConfig& config, itsConfigList)
     {
@@ -496,11 +496,11 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
     }
 
     // NOT REACHED
-    throw SmartMet::Spine::Exception(BCP, "Unknown producer config '" + producer + "' requested");
+    throw Spine::Exception(BCP, "Unknown producer config '" + producer + "' requested");
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

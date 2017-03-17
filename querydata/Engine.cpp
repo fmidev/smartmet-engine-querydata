@@ -54,7 +54,7 @@ void Engine::init()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -78,7 +78,7 @@ void Engine::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -94,7 +94,7 @@ void Engine::shutdownRequestFlagSet()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -119,7 +119,7 @@ CacheReportingStruct Engine::getCacheSizes() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -137,12 +137,12 @@ const ProducerList& Engine::producers() const
     // hence we take an explicit lock here instead of inside the Impl.
     // The other public methods call the Impl to do the job.
 
-    SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+    Spine::ReadLock lock(itsRepoManager->itsMutex);
     return itsRepoManager->itsProducerList;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -156,12 +156,12 @@ OriginTimes Engine::origintimes(const Producer& producer) const
 {
   try
   {
-    SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+    Spine::ReadLock lock(itsRepoManager->itsMutex);
     return itsRepoManager->itsRepo.originTimes(producer);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -175,12 +175,12 @@ Q Engine::get(const Producer& producer) const
 {
   try
   {
-    SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+    Spine::ReadLock lock(itsRepoManager->itsMutex);
     return itsRepoManager->itsRepo.get(producer);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -194,12 +194,12 @@ Q Engine::get(const Producer& producer, const boost::posix_time::ptime& originti
 {
   try
   {
-    SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+    Spine::ReadLock lock(itsRepoManager->itsMutex);
     return itsRepoManager->itsRepo.get(producer, origintime);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -219,7 +219,7 @@ Producer Engine::find(double lon,
 {
   try
   {
-    SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+    Spine::ReadLock lock(itsRepoManager->itsMutex);
     return itsRepoManager->itsRepo.find(itsRepoManager->itsProducerList,
                                         itsRepoManager->itsProducerList,
                                         lon,
@@ -230,7 +230,7 @@ Producer Engine::find(double lon,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -251,7 +251,7 @@ Producer Engine::find(const ProducerList& producerlist,
 {
   try
   {
-    SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+    Spine::ReadLock lock(itsRepoManager->itsMutex);
     return itsRepoManager->itsRepo.find(producerlist,
                                         itsRepoManager->itsProducerList,
                                         longitude,
@@ -262,7 +262,7 @@ Producer Engine::find(const ProducerList& producerlist,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -276,7 +276,7 @@ Producer Engine::find(const ProducerList& producerlist,
 	std::list<boost::posix_time::ptime>
 	Engine::validtimes(const Producer & producer) const
 	{
-	  SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+	  Spine::ReadLock lock(itsRepoManager->itsMutex);
 	  return itsRepoManager->validtimes(producer);
 	}
 #endif
@@ -292,13 +292,13 @@ Repository::ContentTable Engine::getEngineContents(const std::string& timeFormat
 {
   try
   {
-    SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+    Spine::ReadLock lock(itsRepoManager->itsMutex);
 
     return itsRepoManager->itsRepo.getRepoContents(timeFormat, projectionFormat);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -332,7 +332,7 @@ boost::posix_time::time_period Engine::getProducerTimePeriod(const Producer& pro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -340,13 +340,13 @@ std::list<MetaData> Engine::getEngineMetadata() const
 {
   try
   {
-    SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+    Spine::ReadLock lock(itsRepoManager->itsMutex);
 
     return itsRepoManager->itsRepo.getRepoMetadata();
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -354,13 +354,13 @@ std::list<MetaData> Engine::getEngineMetadata(const MetaQueryOptions& theOptions
 {
   try
   {
-    SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+    Spine::ReadLock lock(itsRepoManager->itsMutex);
 
     return itsRepoManager->itsRepo.getRepoMetadata(theOptions);
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -374,7 +374,7 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup) 
     {
       std::list<MetaData> repocontent;
       {
-        SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+        Spine::ReadLock lock(itsRepoManager->itsMutex);
 
         repocontent = itsRepoManager->itsRepo.getRepoMetadata();
       }
@@ -417,7 +417,7 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup) 
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -432,7 +432,7 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup,
     {
       std::list<MetaData> repocontent;
       {
-        SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+        Spine::ReadLock lock(itsRepoManager->itsMutex);
 
         repocontent = itsRepoManager->itsRepo.getRepoMetadata(options);
       }
@@ -474,7 +474,7 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -482,13 +482,13 @@ Repository::MetaObject Engine::getSynchroInfos() const
 {
   try
   {
-    SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+    Spine::ReadLock lock(itsRepoManager->itsMutex);
 
     return itsRepoManager->itsRepo.getSynchroInfos();
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -500,11 +500,11 @@ boost::optional<ProducerMap> Engine::getSyncProducers(const std::string& syncGro
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
-void Engine::startSynchronize(SmartMet::Spine::Reactor* theReactor)
+void Engine::startSynchronize(Spine::Reactor* theReactor)
 {
   try
   {
@@ -512,7 +512,7 @@ void Engine::startSynchronize(SmartMet::Spine::Reactor* theReactor)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -531,7 +531,7 @@ void Engine::startSynchronize(SmartMet::Spine::Reactor* theReactor)
 									const OriginTime & origintime,
 									bool & timeinterpolation) const
 	{
-	  SmartMet::Spine::ReadLock lock(itsRepoManager->itsMutex);
+	  Spine::ReadLock lock(itsRepoManager->itsMutex);
 	  return itsRepoManager->itsRepo.get(producer,starttime,endtime,timestep,origintime,timeinterpolation);
 	}
 #endif
@@ -550,7 +550,7 @@ const ProducerConfig& Engine::getProducerConfig(const std::string& producer) con
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -567,7 +567,7 @@ std::size_t hash_value(const OGRSpatialReference& theSR)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -576,7 +576,7 @@ NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
   try
   {
     if (!theQ->isGrid())
-      throw SmartMet::Spine::Exception(BCP, "Trying to contour non-gridded data");
+      throw Spine::Exception(BCP, "Trying to contour non-gridded data");
 
     // For latlon data GridToWorldXY returns metric units even though we want geographic coordinates
     auto id = theQ->area().ClassId();
@@ -600,7 +600,7 @@ NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -632,7 +632,7 @@ void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -656,14 +656,14 @@ CoordinatesPtr project_coordinates(const Coordinates& theCoords,
     std::unique_ptr<OGRSpatialReference> src(new OGRSpatialReference);
     OGRErr err = src->SetFromUserInput(theQ->area().WKT().c_str());
     if (err != OGRERR_NONE)
-      throw SmartMet::Spine::Exception(BCP, "Unknown WKT in querydata: '" + theQ->area().WKT());
+      throw Spine::Exception(BCP, "Unknown WKT in querydata: '" + theQ->area().WKT());
 
     // Clones the spatial reference object
     std::unique_ptr<OGRCoordinateTransformation> transformation(
         OGRCreateCoordinateTransformation(src.get(), &theSR));
 
     if (!transformation)
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Failed to create the requested coordinate transformation during contouring");
 
     // Project the coordinates one at a time
@@ -716,7 +716,7 @@ CoordinatesPtr project_coordinates(const Coordinates& theCoords,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -763,7 +763,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -785,7 +785,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

@@ -62,7 +62,7 @@ class SyncGroup
   ProducerMap itsConsensus;
 };
 
-class SynchronizerConfig : public SmartMet::Spine::ConfigBase
+class SynchronizerConfig : public Spine::ConfigBase
 {
  public:
   ~SynchronizerConfig();
@@ -97,7 +97,7 @@ class Synchronizer
   boost::optional<std::vector<bp::ptime> > getSynchedData(const std::string& syncGroup,
                                                           const std::string& producer);
 
-  void launch(SmartMet::Spine::Reactor* theReactor);
+  void launch(Spine::Reactor* theReactor);
 
   void shutdown();
   void shutdownRequestFlagSet();
@@ -135,7 +135,7 @@ class Synchronizer
 
   ba::deadline_timer itsTimer;
 
-  SmartMet::Spine::Reactor* itsReactor;
+  Spine::Reactor* itsReactor;
 
   bool hasLaunched;
 
@@ -147,7 +147,7 @@ class Synchronizer
 
   std::string itsSendBuffer;
 
-  SmartMet::Spine::MutexType itsMutex;
+  Spine::MutexType itsMutex;
 
   std::map<std::string, SyncGroup> itsSyncGroups;
 

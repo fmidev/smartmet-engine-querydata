@@ -72,7 +72,7 @@ ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo) : itsMask(qinfo.SizeLocations
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -93,7 +93,7 @@ bool ValidPoints::isvalid(unsigned long index) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

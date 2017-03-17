@@ -29,7 +29,7 @@ void MetaQueryOptions::setProducer(const std::string& producer)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -52,7 +52,7 @@ void MetaQueryOptions::setOriginTime(const bp::ptime& originTime)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -75,7 +75,7 @@ void MetaQueryOptions::setFirstTime(const bp::ptime& firstTime)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -98,7 +98,7 @@ void MetaQueryOptions::setLastTime(const bp::ptime& lastTime)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -121,7 +121,7 @@ void MetaQueryOptions::addParameter(const std::string& parameter)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -147,7 +147,7 @@ void MetaQueryOptions::setBoundingBox(const NFmiPoint& ul,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -160,7 +160,7 @@ void MetaQueryOptions::setBoundingBox(const NFmiPoint& bl, const NFmiPoint& ur)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -183,7 +183,7 @@ void MetaQueryOptions::addLevelType(const std::string& type)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -206,7 +206,7 @@ void MetaQueryOptions::addLevelValue(float value)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

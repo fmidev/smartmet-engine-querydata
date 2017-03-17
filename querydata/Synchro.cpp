@@ -22,7 +22,7 @@
 namespace
 {
 #if 0
-  void dumpMessage(const SmartMet::QueryDataMessage& mesg)
+  void dumpMessage(const QueryDataMessage& mesg)
   {
 	std::cout << "Host name: " << mesg.name() << std::endl;
 	std::cout << "Producer infos :" << std::endl;
@@ -116,7 +116,7 @@ std::string makeRandomString(unsigned int length)
     throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
-}
+}  // namespace anonymous
 
 namespace SmartMet
 {
@@ -170,7 +170,7 @@ Synchronizer::Synchronizer(SmartMet::Engine::Querydata::Engine* itsParent,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -184,18 +184,18 @@ Synchronizer::~Synchronizer()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
-void Synchronizer::launch(SmartMet::Spine::Reactor* theReactor)
+void Synchronizer::launch(Spine::Reactor* theReactor)
 {
   try
   {
-    SmartMet::Spine::WriteLock lock(itsMutex);  // This lock may be unnecessary
+    Spine::WriteLock lock(itsMutex);  // This lock may be unnecessary
     if (!isLaunchable)
     {
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Unable to launch QEngine synchronization, reason: " + itsConfig.getFailedReason());
     }
     if (!hasLaunched)
@@ -216,7 +216,7 @@ void Synchronizer::launch(SmartMet::Spine::Reactor* theReactor)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -235,7 +235,7 @@ void Synchronizer::shutdown()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -247,7 +247,7 @@ void Synchronizer::shutdownRequestFlagSet()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -255,12 +255,12 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& han
 {
   try
   {
-    SmartMet::Spine::WriteLock lock(itsMutex);
+    Spine::WriteLock lock(itsMutex);
     if (!hasLaunched)
     {
       // Attempting to get synched data from a node which is not synching
-      throw SmartMet::Spine::Exception(
-          BCP, "Attempted to get synched metadata from a non-synching QEngine node");
+      throw Spine::Exception(BCP,
+                             "Attempted to get synched metadata from a non-synching QEngine node");
     }
     auto it = itsSyncGroups.find(handler);
     if (it == itsSyncGroups.end())
@@ -275,7 +275,7 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& han
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -284,7 +284,7 @@ boost::optional<std::vector<bp::ptime> > Synchronizer::getSynchedData(const std:
 {
   try
   {
-    SmartMet::Spine::WriteLock lock(itsMutex);
+    Spine::WriteLock lock(itsMutex);
     auto it = itsSyncGroups.find(handler);
     if (it == itsSyncGroups.end())
     {
@@ -308,7 +308,7 @@ boost::optional<std::vector<bp::ptime> > Synchronizer::getSynchedData(const std:
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -354,7 +354,7 @@ void Synchronizer::send_broadcast()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -362,7 +362,7 @@ void Synchronizer::update_consensus()
 {
   try
   {
-    SmartMet::Spine::WriteLock lock(itsMutex);
+    Spine::WriteLock lock(itsMutex);
 
     // Clean too old responses from the pending queue
     auto firstValidTime = bp::microsec_clock::universal_time() - bp::seconds(BROADCAST_TIMER_DELAY);
@@ -440,7 +440,7 @@ void Synchronizer::update_consensus()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -463,7 +463,7 @@ void Synchronizer::fire_timer(const boost::system::error_code& err)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -489,7 +489,7 @@ void Synchronizer::start_receive()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -523,7 +523,7 @@ void Synchronizer::handle_receive(const boost::system::error_code& err,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -570,7 +570,7 @@ void Synchronizer::process_message(const QueryDataMessage& incomingMessage)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -636,7 +636,7 @@ void SyncGroup::update(const ProducerMap& theUpdate)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -659,7 +659,7 @@ bool SynchronizerConfig::parse()
     }
     catch (...)
     {
-      SmartMet::Spine::Exception exception(BCP, "Operation failed!", NULL);
+      Spine::Exception exception(BCP, "Operation failed!", NULL);
       itsFailedReason = exception.what();
       return false;
     }
@@ -672,7 +672,7 @@ bool SynchronizerConfig::parse()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

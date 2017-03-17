@@ -106,7 +106,7 @@ const int maxgap = 6 * 60;
  */
 // ----------------------------------------------------------------------
 
-bool iswater(const SmartMet::Spine::Location &theLocation)
+bool iswater(const Spine::Location &theLocation)
 {
   try
   {
@@ -117,7 +117,7 @@ bool iswater(const SmartMet::Spine::Location &theLocation)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -136,7 +136,7 @@ QImpl::~QImpl()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -160,7 +160,7 @@ QImpl::QImpl(SharedModel theModel)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -176,8 +176,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
   try
   {
     if (theModels.empty())
-      throw SmartMet::Spine::Exception(BCP,
-                                       "Cannot initialize any empty view over multiple models");
+      throw Spine::Exception(BCP, "Cannot initialize any empty view over multiple models");
 
     for (std::size_t i = 0; i < itsModels.size(); i++)
       itsInfos.push_back(itsModels[i]->info());
@@ -207,7 +206,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -277,7 +276,7 @@ MetaData QImpl::metaData()
     for (qi.ResetParam(); qi.NextParam(false);)
     {
       const int paramID = boost::numeric_cast<int>(qi.Param().GetParamIdent());
-      const std::string paramName = SmartMet::Spine::ParameterFactory::instance().name(paramID);
+      const std::string paramName = Spine::ParameterFactory::instance().name(paramID);
       const std::string paramDesc = qi.Param().GetParamName().CharPtr();
       const std::string paramPrec = qi.Param().GetParam()->Precision().CharPtr();
       // Find the numerical part of the precision string
@@ -356,18 +355,18 @@ MetaData QImpl::metaData()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
 const WGS84Envelope &QImpl::getWGS84Envelope()
 {
-  SmartMet::Spine::UpgradeReadLock readlock(itsWGS84EnvelopeMutex);
+  Spine::UpgradeReadLock readlock(itsWGS84EnvelopeMutex);
 
   if (itsWGS84Envelope)
     return *itsWGS84Envelope;
 
-  SmartMet::Spine::UpgradeWriteLock writelock(readlock);
+  Spine::UpgradeWriteLock writelock(readlock);
 
   if (not itsWGS84Envelope)
     itsWGS84Envelope.reset(new WGS84Envelope(itsInfo));
@@ -388,7 +387,7 @@ const NFmiMetTime &QImpl::originTime() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 // ----------------------------------------------------------------------
@@ -412,7 +411,7 @@ boost::posix_time::ptime QImpl::modificationTime() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -441,7 +440,7 @@ const std::string &QImpl::levelName() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -459,7 +458,7 @@ FmiLevelType QImpl::levelType() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -477,7 +476,7 @@ bool QImpl::isClimatology() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -495,7 +494,7 @@ bool QImpl::isFullGrid() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -513,7 +512,7 @@ NFmiPoint QImpl::validPoint(const NFmiPoint &theLatLon, double theMaxDist) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -531,7 +530,7 @@ void QImpl::resetTime()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -549,7 +548,7 @@ bool QImpl::firstTime()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -567,7 +566,7 @@ bool QImpl::lastTime()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -585,7 +584,7 @@ bool QImpl::nextTime()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -603,7 +602,7 @@ bool QImpl::previousTime()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -621,7 +620,7 @@ bool QImpl::isTimeUsable() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -639,7 +638,7 @@ const NFmiMetTime &QImpl::validTime() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -657,7 +656,7 @@ bool QImpl::time(const NFmiMetTime &theTime)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -675,7 +674,7 @@ bool QImpl::param(FmiParameterName theParam)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -693,7 +692,7 @@ void QImpl::resetParam()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -711,7 +710,7 @@ bool QImpl::nextParam(bool ignoreSubParams)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -729,7 +728,7 @@ bool QImpl::isArea() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -747,7 +746,7 @@ bool QImpl::isGrid() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -766,7 +765,7 @@ const NFmiArea &QImpl::area() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -785,7 +784,7 @@ const NFmiGrid &QImpl::grid() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -803,7 +802,7 @@ const NFmiDataIdent &QImpl::param() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -821,7 +820,7 @@ const NFmiLevel &QImpl::level() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -839,7 +838,7 @@ bool QImpl::isInside(double theLon, double theLat, double theMaxDist)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -857,7 +856,7 @@ FmiParameterName QImpl::parameterName() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -877,7 +876,7 @@ float QImpl::interpolate(const NFmiPoint &theLatLon,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -895,7 +894,7 @@ void QImpl::resetLevel()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -913,7 +912,7 @@ bool QImpl::firstLevel()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 // ----------------------------------------------------------------------
@@ -930,7 +929,7 @@ bool QImpl::nextLevel()
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 // ----------------------------------------------------------------------
@@ -947,7 +946,7 @@ float QImpl::levelValue() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -965,7 +964,7 @@ NFmiPoint QImpl::latLon(long theIndex) const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -983,7 +982,7 @@ double QImpl::infoVersion() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1001,7 +1000,7 @@ unsigned long QImpl::paramIndex() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 // ----------------------------------------------------------------------
@@ -1018,7 +1017,7 @@ bool QImpl::paramIndex(unsigned long theIndex)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 // ----------------------------------------------------------------------
@@ -1035,7 +1034,7 @@ unsigned long QImpl::levelIndex() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 // ----------------------------------------------------------------------
@@ -1052,7 +1051,7 @@ bool QImpl::levelIndex(unsigned long theIndex)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1070,7 +1069,7 @@ unsigned long QImpl::timeIndex() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1088,7 +1087,7 @@ bool QImpl::timeIndex(unsigned long theIndex)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1106,7 +1105,7 @@ unsigned long QImpl::locationIndex() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1124,7 +1123,7 @@ bool QImpl::locationIndex(unsigned long theIndex)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 // ----------------------------------------------------------------------
@@ -1141,7 +1140,7 @@ bool QImpl::calcTimeCache(NFmiQueryInfo &theTargetInfo, checkedVector<NFmiTimeCa
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1159,7 +1158,7 @@ NFmiTimeCache QImpl::calcTimeCache(const NFmiMetTime &theTime)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1177,7 +1176,7 @@ float QImpl::cachedInterpolation(const NFmiTimeCache &theTimeCache)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1195,7 +1194,7 @@ float QImpl::cachedInterpolation(const NFmiLocationCache &theLocationCache)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1214,7 +1213,7 @@ float QImpl::cachedInterpolation(const NFmiLocationCache &theLocationCache,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1237,7 +1236,7 @@ void QImpl::landscapeCachedInterpolation(NFmiDataMatrix<float> &theMatrix,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1256,7 +1255,7 @@ bool QImpl::calcLatlonCachePoints(NFmiQueryInfo &theTargetInfo,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1282,7 +1281,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1309,7 +1308,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1331,7 +1330,7 @@ void QImpl::values(const NFmiDataMatrix<NFmiPoint> &theLatlonMatrix,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1362,7 +1361,7 @@ void QImpl::croppedValues(NFmiDataMatrix<float> &theMatrix,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1382,7 +1381,7 @@ void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1404,7 +1403,7 @@ void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1422,7 +1421,7 @@ boost::shared_ptr<std::vector<NFmiPoint>> QImpl::latLonCache() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1440,7 +1439,7 @@ bool QImpl::isSubParamUsed() const
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 //----------------------------------------------------------------------
@@ -1457,7 +1456,7 @@ void QImpl::setIsSubParamUsed(bool theState)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1481,7 +1480,7 @@ std::string format_date(const boost::local_time::local_date_time &ldt,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1492,7 +1491,7 @@ std::string format_date(const boost::local_time::local_date_time &ldt,
 // ----------------------------------------------------------------------
 
 ts::Value WindCompass8(QImpl &q,
-                       const SmartMet::Spine::Location &loc,
+                       const Spine::Location &loc,
                        const boost::local_time::local_date_time &ldt)
 {
   try
@@ -1500,19 +1499,19 @@ ts::Value WindCompass8(QImpl &q,
     static const char *names[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
 
     if (!q.param(kFmiWindDirection))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (value == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     int i = static_cast<int>((value + 22.5) / 45) % 8;
     return names[i];
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1523,7 +1522,7 @@ ts::Value WindCompass8(QImpl &q,
 // ----------------------------------------------------------------------
 
 ts::Value WindCompass16(QImpl &q,
-                        const SmartMet::Spine::Location &loc,
+                        const Spine::Location &loc,
                         const boost::local_time::local_date_time &ldt)
 {
   try
@@ -1546,19 +1545,19 @@ ts::Value WindCompass16(QImpl &q,
                                   "NNW"};
 
     if (!q.param(kFmiWindDirection))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (value == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     int i = static_cast<int>((value + 11.25) / 22.5) % 16;
     return names[i];
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1569,7 +1568,7 @@ ts::Value WindCompass16(QImpl &q,
 // ----------------------------------------------------------------------
 
 ts::Value WindCompass32(QImpl &q,
-                        const SmartMet::Spine::Location &loc,
+                        const Spine::Location &loc,
                         const boost::local_time::local_date_time &ldt)
 {
   try
@@ -1580,19 +1579,19 @@ ts::Value WindCompass32(QImpl &q,
                                   "W", "WbN", "WNW", "NWbW", "NW", "NWbN", "NNW", "NbW"};
 
     if (!q.param(kFmiWindDirection))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (value == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     int i = static_cast<int>((value + 5.625) / 11.25) % 32;
     return names[i];
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1603,18 +1602,18 @@ ts::Value WindCompass32(QImpl &q,
 // ----------------------------------------------------------------------
 
 ts::Value Cloudiness8th(QImpl &q,
-                        const SmartMet::Spine::Location &loc,
+                        const Spine::Location &loc,
                         const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiTotalCloudCover))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (value == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     // This is the synoptic interpretation of 8s
 
@@ -1623,7 +1622,7 @@ ts::Value Cloudiness8th(QImpl &q,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1634,31 +1633,31 @@ ts::Value Cloudiness8th(QImpl &q,
 // ----------------------------------------------------------------------
 
 ts::Value WindChill(QImpl &q,
-                    const SmartMet::Spine::Location &loc,
+                    const Spine::Location &loc,
                     const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiWindSpeedMS))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (!q.param(kFmiTemperature))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
         loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), ldt);
 
     if (wspd == kFloatMissing || t2m == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float chill = FmiWindChill(wspd, t2m);
     return chill;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1669,31 +1668,31 @@ ts::Value WindChill(QImpl &q,
 // ----------------------------------------------------------------------
 
 ts::Value SummerSimmerIndex(QImpl &q,
-                            const SmartMet::Spine::Location &loc,
+                            const Spine::Location &loc,
                             const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiHumidity))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (!q.param(kFmiTemperature))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
         loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), ldt);
 
     if (rh == kFloatMissing || t2m == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float ssi = FmiSummerSimmerIndex(rh, t2m);
     return ssi;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1704,29 +1703,29 @@ ts::Value SummerSimmerIndex(QImpl &q,
 // ----------------------------------------------------------------------
 
 ts::Value FeelsLike(QImpl &q,
-                    const SmartMet::Spine::Location &loc,
+                    const Spine::Location &loc,
                     const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiHumidity))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (!q.param(kFmiTemperature))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
         loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), ldt);
 
     if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     // We permit radiation to be missing
     float rad = kFloatMissing;
@@ -1736,13 +1735,13 @@ ts::Value FeelsLike(QImpl &q,
     float ret = FmiFeelsLikeTemperature(wspd, rh, t2m, rad);
 
     if (ret == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
     else
       return ret;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1753,40 +1752,40 @@ ts::Value FeelsLike(QImpl &q,
 // ----------------------------------------------------------------------
 
 ts::Value ApparentTemperature(QImpl &q,
-                              const SmartMet::Spine::Location &loc,
+                              const Spine::Location &loc,
                               const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiHumidity))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (!q.param(kFmiTemperature))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
         loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), ldt);
 
     if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float ret = FmiApparentTemperature(wspd, rh, t2m);
 
     if (ret == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
     else
       return ret;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1796,13 +1795,13 @@ ts::Value ApparentTemperature(QImpl &q,
  */
 // ----------------------------------------------------------------------
 ts::Value Snow1hLower(QImpl &q,
-                      const SmartMet::Spine::Location &loc,
+                      const Spine::Location &loc,
                       const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiPrecipitation1h))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
@@ -1810,20 +1809,20 @@ ts::Value Snow1hLower(QImpl &q,
 
     if (prec1h == kFloatMissing)
     {
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
     }
     else
     {
       float ret = FmiSnowLowerLimit(prec1h);
       if (ret == kFloatMissing)
-        return SmartMet::Spine::TimeSeries::None();
+        return Spine::TimeSeries::None();
       else
         return ret;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1833,33 +1832,33 @@ ts::Value Snow1hLower(QImpl &q,
  */
 // ----------------------------------------------------------------------
 ts::Value Snow1hUpper(QImpl &q,
-                      const SmartMet::Spine::Location &loc,
+                      const Spine::Location &loc,
                       const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiPrecipitation1h))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     // FmiSnowUpperLimit fails if input is 'nan', check here.
     if (prec1h == kFloatMissing)
     {
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
     }
     else
     {
       float ret = FmiSnowUpperLimit(prec1h);
       if (ret == kFloatMissing)
-        return SmartMet::Spine::TimeSeries::None();
+        return Spine::TimeSeries::None();
       else
         return ret;
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1869,7 +1868,7 @@ ts::Value Snow1hUpper(QImpl &q,
  */
 // ----------------------------------------------------------------------
 ts::Value Snow1h(QImpl &q,
-                 const SmartMet::Spine::Location &loc,
+                 const Spine::Location &loc,
                  const boost::local_time::local_date_time &ldt)
 {
   try
@@ -1879,29 +1878,29 @@ ts::Value Snow1h(QImpl &q,
       return q.param(kFmiSnow1h);
 
     if (!q.param(kFmiTemperature))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float t = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (!q.param(kFmiPrecipitation1h))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (t == kFloatMissing || wspd == kFloatMissing || prec1h == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float snow1h = prec1h * FmiSnowWaterRatio(t, wspd);  // Can this be kFLoatMissing???
     return snow1h;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1912,13 +1911,13 @@ ts::Value Snow1h(QImpl &q,
 // ----------------------------------------------------------------------
 
 ts::Value WeatherSymbol(QImpl &q,
-                        const SmartMet::Spine::Location &loc,
+                        const Spine::Location &loc,
                         const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiWeatherSymbol3))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float symbol = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
@@ -1931,7 +1930,7 @@ ts::Value WeatherSymbol(QImpl &q,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -1942,19 +1941,19 @@ ts::Value WeatherSymbol(QImpl &q,
 // ----------------------------------------------------------------------
 
 ts::Value WeatherText(QImpl &q,
-                      const SmartMet::Spine::Location &loc,
+                      const Spine::Location &loc,
                       const boost::local_time::local_date_time &ldt,
                       const std::string &lang)
 {
   try
   {
     if (!q.param(kFmiWeatherSymbol3))
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     float w = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
 
     if (w == kFloatMissing)
-      return SmartMet::Spine::TimeSeries::None();
+      return Spine::TimeSeries::None();
 
     // Source: /smartdev/www/wap.weatherproof.fi/sms/funcs.php
     if (lang == "en")
@@ -2199,11 +2198,11 @@ ts::Value WeatherText(QImpl &q,
       }
     }
 
-    return SmartMet::Spine::TimeSeries::None();
+    return Spine::TimeSeries::None();
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -2214,11 +2213,11 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
   try
   {
     // Default return value
-    ts::Value retval = SmartMet::Spine::TimeSeries::None();
+    ts::Value retval = Spine::TimeSeries::None();
 
     // Some shorthand variables
     const std::string &pname = opt.par.name();
-    const SmartMet::Spine::Location &loc = opt.loc;
+    const Spine::Location &loc = opt.loc;
 
     // Update last accessed point.
 
@@ -2226,7 +2225,7 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
 
     switch (opt.par.type())
     {
-      case SmartMet::Spine::Parameter::Type::Landscaped:
+      case Spine::Parameter::Type::Landscaped:
       {
         // We can landscape only surface data
         if (itsModels[0]->levelName() == "surface")
@@ -2246,7 +2245,7 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
         }
         // Fall through to normal handling if the data is not surface data,
       }
-      case SmartMet::Spine::Parameter::Type::Data:
+      case Spine::Parameter::Type::Data:
       {
         opt.lastpoint = latlon;
 
@@ -2275,14 +2274,14 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
           }
 
           if (interpolatedValue == kFloatMissing)
-            retval = SmartMet::Spine::TimeSeries::None();
+            retval = Spine::TimeSeries::None();
           else
             retval = interpolatedValue;
         }
 
         break;
       }
-      case SmartMet::Spine::Parameter::Type::DataDerived:
+      case Spine::Parameter::Type::DataDerived:
       {
         if (pname == "windcompass8")
           retval = WindCompass8(*this, loc, ldt);
@@ -2324,11 +2323,11 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
           retval = Snow1h(*this, loc, ldt);
 
         else
-          throw SmartMet::Spine::Exception(BCP, "Unknown DataDerived parameter '" + pname + "'!");
+          throw Spine::Exception(BCP, "Unknown DataDerived parameter '" + pname + "'!");
 
         break;
       }
-      case SmartMet::Spine::Parameter::Type::DataIndependent:
+      case Spine::Parameter::Type::DataIndependent:
       {
         const std::string &pname = opt.par.name();
 
@@ -2344,7 +2343,7 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
         else if (pname == "geoid")
         {
           if (loc.geoid == 0)  // not sure why this is still here
-            retval = SmartMet::Spine::TimeSeries::None();
+            retval = Spine::TimeSeries::None();
           else
             retval = Fmi::to_string(loc.geoid);
         }
@@ -2364,7 +2363,7 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
             if (loc.name.empty())
             {
               // No area (administrative region) nor name known.
-              retval = SmartMet::Spine::TimeSeries::None();
+              retval = Spine::TimeSeries::None();
             }
             else
             {
@@ -2390,7 +2389,7 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
           if (ldt.zone())
             retval = ldt.zone()->std_zone_name();
           else
-            retval = SmartMet::Spine::TimeSeries::None();
+            retval = Spine::TimeSeries::None();
         }
 
         else if (pname == "localtz")
@@ -2649,28 +2648,27 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
           retval = Spine::TimeSeries::None();
 
         else
-          throw SmartMet::Spine::Exception(
-              BCP, "Unknown DataIndependent special function '" + pname + "'!");
+          throw Spine::Exception(BCP, "Unknown DataIndependent special function '" + pname + "'!");
       }
     }
 
     if (boost::get<double>(&retval))
     {
       if (*(boost::get<double>(&retval)) == kFloatMissing)
-        retval = SmartMet::Spine::TimeSeries::None();
+        retval = Spine::TimeSeries::None();
     }
 
     return retval;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
 // one location, many timesteps
 ts::TimeSeriesPtr QImpl::values(ParameterOptions &param,
-                                const SmartMet::Spine::TimeSeriesGenerator::LocalTimeList &tlist)
+                                const Spine::TimeSeriesGenerator::LocalTimeList &tlist)
 {
   try
   {
@@ -2685,15 +2683,14 @@ ts::TimeSeriesPtr QImpl::values(ParameterOptions &param,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
 // many locations (indexmask), many timesteps
-ts::TimeSeriesGroupPtr QImpl::values(
-    ParameterOptions &param,
-    const NFmiIndexMask &indexmask,
-    const SmartMet::Spine::TimeSeriesGenerator::LocalTimeList &tlist)
+ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
+                                     const NFmiIndexMask &indexmask,
+                                     const Spine::TimeSeriesGenerator::LocalTimeList &tlist)
 {
   try
   {
@@ -2704,19 +2701,19 @@ ts::TimeSeriesGroupPtr QImpl::values(
       // Indexed latlon
       NFmiPoint latlon(latLon(*it));
 
-      SmartMet::Spine::Location location(param.loc.geoid,
-                                         param.loc.name,
-                                         param.loc.iso2,
-                                         param.loc.municipality,
-                                         param.loc.area,
-                                         param.loc.feature,
-                                         param.loc.country,
-                                         latlon.X(),
-                                         latlon.Y(),
-                                         param.loc.timezone,
-                                         param.loc.population,
-                                         param.loc.elevation,
-                                         param.loc.priority);
+      Spine::Location location(param.loc.geoid,
+                               param.loc.name,
+                               param.loc.iso2,
+                               param.loc.municipality,
+                               param.loc.area,
+                               param.loc.feature,
+                               param.loc.country,
+                               latlon.X(),
+                               latlon.Y(),
+                               param.loc.timezone,
+                               param.loc.population,
+                               param.loc.elevation,
+                               param.loc.priority);
 
       ParameterOptions paramOptions(param.par,
                                     param.producer,
@@ -2742,7 +2739,7 @@ ts::TimeSeriesGroupPtr QImpl::values(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -2750,17 +2747,16 @@ ts::TimeSeriesGroupPtr QImpl::values(
 
 // BUG?? Why is maxdistance in the API?
 
-ts::TimeSeriesGroupPtr QImpl::values(
-    ParameterOptions &param,
-    const SmartMet::Spine::LocationList &llist,
-    const SmartMet::Spine::TimeSeriesGenerator::LocalTimeList &tlist,
-    const double & /* maxdistance */)
+ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
+                                     const Spine::LocationList &llist,
+                                     const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                     const double & /* maxdistance */)
 {
   try
   {
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
-    BOOST_FOREACH (const SmartMet::Spine::LocationPtr &loc, llist)
+    BOOST_FOREACH (const Spine::LocationPtr &loc, llist)
     {
       ParameterOptions paramOptions(param.par,
                                     param.producer,
@@ -2786,7 +2782,7 @@ ts::TimeSeriesGroupPtr QImpl::values(
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -2811,21 +2807,21 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
   try
   {
     if (!isGrid())
-      throw SmartMet::Spine::Exception(BCP, "Can only be used for gridded data!");
+      throw Spine::Exception(BCP, "Can only be used for gridded data!");
 
     // Resolution must be given with locations
 
     if (theResolution < 0)
-      throw SmartMet::Spine::Exception(BCP, "Resolution must be nonnegative!");
+      throw Spine::Exception(BCP, "Resolution must be nonnegative!");
     else if (theResolution < 0.01)
     {
       if (theResolution > 0)
       {
-        throw SmartMet::Spine::Exception(BCP, "Resolutions below 10 meters are not supported!");
+        throw Spine::Exception(BCP, "Resolutions below 10 meters are not supported!");
       }
       else if (theLocationCache.NX() > 0)
       {
-        throw SmartMet::Spine::Exception(BCP, "Nonzero resolution must be given with locations!");
+        throw Spine::Exception(BCP, "Nonzero resolution must be given with locations!");
       }
     }
 
@@ -2880,7 +2876,7 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
     {
       if (!((x1 >= 0) && (x1 < x2) && (y1 >= 0) && (y1 < y2) && (x2 < nativeGridSizeX) &&
             (y2 < nativeGridSizeY)))
-        throw SmartMet::Spine::Exception(BCP, "Cropping is invalid or outside the grid!");
+        throw Spine::Exception(BCP, "Cropping is invalid or outside the grid!");
 
       if (x2 < (nativeGridSizeX - 1))
         x2++;
@@ -2923,7 +2919,7 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -2933,7 +2929,7 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
  */
 // ----------------------------------------------------------------------
 
-Q QImpl::sample(const SmartMet::Spine::Parameter &theParameter,
+Q QImpl::sample(const Spine::Parameter &theParameter,
                 const boost::posix_time::ptime &theTime,
                 const OGRSpatialReference &theCrs,
                 double theXmin,
@@ -2947,22 +2943,21 @@ Q QImpl::sample(const SmartMet::Spine::Parameter &theParameter,
   try
   {
     if (!param(theParameter.number()))
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP,
           "Parameter " + theParameter.name() + " is not available for sampling in the querydata");
 
     if (theResolution <= 0)
-      throw SmartMet::Spine::Exception(BCP, "The sampling resolution must be nonnegative");
+      throw Spine::Exception(BCP, "The sampling resolution must be nonnegative");
 
     if (theResolution < 0.01)
-      throw SmartMet::Spine::Exception(BCP,
-                                       "Sampling resolutions below 10 meters are not supported");
+      throw Spine::Exception(BCP, "Sampling resolutions below 10 meters are not supported");
 
     if (!itsInfo->TimeDescriptor().IsInside(theTime))
-      throw SmartMet::Spine::Exception(BCP, "Cannot sample data to a time outside the querydata");
+      throw Spine::Exception(BCP, "Cannot sample data to a time outside the querydata");
 
     if (!itsInfo->IsGrid())
-      throw SmartMet::Spine::Exception(BCP, "Cannot sample point data to new resolution");
+      throw Spine::Exception(BCP, "Cannot sample point data to new resolution");
 
     // Establish the new descriptors
 
@@ -2997,13 +2992,13 @@ Q QImpl::sample(const SmartMet::Spine::Parameter &theParameter,
     NFmiFastQueryInfo info(pdesc, tdesc, hdesc, vdesc);
     boost::shared_ptr<NFmiQueryData> data(NFmiQueryDataUtil::CreateEmptyData(info));
     if (data.get() == 0)
-      throw SmartMet::Spine::Exception(BCP, "Failed to create querydata by sampling");
+      throw Spine::Exception(BCP, "Failed to create querydata by sampling");
 
     NFmiFastQueryInfo dstinfo(data.get());
     dstinfo.First();  // sets the only param and time active
 
     if ((itsModels[0]->levelName() == "surface") &&
-        (theParameter.type() == SmartMet::Spine::Parameter::Type::Landscaped))
+        (theParameter.type() == Spine::Parameter::Type::Landscaped))
     {
       // Landscaping; temperature or dewpoint
       //
@@ -3049,7 +3044,7 @@ Q QImpl::sample(const SmartMet::Spine::Parameter &theParameter,
           auto latlon = dstinfo.LatLon();
           auto dem = theDem.elevation(latlon.X(), latlon.Y(), theResolution);
           auto covertype = theLandCover.coverType(latlon.X(), latlon.Y());
-          SmartMet::Spine::Location loc(latlon.X(), latlon.Y(), dem, covertype);
+          Spine::Location loc(latlon.X(), latlon.Y(), dem, covertype);
           // Paska API...
           ParameterOptions options(theParameter,
                                    Producer(),
@@ -3092,7 +3087,7 @@ Q QImpl::sample(const SmartMet::Spine::Parameter &theParameter,
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -3110,7 +3105,7 @@ bool QImpl::selectLevel(double theLevel)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
@@ -3141,7 +3136,7 @@ std::size_t hash_value(const QImpl &theQ)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 

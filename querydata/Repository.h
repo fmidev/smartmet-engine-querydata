@@ -56,8 +56,7 @@ class Repository
 
   Q getAll(const Producer& producer) const;
 
-  typedef std::pair<boost::shared_ptr<SmartMet::Spine::Table>,
-                    SmartMet::Spine::TableFormatter::Names> ContentTable;
+  typedef std::pair<boost::shared_ptr<Spine::Table>, Spine::TableFormatter::Names> ContentTable;
   typedef std::map<OriginTime, SharedModel> SharedModels;
   typedef std::map<std::string, std::vector<boost::posix_time::ptime> > MetaObject;
 

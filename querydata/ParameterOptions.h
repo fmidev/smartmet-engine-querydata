@@ -29,9 +29,9 @@ namespace Querydata
 {
 struct ParameterOptions
 {
-  ParameterOptions(const SmartMet::Spine::Parameter& theParam,
+  ParameterOptions(const Spine::Parameter& theParam,
                    const Producer& theProducer,
-                   const SmartMet::Spine::Location& theLocation,
+                   const Spine::Location& theLocation,
                    const std::string& theCountry,
                    const std::string& thePlace,
                    const Fmi::TimeFormatter& theTimeFormatter,
@@ -43,9 +43,9 @@ struct ParameterOptions
                    const NFmiPoint& theNearestPoint,
                    NFmiPoint& theLastPoint);
 
-  const SmartMet::Spine::Parameter& par;
+  const Spine::Parameter& par;
   const Producer& producer;
-  const SmartMet::Spine::Location& loc;
+  const Spine::Location& loc;
   const std::string& country;
   const std::string& place;
   const Fmi::TimeFormatter& timeformatter;

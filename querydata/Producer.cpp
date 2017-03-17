@@ -48,8 +48,7 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
   try
   {
     if (!setting.isGroup())
-      throw SmartMet::Spine::Exception(
-          BCP, "Producer settings must be stored in groups delimited by {}!");
+      throw Spine::Exception(BCP, "Producer settings must be stored in groups delimited by {}!");
 
     ProducerConfig pinfo;
     pinfo.producer = producer;
@@ -106,39 +105,38 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
         pinfo.leveltype = static_cast<const char *>(setting[i]);
 
       else
-        throw SmartMet::Spine::Exception(
+        throw Spine::Exception(
             BCP, "QEngine: Unknown producer setting named " + name + " for producer " + producer);
     }
 
     // Sanity checks
 
     if (pinfo.directory.empty())
-      throw SmartMet::Spine::Exception(BCP, "No directory specified for producer " + producer);
+      throw Spine::Exception(BCP, "No directory specified for producer " + producer);
 
     if (pinfo.pattern.empty())
-      throw SmartMet::Spine::Exception(BCP, "No pattern specified for producer " + producer);
+      throw Spine::Exception(BCP, "No pattern specified for producer " + producer);
 
     if (pinfo.refresh_interval_secs < 1)
-      throw SmartMet::Spine::Exception(
-          BCP, "Refresh interval for producer " + producer + " must be > 0");
+      throw Spine::Exception(BCP, "Refresh interval for producer " + producer + " must be > 0");
 
     if (pinfo.number_to_keep < 1)
-      throw SmartMet::Spine::Exception(
-          BCP, "Number of files to keep for producer " + producer + " must be > 0");
+      throw Spine::Exception(BCP,
+                             "Number of files to keep for producer " + producer + " must be > 0");
 
     if (pinfo.number_to_keep >= 1000)
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Number of files to keep for producer " + producer + " must be < 1000");
 
     if (pinfo.maxdistance >= 10000)
-      throw SmartMet::Spine::Exception(
+      throw Spine::Exception(
           BCP, "Maximum search radius for producer " + producer + " must be < 10000 km");
 
     return pinfo;
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
 
