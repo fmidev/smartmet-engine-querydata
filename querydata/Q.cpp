@@ -868,11 +868,18 @@ FmiParameterName QImpl::parameterName() const
 
 float QImpl::interpolate(const NFmiPoint &theLatLon,
                          const NFmiMetTime &theTime,
-                         int theMaxMinuteGap)
+                         int theMaxMinuteGap,
+                         boost::optional<float> thePressure,
+                         boost::optional<float> theHeight)
 {
   try
   {
-    return itsInfo->InterpolatedValue(theLatLon, theTime, theMaxMinuteGap);
+    if (thePressure)
+      return itsInfo->PressureLevelValue(*thePressure, theLatLon, theTime, theMaxMinuteGap);
+    else if (theHeight)
+      return itsInfo->HeightValue(*theHeight, theLatLon, theTime, theMaxMinuteGap);
+    else
+      return itsInfo->InterpolatedValue(theLatLon, theTime, theMaxMinuteGap);
   }
   catch (...)
   {
@@ -2208,7 +2215,9 @@ ts::Value WeatherText(QImpl &q,
 
 // ======================================================================
 
-ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_date_time &ldt)
+ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_date_time &ldt,
+                       boost::optional<float> pressure,
+                       boost::optional<float> height)
 {
   try
   {
@@ -2228,7 +2237,7 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
       case Spine::Parameter::Type::Landscaped:
       {
         // We can landscape only surface data
-        if (itsModels[0]->levelName() == "surface")
+        if ((itsModels[0]->levelName() == "surface") && (!(pressure || height)))
         {
           if (param(opt.par.number()))
           {
@@ -2249,7 +2258,9 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
       {
         opt.lastpoint = latlon;
 
-        if (param(opt.par.number()))
+        // Surface or climatology data is not applicable with pressure and height queries
+        if (param(opt.par.number()) &&
+            (((itsModels[0]->levelName() != "surface") && !isClimatology()) || (!(pressure || height))))
         {
           NFmiMetTime t = ldt;
 
@@ -2260,7 +2271,7 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
             t.SetYear(boost::numeric_cast<short>(year));
           }
 
-          float interpolatedValue = interpolate(latlon, t, maxgap);
+          float interpolatedValue = interpolate(latlon, t, maxgap, pressure, height);
 
           // If we got no value and the proper flag is on,
           // find the nearest point with valid values and use
@@ -2268,7 +2279,7 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
 
           if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
           {
-            interpolatedValue = interpolate(opt.nearestpoint, t, maxgap);
+            interpolatedValue = interpolate(opt.nearestpoint, t, maxgap, pressure, height);
             if (interpolatedValue != kFloatMissing)
               opt.lastpoint = opt.nearestpoint;
           }
@@ -2283,7 +2294,12 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
       }
       case Spine::Parameter::Type::DataDerived:
       {
-        if (pname == "windcompass8")
+        if (pressure || height)
+          // Derived params are not supported (available in level data) with pressure and
+          // height queries
+          ;
+
+        else if (pname == "windcompass8")
           retval = WindCompass8(*this, loc, ldt);
 
         else if (pname == "windcompass16")
@@ -2396,7 +2412,14 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
           retval = loc.timezone;
 
         else if (pname == "level")
-          retval = Fmi::to_string(levelValue());
+        {
+          if (pressure)
+            retval = Fmi::to_string(*pressure);
+          else if (height)
+            retval = Fmi::to_string(*height);
+          else
+            retval = Fmi::to_string(levelValue());
+        }
 
         else if (pname == "latlon" || pname == "lonlat")
           retval = ts::LonLat(loc.longitude, loc.latitude);
@@ -2668,7 +2691,9 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
 
 // one location, many timesteps
 ts::TimeSeriesPtr QImpl::values(ParameterOptions &param,
-                                const Spine::TimeSeriesGenerator::LocalTimeList &tlist)
+                                const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                boost::optional<float> pressure,
+                                boost::optional<float> height)
 {
   try
   {
@@ -2676,7 +2701,7 @@ ts::TimeSeriesPtr QImpl::values(ParameterOptions &param,
 
     BOOST_FOREACH (const boost::local_time::local_date_time &ldt, tlist)
     {
-      ret->push_back(ts::TimedValue(ldt, value(param, ldt)));
+      ret->push_back(ts::TimedValue(ldt, value(param, ldt, pressure, height)));
     }
 
     return ret;
@@ -2690,7 +2715,9 @@ ts::TimeSeriesPtr QImpl::values(ParameterOptions &param,
 // many locations (indexmask), many timesteps
 ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
                                      const NFmiIndexMask &indexmask,
-                                     const Spine::TimeSeriesGenerator::LocalTimeList &tlist)
+                                     const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                     boost::optional<float> pressure,
+                                     boost::optional<float> height)
 {
   try
   {
@@ -2729,7 +2756,7 @@ ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
                                     param.nearestpoint,
                                     param.lastpoint);
 
-      ts::TimeSeriesPtr timeseries = values(paramOptions, tlist);
+      ts::TimeSeriesPtr timeseries = values(paramOptions, tlist, pressure, height);
       ts::LonLat lonlat(latlon.X(), latlon.Y());
 
       ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
@@ -2750,7 +2777,9 @@ ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
 ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
                                      const Spine::LocationList &llist,
                                      const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
-                                     const double & /* maxdistance */)
+                                     const double & /* maxdistance */,
+                                     boost::optional<float> pressure,
+                                     boost::optional<float> height)
 {
   try
   {
@@ -2772,7 +2801,7 @@ ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
                                     param.nearestpoint,
                                     param.lastpoint);
 
-      ts::TimeSeriesPtr timeseries = values(paramOptions, tlist);
+      ts::TimeSeriesPtr timeseries = values(paramOptions, tlist, pressure, height);
       ts::LonLat lonlat(loc->longitude, loc->latitude);
 
       ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
