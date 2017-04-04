@@ -13,7 +13,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
 BuildRequires: smartmet-library-spine-devel >= 17.3.15
-BuildRequires: smartmet-library-newbase-devel >= 17.3.9
+BuildRequires: smartmet-library-newbase-devel >= 1
 BuildRequires: smartmet-library-macgyver-devel >= 17.3.14
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -24,7 +24,7 @@ Requires: boost-iostreams
 Requires: boost-regex
 Requires: boost-thread
 Requires: boost-system
-Requires: smartmet-library-newbase >= 17.3.9
+Requires: smartmet-library-newbase >= 1
 Requires: smartmet-library-macgyver >= 17.3.14
 Requires: protobuf
 Requires: libconfig >= 1.4.9
@@ -67,6 +67,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Upcoming
+- Support for pressure and height value queries
+
 * Wed Mar 15 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.3.15-2.fmi
 - Improved caching of querydata world coordinates
 

@@ -112,6 +112,14 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   float interpolate(const NFmiPoint& theLatLon,
                     const NFmiMetTime& theTime,
                     int theMaxMinuteRange = 0);
+  float interpolateAtPressure(const NFmiPoint& theLatLon,
+                              const NFmiMetTime& theTime,
+                              float thePressure,
+                              int theMaxMinuteRange = 0);
+  float interpolateAtHeight(const NFmiPoint& theLatLon,
+                            const NFmiMetTime& theTime,
+                            float theHeight,
+                            int theMaxMinuteRange = 0);
 
   NFmiPoint latLon(long theIndex) const;
 
@@ -213,20 +221,54 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   // one location, one timestep
   Spine::TimeSeries::Value value(ParameterOptions& param,
                                  const boost::local_time::local_date_time& ldt);
+  Spine::TimeSeries::Value valueAtPressure(ParameterOptions& param,
+                                           const boost::local_time::local_date_time& ldt,
+                                           float pressure);
+  Spine::TimeSeries::Value valueAtHeight(ParameterOptions& param,
+                                         const boost::local_time::local_date_time& ldt,
+                                         float height);
   // one location, many timesteps
   Spine::TimeSeries::TimeSeriesPtr values(ParameterOptions& param,
                                           const Spine::TimeSeriesGenerator::LocalTimeList& tlist);
+  Spine::TimeSeries::TimeSeriesPtr valuesAtPressure(ParameterOptions& param,
+                                                    const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
+                                                    float pressure);
+  Spine::TimeSeries::TimeSeriesPtr valuesAtHeight(ParameterOptions& param,
+                                                  const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
+                                                  float height);
   // many locations (indexmask), many timesteps
   Spine::TimeSeries::TimeSeriesGroupPtr values(
       ParameterOptions& param,
       const NFmiIndexMask& indexmask,
       const Spine::TimeSeriesGenerator::LocalTimeList& tlist);
+  Spine::TimeSeries::TimeSeriesGroupPtr valuesAtPressure(
+      ParameterOptions& param,
+      const NFmiIndexMask& indexmask,
+      const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
+      float pressure);
+  Spine::TimeSeries::TimeSeriesGroupPtr valuesAtHeight(
+      ParameterOptions& param,
+      const NFmiIndexMask& indexmask,
+      const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
+      float height);
   // many locations (llist), many timesteps
   Spine::TimeSeries::TimeSeriesGroupPtr values(
       ParameterOptions& param,
       const Spine::LocationList& llist,
       const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
       const double& maxdistance);
+  Spine::TimeSeries::TimeSeriesGroupPtr valuesAtPressure(
+      ParameterOptions& param,
+      const Spine::LocationList& llist,
+      const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
+      const double& maxdistance,
+      float pressure);
+  Spine::TimeSeries::TimeSeriesGroupPtr valuesAtHeight(
+      ParameterOptions& param,
+      const Spine::LocationList& llist,
+      const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
+      const double& maxdistance,
+      float height);
 
   bool selectLevel(double theLevel);
 

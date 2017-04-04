@@ -880,6 +880,36 @@ float QImpl::interpolate(const NFmiPoint &theLatLon,
   }
 }
 
+float QImpl::interpolateAtPressure(const NFmiPoint &theLatLon,
+                                   const NFmiMetTime &theTime,
+                                   float thePressure,
+                                   int theMaxMinuteGap)
+{
+  try
+  {
+    return itsInfo->PressureLevelValue(thePressure, theLatLon, theTime, theMaxMinuteGap);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+float QImpl::interpolateAtHeight(const NFmiPoint &theLatLon,
+                                 const NFmiMetTime &theTime,
+                                 float theHeight,
+                                 int theMaxMinuteGap)
+{
+  try
+  {
+    return itsInfo->HeightValue(theHeight, theLatLon, theTime, theMaxMinuteGap);
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Reset the level iterator
@@ -2396,7 +2426,793 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
           retval = loc.timezone;
 
         else if (pname == "level")
-          retval = Fmi::to_string(levelValue());
+            retval = Fmi::to_string(levelValue());
+
+        else if (pname == "latlon" || pname == "lonlat")
+          retval = ts::LonLat(loc.longitude, loc.latitude);
+
+        else if (pname == "nearlatitude")
+          retval = opt.lastpoint.Y();
+
+        else if (pname == "nearlongitude")
+          retval = opt.lastpoint.X();
+
+        else if (pname == "nearlatlon" || pname == "nearlonlat")
+          retval = ts::LonLat(opt.lastpoint.X(), opt.lastpoint.Y());
+
+        else if (pname == "population")
+          retval = Fmi::to_string(loc.population);
+
+        else if (pname == "elevation")
+          retval = Fmi::to_string(loc.elevation);
+
+        else if (pname == "dem")
+          retval = Fmi::to_string(loc.dem);
+
+        else if (pname == "covertype")
+          retval = Fmi::to_string(static_cast<int>(loc.covertype));
+
+        else if (pname == "model")
+          retval = opt.producer;
+
+        else if (pname == "time")
+          retval = opt.timeformatter.format(ldt);
+
+        else if (pname == "isotime")
+          retval = Fmi::to_iso_string(ldt.local_time());
+
+        else if (pname == "xmltime")
+          retval = Fmi::to_iso_extended_string(ldt.local_time());
+
+        else if (pname == "localtime")
+        {
+          boost::local_time::time_zone_ptr localtz =
+              Fmi::TimeZoneFactory::instance().time_zone_from_string(loc.timezone);
+
+          boost::posix_time::ptime utc = ldt.utc_time();
+          boost::local_time::local_date_time localt(utc, localtz);
+          retval = opt.timeformatter.format(localt);
+        }
+
+        else if (pname == "utctime")
+          retval = opt.timeformatter.format(ldt.utc_time());
+
+        else if (pname == "epochtime")
+        {
+          boost::posix_time::ptime time_t_epoch(boost::gregorian::date(1970, 1, 1));
+          boost::posix_time::time_duration diff = ldt.utc_time() - time_t_epoch;
+          retval = Fmi::to_string(diff.total_seconds());
+        }
+
+        else if (pname == "origintime")
+        {
+          boost::posix_time::ptime utc = originTime();
+          boost::local_time::local_date_time localt(utc, ldt.zone());
+          retval = opt.timeformatter.format(localt);
+        }
+
+        else if (pname == "modtime" || pname == "mtime")
+        {
+          boost::posix_time::ptime utc = modificationTime();
+          boost::local_time::local_date_time localt(utc, ldt.zone());
+          retval = opt.timeformatter.format(localt);
+        }
+
+        else if (pname == "dark")
+        {
+          Fmi::Astronomy::solar_position_t sp =
+              Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(sp.dark()));
+        }
+
+        else if (pname == "moonphase")
+          retval = Fmi::Astronomy::moonphase(ldt.utc_time());
+
+        else if (pname == "moonrise")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_iso_string(lt.moonrise.local_time());
+        }
+        else if (pname == "moonrise2")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+
+          if (lt.moonrise2_today())
+            retval = Fmi::to_iso_string(lt.moonrise2.local_time());
+          else
+            retval = std::string("");
+        }
+        else if (pname == "moonset")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_iso_string(lt.moonset.local_time());
+        }
+        else if (pname == "moonset2")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+
+          if (lt.moonset2_today())
+          {
+            retval = Fmi::to_iso_string(lt.moonset2.local_time());
+          }
+          else
+          {
+            retval = std::string("");
+          }
+        }
+        else if (pname == "moonrisetoday")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+
+          retval = Fmi::to_string(static_cast<int>(lt.moonrise_today()));
+        }
+        else if (pname == "moonrise2today")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(lt.moonrise2_today()));
+        }
+        else if (pname == "moonsettoday")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(lt.moonset_today()));
+        }
+        else if (pname == "moonset2today")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(lt.moonset2_today()));
+        }
+        else if (pname == "moonup24h")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(lt.above_horizont_24h()));
+        }
+        else if (pname == "moondown24h")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(!lt.moonrise_today() && !lt.moonset_today() &&
+                                                   !lt.above_horizont_24h()));
+        }
+
+        else if (pname == "sunrise")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_iso_string(st.sunrise.local_time());
+        }
+        else if (pname == "sunset")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_iso_string(st.sunset.local_time());
+        }
+        else if (pname == "noon")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_iso_string(st.noon.local_time());
+        }
+        else if (pname == "sunrisetoday")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(st.sunrise_today()));
+        }
+        else if (pname == "sunsettoday")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(st.sunset_today()));
+        }
+        else if (pname == "daylength")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          auto seconds = st.daylength().total_seconds();
+          auto minutes = boost::numeric_cast<long>(round(seconds / 60.0));
+          retval = Fmi::to_string(minutes);
+        }
+        else if (pname == "timestring")
+          retval = format_date(ldt, opt.outlocale, opt.timestring.c_str());
+
+        else if (pname == "wday")
+          retval = format_date(ldt, opt.outlocale, "%a");
+
+        else if (pname == "weekday")
+          retval = format_date(ldt, opt.outlocale, "%A");
+
+        else if (pname == "mon")
+          retval = format_date(ldt, opt.outlocale, "%b");
+
+        else if (pname == "month")
+          retval = format_date(ldt, opt.outlocale, "%B");
+
+        else if (pname == "hour")
+          retval = Fmi::to_string(ldt.local_time().time_of_day().hours());
+
+        else if (pname.substr(0, 5) == "date(" && pname[pname.size() - 1] == ')')
+          retval = format_date(ldt, opt.outlocale, pname.substr(5, pname.size() - 6));
+
+        else if (pname == "latitude" || pname == "lat")
+          retval = loc.latitude;
+
+        else if (pname == "longitude" || pname == "lon")
+          retval = loc.longitude;
+
+        else if (pname == "sunelevation")
+        {
+          Fmi::Astronomy::solar_position_t sp =
+              Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+          retval = sp.elevation;
+        }
+
+        else if (pname == "sundeclination")
+        {
+          Fmi::Astronomy::solar_position_t sp =
+              Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+          retval = sp.declination;
+        }
+
+        else if (pname == "sunazimuth")
+        {
+          Fmi::Astronomy::solar_position_t sp =
+              Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+          retval = sp.azimuth;
+        }
+
+        // The following parameters are added for for obsengine compability reasons
+        // so that we can have e.g. fmisid identifier for observations in query which
+        // has both observations and forecasts
+        else if (pname == "fmisid" || pname == "wmo" || pname == "lpnn" || pname == "rwsid" ||
+                 pname == "stationary" || pname == "distance" || pname == "direction" ||
+                 pname == "sensor_no" || pname == "stationname")
+          retval = Spine::TimeSeries::None();
+
+        else
+          throw Spine::Exception(BCP, "Unknown DataIndependent special function '" + pname + "'!");
+      }
+    }
+
+    if (boost::get<double>(&retval))
+    {
+      if (*(boost::get<double>(&retval)) == kFloatMissing)
+        retval = Spine::TimeSeries::None();
+    }
+
+    return retval;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+ts::Value QImpl::valueAtPressure(ParameterOptions &opt, const boost::local_time::local_date_time &ldt,
+                                 float pressure)
+{
+  try
+  {
+    // Default return value
+    ts::Value retval = Spine::TimeSeries::None();
+
+    // Some shorthand variables
+    const Spine::Location &loc = opt.loc;
+
+    // Update last accessed point.
+
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+
+    switch (opt.par.type())
+    {
+      case Spine::Parameter::Type::Landscaped:
+      {
+        break;
+      }
+      case Spine::Parameter::Type::Data:
+      {
+        opt.lastpoint = latlon;
+
+        if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
+        {
+          NFmiMetTime t = ldt;
+
+          float interpolatedValue = interpolateAtPressure(latlon, t, pressure, maxgap);
+
+          // If we got no value and the proper flag is on,
+          // find the nearest point with valid values and use
+          // the values from that point
+
+          if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
+          {
+            interpolatedValue = interpolateAtPressure(opt.nearestpoint, t, pressure, maxgap);
+            if (interpolatedValue != kFloatMissing)
+              opt.lastpoint = opt.nearestpoint;
+          }
+
+          if (interpolatedValue == kFloatMissing)
+            retval = Spine::TimeSeries::None();
+          else
+            retval = interpolatedValue;
+        }
+
+        break;
+      }
+      case Spine::Parameter::Type::DataDerived:
+      {
+        break;
+      }
+      case Spine::Parameter::Type::DataIndependent:
+      {
+        const std::string &pname = opt.par.name();
+
+        if (pname == "place")
+          retval = opt.place;
+
+        else if (pname == "name")
+          retval = loc.name;
+
+        else if (pname == "iso2")
+          retval = loc.iso2;
+
+        else if (pname == "geoid")
+        {
+          if (loc.geoid == 0)  // not sure why this is still here
+            retval = Spine::TimeSeries::None();
+          else
+            retval = Fmi::to_string(loc.geoid);
+        }
+
+        else if (pname == "region")
+        {
+          // This reintroduces an older bug/feature where
+          // the name of the location is given as a region
+          // if it doesn't belong to any administrative region.
+          // (i.e. Helsinki doesn't have region, Kumpula has.)
+          //
+          // Also checking whether the loc.name has valid data,
+          // if it's empty as well - which shoudn't occur - we return nan
+
+          if (loc.area.empty())
+          {
+            if (loc.name.empty())
+            {
+              // No area (administrative region) nor name known.
+              retval = Spine::TimeSeries::None();
+            }
+            else
+            {
+              // Place name known, administrative region unknown.
+              retval = loc.name;
+            }
+          }
+          else
+          {
+            // Administrative region known.
+            retval = loc.area;
+          }
+        }
+
+        else if (pname == "country")
+          retval = opt.country;
+
+        else if (pname == "feature")
+          retval = loc.feature;
+
+        else if (pname == "tz")
+        {
+          if (ldt.zone())
+            retval = ldt.zone()->std_zone_name();
+          else
+            retval = Spine::TimeSeries::None();
+        }
+
+        else if (pname == "localtz")
+          retval = loc.timezone;
+
+        else if (pname == "level")
+            retval = Fmi::to_string(pressure);
+
+        else if (pname == "latlon" || pname == "lonlat")
+          retval = ts::LonLat(loc.longitude, loc.latitude);
+
+        else if (pname == "nearlatitude")
+          retval = opt.lastpoint.Y();
+
+        else if (pname == "nearlongitude")
+          retval = opt.lastpoint.X();
+
+        else if (pname == "nearlatlon" || pname == "nearlonlat")
+          retval = ts::LonLat(opt.lastpoint.X(), opt.lastpoint.Y());
+
+        else if (pname == "population")
+          retval = Fmi::to_string(loc.population);
+
+        else if (pname == "elevation")
+          retval = Fmi::to_string(loc.elevation);
+
+        else if (pname == "dem")
+          retval = Fmi::to_string(loc.dem);
+
+        else if (pname == "covertype")
+          retval = Fmi::to_string(static_cast<int>(loc.covertype));
+
+        else if (pname == "model")
+          retval = opt.producer;
+
+        else if (pname == "time")
+          retval = opt.timeformatter.format(ldt);
+
+        else if (pname == "isotime")
+          retval = Fmi::to_iso_string(ldt.local_time());
+
+        else if (pname == "xmltime")
+          retval = Fmi::to_iso_extended_string(ldt.local_time());
+
+        else if (pname == "localtime")
+        {
+          boost::local_time::time_zone_ptr localtz =
+              Fmi::TimeZoneFactory::instance().time_zone_from_string(loc.timezone);
+
+          boost::posix_time::ptime utc = ldt.utc_time();
+          boost::local_time::local_date_time localt(utc, localtz);
+          retval = opt.timeformatter.format(localt);
+        }
+
+        else if (pname == "utctime")
+          retval = opt.timeformatter.format(ldt.utc_time());
+
+        else if (pname == "epochtime")
+        {
+          boost::posix_time::ptime time_t_epoch(boost::gregorian::date(1970, 1, 1));
+          boost::posix_time::time_duration diff = ldt.utc_time() - time_t_epoch;
+          retval = Fmi::to_string(diff.total_seconds());
+        }
+
+        else if (pname == "origintime")
+        {
+          boost::posix_time::ptime utc = originTime();
+          boost::local_time::local_date_time localt(utc, ldt.zone());
+          retval = opt.timeformatter.format(localt);
+        }
+
+        else if (pname == "modtime" || pname == "mtime")
+        {
+          boost::posix_time::ptime utc = modificationTime();
+          boost::local_time::local_date_time localt(utc, ldt.zone());
+          retval = opt.timeformatter.format(localt);
+        }
+
+        else if (pname == "dark")
+        {
+          Fmi::Astronomy::solar_position_t sp =
+              Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(sp.dark()));
+        }
+
+        else if (pname == "moonphase")
+          retval = Fmi::Astronomy::moonphase(ldt.utc_time());
+
+        else if (pname == "moonrise")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_iso_string(lt.moonrise.local_time());
+        }
+        else if (pname == "moonrise2")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+
+          if (lt.moonrise2_today())
+            retval = Fmi::to_iso_string(lt.moonrise2.local_time());
+          else
+            retval = std::string("");
+        }
+        else if (pname == "moonset")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_iso_string(lt.moonset.local_time());
+        }
+        else if (pname == "moonset2")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+
+          if (lt.moonset2_today())
+          {
+            retval = Fmi::to_iso_string(lt.moonset2.local_time());
+          }
+          else
+          {
+            retval = std::string("");
+          }
+        }
+        else if (pname == "moonrisetoday")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+
+          retval = Fmi::to_string(static_cast<int>(lt.moonrise_today()));
+        }
+        else if (pname == "moonrise2today")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(lt.moonrise2_today()));
+        }
+        else if (pname == "moonsettoday")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(lt.moonset_today()));
+        }
+        else if (pname == "moonset2today")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(lt.moonset2_today()));
+        }
+        else if (pname == "moonup24h")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(lt.above_horizont_24h()));
+        }
+        else if (pname == "moondown24h")
+        {
+          Fmi::Astronomy::lunar_time_t lt =
+              Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(!lt.moonrise_today() && !lt.moonset_today() &&
+                                                   !lt.above_horizont_24h()));
+        }
+
+        else if (pname == "sunrise")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_iso_string(st.sunrise.local_time());
+        }
+        else if (pname == "sunset")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_iso_string(st.sunset.local_time());
+        }
+        else if (pname == "noon")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_iso_string(st.noon.local_time());
+        }
+        else if (pname == "sunrisetoday")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(st.sunrise_today()));
+        }
+        else if (pname == "sunsettoday")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          retval = Fmi::to_string(static_cast<int>(st.sunset_today()));
+        }
+        else if (pname == "daylength")
+        {
+          Fmi::Astronomy::solar_time_t st =
+              Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+          auto seconds = st.daylength().total_seconds();
+          auto minutes = boost::numeric_cast<long>(round(seconds / 60.0));
+          retval = Fmi::to_string(minutes);
+        }
+        else if (pname == "timestring")
+          retval = format_date(ldt, opt.outlocale, opt.timestring.c_str());
+
+        else if (pname == "wday")
+          retval = format_date(ldt, opt.outlocale, "%a");
+
+        else if (pname == "weekday")
+          retval = format_date(ldt, opt.outlocale, "%A");
+
+        else if (pname == "mon")
+          retval = format_date(ldt, opt.outlocale, "%b");
+
+        else if (pname == "month")
+          retval = format_date(ldt, opt.outlocale, "%B");
+
+        else if (pname == "hour")
+          retval = Fmi::to_string(ldt.local_time().time_of_day().hours());
+
+        else if (pname.substr(0, 5) == "date(" && pname[pname.size() - 1] == ')')
+          retval = format_date(ldt, opt.outlocale, pname.substr(5, pname.size() - 6));
+
+        else if (pname == "latitude" || pname == "lat")
+          retval = loc.latitude;
+
+        else if (pname == "longitude" || pname == "lon")
+          retval = loc.longitude;
+
+        else if (pname == "sunelevation")
+        {
+          Fmi::Astronomy::solar_position_t sp =
+              Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+          retval = sp.elevation;
+        }
+
+        else if (pname == "sundeclination")
+        {
+          Fmi::Astronomy::solar_position_t sp =
+              Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+          retval = sp.declination;
+        }
+
+        else if (pname == "sunazimuth")
+        {
+          Fmi::Astronomy::solar_position_t sp =
+              Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+          retval = sp.azimuth;
+        }
+
+        // The following parameters are added for for obsengine compability reasons
+        // so that we can have e.g. fmisid identifier for observations in query which
+        // has both observations and forecasts
+        else if (pname == "fmisid" || pname == "wmo" || pname == "lpnn" || pname == "rwsid" ||
+                 pname == "stationary" || pname == "distance" || pname == "direction" ||
+                 pname == "sensor_no" || pname == "stationname")
+          retval = Spine::TimeSeries::None();
+
+        else
+          throw Spine::Exception(BCP, "Unknown DataIndependent special function '" + pname + "'!");
+      }
+    }
+
+    if (boost::get<double>(&retval))
+    {
+      if (*(boost::get<double>(&retval)) == kFloatMissing)
+        retval = Spine::TimeSeries::None();
+    }
+
+    return retval;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+ts::Value QImpl::valueAtHeight(ParameterOptions &opt, const boost::local_time::local_date_time &ldt,
+                               float height)
+{
+  try
+  {
+    // Default return value
+    ts::Value retval = Spine::TimeSeries::None();
+
+    // Some shorthand variables
+    const Spine::Location &loc = opt.loc;
+
+    // Update last accessed point.
+
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+
+    switch (opt.par.type())
+    {
+      case Spine::Parameter::Type::Landscaped:
+      {
+        break;
+      }
+      case Spine::Parameter::Type::Data:
+      {
+        opt.lastpoint = latlon;
+
+        if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
+        {
+          NFmiMetTime t = ldt;
+
+          float interpolatedValue = interpolateAtHeight(latlon, t, height, maxgap);
+
+          // If we got no value and the proper flag is on,
+          // find the nearest point with valid values and use
+          // the values from that point
+
+          if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
+          {
+            interpolatedValue = interpolateAtHeight(opt.nearestpoint, t, height, maxgap);
+            if (interpolatedValue != kFloatMissing)
+              opt.lastpoint = opt.nearestpoint;
+          }
+
+          if (interpolatedValue == kFloatMissing)
+            retval = Spine::TimeSeries::None();
+          else
+            retval = interpolatedValue;
+        }
+
+        break;
+      }
+      case Spine::Parameter::Type::DataDerived:
+      {
+        break;
+      }
+      case Spine::Parameter::Type::DataIndependent:
+      {
+        const std::string &pname = opt.par.name();
+
+        if (pname == "place")
+          retval = opt.place;
+
+        else if (pname == "name")
+          retval = loc.name;
+
+        else if (pname == "iso2")
+          retval = loc.iso2;
+
+        else if (pname == "geoid")
+        {
+          if (loc.geoid == 0)  // not sure why this is still here
+            retval = Spine::TimeSeries::None();
+          else
+            retval = Fmi::to_string(loc.geoid);
+        }
+
+        else if (pname == "region")
+        {
+          // This reintroduces an older bug/feature where
+          // the name of the location is given as a region
+          // if it doesn't belong to any administrative region.
+          // (i.e. Helsinki doesn't have region, Kumpula has.)
+          //
+          // Also checking whether the loc.name has valid data,
+          // if it's empty as well - which shoudn't occur - we return nan
+
+          if (loc.area.empty())
+          {
+            if (loc.name.empty())
+            {
+              // No area (administrative region) nor name known.
+              retval = Spine::TimeSeries::None();
+            }
+            else
+            {
+              // Place name known, administrative region unknown.
+              retval = loc.name;
+            }
+          }
+          else
+          {
+            // Administrative region known.
+            retval = loc.area;
+          }
+        }
+
+        else if (pname == "country")
+          retval = opt.country;
+
+        else if (pname == "feature")
+          retval = loc.feature;
+
+        else if (pname == "tz")
+        {
+          if (ldt.zone())
+            retval = ldt.zone()->std_zone_name();
+          else
+            retval = Spine::TimeSeries::None();
+        }
+
+        else if (pname == "localtz")
+          retval = loc.timezone;
+
+        else if (pname == "level")
+            retval = Fmi::to_string(height);
 
         else if (pname == "latlon" || pname == "lonlat")
           retval = ts::LonLat(loc.longitude, loc.latitude);
@@ -2686,6 +3502,46 @@ ts::TimeSeriesPtr QImpl::values(ParameterOptions &param,
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
+ts::TimeSeriesPtr QImpl::valuesAtPressure(ParameterOptions &param,
+                                          const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                          float pressure)
+{
+  try
+  {
+    ts::TimeSeriesPtr ret(new ts::TimeSeries);
+
+    BOOST_FOREACH (const boost::local_time::local_date_time &ldt, tlist)
+    {
+      ret->push_back(ts::TimedValue(ldt, valueAtPressure(param, ldt, pressure)));
+    }
+
+    return ret;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+ts::TimeSeriesPtr QImpl::valuesAtHeight(ParameterOptions &param,
+                                        const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                        float height)
+{
+  try
+  {
+    ts::TimeSeriesPtr ret(new ts::TimeSeries);
+
+    BOOST_FOREACH (const boost::local_time::local_date_time &ldt, tlist)
+    {
+      ret->push_back(ts::TimedValue(ldt, valueAtHeight(param, ldt, height)));
+    }
+
+    return ret;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
 
 // many locations (indexmask), many timesteps
 ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
@@ -2742,6 +3598,116 @@ ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
+ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(ParameterOptions &param,
+                                               const NFmiIndexMask &indexmask,
+                                               const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                               float pressure)
+{
+  try
+  {
+    ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
+
+    for (NFmiIndexMask::const_iterator it = indexmask.begin(); it != indexmask.end(); ++it)
+    {
+      // Indexed latlon
+      NFmiPoint latlon(latLon(*it));
+
+      Spine::Location location(param.loc.geoid,
+                               param.loc.name,
+                               param.loc.iso2,
+                               param.loc.municipality,
+                               param.loc.area,
+                               param.loc.feature,
+                               param.loc.country,
+                               latlon.X(),
+                               latlon.Y(),
+                               param.loc.timezone,
+                               param.loc.population,
+                               param.loc.elevation,
+                               param.loc.priority);
+
+      ParameterOptions paramOptions(param.par,
+                                    param.producer,
+                                    location,
+                                    param.country,
+                                    param.place,
+                                    param.timeformatter,
+                                    param.timestring,
+                                    param.language,
+                                    param.outlocale,
+                                    param.outzone,
+                                    param.findnearestvalidpoint,
+                                    param.nearestpoint,
+                                    param.lastpoint);
+
+      ts::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
+      ts::LonLat lonlat(latlon.X(), latlon.Y());
+
+      ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+    }
+
+    return ret;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(ParameterOptions &param,
+                                             const NFmiIndexMask &indexmask,
+                                             const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                             float height)
+{
+  try
+  {
+    ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
+
+    for (NFmiIndexMask::const_iterator it = indexmask.begin(); it != indexmask.end(); ++it)
+    {
+      // Indexed latlon
+      NFmiPoint latlon(latLon(*it));
+
+      Spine::Location location(param.loc.geoid,
+                               param.loc.name,
+                               param.loc.iso2,
+                               param.loc.municipality,
+                               param.loc.area,
+                               param.loc.feature,
+                               param.loc.country,
+                               latlon.X(),
+                               latlon.Y(),
+                               param.loc.timezone,
+                               param.loc.population,
+                               param.loc.elevation,
+                               param.loc.priority);
+
+      ParameterOptions paramOptions(param.par,
+                                    param.producer,
+                                    location,
+                                    param.country,
+                                    param.place,
+                                    param.timeformatter,
+                                    param.timestring,
+                                    param.language,
+                                    param.outlocale,
+                                    param.outzone,
+                                    param.findnearestvalidpoint,
+                                    param.nearestpoint,
+                                    param.lastpoint);
+
+      ts::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
+      ts::LonLat lonlat(latlon.X(), latlon.Y());
+
+      ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+    }
+
+    return ret;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
 
 // many locations (llist), many timesteps
 
@@ -2773,6 +3739,84 @@ ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
                                     param.lastpoint);
 
       ts::TimeSeriesPtr timeseries = values(paramOptions, tlist);
+      ts::LonLat lonlat(loc->longitude, loc->latitude);
+
+      ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+    }
+
+    return ret;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(ParameterOptions &param,
+                                               const Spine::LocationList &llist,
+                                               const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                               const double & /* maxdistance */,
+                                               float pressure)
+{
+  try
+  {
+    ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
+
+    BOOST_FOREACH (const Spine::LocationPtr &loc, llist)
+    {
+      ParameterOptions paramOptions(param.par,
+                                    param.producer,
+                                    *loc,
+                                    param.country,
+                                    param.place,
+                                    param.timeformatter,
+                                    param.timestring,
+                                    param.language,
+                                    param.outlocale,
+                                    param.outzone,
+                                    param.findnearestvalidpoint,
+                                    param.nearestpoint,
+                                    param.lastpoint);
+
+      ts::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
+      ts::LonLat lonlat(loc->longitude, loc->latitude);
+
+      ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+    }
+
+    return ret;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(ParameterOptions &param,
+                                             const Spine::LocationList &llist,
+                                             const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                             const double & /* maxdistance */,
+                                             float height)
+{
+  try
+  {
+    ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
+
+    BOOST_FOREACH (const Spine::LocationPtr &loc, llist)
+    {
+      ParameterOptions paramOptions(param.par,
+                                    param.producer,
+                                    *loc,
+                                    param.country,
+                                    param.place,
+                                    param.timeformatter,
+                                    param.timestring,
+                                    param.language,
+                                    param.outlocale,
+                                    param.outzone,
+                                    param.findnearestvalidpoint,
+                                    param.nearestpoint,
+                                    param.lastpoint);
+
+      ts::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       ts::LonLat lonlat(loc->longitude, loc->latitude);
 
       ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
