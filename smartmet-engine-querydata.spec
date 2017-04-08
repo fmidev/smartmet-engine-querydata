@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 17.3.15
-Release: 2%{?dist}.fmi
+Version: 17.4.8
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -12,9 +12,9 @@ Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 17.3.15
-BuildRequires: smartmet-library-newbase-devel >= 1
-BuildRequires: smartmet-library-macgyver-devel >= 17.3.14
+BuildRequires: smartmet-library-spine-devel >= 17.3.16
+BuildRequires: smartmet-library-newbase-devel >= 17.4.4
+BuildRequires: smartmet-library-macgyver-devel >= 17.3.16
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -24,11 +24,11 @@ Requires: boost-iostreams
 Requires: boost-regex
 Requires: boost-thread
 Requires: boost-system
-Requires: smartmet-library-newbase >= 1
-Requires: smartmet-library-macgyver >= 17.3.14
+Requires: smartmet-library-newbase >= 17.4.4
+Requires: smartmet-library-macgyver >= 17.3.16
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 17.3.15
+Requires: smartmet-library-spine >= 17.3.16
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -67,7 +67,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
-* Upcoming
+* Sat Apr  8 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.4.8-1.fmi
+- Do not print stack traces for many trivial problems
+
+* Tue Apr  4 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.4.4-1.fmi
 - Support for pressure and height value queries
 
 * Wed Mar 15 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.3.15-2.fmi

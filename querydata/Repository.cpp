@@ -7,19 +7,19 @@
 #include "Repository.h"
 #include "MetaQueryFilters.h"
 
-#include <spine/Exception.h>
-#include <spine/TableFormatter.h>
-#include <spine/ParameterFactory.h>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/date_time/posix_time/posix_time_io.hpp>
+#include <boost/foreach.hpp>
+#include <boost/regex.hpp>
+#include <boost/tuple/tuple.hpp>
+#include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
-#include <macgyver/StringConversion.h>
-#include <boost/foreach.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/date_time/posix_time/posix_time_io.hpp>
-#include <boost/algorithm/string/join.hpp>
-#include <boost/regex.hpp>
-#include <stdexcept>
+#include <spine/Exception.h>
+#include <spine/ParameterFactory.h>
+#include <spine/TableFormatter.h>
 #include <sstream>
+#include <stdexcept>
 
 namespace SmartMet
 {
@@ -173,14 +173,22 @@ Q Repository::get(const Producer& producer) const
     Producers::const_iterator producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw Spine::Exception(
-          BCP, "Repository get (1): No data available for producer '" + producer + "'!");
+    {
+      Spine::Exception ex(BCP,
+                          "Repository get (1): No data available for producer '" + producer + "'!");
+      ex.disableStackTrace();
+      throw ex;
+    }
 
     const SharedModels& time_model = producer_model->second;
 
     if (time_model.empty())
-      throw Spine::Exception(
-          BCP, "Repository get (2): No data available for producer '" + producer + "'!");
+    {
+      Spine::Exception ex(BCP,
+                          "Repository get (2): No data available for producer '" + producer + "'!");
+      ex.disableStackTrace();
+      throw ex;
+    }
 
     // newest origintime is at the end
     auto last = --time_model.end();
@@ -206,8 +214,12 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
     Producers::const_iterator producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw Spine::Exception(
-          BCP, "Repository get (3): No data available for producer '" + producer + "'!");
+    {
+      Spine::Exception ex(BCP,
+                          "Repository get (3): No data available for producer '" + producer + "'!");
+      ex.disableStackTrace();
+      throw ex;
+    }
 
     const SharedModels& models = producer_model->second;
 
@@ -270,14 +282,22 @@ Q Repository::getAll(const Producer& producer) const
     Producers::const_iterator producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw Spine::Exception(
+    {
+      Spine::Exception ex(
           BCP, "Repository getPeriod: No data available for producer '" + producer + "'");
+      ex.disableStackTrace();
+      throw ex;
+    }
 
     const SharedModels& models = producer_model->second;
 
     if (models.empty())
-      throw Spine::Exception(
+    {
+      Spine::Exception ex(
           BCP, "Repository getPeriod: No data available for producer '" + producer + "'");
+      ex.disableStackTrace();
+      throw ex;
+    }
 
     // Construct a vector of datas
 
