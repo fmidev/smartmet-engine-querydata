@@ -14,8 +14,8 @@
 
 #include "MetaData.h"
 #include "Model.h"
-#include "ValidTimeList.h"
 #include "ParameterOptions.h"
+#include "ValidTimeList.h"
 
 #include <spine/Thread.h>
 #include <spine/TimeSeries.h>
@@ -230,12 +230,14 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   // one location, many timesteps
   Spine::TimeSeries::TimeSeriesPtr values(ParameterOptions& param,
                                           const Spine::TimeSeriesGenerator::LocalTimeList& tlist);
-  Spine::TimeSeries::TimeSeriesPtr valuesAtPressure(ParameterOptions& param,
-                                                    const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
-                                                    float pressure);
-  Spine::TimeSeries::TimeSeriesPtr valuesAtHeight(ParameterOptions& param,
-                                                  const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
-                                                  float height);
+  Spine::TimeSeries::TimeSeriesPtr valuesAtPressure(
+      ParameterOptions& param,
+      const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
+      float pressure);
+  Spine::TimeSeries::TimeSeriesPtr valuesAtHeight(
+      ParameterOptions& param,
+      const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
+      float height);
   // many locations (indexmask), many timesteps
   Spine::TimeSeries::TimeSeriesGroupPtr values(
       ParameterOptions& param,
@@ -273,6 +275,8 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   bool selectLevel(double theLevel);
 
   const WGS84Envelope& getWGS84Envelope();
+
+  bool needsWraparound() const;
 
  private:
   QImpl();

@@ -1,8 +1,8 @@
 #include "Q.h"
 #include "Model.h"
 
-#include <spine/ParameterFactory.h>
 #include <spine/Exception.h>
+#include <spine/ParameterFactory.h>
 
 #include <gis/Box.h>
 #include <gis/DEM.h>
@@ -11,8 +11,8 @@
 #include <macgyver/Astronomy.h>
 #include <macgyver/CharsetTools.h>
 #include <macgyver/StringConversion.h>
-#include <macgyver/TimeZoneFactory.h>
 #include <macgyver/TimeFormatter.h>
+#include <macgyver/TimeZoneFactory.h>
 
 #include <newbase/NFmiGdalArea.h>
 #include <newbase/NFmiMetMath.h>
@@ -23,14 +23,14 @@
 
 #include <gdal/ogr_spatialref.h>
 
-#include <boost/date_time/time_facet.hpp>
 #include <boost/date_time/local_time/local_time_io.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/date_time/time_facet.hpp>
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/range/algorithm_ext/erase.hpp>
-#include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/unique.hpp>
+#include <boost/range/algorithm_ext/erase.hpp>
 #include <boost/timer/timer.hpp>
 
 #include <cassert>
@@ -2426,7 +2426,7 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
           retval = loc.timezone;
 
         else if (pname == "level")
-            retval = Fmi::to_string(levelValue());
+          retval = Fmi::to_string(levelValue());
 
         else if (pname == "latlon" || pname == "lonlat")
           retval = ts::LonLat(loc.longitude, loc.latitude);
@@ -2696,7 +2696,8 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
   }
 }
 
-ts::Value QImpl::valueAtPressure(ParameterOptions &opt, const boost::local_time::local_date_time &ldt,
+ts::Value QImpl::valueAtPressure(ParameterOptions &opt,
+                                 const boost::local_time::local_date_time &ldt,
                                  float pressure)
 {
   try
@@ -2819,7 +2820,7 @@ ts::Value QImpl::valueAtPressure(ParameterOptions &opt, const boost::local_time:
           retval = loc.timezone;
 
         else if (pname == "level")
-            retval = Fmi::to_string(pressure);
+          retval = Fmi::to_string(pressure);
 
         else if (pname == "latlon" || pname == "lonlat")
           retval = ts::LonLat(loc.longitude, loc.latitude);
@@ -3089,7 +3090,8 @@ ts::Value QImpl::valueAtPressure(ParameterOptions &opt, const boost::local_time:
   }
 }
 
-ts::Value QImpl::valueAtHeight(ParameterOptions &opt, const boost::local_time::local_date_time &ldt,
+ts::Value QImpl::valueAtHeight(ParameterOptions &opt,
+                               const boost::local_time::local_date_time &ldt,
                                float height)
 {
   try
@@ -3212,7 +3214,7 @@ ts::Value QImpl::valueAtHeight(ParameterOptions &opt, const boost::local_time::l
           retval = loc.timezone;
 
         else if (pname == "level")
-            retval = Fmi::to_string(height);
+          retval = Fmi::to_string(height);
 
         else if (pname == "latlon" || pname == "lonlat")
           retval = ts::LonLat(loc.longitude, loc.latitude);
@@ -3598,10 +3600,11 @@ ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
-ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(ParameterOptions &param,
-                                               const NFmiIndexMask &indexmask,
-                                               const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
-                                               float pressure)
+ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
+    ParameterOptions &param,
+    const NFmiIndexMask &indexmask,
+    const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+    float pressure)
 {
   try
   {
@@ -3751,11 +3754,12 @@ ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
-ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(ParameterOptions &param,
-                                               const Spine::LocationList &llist,
-                                               const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
-                                               const double & /* maxdistance */,
-                                               float pressure)
+ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
+    ParameterOptions &param,
+    const Spine::LocationList &llist,
+    const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+    const double & /* maxdistance */,
+    float pressure)
 {
   try
   {
@@ -4155,7 +4159,7 @@ bool QImpl::selectLevel(double theLevel)
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Retrun the grid hash value
+ * \brief Return the grid hash value
  *
  * Note: All models are required to have the same grid
  */
@@ -4164,6 +4168,45 @@ bool QImpl::selectLevel(double theLevel)
 std::size_t QImpl::gridHashValue() const
 {
   return itsModels.front()->gridHashValue();
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Return true if the data looks global but lacks one grid cell column
+ */
+// ----------------------------------------------------------------------
+
+bool QImpl::needsWraparound() const
+{
+  if (!isGrid())
+    return false;
+
+  NFmiFastQueryInfo &qi = *itsInfo;
+
+  const NFmiArea *area = qi.Area();
+  const NFmiGrid *grid = qi.Grid();
+
+  const auto x1 = area->BottomLeftLatLon().X();
+  const auto x2 = area->TopRightLatLon().X();
+
+  const auto nx = grid->XNumber();
+
+  if (x1 == kFloatMissing || x2 == kFloatMissing)
+    return false;
+
+  /*
+   * GFS example:
+   * bottom left lonlat= 0,-90
+   * top right lonlat= 359.75,90
+   * xnumber= 1440
+   *
+   * ==> (x1-x1)*1441/1440 = 360  ==> we need to generate an extra cell by wrapping around
+   */
+
+  auto test_width = (x2 - x1) * (nx + 1) / nx;
+
+  // In the GFS case the rounding error is about 1e-4
+  return (std::abs(test_width - 360) < 1e-3);
 }
 
 // ----------------------------------------------------------------------
