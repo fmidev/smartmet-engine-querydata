@@ -2715,9 +2715,6 @@ ts::Value QImpl::valueAtPressure(ParameterOptions &opt,
     switch (opt.par.type())
     {
       case Spine::Parameter::Type::Landscaped:
-      {
-        break;
-      }
       case Spine::Parameter::Type::Data:
       {
         opt.lastpoint = latlon;
@@ -3109,9 +3106,6 @@ ts::Value QImpl::valueAtHeight(ParameterOptions &opt,
     switch (opt.par.type())
     {
       case Spine::Parameter::Type::Landscaped:
-      {
-        break;
-      }
       case Spine::Parameter::Type::Data:
       {
         opt.lastpoint = latlon;
