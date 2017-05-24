@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 17.4.10
+Version: 17.5.24
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -12,9 +12,9 @@ Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 17.3.16
-BuildRequires: smartmet-library-newbase-devel >= 17.4.4
-BuildRequires: smartmet-library-macgyver-devel >= 17.3.16
+BuildRequires: smartmet-library-spine-devel >= 17.5.5
+BuildRequires: smartmet-library-newbase-devel >= 17.4.28
+BuildRequires: smartmet-library-macgyver-devel >= 17.4.19
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -24,11 +24,11 @@ Requires: boost-iostreams
 Requires: boost-regex
 Requires: boost-thread
 Requires: boost-system
-Requires: smartmet-library-newbase >= 17.4.4
-Requires: smartmet-library-macgyver >= 17.3.16
+Requires: smartmet-library-newbase >= 17.4.28
+Requires: smartmet-library-macgyver >= 17.4.19
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 17.3.16
+Requires: smartmet-library-spine >= 17.5.5
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -67,6 +67,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed May 24 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.5.24-1.fmi
+- Avoid fetching DEM and LandCover variables if possible when sampling querydata
+
 * Mon Apr 10 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.4.10-1.fmi
 - Added Q::needsWraparound for identifying global data which needs an extra grid cell column to cover the entire globe
 

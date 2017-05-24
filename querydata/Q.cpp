@@ -4084,27 +4084,33 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
         for (dstinfo.ResetLocation(); dstinfo.NextLocation();)
         {
           auto latlon = dstinfo.LatLon();
-          auto dem = theDem.elevation(latlon.X(), latlon.Y(), theResolution);
-          auto covertype = theLandCover.coverType(latlon.X(), latlon.Y());
-          Spine::Location loc(latlon.X(), latlon.Y(), dem, covertype);
-          // Paska API...
-          ParameterOptions options(theParameter,
-                                   Producer(),
-                                   loc,
-                                   "",
-                                   "",
-                                   *timeformatter,
-                                   "",
-                                   "",
-                                   std::locale::classic(),
-                                   "",
-                                   false,
-                                   NFmiPoint(),
-                                   dummy);
 
-          auto result = value(options, localdatetime);
-          if (boost::get<double>(&result))
-            dstinfo.FloatValue(*boost::get<double>(&result));
+          if (theParameter.name() == "dem")
+            dstinfo.FloatValue(theDem.elevation(latlon.X(), latlon.Y(), theResolution));
+          else if (theParameter.name() == "covertype")
+            dstinfo.FloatValue(theLandCover.coverType(latlon.X(), latlon.Y()));
+          else
+          {
+            Spine::Location loc(latlon.X(), latlon.Y());
+
+            ParameterOptions options(theParameter,
+                                     Producer(),
+                                     loc,
+                                     "",
+                                     "",
+                                     *timeformatter,
+                                     "",
+                                     "",
+                                     std::locale::classic(),
+                                     "",
+                                     false,
+                                     NFmiPoint(),
+                                     dummy);
+
+            auto result = value(options, localdatetime);
+            if (boost::get<double>(&result))
+              dstinfo.FloatValue(*boost::get<double>(&result));
+          }
         }
       }
     }
