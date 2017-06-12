@@ -5,11 +5,12 @@
 // ======================================================================
 
 #include "Engine.h"
+#include "MetaQueryFilters.h"
 #include "RepoManager.h"
 #include "Repository.h"
 #include "Synchro.h"
-#include "MetaQueryFilters.h"
 #include <spine/Exception.h>
+#include <exception>
 
 namespace SmartMet
 {
@@ -642,14 +643,14 @@ void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
  */
 // ----------------------------------------------------------------------
 
-CoordinatesPtr project_coordinates(const Coordinates& theCoords,
+CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
                                    const Q& theQ,
                                    OGRSpatialReference& theSR)
 {
   try
   {
     // Copy the original coordinates for projection
-    auto coords = boost::make_shared<Coordinates>(theCoords);
+    auto coords = boost::make_shared<Coordinates>(*theCoords);
 
     // Create the coordinate transformation
 
@@ -724,42 +725,48 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 {
   try
   {
+    // Hash value of unprojected and projected coordinates
     auto qhash = theQ->gridHashValue();
+    auto projhash = qhash;
 
-    // Handle native coordinates first
-    if (theSR == nullptr)
+    if (theSR != nullptr)
     {
-      auto cached_coords = itsCoordinateCache.find(qhash);
-      if (cached_coords)
-        return *cached_coords;
+      boost::hash_combine(projhash, hash_value(*theSR));
 
-      auto coords = boost::make_shared<Coordinates>(get_world_xy(theQ));
-      itsCoordinateCache.insert(qhash, coords);
-      return coords;
+      auto cached_coords = itsCoordinateCache.find(projhash);
+      if (cached_coords)
+        return cached_coords->get();
     }
 
-    // Must use a projected grid coordinates
+    // Now we need either the original coordinates as is or need to project them
 
-    auto projhash = qhash;
-    boost::hash_combine(projhash, hash_value(*theSR));
+    auto cached_coords = itsCoordinateCache.find(qhash);
 
-    // Use cached coordinates if possible
-    auto cached_coords = itsCoordinateCache.find(projhash);
-    if (cached_coords)
-      return *cached_coords;
+    if (cached_coords && theSR == nullptr)
+      return cached_coords->get();
 
-    // Must calculate cached coordinates from native coordinates
-    cached_coords = itsCoordinateCache.find(qhash);
     if (!cached_coords)
     {
-      cached_coords = boost::make_shared<Coordinates>(get_world_xy(theQ));
-      itsCoordinateCache.insert(qhash, *cached_coords);
+      auto ftr =
+          boost::async([=] { return boost::make_shared<Coordinates>(get_world_xy(theQ)); }).share();
+      itsCoordinateCache.insert(qhash, ftr);
+      ftr.get();
+      cached_coords = itsCoordinateCache.find(qhash);
     }
 
-    auto coords = project_coordinates(**cached_coords, theQ, *theSR);
-    itsCoordinateCache.insert(projhash, coords);
+    // g++ 4.8.5 does not allow get to be called inside the lambda below, had to place it here
 
-    return coords;
+    auto coords = cached_coords->get();
+
+    if (theSR == nullptr)
+      return coords;
+
+    // Project the coordinates
+
+    auto ftr = boost::async([=] { return project_coordinates(coords, theQ, *theSR); }).share();
+
+    itsCoordinateCache.insert(projhash, ftr);
+    return ftr.get();
   }
   catch (...)
   {
@@ -774,14 +781,17 @@ ValuesPtr Engine::getValues(const Q& theQ,
   try
   {
     auto values = itsValuesCache.find(theValuesHash);
-    if (!values)
-    {
-      auto tmp = boost::make_shared<Values>();
-      theQ->values(*tmp, theTime);
-      itsValuesCache.insert(theValuesHash, tmp);
-      return tmp;
-    }
-    return *values;
+    if (values)
+      return values->get();
+
+    auto ftr = boost::async([=] {
+                 auto tmp = boost::make_shared<Values>();
+                 theQ->values(*tmp, theTime);
+                 return tmp;
+               }).share();
+
+    itsValuesCache.insert(theValuesHash, ftr);
+    return ftr.get();
   }
   catch (...)
   {

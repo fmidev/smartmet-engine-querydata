@@ -67,6 +67,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Upcoming
+- Use shared futures to cache coordinates and values to avoid duplicate work by simultaneous requests
+
 * Wed May 24 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.5.24-1.fmi
 - Avoid fetching DEM and LandCover variables if possible when sampling querydata
 

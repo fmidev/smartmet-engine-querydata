@@ -6,15 +6,16 @@
 
 #pragma once
 
-#include "Synchro.h"
-#include "Repository.h"
 #include "Producer.h"
+#include "Repository.h"
+#include "Synchro.h"
 
-#include <spine/SmartMetEngine.h>
-#include <macgyver/Cache.h>
-#include <gdal/ogr_spatialref.h>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/future.hpp>
+#include <gdal/ogr_spatialref.h>
+#include <macgyver/Cache.h>
+#include <spine/SmartMetEngine.h>
 #include <string>
 
 class NFmiPoint;
@@ -62,10 +63,11 @@ class Engine : public Spine::SmartMetEngine
   const std::string itsConfigFile;
 
   // Cached querydata coordinates.
-  typedef Fmi::Cache::Cache<std::size_t, CoordinatesPtr> CoordinateCache;
+  typedef Fmi::Cache::Cache<std::size_t, boost::shared_future<CoordinatesPtr>> CoordinateCache;
   mutable CoordinateCache itsCoordinateCache;
 
-  typedef Fmi::Cache::Cache<std::size_t, ValuesPtr> ValuesCache;
+  // Cached querydata values
+  typedef Fmi::Cache::Cache<std::size_t, boost::shared_future<ValuesPtr>> ValuesCache;
   mutable ValuesCache itsValuesCache;
 
   int itsActiveThreadCount;
