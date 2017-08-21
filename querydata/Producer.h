@@ -64,6 +64,18 @@ struct ProducerConfig
   bool isforecast;
   bool isclimatology;
   bool isfullgrid;
+
+  inline bool operator==(const ProducerConfig& c)
+  {
+    return c.isfullgrid == isfullgrid && c.isclimatology == isclimatology &&
+           c.isforecast == isforecast && c.ismultifile == ismultifile &&
+           c.maxdistance == maxdistance && c.number_to_keep == number_to_keep &&
+           c.refresh_interval_secs == refresh_interval_secs && c.leveltype == leveltype &&
+           c.type == type && c.pattern == pattern && c.directory == directory &&
+           c.aliases == aliases && c.producer == producer;
+  }
+  inline bool operator!=(const ProducerConfig& c) { return !operator==(c); }
+
   // Monitor index:
 };
 
