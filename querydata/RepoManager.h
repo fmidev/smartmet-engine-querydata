@@ -7,9 +7,10 @@
 #pragma once
 
 #include "Repository.h"
-#include <spine/Thread.h>
+#include <boost/thread.hpp>
 #include <macgyver/Cache.h>
 #include <macgyver/DirectoryMonitor.h>
+#include <spine/Thread.h>
 #include <memory>
 
 namespace SmartMet

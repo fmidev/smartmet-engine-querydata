@@ -136,7 +136,7 @@ OriginTimes Repository::originTimes(const Producer& producer) const
     {
       const SharedModels& models = it->second;
 
-      BOOST_FOREACH (const auto& time_model, models)
+      BOOST_FOREACH(const auto & time_model, models)
       {
         times.insert(time_model.first);
       }
@@ -302,7 +302,7 @@ Q Repository::getAll(const Producer& producer) const
     // Construct a vector of datas
 
     std::vector<SharedModel> okmodels;
-    BOOST_FOREACH (const auto& otime_model, models)
+    BOOST_FOREACH(const auto & otime_model, models)
     {
       okmodels.push_back(otime_model.second);
     }
@@ -475,7 +475,7 @@ Producer Repository::find(const ProducerList& producerlist,
 {
   try
   {
-    BOOST_FOREACH (const Producer& producer, producerlist)
+    BOOST_FOREACH(const Producer & producer, producerlist)
     {
       // Try primary names first
       Producers::const_iterator producer_model = itsProducers.find(producer);
@@ -495,7 +495,7 @@ Producer Repository::find(const ProducerList& producerlist,
 
     // Try aliases next in the given order
 
-    BOOST_FOREACH (const Producer& producer, producerorder)
+    BOOST_FOREACH(const Producer & producer, producerorder)
     {
       ProducerConfigs::const_iterator prod_config = itsProducerConfigs.find(producer);
       if (prod_config == itsProducerConfigs.end())
@@ -508,7 +508,7 @@ Producer Repository::find(const ProducerList& producerlist,
 
       const std::set<std::string>& aliases = prod_config->second.aliases;
 
-      BOOST_FOREACH (const Producer& alias, producerlist)
+      BOOST_FOREACH(const Producer & alias, producerlist)
       {
         if (aliases.find(alias) != aliases.end())
         {
@@ -536,17 +536,9 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
   try
   {
     static const std::vector<std::string>& ContentTableHeaders =
-        *new std::vector<std::string>{"Producer",
-                                      "Aliases",
-                                      "RI",
-                                      "Path",
-                                      "Parameters",
-                                      "Descriptions",
-                                      "Levels",
-                                      "Projection",
-                                      "OriginTime",
-                                      "MinTime",
-                                      "MaxTime"};
+        *new std::vector<std::string>{"Producer",   "Aliases",      "RI",     "Path",
+                                      "Parameters", "Descriptions", "Levels", "Projection",
+                                      "OriginTime", "MinTime",      "MaxTime"};
 
     std::unique_ptr<Fmi::TimeFormatter> timeFormatter(Fmi::TimeFormatter::create(timeFormat));
 
@@ -677,7 +669,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
 
     Spine::TableFormatter::Names headers;
 
-    BOOST_FOREACH (const auto& p, ContentTableHeaders)
+    BOOST_FOREACH(const auto & p, ContentTableHeaders)
     {
       headers.push_back(p);
     }

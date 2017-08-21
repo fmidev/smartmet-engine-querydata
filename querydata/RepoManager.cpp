@@ -162,7 +162,7 @@ void RepoManager::init()
 {
   try
   {
-    BOOST_FOREACH (const auto& pinfo, itsConfigList)
+    BOOST_FOREACH(const auto & pinfo, itsConfigList)
     {
       // Note: watcher indexes start from 0, so we can index the producer
       // with a vector to find out which producer the callback instructs to update.
@@ -234,7 +234,7 @@ Fmi::DirectoryMonitor::Watcher RepoManager::id(const Producer& producer) const
   {
     // no lock needed, this method is private, caller is responsible
 
-    BOOST_FOREACH (const ProducerMap::value_type& it, itsProducerMap)
+    BOOST_FOREACH(const ProducerMap::value_type & it, itsProducerMap)
     {
       if (it.second == producer)
         return it.first;
@@ -305,7 +305,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
 
     Files removals;
     Files additions;
-    BOOST_FOREACH (const auto& file_status, *status)
+    BOOST_FOREACH(const auto & file_status, *status)
     {
       if (file_status.second == Fmi::DirectoryMonitor::DELETE ||
           file_status.second == Fmi::DirectoryMonitor::MODIFY)
@@ -325,8 +325,8 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     {
       // Take the lock only when needed
       Spine::WriteLock lock(itsMutex);
-      BOOST_FOREACH (const auto& file, removals)
-        itsRepo.remove(producer, file);
+      BOOST_FOREACH(const auto & file, removals)
+      itsRepo.remove(producer, file);
     }
 
     // Done if there are no additions
@@ -489,7 +489,7 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
     // jams the server. Must study more carefully.
     // Spine::ReadLock lock(mutex);
 
-    BOOST_FOREACH (const ProducerConfig& config, itsConfigList)
+    BOOST_FOREACH(const ProducerConfig & config, itsConfigList)
     {
       if (config.producer == producer)
         return config;

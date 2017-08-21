@@ -26,7 +26,9 @@ class MetaQueryOptions
  public:
   struct BBox
   {
-    BBox() : ul(0, 0), ur(0, 0), bl(0, 0), br(0, 0) {}
+    BBox() : ul(0, 0), ur(0, 0), bl(0, 0), br(0, 0)
+    {
+    }
     BBox(const NFmiPoint& newbl,
          const NFmiPoint& newbr,
          const NFmiPoint& newul,

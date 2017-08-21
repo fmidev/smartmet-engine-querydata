@@ -208,7 +208,9 @@ void Synchronizer::launch(Spine::Reactor* theReactor)
       itsTimer.async_wait(boost::bind(&Synchronizer::fire_timer, this, _1));
 
       // Start thread for async operations
-      itsCommThread.reset(new boost::thread(boost::bind(&ba::io_service::run, &itsIoService)));
+      itsCommThread.reset(new boost::thread(boost::bind(
+          static_cast<std::size_t (boost::asio::io_service::*)(void)>(&ba::io_service::run),
+          &itsIoService)));
 
       // Start listening for broadcasts
       start_receive();
@@ -390,9 +392,9 @@ void Synchronizer::update_consensus()
     }
 
     // Intersect each pending update with the current data (baseline set previously)
-    BOOST_FOREACH (auto& update, itsPendingUpdates)
+    BOOST_FOREACH(auto & update, itsPendingUpdates)
     {
-      BOOST_FOREACH (auto& handler, update.handlers)
+      BOOST_FOREACH(auto & handler, update.handlers)
       {
         // Find the handler from the current data
         auto it = itsSyncGroups.find(handler);
