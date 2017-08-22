@@ -78,6 +78,9 @@ struct RepoManager
 
   Repository itsRepo;
 
+  std::time_t configModTime;  // Timestamp of configuration file loaded
+  inline std::time_t getConfigModTime() { return configModTime; }
+
  private:
   void load(Producer producer, Files files);
 

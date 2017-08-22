@@ -845,6 +845,12 @@ ValuesPtr Engine::getValues(const Q& theQ,
   }
 }
 
+std::time_t Engine::getConfigModTime()
+{
+  auto repomanager = boost::atomic_load(&itsRepoManager);
+  return repomanager->getConfigModTime();
+}
+
 }  // namespace QueryData
 }  // namespace Engine
 }  // namespace SmartMet

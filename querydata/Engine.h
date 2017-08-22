@@ -141,7 +141,7 @@ class Engine : public Spine::SmartMetEngine
   void init();
   void shutdown();
   void shutdownRequestFlagSet();
-
+  std::time_t getConfigModTime();
 };  // class Engine
 
 }  // namespace Q

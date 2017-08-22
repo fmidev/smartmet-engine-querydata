@@ -21,7 +21,7 @@ using namespace std;
 
 const string configfile = "querydata.conf";
 
-const int timeout = 5 ;
+const int timeout = 5;
 
 void sighandler(int)
 {
@@ -39,10 +39,8 @@ int main()
     signal(SIGABRT, &sighandler);
     signal(SIGTERM, &sighandler);
 
-    cout << endl
-         << "\tThere are " << timeout << " seconds before the program will" << endl
-         << "\texit automatically." << endl
-         << endl;
+    cout << endl << "\tThere are " << timeout << " seconds before the program will" << endl
+         << "\texit automatically." << endl << endl;
 
     // We'll run the method in a thread. If the user does not interrupt
     // the program fast enough, we'll abort
@@ -55,9 +53,8 @@ int main()
   }
   catch (libconfig::ParseException& e)
   {
-    std::cerr << std::endl
-              << "Parse error on line " << e.getLine() << " of '" << configfile << "' : '"
-              << e.getError() << "'" << std::endl;
+    std::cerr << std::endl << "Parse error on line " << e.getLine() << " of '" << configfile
+              << "' : '" << e.getError() << "'" << std::endl;
     return 1;
   }
   catch (std::exception& e)
@@ -66,9 +63,6 @@ int main()
     return 1;
   }
 
+  // This has to be return: doing exit will not actually segfault
   return 0;
 }
-
-
-
-
