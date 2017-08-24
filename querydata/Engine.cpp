@@ -84,7 +84,15 @@ void Engine::configFileWatch()
 
     // If file was deleted, skip and go waiting until it is back
     if (!boost::filesystem::exists(itsConfigFile, ec))
+    {
+      if (filetime > 0)
+      {
+        std::cout << "Querydata config " << itsConfigFile
+                  << " removed - current configuration kept until new file appears" << std::endl;
+        filetime = 0;
+      }
       continue;
+    }
 
     std::time_t newfiletime = boost::filesystem::last_write_time(itsConfigFile);
 
@@ -101,15 +109,15 @@ void Engine::configFileWatch()
         newfiletime = boost::filesystem::last_write_time(itsConfigFile);
       }
 
-      // Now we should reread the config
-      std::cout << "Config file " << itsConfigFile << " updated, rereading" << std::endl;
+      // Generate new repomanager according to new configs
+      std::cout << "Querydata config " << itsConfigFile << " updated, rereading" << std::endl;
       auto newrepomanager = boost::make_shared<RepoManager>(itsConfigFile);
       newrepomanager->init();
       boost::atomic_store(&itsRepoManager, newrepomanager);
-      boost::this_thread::sleep_for(boost::chrono::seconds(2));
 
-      // Assuming everything went okay, (it should have!), we can now update the comparison time
-      filetime = getConfigModTime();
+      // Before staring poll cycle again, wait to avoid constant reload if the file changes many
+      // times
+      boost::this_thread::sleep_for(boost::chrono::seconds(2));
     }
   }
 }
