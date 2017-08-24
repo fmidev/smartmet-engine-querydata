@@ -10,6 +10,7 @@
 #include "Repository.h"
 #include "Synchro.h"
 
+#include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/future.hpp>
@@ -142,6 +143,11 @@ class Engine : public Spine::SmartMetEngine
   void shutdown();
   void shutdownRequestFlagSet();
   std::time_t getConfigModTime();
+
+ private:
+  boost::thread configFileWatcher;  // A thread watching for config file changes
+  void configFileWatch();           // A function in separate thread checking the config file
+
 };  // class Engine
 
 }  // namespace Q

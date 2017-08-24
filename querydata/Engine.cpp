@@ -9,6 +9,12 @@
 #include "RepoManager.h"
 #include "Repository.h"
 #include "Synchro.h"
+#include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
+#include <chrono>
+
 #include <spine/Exception.h>
 #include <exception>
 
@@ -51,10 +57,60 @@ void Engine::init()
     {
       boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
+
+    // Start watcher thread to watch for configuration changes
+    configFileWatcher = boost::thread(&Engine::configFileWatch, this);
   }
   catch (...)
   {
     throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Watch the config file to change
+ * Should be run in a separate thread
+ */
+// ----------------------------------------------------------------------
+void Engine::configFileWatch()
+{
+  boost::system::error_code ec;
+  std::time_t filetime = getConfigModTime();
+
+  while (1 == 1)
+  {
+    boost::this_thread::sleep_for(boost::chrono::seconds(1));
+
+    // If file was deleted, skip and go waiting until it is back
+    if (!boost::filesystem::exists(itsConfigFile, ec))
+      continue;
+
+    std::time_t newfiletime = boost::filesystem::last_write_time(itsConfigFile);
+
+    // Was the file modified?
+    if (newfiletime != filetime)
+    {
+      // File changed
+      // Go into cooling period of waiting a few seconds and checking again
+      // This assures there are no half completed writes
+      while (newfiletime != filetime)
+      {
+        filetime = newfiletime;
+        boost::this_thread::sleep_for(boost::chrono::seconds(3));
+        newfiletime = boost::filesystem::last_write_time(itsConfigFile);
+      }
+
+      // Now we should reread the config
+      std::cout << "Config file " << itsConfigFile << " updated, rereading" << std::endl;
+      auto newrepomanager = boost::make_shared<RepoManager>(itsConfigFile);
+      newrepomanager->init();
+      boost::atomic_store(&itsRepoManager, newrepomanager);
+      boost::this_thread::sleep_for(boost::chrono::seconds(2));
+
+      // Assuming everything went okay, (it should have!), we can now update the comparison time
+      filetime = getConfigModTime();
+    }
   }
 }
 
