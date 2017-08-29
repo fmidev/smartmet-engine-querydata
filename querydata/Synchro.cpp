@@ -392,9 +392,9 @@ void Synchronizer::update_consensus()
     }
 
     // Intersect each pending update with the current data (baseline set previously)
-    BOOST_FOREACH(auto & update, itsPendingUpdates)
+    BOOST_FOREACH (auto& update, itsPendingUpdates)
     {
-      BOOST_FOREACH(auto & handler, update.handlers)
+      BOOST_FOREACH (auto& handler, update.handlers)
       {
         // Find the handler from the current data
         auto it = itsSyncGroups.find(handler);
