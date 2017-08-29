@@ -89,6 +89,8 @@ RepoManager::RepoManager(const std::string& configfile)
       itsLatLonCache(500)  // TODO: hard coded 500 different grids
 
 {
+  boost::system::error_code ec;
+
   try
   {
     // This lock is unnecessary since it is not possible to access
@@ -101,7 +103,8 @@ RepoManager::RepoManager(const std::string& configfile)
     try
     {
       // Save the modification time of config to track config changes by other modules
-      std::time_t modtime = boost::filesystem::last_write_time(configfile);
+      // Ignoring errors for now, should be caught when reading the file
+      std::time_t modtime = boost::filesystem::last_write_time(configfile, ec);
       // There is a slight race condition here: time is recorded before the actual config is read
       // If config changes between these two calls, we actually have old timestamp
       // To minimize the effects, modification time is recorded before reading. May cause almost
@@ -145,12 +148,13 @@ RepoManager::RepoManager(const std::string& configfile)
     catch (libconfig::ParseException& e)
     {
       throw Spine::Exception(BCP,
-                             "Qengine configuration error '" + std::string(e.getError()) +
-                                 "' on line " + std::to_string(e.getLine()));
+                             "Qengine configuration " + configfile + " error '" +
+                                 std::string(e.getError()) + "' on line " +
+                                 std::to_string(e.getLine()));
     }
-    catch (libconfig::ConfigException&)
+    catch (libconfig::ConfigException& e)
     {
-      throw Spine::Exception(BCP, "Qengine configuration error");
+      throw Spine::Exception(BCP, configfile + ": " + std::strerror(ec.value()));
     }
   }
   catch (...)

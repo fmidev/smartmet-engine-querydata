@@ -37,7 +37,7 @@ using namespace SmartMet::Engine::Querydata;
 
 const string _configfile = "querydata.conf";
 
-const int timeout = 10;  // Timeout in seconds
+const int maxiter = 15;  // Max iterations of wait cycles
 
 void sighandler(int)
 {
@@ -103,9 +103,15 @@ class EngineW : public SmartMet::Engine::Querydata::Engine
   // Allow explicit initialization
   inline void initMe() { init(); }
 
+  // Expose some internal data
   inline std::time_t getConfigModTime()
   {
     return SmartMet::Engine::Querydata::Engine::getConfigModTime();
+  }
+
+  inline int getLastConfigErrno()
+  {
+    return SmartMet::Engine::Querydata::Engine::getLastConfigErrno();
   }
 };
 
@@ -194,7 +200,6 @@ static string generateConfigFile(std::vector<SmartMet::Engine::Querydata::Produc
 
 int main()
 {
-  std::shared_ptr<EngineW> engine;
   signal(SIGINT, &sighandler);
   signal(SIGQUIT, &sighandler);
   signal(SIGHUP, &sighandler);
@@ -215,27 +220,30 @@ int main()
     boost::atomic_store(&ptr2, ptr1);
     cout << boost::atomic_load(&ptr2)->what() << endl;
   }
-  cout << endl
-       << "\tThis program will monitor test querydata." << endl
-       << "\tYou can abort the program by pressing Ctrl-C." << endl
-       << endl;
+
+  EngineW* engine = nullptr;
 
   cout << "Testing non-existing config file ";
   try
   {
     cout << "... ";
-    engine = std::make_shared<EngineW>("/A file which surely does not exist");
+    // engine = std::make_shared<EngineW>("/A file which surely does not exist");
+    engine = new EngineW("/A file which surely does not exist");
     adderror("init should have failed with non-existing file");
     exit(1);
   }
   catch (std::exception& e)
   {
-    // FIXME: Just accept any error for now
-    //  if (std::strcmp(e.what(), "Qengine configuration error") != 0)
-    //    adderror((std::string) "non-existent config file error " + e.what());
-    engine.reset();
-    cout << "ok" << endl;
+    if (strstr(e.what(), "No such file or directory") == nullptr)
+    {
+      cout << "failed" << endl;
+      adderror((std::string) "non-existent file should have given ENOENT but was " + e.what());
+    }
+    else
+      cout << "done" << endl;
   }
+  delete engine;
+  engine = nullptr;
 
   // Generate a temporary config file to modify
   boost::filesystem::path configfile((boost::filesystem::path(__FILE__).filename()).string() +
@@ -249,17 +257,19 @@ int main()
     conff << generateConfigFile(configs) << endl;
     conff.flush();
 
-    cout << "Initializing engine" << endl;
+    cout << "Creating engine" << endl;
 
     // Initialize with config file
-    engine = std::make_shared<EngineW>(configfile.string());
+    //    engine = std::make_shared<EngineW>(configfile.string());
+    engine = new EngineW(configfile.string());
+    //_eng = EngineW(configfile.string());
 
     // Previous update time of config file
     std::time_t prevstamp = 0;
 
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 4; i++)
     {
-      alarm(timeout);
+      cout << endl;
       // Run iterations with the same file and test various things
       // 0: run tests and change file trivially so that real config will not change
       // 1: run tests and check that config has not changed. Change file more substantially.
@@ -268,14 +278,25 @@ int main()
 
       // Wait for config to reload
       std::time_t etime;
+      int c = 0;
+      int err = 0;
       do
       {
         etime = engine->getConfigModTime();
+        err = engine->getLastConfigErrno();
         cout << "// Test iteration " << i << ": prevstamp=" << prevstamp
-             << " configmodtime=" << etime << endl;
+             << " configmodtime=" << etime << " errno=" << err << " " << std::strerror(err) << endl;
         if (prevstamp > 0)
           this_thread::sleep_for(chrono::seconds(1));
-      } while (prevstamp >= etime);
+        c++;
+      } while (prevstamp >= etime && c <= maxiter &&
+               err != ENOENT);  //&& engine->isConfigFileOK() == true);
+                                /*      if (!engine->isConfigFileOK())
+                                      {
+                                        // Config file not ok i.e. lost or broken
+                                        // Wait a bit for it to settle, should still be same
+                                        this_thread::sleep_for(chrono::seconds(1));
+                                      } */
       prevstamp = engine->getConfigModTime();
 
       // Compare configurations
@@ -293,27 +314,47 @@ int main()
         if (engine->producers().size() != 0)
           adderror((std::string) "non-zero producer list before init (was " +
                    std::to_string(engine->producers().size()) + ")");
+        if (engine->getLastConfigErrno() != EINPROGRESS)
+        {
+          adderror(
+              (std::string) "before initialization error should be set to EINPROGRESS but is " +
+              std::to_string(engine->getLastConfigErrno()));
+        }
         cout << "Initializing engine ... ";
         engine->initMe();
-        cout << "ok" << endl;
+        cout << "done" << endl;
       }
 
+      cout << "Checking configuration read correctly ... ";
       // Check that the number of producers match
       if (engine->producers().size() != configs.size())
         adderror((std::string) "producer list size " + std::to_string(engine->producers().size()) +
                  " different than what was expected " + std::to_string(configs.size()));
 
       // Step 2 should have the extra config
-      if (i == 2)
+      if (i >= 2)
       {
         ProducerConfig test = engine->getProducerConfig(confX.producer);
 
         if (configToStr(test).length() < 1)
           adderror((std::string) "Producer config for " + confX.producer +
-                   " appears not loaded after mod");
+                   " appears not loaded corractly");
       }
 
+      // Step 3 should be missing the config and thus have flag set
+      if (i == 3)
+      {
+        if (engine->getLastConfigErrno() != ENOENT)
+          adderror((std::string) "Config file has been removed but status still showing it as ok");
+      }
+      else if (engine->getLastConfigErrno() != 0)
+      {
+        adderror((std::string) "Config reported error " +
+                 std::to_string(engine->getLastConfigErrno()) + " but should be ok ");
+      }
+      cout << "done" << endl;
       // The end part, modify file accordingly for next step
+      cout << "Config preparation for next iteration ... ";
       this_thread::sleep_for(
           chrono::seconds(1));  // Have to sleep before modification to get a new timestamp
       if (i == 0)
@@ -335,16 +376,9 @@ int main()
         conff.close();
         boost::filesystem::remove(configfile);
       }
+
+      cout << "done" << endl;
     }
-
-    /*    cout << "\tThere are " << timeout << " seconds before the program will" << endl
-             << "\texit automatically." << endl
-             << endl;
-
-        sleep(timeout);
-
-        cout << endl << "Ending the program after a " << timeout << " second timeout" << endl;
-        */
   }
   catch (libconfig::ParseException& e)
   {
@@ -363,13 +397,14 @@ int main()
 
   if (errors.size() > 0)
   {
-    cerr << errors.size() << " tests failed:" << endl;
+    cerr << endl << errors.size() << " tests failed:" << endl;
     for (string e : errors)
     {
       cerr << "  " << e << endl;
     }
     exit(errors.size());
   }
+  cout << endl << "All tests ok." << endl;
   exit(0);
   // return 0; // Currently this will segfault
 }

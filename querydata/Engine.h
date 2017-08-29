@@ -18,6 +18,7 @@
 #include <macgyver/Cache.h>
 #include <spine/SmartMetEngine.h>
 #include <string>
+#include <system_error>
 
 class NFmiPoint;
 
@@ -143,6 +144,8 @@ class Engine : public Spine::SmartMetEngine
   void shutdown();
   void shutdownRequestFlagSet();
   std::time_t getConfigModTime();
+  int lastConfigErrno;
+  int getLastConfigErrno();
 
  private:
   boost::thread configFileWatcher;  // A thread watching for config file changes
