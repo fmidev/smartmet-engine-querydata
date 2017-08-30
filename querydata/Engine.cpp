@@ -99,7 +99,7 @@ void Engine::configFileWatch()
       continue;
     }
 
-    std::time_t newfiletime = boost::filesystem::last_write_time(itsConfigFile);
+    std::time_t newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
 
     // Was the file modified?
     if (newfiletime != filetime)
@@ -108,28 +108,43 @@ void Engine::configFileWatch()
       // Go into cooling period of waiting a few seconds and checking again
       // This assures there are no half completed writes
       lastConfigErrno = EINPROGRESS;
-      while (newfiletime != filetime)
+
+      try
       {
-        std::cout << (std::string) "Querydata config " + itsConfigFile + " updated, rereading\n";
-        filetime = newfiletime;
-        boost::this_thread::sleep_for(boost::chrono::seconds(3));
-        newfiletime = boost::filesystem::last_write_time(itsConfigFile);
+        while (newfiletime != filetime)
+        {
+          std::cout << (std::string) "Querydata config " + itsConfigFile + " updated, rereading\n";
+          filetime = newfiletime;
+          boost::this_thread::sleep_for(boost::chrono::seconds(3));
+          newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
+        }
+
+        // Generate new repomanager according to new configs
+        boost::shared_ptr<RepoManager> newrepomanager =
+            boost::make_shared<RepoManager>(itsConfigFile);
+        newrepomanager->init();
+        // Wait until all initial data has been loaded
+        while (!newrepomanager->ready() && !itsShutdownRequested)
+        {
+          boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+        }
+
+        // Update current repomanager
+        boost::atomic_store(&itsRepoManager, newrepomanager);
+        std::cout << (std::string) "Querydata config " + itsConfigFile + " update done\n";
+        lastConfigErrno = 0;
+        // Before poll cycling again, wait to avoid constant reload if the file changes many times
+        boost::this_thread::sleep_for(boost::chrono::seconds(2));
+      }
+      catch (std::exception& e)
+      {
+        if (strstr(e.what(), "syntax error") != nullptr)
+          lastConfigErrno = ENOEXEC;
+        std::cerr << (std::string) "Error reading new config: " + e.what() + "\n";
       }
 
-      // Generate new repomanager according to new configs
-      auto newrepomanager = boost::make_shared<RepoManager>(itsConfigFile);
-      newrepomanager->init();
-      // Wait until all initial data has been loaded
-      while (!newrepomanager->ready() && !itsShutdownRequested)
-      {
-        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
-      }
-
-      // Before poll cycling again, wait to avoid constant reload if the file changes many times
-      lastConfigErrno = 0;
-      std::cout << (std::string) "Querydata config " + itsConfigFile + " update done\n";
-      boost::atomic_store(&itsRepoManager, newrepomanager);
-      boost::this_thread::sleep_for(boost::chrono::seconds(2));
+      filetime = newfiletime;  // Update time even if there is an error
+      // We don't want to reread a damaged file continuously
     }
   }
 }
@@ -652,7 +667,6 @@ const ProducerConfig& Engine::getProducerConfig(const std::string& producer) con
   try
   {
     auto repomanager = boost::atomic_load(&itsRepoManager);
-
     return repomanager->producerConfig(producer);
   }
   catch (...)
