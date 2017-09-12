@@ -9,6 +9,7 @@
 #include "RepoManager.h"
 #include "Repository.h"
 #include "Synchro.h"
+#include <newbase/NFmiLatLonArea.h>
 #include <spine/Exception.h>
 #include <exception>
 
@@ -605,6 +606,32 @@ NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
   }
 }
 
+NFmiDataMatrix<NFmiPoint> get_latlons(const Q& theQ)
+{
+  try
+  {
+    if (!theQ->isGrid())
+      throw Spine::Exception(BCP, "Trying to contour non-gridded data");
+
+    const auto& grid = theQ->grid();
+
+    const long unsigned int nx = grid.XNumber();
+    const long unsigned int ny = grid.YNumber();
+
+    NFmiDataMatrix<NFmiPoint> coords(nx, ny);
+
+    for (std::size_t j = 0; j < ny; j++)
+      for (std::size_t i = 0; i < nx; i++)
+        coords[i][j] = grid.GridToLatLon(i, j);
+
+    return coords;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Mark the given coordinate cell as bad
@@ -655,9 +682,13 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     // Create the coordinate transformation
 
     std::unique_ptr<OGRSpatialReference> src(new OGRSpatialReference);
-    OGRErr err = src->SetFromUserInput(theQ->area().WKT().c_str());
+
+    // The input data is here always newbase NFmiLatLon coordinates
+
+    NFmiLatLonArea tmp;
+    OGRErr err = src->SetFromUserInput(tmp.WKT().c_str());
     if (err != OGRERR_NONE)
-      throw Spine::Exception(BCP, "Unknown WKT in querydata: '" + theQ->area().WKT());
+      throw Spine::Exception(BCP, "Unable to set WKT: '" + tmp.WKT());
 
     // Clones the spatial reference object
     std::unique_ptr<OGRCoordinateTransformation> transformation(
@@ -683,6 +714,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
           x = kFloatMissing;
           y = kFloatMissing;
         }
+
         c[i][j] = NFmiPoint(x, y);
       }
 
@@ -725,7 +757,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 {
   try
   {
-    // Hash value of unprojected and projected coordinates
+    // Hash value of latlon coordinates and projected coordinates
     auto qhash = theQ->gridHashValue();
     auto projhash = qhash;
 
@@ -748,7 +780,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
     if (!cached_coords)
     {
       auto ftr =
-          boost::async([=] { return boost::make_shared<Coordinates>(get_world_xy(theQ)); }).share();
+          boost::async([=] { return boost::make_shared<Coordinates>(get_latlons(theQ)); }).share();
       itsCoordinateCache.insert(qhash, ftr);
       ftr.get();
       cached_coords = itsCoordinateCache.find(qhash);
