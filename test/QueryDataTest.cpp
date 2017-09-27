@@ -345,7 +345,6 @@ int main(int argc, char* argv[])
       }
       else
       {
-        // Phase 1: Modify/write config
         std::time_t prevstamp = 0;  // Timestamp of config file before changes
         int preverrno = 0;          // Error code before writing
         int err = 0;
@@ -546,6 +545,8 @@ int main(int argc, char* argv[])
   // Should we remove the config ???
   boost::filesystem::remove(configfile);
   cout << endl << "All tests ok." << endl;
-  exit(0);
-  // return 0; // Currently this will segfault
+  if (engine != nullptr)
+    delete engine;
+  // exit(0);
+  return 0;  // Currently this will segfault
 }
