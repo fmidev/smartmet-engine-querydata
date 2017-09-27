@@ -29,6 +29,15 @@ void sighandler(int)
   exit(0);
 }
 
+class EngineW : public SmartMet::Engine::Querydata::Engine
+{
+ public:
+  EngineW(const std::string& configfile) : SmartMet::Engine::Querydata::Engine(configfile) {}
+
+  // Allow explicit initialization
+  inline void initMe() { init(); }
+};
+
 int main()
 {
   try
@@ -39,22 +48,26 @@ int main()
     signal(SIGABRT, &sighandler);
     signal(SIGTERM, &sighandler);
 
-    cout << endl << "\tThere are " << timeout << " seconds before the program will" << endl
-         << "\texit automatically." << endl << endl;
+    cout << endl
+         << "\tThere are " << timeout << " seconds before the program will" << endl
+         << "\texit automatically." << endl
+         << endl;
 
     // We'll run the method in a thread. If the user does not interrupt
     // the program fast enough, we'll abort
 
-    SmartMet::Engine::Querydata::Engine engine(configfile);
-
+    EngineW engine(configfile);
+    engine.initMe();
     sleep(timeout);
 
     cout << endl << "Ending the program after a " << timeout << " second timeout" << endl;
+    engine.shutdownEngine();
   }
   catch (libconfig::ParseException& e)
   {
-    std::cerr << std::endl << "Parse error on line " << e.getLine() << " of '" << configfile
-              << "' : '" << e.getError() << "'" << std::endl;
+    std::cerr << std::endl
+              << "Parse error on line " << e.getLine() << " of '" << configfile << "' : '"
+              << e.getError() << "'" << std::endl;
     return 1;
   }
   catch (std::exception& e)
