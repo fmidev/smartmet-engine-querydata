@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 17.5.24
+Version: 17.9.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -14,23 +14,25 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 17.5.5
-BuildRequires: smartmet-library-newbase-devel >= 17.4.28
-BuildRequires: smartmet-library-macgyver-devel >= 17.4.19
+BuildRequires: smartmet-library-spine-devel >= 17.9.8
+BuildRequires: smartmet-library-newbase-devel >= 17.9.11
+BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
+BuildRequires: gdal-devel
+BuildRequires: bzip2-devel
 Requires: boost-filesystem
 Requires: boost-date-time
 Requires: boost-iostreams
 Requires: boost-regex
 Requires: boost-thread
 Requires: boost-system
-Requires: smartmet-library-newbase >= 17.4.28
-Requires: smartmet-library-macgyver >= 17.4.19
+Requires: smartmet-library-newbase >= 17.9.11
+Requires: smartmet-library-macgyver >= 17.8.28
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 17.5.5
+Requires: smartmet-library-spine >= 17.9.8
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -42,6 +44,7 @@ SmartMet querydata engine
 Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
+Requires: gdal-devel
 Obsoletes: smartmet-brainstorm-qengine-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -69,7 +72,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
-* Upcoming
+* Tue Sep 12 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.9.12-1.fmi
+- Changed implementation of coordinate caching to prefer native latlon calculations due to PROJ.4 issues
+
+* Sun Aug 27 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.8.28-1.fmi
+- Upgrade to boost 1.65
 - Use shared futures to cache coordinates and values to avoid duplicate work by simultaneous requests
 
 * Wed May 24 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.5.24-1.fmi
