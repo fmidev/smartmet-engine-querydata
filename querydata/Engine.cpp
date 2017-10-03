@@ -13,11 +13,11 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
-#include <chrono>
-#include <system_error>
 #include <newbase/NFmiLatLonArea.h>
 #include <spine/Exception.h>
+#include <chrono>
 #include <exception>
+#include <system_error>
 
 namespace SmartMet
 {
@@ -35,7 +35,8 @@ Engine::Engine(const std::string& configfile)
     : itsRepoManager(new RepoManager(configfile)),
       itsSynchro(),
       itsConfigFile(configfile),
-      itsActiveThreadCount(0)
+      itsActiveThreadCount(0),
+      lastConfigErrno(EINPROGRESS)
 {
   auto repomanager = boost::make_shared<RepoManager>(configfile);
   boost::atomic_store(&itsRepoManager, repomanager);
@@ -384,11 +385,11 @@ Producer Engine::find(const ProducerList& producerlist,
   }
 }
 
-// ----------------------------------------------------------------------
-/*!
- *\ brief Return available valid times for the latest model
- */
-// ----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  /*!
+   *\ brief Return available valid times for the latest model
+   */
+  // ----------------------------------------------------------------------
 
 #if 0
 	std::list<boost::posix_time::ptime>
@@ -647,12 +648,12 @@ void Engine::startSynchronize(Spine::Reactor* theReactor)
   }
 }
 
-// ----------------------------------------------------------------------
-/*!
- *\ brief Get data for given producer and optional origintime inside given
- *\		  validtime range
- */
-// ----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  /*!
+   *\ brief Get data for given producer and optional origintime inside given
+   *\		  validtime range
+   */
+  // ----------------------------------------------------------------------
 
 #if 0
 	SharedModelTimeList Engine::get(const Producer & producer,
@@ -965,7 +966,8 @@ ValuesPtr Engine::getValues(const Q& theQ,
                  auto tmp = boost::make_shared<Values>();
                  theQ->values(*tmp, theTime);
                  return tmp;
-               }).share();
+               })
+                   .share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);
