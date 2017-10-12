@@ -20,6 +20,8 @@ BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
+BuildRequires: gdal-devel
+BuildRequires: bzip2-devel
 Requires: boost-filesystem
 Requires: boost-date-time
 Requires: boost-iostreams
@@ -42,6 +44,7 @@ SmartMet querydata engine
 Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
+Requires: gdal-devel
 Obsoletes: smartmet-brainstorm-qengine-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
