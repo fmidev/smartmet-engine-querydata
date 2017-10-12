@@ -775,7 +775,9 @@ void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
 {
   try
   {
-    if (theCoord.X() == kFloatMissing || theCoord.Y() == kFloatMissing)
+    if (theCoord.X() == kFloatMissing || theCoord.Y() == kFloatMissing ||
+        std::isnan(theCoord.X()) || std::isnan(theCoord.Y()))
+
       return;
 
     if (theCoord.X() >= 0 && theCoord.X() < theCoords.NX() - 1 && theCoord.Y() >= 0 &&
@@ -783,7 +785,8 @@ void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
     {
       std::size_t i = static_cast<std::size_t>(theCoord.X());
       std::size_t j = static_cast<std::size_t>(theCoord.Y());
-      NFmiPoint badcoord(kFloatMissing, kFloatMissing);
+      NFmiPoint badcoord(std::numeric_limits<float>::quiet_NaN(),
+                         std::numeric_limits<float>::quiet_NaN());
       theCoords[i + 0][j + 0] = badcoord;
       theCoords[i + 1][j + 0] = badcoord;
       // Marking two vertices bad is enough to invalidate the cell
@@ -837,6 +840,8 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     auto nx = c.NX();
     auto ny = c.NY();
 
+    double nan = std::numeric_limits<double>::quiet_NaN();
+
     for (std::size_t j = 0; j < ny; j++)
       for (std::size_t i = 0; i < nx; i++)
       {
@@ -844,8 +849,8 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
         double y = c[i][j].Y();
         if (!transformation->Transform(1, &x, &y))
         {
-          x = kFloatMissing;
-          y = kFloatMissing;
+          x = nan;
+          y = nan;
         }
 
         c[i][j] = NFmiPoint(x, y);
@@ -867,7 +872,8 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
       auto southpole = grid.LatLonToGrid(0, -90);
       mark_cell_bad(c, southpole);
 
-      NFmiPoint badcoord(kFloatMissing, kFloatMissing);
+      NFmiPoint badcoord(std::numeric_limits<double>::quiet_NaN(),
+                         std::numeric_limits<double>::quiet_NaN());
       for (std::size_t j = 0; j < ny; j++)
         for (std::size_t i = 0; i + 1 < nx; i++)
         {
