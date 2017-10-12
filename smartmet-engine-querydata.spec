@@ -15,7 +15,7 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
 BuildRequires: smartmet-library-spine-devel >= 17.9.13
-BuildRequires: smartmet-library-newbase-devel >= 17.9.14
+BuildRequires: smartmet-library-newbase-devel >= 17.10.5
 BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -28,7 +28,7 @@ Requires: boost-iostreams
 Requires: boost-regex
 Requires: boost-thread
 Requires: boost-system
-Requires: smartmet-library-newbase >= 17.9.14
+Requires: smartmet-library-newbase >= 17.10.5
 Requires: smartmet-library-macgyver >= 17.8.28
 Requires: protobuf
 Requires: libconfig >= 1.4.9
