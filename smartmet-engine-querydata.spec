@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 17.9.12
+Version: 17.10.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -14,8 +14,8 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 17.9.8
-BuildRequires: smartmet-library-newbase-devel >= 17.9.11
+BuildRequires: smartmet-library-spine-devel >= 17.9.13
+BuildRequires: smartmet-library-newbase-devel >= 17.9.14
 BuildRequires: smartmet-library-macgyver-devel >= 17.8.28
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -26,11 +26,11 @@ Requires: boost-iostreams
 Requires: boost-regex
 Requires: boost-thread
 Requires: boost-system
-Requires: smartmet-library-newbase >= 17.9.11
+Requires: smartmet-library-newbase >= 17.9.14
 Requires: smartmet-library-macgyver >= 17.8.28
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 17.9.8
+Requires: smartmet-library-spine >= 17.9.13
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -69,6 +69,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Oct 12 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.10.12-1.fmi
+- Fixed engine initialization to finish even if all the directories are empty
+
+* Wed Sep 20 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.9.20-1.fmi
+- getWorldCoordinates now uses NaN instead of kFloatMissing
+
 * Tue Sep 12 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.9.12-1.fmi
 - Changed implementation of coordinate caching to prefer native latlon calculations due to PROJ.4 issues
 

@@ -32,10 +32,10 @@
 #include "Producer.h"
 #include "Repository.h"
 
-#include <spine/Exception.h>
-#include <spine/Convenience.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
+#include <spine/Convenience.h>
+#include <spine/Exception.h>
 
 #include <macgyver/AnsiEscapeCodes.h>
 #include <macgyver/StringConversion.h>
@@ -82,7 +82,6 @@ RepoManager::RepoManager(const std::string& configfile)
     : itsVerbose(false),
       itsMonitor(),
       itsThreadCount(0),
-      itsReady(false),
       itsMaxThreadCount(10),  // default if not configured
       itsShutdownRequested(false),
       itsLatLonCache(500)  // TODO: hard coded 500 different grids
@@ -340,7 +339,6 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     while (!ok && !itsShutdownRequested)
     {
       {
-        Spine::ReadLock lock(itsThreadCountMutex);
         if (itsThreadCount <= itsMaxThreadCount)
           ok = true;
       }
@@ -355,10 +353,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     // Note: We are really counting scheduled threads, not
     // ones which have actually started. Hence the counter
     // should be here and not in the load method.
-    {
-      Spine::WriteLock lock(itsThreadCountMutex);
-      ++itsThreadCount;
-    }
+    ++itsThreadCount;
 
 // Handle new or modified files
 
@@ -385,13 +380,8 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
 
 void RepoManager::load(Producer producer, Files files)
 {
-  // Just in case
-  if (files.empty())
-    return;
-
   if (itsShutdownRequested)
   {
-    Spine::WriteLock lock(itsThreadCountMutex);
     --itsThreadCount;
     return;
   }
@@ -456,13 +446,7 @@ void RepoManager::load(Producer producer, Files files)
     }
   }  // for all files
 
-  Spine::WriteLock lock(itsThreadCountMutex);
   --itsThreadCount;
-
-  // Set ready flag if the scan is complete. Only the 1st full scan changes the state.
-
-  if (itsThreadCount == 0 && itsMonitor.ready())
-    itsReady = true;
 }
 
 // ----------------------------------------------------------------------
@@ -473,7 +457,7 @@ void RepoManager::load(Producer producer, Files files)
 
 bool RepoManager::ready() const
 {
-  return itsReady;
+  return (itsThreadCount == 0 && itsMonitor.ready());
 }
 // ----------------------------------------------------------------------
 /*!
