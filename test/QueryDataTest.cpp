@@ -346,13 +346,11 @@ int main(int argc, char* argv[])
       else
       {
         std::time_t prevstamp = 0;  // Timestamp of config file before changes
-        int preverrno = 0;          // Error code before writing
         int err = 0;
 
         if (engine != nullptr)
         {
           prevstamp = engine->getConfigModTime();
-          preverrno = engine->getLastConfigErrno();
           err = engine->getLastConfigErrno();
         }
 
