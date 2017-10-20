@@ -9,9 +9,15 @@
 #include "RepoManager.h"
 #include "Repository.h"
 #include "Synchro.h"
+#include <boost/bind.hpp>
+#include <boost/make_shared.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
 #include <newbase/NFmiLatLonArea.h>
 #include <spine/Exception.h>
+#include <chrono>
 #include <exception>
+#include <system_error>
 
 namespace SmartMet
 {
@@ -29,8 +35,11 @@ Engine::Engine(const std::string& configfile)
     : itsRepoManager(new RepoManager(configfile)),
       itsSynchro(),
       itsConfigFile(configfile),
-      itsActiveThreadCount(0)
+      itsActiveThreadCount(0),
+      lastConfigErrno(EINPROGRESS)
 {
+  auto repomanager = boost::make_shared<RepoManager>(configfile);
+  boost::atomic_store(&itsRepoManager, repomanager);
 }
 
 // ----------------------------------------------------------------------
@@ -44,20 +53,114 @@ void Engine::init()
   {
     itsCoordinateCache.resize(100);
     itsValuesCache.resize(5000);
-
-    itsRepoManager->init();
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+    repomanager->init();
     itsSynchro.reset(new Synchronizer(this, itsConfigFile));
 
     // Wait until all initial data has been loaded
-    while (!itsRepoManager->ready() && !itsShutdownRequested)
+    while (!repomanager->ready() && !itsShutdownRequested)
     {
       boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
+
+    // We got this far, assume config file must be valid
+    lastConfigErrno = 0;
+
+    // Start watcher thread to watch for configuration changes
+    configFileWatcher = boost::thread(&Engine::configFileWatch, this);
   }
   catch (...)
   {
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Watch the config file to change
+ * Should be run in a separate thread
+ */
+// ----------------------------------------------------------------------
+void Engine::configFileWatch()
+{
+  boost::system::error_code ec;
+  std::time_t filetime = getConfigModTime();
+
+  while (itsShutdownRequested == false)
+  {
+    boost::this_thread::sleep_for(boost::chrono::seconds(1));
+
+    // If file was deleted, skip and go waiting until it is back
+    if (!boost::filesystem::exists(itsConfigFile, ec))
+    {
+      if (filetime > 0)
+      {
+        std::cout << "Querydata config " << itsConfigFile
+                  << " removed - current configuration kept until new file appears" << std::endl;
+        filetime = 0;
+        lastConfigErrno = ENOENT;
+      }
+      continue;
+    }
+
+    std::time_t newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
+
+    // Was the file modified?
+    if (newfiletime != filetime && itsShutdownRequested == false)
+    {
+      // File changed
+      // Go into cooling period of waiting a few seconds and checking again
+      // This assures there are no half completed writes
+      lastConfigErrno = EINPROGRESS;
+
+      try
+      {
+        while (newfiletime != filetime && itsShutdownRequested == false)
+        {
+          std::cout << (std::string) "Querydata config " + itsConfigFile + " updated, rereading\n";
+          filetime = newfiletime;
+          boost::this_thread::sleep_for(boost::chrono::seconds(3));
+          newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
+        }
+
+        if (itsShutdownRequested == false)
+        {
+          // Generate new repomanager according to new configs
+          boost::shared_ptr<RepoManager> newrepomanager =
+              boost::make_shared<RepoManager>(itsConfigFile);
+          newrepomanager->init();
+          // Wait until all initial data has been loaded
+          while (!newrepomanager->ready() && !itsShutdownRequested)
+          {
+            boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+          }
+
+          if (itsShutdownRequested == false)
+          {
+            // Update current repomanager
+            boost::atomic_store(&itsRepoManager, newrepomanager);
+            std::cout << (std::string) "Querydata config " + itsConfigFile + " update done\n";
+            lastConfigErrno = 0;
+            // Before poll cycling again, wait to avoid constant reload if the file changes many
+            // times
+            boost::this_thread::sleep_for(boost::chrono::seconds(2));
+          }
+        }
+      }
+      catch (std::exception& e)
+      {
+        if (strstr(e.what(), "syntax error") != nullptr)
+          lastConfigErrno = ENOEXEC;
+        std::cerr << (std::string) "Error reading new config: " + e.what() + "\n";
+      }
+
+      filetime = newfiletime;  // Update time even if there is an error
+      // We don't want to reread a damaged file continuously
+    }
+  }
+
+  // Exit on shutdown
+  lastConfigErrno = ESHUTDOWN;
 }
 
 // ----------------------------------------------------------------------
@@ -71,9 +174,10 @@ void Engine::shutdown()
   try
   {
     std::cout << "  -- Shutdown requested (qengine)\n";
+    auto repomanager = boost::atomic_load(&itsRepoManager);
 
-    if (itsRepoManager != NULL)
-      itsRepoManager->shutdown();
+    if (repomanager != NULL)
+      repomanager->shutdown();
 
     if (itsSynchro)
       itsSynchro->shutdown();
@@ -88,8 +192,10 @@ void Engine::shutdownRequestFlagSet()
 {
   try
   {
-    if (itsRepoManager != NULL)
-      itsRepoManager->shutdownRequestFlagSet();
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+
+    if (repomanager != NULL)
+      repomanager->shutdownRequestFlagSet();
 
     if (itsSynchro)
       itsSynchro->shutdownRequestFlagSet();
@@ -138,9 +244,10 @@ const ProducerList& Engine::producers() const
     // We didn't bother to add a producers() method for the Impl,
     // hence we take an explicit lock here instead of inside the Impl.
     // The other public methods call the Impl to do the job.
+    auto repomanager = boost::atomic_load(&itsRepoManager);
 
-    Spine::ReadLock lock(itsRepoManager->itsMutex);
-    return itsRepoManager->itsProducerList;
+    Spine::ReadLock lock(repomanager->itsMutex);
+    return repomanager->itsProducerList;
   }
   catch (...)
   {
@@ -158,8 +265,10 @@ OriginTimes Engine::origintimes(const Producer& producer) const
 {
   try
   {
-    Spine::ReadLock lock(itsRepoManager->itsMutex);
-    return itsRepoManager->itsRepo.originTimes(producer);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+    return repomanager->itsRepo.originTimes(producer);
   }
   catch (...)
   {
@@ -177,8 +286,10 @@ Q Engine::get(const Producer& producer) const
 {
   try
   {
-    Spine::ReadLock lock(itsRepoManager->itsMutex);
-    return itsRepoManager->itsRepo.get(producer);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+    return repomanager->itsRepo.get(producer);
   }
   catch (...)
   {
@@ -196,8 +307,10 @@ Q Engine::get(const Producer& producer, const boost::posix_time::ptime& originti
 {
   try
   {
-    Spine::ReadLock lock(itsRepoManager->itsMutex);
-    return itsRepoManager->itsRepo.get(producer, origintime);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+    return repomanager->itsRepo.get(producer, origintime);
   }
   catch (...)
   {
@@ -221,14 +334,16 @@ Producer Engine::find(double lon,
 {
   try
   {
-    Spine::ReadLock lock(itsRepoManager->itsMutex);
-    return itsRepoManager->itsRepo.find(itsRepoManager->itsProducerList,
-                                        itsRepoManager->itsProducerList,
-                                        lon,
-                                        lat,
-                                        maxdist,
-                                        usedatamaxdistance,
-                                        leveltype);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+    return repomanager->itsRepo.find(repomanager->itsProducerList,
+                                     repomanager->itsProducerList,
+                                     lon,
+                                     lat,
+                                     maxdist,
+                                     usedatamaxdistance,
+                                     leveltype);
   }
   catch (...)
   {
@@ -253,14 +368,16 @@ Producer Engine::find(const ProducerList& producerlist,
 {
   try
   {
-    Spine::ReadLock lock(itsRepoManager->itsMutex);
-    return itsRepoManager->itsRepo.find(producerlist,
-                                        itsRepoManager->itsProducerList,
-                                        longitude,
-                                        latitude,
-                                        maxdistance,
-                                        usedatamaxdistance,
-                                        leveltype);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+    return repomanager->itsRepo.find(producerlist,
+                                     repomanager->itsProducerList,
+                                     longitude,
+                                     latitude,
+                                     maxdistance,
+                                     usedatamaxdistance,
+                                     leveltype);
   }
   catch (...)
   {
@@ -268,18 +385,20 @@ Producer Engine::find(const ProducerList& producerlist,
   }
 }
 
-// ----------------------------------------------------------------------
-/*!
- *\ brief Return available valid times for the latest model
- */
-// ----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  /*!
+   *\ brief Return available valid times for the latest model
+   */
+  // ----------------------------------------------------------------------
 
 #if 0
 	std::list<boost::posix_time::ptime>
 	Engine::validtimes(const Producer & producer) const
 	{
-	  Spine::ReadLock lock(itsRepoManager->itsMutex);
-	  return itsRepoManager->validtimes(producer);
+	    auto repomanager=boost::atomic_load(&itsRepoManager);
+
+	  Spine::ReadLock lock(repomanager->itsMutex);
+	  return repomanager->validtimes(producer);
 	}
 #endif
 
@@ -294,9 +413,11 @@ Repository::ContentTable Engine::getEngineContents(const std::string& timeFormat
 {
   try
   {
-    Spine::ReadLock lock(itsRepoManager->itsMutex);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
 
-    return itsRepoManager->itsRepo.getRepoContents(timeFormat, projectionFormat);
+    Spine::ReadLock lock(repomanager->itsMutex);
+
+    return repomanager->itsRepo.getRepoContents(timeFormat, projectionFormat);
   }
   catch (...)
   {
@@ -342,9 +463,11 @@ std::list<MetaData> Engine::getEngineMetadata() const
 {
   try
   {
-    Spine::ReadLock lock(itsRepoManager->itsMutex);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
 
-    return itsRepoManager->itsRepo.getRepoMetadata();
+    Spine::ReadLock lock(repomanager->itsMutex);
+
+    return repomanager->itsRepo.getRepoMetadata();
   }
   catch (...)
   {
@@ -356,9 +479,11 @@ std::list<MetaData> Engine::getEngineMetadata(const MetaQueryOptions& theOptions
 {
   try
   {
-    Spine::ReadLock lock(itsRepoManager->itsMutex);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
 
-    return itsRepoManager->itsRepo.getRepoMetadata(theOptions);
+    Spine::ReadLock lock(repomanager->itsMutex);
+
+    return repomanager->itsRepo.getRepoMetadata(theOptions);
   }
   catch (...)
   {
@@ -374,11 +499,13 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup) 
 
     if (syncProducers)
     {
+      auto repomanager = boost::atomic_load(&itsRepoManager);
+
       std::list<MetaData> repocontent;
       {
-        Spine::ReadLock lock(itsRepoManager->itsMutex);
+        Spine::ReadLock lock(repomanager->itsMutex);
 
-        repocontent = itsRepoManager->itsRepo.getRepoMetadata();
+        repocontent = repomanager->itsRepo.getRepoMetadata();
       }
 
       if (repocontent.empty())
@@ -429,14 +556,15 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup,
   try
   {
     auto syncProducers = itsSynchro->getSynchedData(syncGroup);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
 
     if (syncProducers)
     {
       std::list<MetaData> repocontent;
       {
-        Spine::ReadLock lock(itsRepoManager->itsMutex);
+        Spine::ReadLock lock(repomanager->itsMutex);
 
-        repocontent = itsRepoManager->itsRepo.getRepoMetadata(options);
+        repocontent = repomanager->itsRepo.getRepoMetadata(options);
       }
 
       if (repocontent.empty())
@@ -484,9 +612,11 @@ Repository::MetaObject Engine::getSynchroInfos() const
 {
   try
   {
-    Spine::ReadLock lock(itsRepoManager->itsMutex);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
 
-    return itsRepoManager->itsRepo.getSynchroInfos();
+    Spine::ReadLock lock(repomanager->itsMutex);
+
+    return repomanager->itsRepo.getSynchroInfos();
   }
   catch (...)
   {
@@ -518,12 +648,12 @@ void Engine::startSynchronize(Spine::Reactor* theReactor)
   }
 }
 
-// ----------------------------------------------------------------------
-/*!
- *\ brief Get data for given producer and optional origintime inside given
- *\		  validtime range
- */
-// ----------------------------------------------------------------------
+  // ----------------------------------------------------------------------
+  /*!
+   *\ brief Get data for given producer and optional origintime inside given
+   *\		  validtime range
+   */
+  // ----------------------------------------------------------------------
 
 #if 0
 	SharedModelTimeList Engine::get(const Producer & producer,
@@ -533,8 +663,10 @@ void Engine::startSynchronize(Spine::Reactor* theReactor)
 									const OriginTime & origintime,
 									bool & timeinterpolation) const
 	{
-	  Spine::ReadLock lock(itsRepoManager->itsMutex);
-	  return itsRepoManager->itsRepo.get(producer,starttime,endtime,timestep,origintime,timeinterpolation);
+	    auto repomanager=boost::atomic_load(&itsRepoManager);
+
+	  Spine::ReadLock lock(repomanager->itsMutex);
+	  return repomanager->itsRepo.get(producer,starttime,endtime,timestep,origintime,timeinterpolation);
 	}
 #endif
 
@@ -548,7 +680,8 @@ const ProducerConfig& Engine::getProducerConfig(const std::string& producer) con
 {
   try
   {
-    return itsRepoManager->producerConfig(producer);
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+    return repomanager->producerConfig(producer);
   }
   catch (...)
   {
@@ -839,7 +972,8 @@ ValuesPtr Engine::getValues(const Q& theQ,
                  auto tmp = boost::make_shared<Values>();
                  theQ->values(*tmp, theTime);
                  return tmp;
-               }).share();
+               })
+                   .share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);
@@ -851,6 +985,17 @@ ValuesPtr Engine::getValues(const Q& theQ,
   {
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
+}
+
+std::time_t Engine::getConfigModTime()
+{
+  auto repomanager = boost::atomic_load(&itsRepoManager);
+  return repomanager->getConfigModTime();
+}
+
+int Engine::getLastConfigErrno()
+{
+  return lastConfigErrno;
 }
 
 }  // namespace QueryData

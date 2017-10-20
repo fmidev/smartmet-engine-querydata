@@ -45,6 +45,7 @@ ProducerConfig::ProducerConfig()
 
 ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Setting &setting)
 {
+  std::string name;
   try
   {
     if (!setting.isGroup())
@@ -58,7 +59,7 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
 
     for (int i = 0; i < setting.getLength(); ++i)
     {
-      std::string name = setting[i].getName();
+      name = setting[i].getName();
 
       if (name == "alias")
       {
@@ -136,7 +137,12 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    std::string nm("");
+    if (name.length() > 0)
+    {
+      nm = " element " + name;
+    }
+    throw Spine::Exception(BCP, "Operation failed for producer " + producer + nm, NULL);
   }
 }
 

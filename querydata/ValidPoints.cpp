@@ -67,7 +67,8 @@ ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo) : itsMask(qinfo.SizeLocations
 #endif
         }
       }
-    nextpoint:;
+    nextpoint:
+      ;
     }
   }
   catch (...)

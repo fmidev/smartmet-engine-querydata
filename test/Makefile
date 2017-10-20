@@ -11,7 +11,7 @@ EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
 DIFFICULTFLAGS = -Weffc++ -Wunreachable-code -Wredundant-decls
 
 CC = g++
-CFLAGS = -DUNIX -O0 -g $(MAINFLAGS)
+CFLAGS = -pipe -DUNIX -O0 -g $(MAINFLAGS)
 
 INCLUDES = \
 	-I ../querydata \
@@ -30,6 +30,7 @@ LIBS = \
 	-lboost_regex \
 	-lboost_iostreams \
 	-lboost_system \
+	-lboost_atomic \
 	-lbz2 -lz -lpthread -ldl
 
 all: $(PROG)

@@ -21,13 +21,22 @@ using namespace std;
 
 const string configfile = "querydata.conf";
 
-const int timeout = 5 ;
+const int timeout = 5;
 
 void sighandler(int)
 {
   cout << "exiting after signal catch" << endl;
   exit(0);
 }
+
+class EngineW : public SmartMet::Engine::Querydata::Engine
+{
+ public:
+  EngineW(const std::string& configfile) : SmartMet::Engine::Querydata::Engine(configfile) {}
+
+  // Allow explicit initialization
+  inline void initMe() { init(); }
+};
 
 int main()
 {
@@ -47,11 +56,12 @@ int main()
     // We'll run the method in a thread. If the user does not interrupt
     // the program fast enough, we'll abort
 
-    SmartMet::Engine::Querydata::Engine engine(configfile);
-
+    EngineW engine(configfile);
+    engine.initMe();
     sleep(timeout);
 
     cout << endl << "Ending the program after a " << timeout << " second timeout" << endl;
+    engine.shutdownEngine();
   }
   catch (libconfig::ParseException& e)
   {
@@ -66,9 +76,6 @@ int main()
     return 1;
   }
 
+  // This has to be return: doing exit will not actually segfault
   return 0;
 }
-
-
-
-
