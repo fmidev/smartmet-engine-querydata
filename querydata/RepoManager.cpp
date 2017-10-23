@@ -59,6 +59,66 @@ namespace Engine
 {
 namespace Querydata
 {
+namespace
+{
+// ----------------------------------------------------------------------
+/*!
+ * \brief Return a setting, which may have a host specific value
+ *
+ * Example:
+ *
+ *   verbose = false;
+ *
+ *   overrides:
+ *   (
+ *       {
+ *           name = ["host1","host2"];
+ *           verbose = true;
+ *       };
+ *       ...
+ *   )
+ */
+// ----------------------------------------------------------------------
+
+template <typename T>
+bool lookupHostSetting(const libconfig::Config& theConfig,
+                       T& theValue,
+                       const std::string& theVariable,
+                       const std::string& theHost)
+{
+  try
+  {
+    // scan for overrides
+    if (theConfig.exists("overrides"))
+    {
+      const libconfig::Setting& override = theConfig.lookup("overrides");
+      int count = override.getLength();
+      for (int i = 0; i < count; ++i)
+      {
+        const libconfig::Setting& trial_hosts = override[i]["name"];
+        int numhosts = trial_hosts.getLength();
+        for (int j = 0; j < numhosts; ++j)
+        {
+          std::string trial_host = trial_hosts[j];
+          // Does the start of the host name match and there is a value for the setting?
+          if (boost::algorithm::istarts_with(theHost, trial_host) &&
+              override[i].lookupValue(theVariable, theValue))
+            return true;
+        }
+      }
+    }
+
+    // use default setting instead
+    return theConfig.lookupValue(theVariable, theValue);
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Error trying to find setting value")
+        .addParameter("variable", theVariable);
+  }
+}
+}  // namespace
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Destructor
@@ -110,11 +170,12 @@ RepoManager::RepoManager(const std::string& configfile)
       // immediate reread if config file is changing rapidly
       itsConfig.readFile(configfile.c_str());
 
-      itsConfig.lookupValue("maxthreads", itsMaxThreadCount);
-
       // Options
 
-      itsConfig.lookupValue("verbose", itsVerbose);
+      const std::string& hostname = boost::asio::ip::host_name();
+
+      lookupHostSetting(itsConfig, itsMaxThreadCount, "maxthreads", hostname);
+      lookupHostSetting(itsConfig, itsVerbose, "verbose", hostname);
 
       // Phase 1: Establish producer setting
 

@@ -33,14 +33,12 @@ namespace Querydata
 // ----------------------------------------------------------------------
 
 Engine::Engine(const std::string& configfile)
-    : itsRepoManager(new RepoManager(configfile)),
+    : itsRepoManager(boost::make_shared<RepoManager>(configfile)),
       itsSynchro(),
       itsConfigFile(configfile),
       itsActiveThreadCount(0),
       lastConfigErrno(EINPROGRESS)
 {
-  auto repomanager = boost::make_shared<RepoManager>(configfile);
-  boost::atomic_store(&itsRepoManager, repomanager);
 }
 
 // ----------------------------------------------------------------------
