@@ -82,6 +82,9 @@ struct RepoManager
   std::time_t configModTime;  // Timestamp of configuration file loaded
   inline std::time_t getConfigModTime() { return configModTime; }
 
+  void setOldManager(boost::shared_ptr<RepoManager> oldmanager);
+  void removeOldManager();
+
  private:
   void load(Producer producer, Files files);
 
@@ -95,6 +98,7 @@ struct RepoManager
   using LatLonCache = Fmi::Cache::Cache<std::size_t, boost::shared_ptr<std::vector<NFmiPoint>>>;
 
   LatLonCache itsLatLonCache;
+  boost::shared_ptr<RepoManager> itsOldRepoManager;
 };
 
 }  // namespace Q

@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 17.10.20
+Version: 17.10.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -72,6 +72,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Oct 23 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.10.23-1.fmi
+- Speed up reload by using the data in the current repository if possible
+
 * Fri Oct 20 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.10.20-1.fmi
 - Automatic reload of the configuration file and the respective data if the file changes
 

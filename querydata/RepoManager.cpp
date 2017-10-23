@@ -205,6 +205,28 @@ void RepoManager::init()
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Set an old manager to be used during initialization
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::setOldManager(boost::shared_ptr<RepoManager> oldmanager)
+{
+  itsOldRepoManager = oldmanager;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Remove old manager from use once init is complete
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::removeOldManager()
+{
+  itsOldRepoManager.reset();
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Shutdown
  */
 // ----------------------------------------------------------------------
@@ -423,8 +445,20 @@ void RepoManager::load(Producer producer, Files files)
         std::cout << msg.str() << std::flush;
       }
 
-      SharedModel model = boost::make_shared<Model>(
-          filename, conf.producer, conf.leveltype, conf.isclimatology, conf.isfullgrid);
+      SharedModel model;
+
+      // Try using the old repo if it is available
+
+      if (itsOldRepoManager)
+      {
+        Spine::ReadLock lock(itsOldRepoManager->itsMutex);
+        model = itsOldRepoManager->itsRepo.getModel(producer, filename);
+      }
+
+      // Load directly if the old repo was not useful
+      if (!model)
+        model = boost::make_shared<Model>(
+            filename, conf.producer, conf.leveltype, conf.isclimatology, conf.isfullgrid);
 
       if (itsVerbose)
       {
@@ -439,7 +473,7 @@ void RepoManager::load(Producer producer, Files files)
       auto hash = model->gridHashValue();
       auto latlons = itsLatLonCache.find(hash);  // cached coordinates, if any
       if (!latlons)
-        itsLatLonCache.insert(hash, model->makeLatLonCache());  // calc latloncache and cache it
+        itsLatLonCache.insert(hash, model->makeLatLonCache());  // request latlons and cache them
       else
         model->setLatLonCache(*latlons);  // set model cache from our cache
 

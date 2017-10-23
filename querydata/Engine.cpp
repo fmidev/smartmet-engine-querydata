@@ -14,6 +14,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 #include <newbase/NFmiLatLonArea.h>
+#include <spine/Convenience.h>
 #include <spine/Exception.h>
 #include <chrono>
 #include <exception>
@@ -117,7 +118,8 @@ void Engine::configFileWatch()
       {
         while (newfiletime != filetime && itsShutdownRequested == false)
         {
-          std::cout << (std::string) "Querydata config " + itsConfigFile + " updated, rereading\n";
+          std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
+                           " updated, rereading\n";
           filetime = newfiletime;
           boost::this_thread::sleep_for(boost::chrono::seconds(3));
           newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
@@ -128,18 +130,26 @@ void Engine::configFileWatch()
           // Generate new repomanager according to new configs
           boost::shared_ptr<RepoManager> newrepomanager =
               boost::make_shared<RepoManager>(itsConfigFile);
+
+          // The old manager can be used to initialize common data faster
+          auto oldrepomanager = boost::atomic_load(&itsRepoManager);
+          newrepomanager->setOldManager(oldrepomanager);
           newrepomanager->init();
+
           // Wait until all initial data has been loaded
           while (!newrepomanager->ready() && !itsShutdownRequested)
           {
             boost::this_thread::sleep(boost::posix_time::milliseconds(100));
           }
 
+          newrepomanager->removeOldManager();
+
           if (itsShutdownRequested == false)
           {
             // Update current repomanager
             boost::atomic_store(&itsRepoManager, newrepomanager);
-            std::cout << (std::string) "Querydata config " + itsConfigFile + " update done\n";
+            std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
+                             " update done\n";
             lastConfigErrno = 0;
             // Before poll cycling again, wait to avoid constant reload if the file changes many
             // times
@@ -385,11 +395,11 @@ Producer Engine::find(const ProducerList& producerlist,
   }
 }
 
-  // ----------------------------------------------------------------------
-  /*!
-   *\ brief Return available valid times for the latest model
-   */
-  // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+/*!
+ *\ brief Return available valid times for the latest model
+ */
+// ----------------------------------------------------------------------
 
 #if 0
 	std::list<boost::posix_time::ptime>
@@ -648,12 +658,12 @@ void Engine::startSynchronize(Spine::Reactor* theReactor)
   }
 }
 
-  // ----------------------------------------------------------------------
-  /*!
-   *\ brief Get data for given producer and optional origintime inside given
-   *\		  validtime range
-   */
-  // ----------------------------------------------------------------------
+// ----------------------------------------------------------------------
+/*!
+ *\ brief Get data for given producer and optional origintime inside given
+ *\		  validtime range
+ */
+// ----------------------------------------------------------------------
 
 #if 0
 	SharedModelTimeList Engine::get(const Producer & producer,
@@ -972,8 +982,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
                  auto tmp = boost::make_shared<Values>();
                  theQ->values(*tmp, theTime);
                  return tmp;
-               })
-                   .share();
+               }).share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);

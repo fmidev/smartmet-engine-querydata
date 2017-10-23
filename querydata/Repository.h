@@ -6,11 +6,11 @@
 
 #pragma once
 
+#include "MetaData.h"
+#include "MetaQueryOptions.h"
 #include "Model.h"
 #include "OriginTime.h"
 #include "Producer.h"
-#include "MetaQueryOptions.h"
-#include "MetaData.h"
 #include "Q.h"
 
 #include <boost/date_time/posix_time/ptime.hpp>
@@ -69,6 +69,7 @@ class Repository
 
   MetaObject getSynchroInfos() const;
 
+  SharedModel getModel(const Producer& producer, const boost::filesystem::path& path) const;
   SharedModels getAllModels(const Producer& producer) const;
 
  private:
