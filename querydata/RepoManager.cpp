@@ -488,6 +488,21 @@ void RepoManager::load(Producer producer, Files files)
 
   const ProducerConfig& conf = producerConfig(producer);
 
+  // Try establishing old config
+  boost::optional<ProducerConfig> oldconf;
+  try
+  {
+    if (itsOldRepoManager)
+      oldconf = itsOldRepoManager->producerConfig(producer);
+  }
+  catch (...)
+  {
+  }
+
+  // Do not use old repo if configuration has changed
+
+  const bool try_old_repo = (oldconf && *oldconf == conf);
+
   unsigned int successful_loads = 0;
 
   for (const auto& filename : files)
@@ -499,29 +514,37 @@ void RepoManager::load(Producer producer, Files files)
     // files may be corrupt, hence we catch exceptions
     try
     {
-      if (itsVerbose)
-      {
-        std::ostringstream msg;
-        msg << Spine::log_time_str() << " QENGINE LOAD " << filename << std::endl;
-        std::cout << msg.str() << std::flush;
-      }
-
       SharedModel model;
 
       // Try using the old repo if it is available
 
-      if (itsOldRepoManager)
+      if (try_old_repo)
       {
         Spine::ReadLock lock(itsOldRepoManager->itsMutex);
-        model = itsOldRepoManager->itsRepo.getModel(producer, filename);
+
+        // Failure to get old data is not an error here
+        try
+        {
+          model = itsOldRepoManager->itsRepo.getModel(producer, filename);
+        }
+        catch (...)
+        {
+        }
       }
 
+      const bool load_new_data = !model;
+
       // Load directly if the old repo was not useful
-      if (!model)
+      if (load_new_data)
+      {
+        if (itsVerbose)
+          std::cout << Spine::log_time_str() + " QENGINE LOAD " + filename.string() << std::endl;
+
         model = boost::make_shared<Model>(
             filename, conf.producer, conf.leveltype, conf.isclimatology, conf.isfullgrid);
+      }
 
-      if (itsVerbose)
+      if (itsVerbose && load_new_data)
       {
         std::ostringstream msg;
         msg << Spine::log_time_str() << " QENGINE ORIGINTIME for " << filename << " is "
