@@ -14,13 +14,13 @@
 #include "Producer.h"
 #include "ValidTimeList.h"
 
-#include <spine/Thread.h>
-#include <newbase/NFmiFastQueryInfo.h>
-#include <boost/filesystem/path.hpp>
 #include <boost/date_time/posix_time/ptime.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
+#include <newbase/NFmiFastQueryInfo.h>
+#include <spine/Thread.h>
 #include <list>
 
 class NFmiPoint;
@@ -43,7 +43,9 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
         const Producer& producer,
         const std::string& levelname,
         bool climatology,
-        bool full);
+        bool full,
+        unsigned int update_interval,
+        unsigned int minimum_expiration_time);
 
   Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
 
@@ -51,6 +53,7 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
 
   const boost::posix_time::ptime& originTime() const;
   const boost::posix_time::ptime& modificationTime() const;
+  boost::posix_time::ptime expirationTime() const;
 
   boost::shared_ptr<ValidTimeList> validTimes() const;
 
@@ -84,6 +87,8 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   boost::posix_time::ptime itsModificationTime;
   Producer itsProducer;
   std::string itsLevelName;
+  unsigned int itsUpdateInterval;
+  unsigned int itsMinimumExpirationTime;
   bool itsClimatology;
   bool itsFullGrid;
 
@@ -111,7 +116,7 @@ inline std::size_t hash_value(const SharedModel& theModel)
   return hash_value(*theModel);
 }
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

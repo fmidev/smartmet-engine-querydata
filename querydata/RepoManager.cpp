@@ -452,7 +452,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     // should be here and not in the load method.
     ++itsThreadCount;
 
-// Handle new or modified files
+    // Handle new or modified files
 
 #if 0
 	std::cerr << ANSI_FG_GREEN << "Threads: " << itsThreadCount
@@ -540,8 +540,13 @@ void RepoManager::load(Producer producer, Files files)
         if (itsVerbose)
           std::cout << Spine::log_time_str() + " QENGINE LOAD " + filename.string() << std::endl;
 
-        model = boost::make_shared<Model>(
-            filename, conf.producer, conf.leveltype, conf.isclimatology, conf.isfullgrid);
+        model = boost::make_shared<Model>(filename,
+                                          conf.producer,
+                                          conf.leveltype,
+                                          conf.isclimatology,
+                                          conf.isfullgrid,
+                                          conf.update_interval,
+                                          conf.minimum_expires);
       }
 
       if (itsVerbose && load_new_data)
@@ -620,7 +625,7 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
   }
 }
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

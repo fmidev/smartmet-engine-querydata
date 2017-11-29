@@ -40,6 +40,8 @@ typedef std::list<std::string> ProducerList;
  *         leveltype               = "surface";
  *         refresh_interval_secs   = 60;
  *         number_to_keep          = 1;
+ *         update_interval         = "PT1H";
+ *         minimum_expires         = "PT5M";
  * };
  * \endcode
  */
@@ -47,7 +49,7 @@ typedef std::list<std::string> ProducerList;
 
 struct ProducerConfig
 {
-  ProducerConfig();
+  ProducerConfig() = default;
 
   // from the configfile:
 
@@ -55,21 +57,24 @@ struct ProducerConfig
   std::set<std::string> aliases;
   boost::filesystem::path directory;
   boost::regex pattern;
-  std::string type;
-  std::string leveltype;
-  unsigned int refresh_interval_secs;
-  unsigned int number_to_keep;
-  double maxdistance;
-  bool ismultifile;
-  bool isforecast;
-  bool isclimatology;
-  bool isfullgrid;
+  std::string type = "grid";
+  std::string leveltype = "surface";
+  unsigned int refresh_interval_secs = 60;
+  unsigned int number_to_keep = 1;
+  unsigned int update_interval = 3600;
+  unsigned int minimum_expires = 600;
+  double maxdistance = -1;
+  bool ismultifile = false;
+  bool isforecast = true;
+  bool isclimatology = false;
+  bool isfullgrid = true;
 
   inline bool operator==(const ProducerConfig& c)
   {
     return c.isfullgrid == isfullgrid && c.isclimatology == isclimatology &&
            c.isforecast == isforecast && c.ismultifile == ismultifile &&
            c.maxdistance == maxdistance && c.number_to_keep == number_to_keep &&
+           c.update_interval == update_interval && c.minimum_expires == minimum_expires &&
            c.refresh_interval_secs == refresh_interval_secs && c.leveltype == leveltype &&
            c.type == type && c.pattern == pattern && c.directory == directory &&
            c.aliases == aliases && c.producer == producer;
@@ -83,7 +88,7 @@ struct ProducerConfig
 
 ProducerConfig parse_producerinfo(const Producer& producer, const libconfig::Setting& setting);
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

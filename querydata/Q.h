@@ -41,7 +41,7 @@ namespace Fmi
 {
 class DEM;
 class LandCover;
-}
+}  // namespace Fmi
 
 namespace SmartMet
 {
@@ -76,6 +76,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   const NFmiMetTime& originTime() const;
   boost::posix_time::ptime modificationTime() const;
+  boost::posix_time::ptime expirationTime() const;
   double infoVersion() const;
 
   void resetTime();
@@ -156,14 +157,14 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                   NFmiDataMatrix<float>(),  // DEM values for landscaping
               const NFmiDataMatrix<bool>& theWaterFlags =
                   NFmiDataMatrix<bool>()  // Water flags for landscaping
-              );
+  );
   void values(NFmiDataMatrix<float>& theMatrix,
               const NFmiMetTime& theInterpolatedTime,
               const NFmiDataMatrix<float>& theDEMValues =
                   NFmiDataMatrix<float>(),  // DEM values for landscaping
               const NFmiDataMatrix<bool>& theWaterFlags =
                   NFmiDataMatrix<bool>()  // Water flags for landscaping
-              );
+  );
   void values(const NFmiDataMatrix<NFmiPoint>& theLatlonMatrix,
               NFmiDataMatrix<float>& theValues,
               const NFmiMetTime& theTime,
@@ -300,6 +301,6 @@ inline std::size_t hash_value(const Q& theQ)
   return hash_value(*theQ);
 }
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet

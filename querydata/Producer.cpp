@@ -1,6 +1,7 @@
 // ======================================================================
 
 #include "Producer.h"
+#include <macgyver/TimeParser.h>
 #include <spine/Exception.h>
 #include <stdexcept>
 
@@ -10,33 +11,6 @@ namespace Engine
 {
 namespace Querydata
 {
-const int default_refresh_interval_secs = 60;
-const int default_number_to_keep = 1;
-const double default_maxdistance = -1;  // disabled
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Default constructor for ProducerConfig
- */
-// ----------------------------------------------------------------------
-
-ProducerConfig::ProducerConfig()
-    : producer(),
-      aliases(),
-      directory(),
-      pattern(),
-      type("grid"),
-      leveltype("surface"),
-      refresh_interval_secs(default_refresh_interval_secs),
-      number_to_keep(default_number_to_keep),
-      maxdistance(default_maxdistance),
-      ismultifile(false),
-      isforecast(true),
-      isclimatology(false),
-      isfullgrid(true)
-{
-}
-
 // ----------------------------------------------------------------------
 /*!
  * \brief Extract producer settings from configuration file
@@ -96,6 +70,12 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
       else if (name == "number_to_keep")
         pinfo.number_to_keep = setting[i];
 
+      else if (name == "update_interval")
+        pinfo.update_interval = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
+
+      else if (name == "minimum_expires")
+        pinfo.minimum_expires = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
+
       else if (name == "maxdistance")
         pinfo.maxdistance = setting[i];
 
@@ -133,6 +113,10 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
       throw Spine::Exception(
           BCP, "Maximum search radius for producer " + producer + " must be < 10000 km");
 
+    if (pinfo.update_interval < 60)
+      throw Spine::Exception(BCP,
+                             "Minimum update interval for producer " + producer + " is 60 seconds");
+
     return pinfo;
   }
   catch (...)
@@ -142,11 +126,11 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
     {
       nm = " element " + name;
     }
-    throw Spine::Exception(BCP, "Operation failed for producer " + producer + nm, NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed for producer " + producer + nm);
   }
 }
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

@@ -6,13 +6,13 @@
 
 #include "Model.h"
 #include "ValidPoints.h"
-#include <spine/Hash.h>
-#include <spine/Exception.h>
+#include <boost/filesystem/operations.hpp>
+#include <boost/functional/hash.hpp>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiGeoTools.h>
 #include <newbase/NFmiQueryData.h>
-#include <boost/filesystem/operations.hpp>
-#include <boost/functional/hash.hpp>
+#include <spine/Exception.h>
+#include <spine/Hash.h>
 
 namespace SmartMet
 {
@@ -35,11 +35,15 @@ Model::Model(const boost::filesystem::path& filename,
              const Producer& producer,
              const std::string& levelname,
              bool climatology,
-             bool full)
+             bool full,
+             unsigned int update_interval,
+             unsigned int minimum_expiration_time)
     : itsOriginTime(),
       itsPath(filename),
       itsProducer(producer),
       itsLevelName(levelname),
+      itsUpdateInterval(update_interval),
+      itsMinimumExpirationTime(minimum_expiration_time),
       itsClimatology(climatology),
       itsFullGrid(full),
       itsQueryData(new NFmiQueryData(filename.string())),
@@ -181,6 +185,30 @@ const boost::posix_time::ptime& Model::originTime() const
 const boost::posix_time::ptime& Model::modificationTime() const
 {
   return itsModificationTime;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Estimated expiration time for products generated from this data
+ */
+// ----------------------------------------------------------------------
+
+boost::posix_time::ptime Model::expirationTime() const
+{
+  // Expected time for the next model
+  auto t1 = itsModificationTime + boost::posix_time::seconds(itsUpdateInterval);
+
+  // Minimum expiration time from wall clock
+  auto t2 = boost::posix_time::second_clock::universal_time() +
+            boost::posix_time::seconds(itsMinimumExpirationTime);
+
+  // Choose the later one. t1 dominates until the next model is overdue, in
+  // which case we start waiting for it in smaller minimum expiration time
+  // intervals. If the next model is early, too bad. Someone is bound to
+  // make a fresh load of the data though, in which case the backend
+  // will generate a new product and the frontend cache will be updated.
+
+  return std::max(t1, t2);
 }
 
 // ----------------------------------------------------------------------
@@ -421,7 +449,7 @@ std::size_t hash_value(const Model& theModel)
   return theModel.itsHashValue;
 }
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

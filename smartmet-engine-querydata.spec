@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 17.10.24
+Version: 17.11.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -72,6 +72,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Nov 28 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.11.28-1.fmi
+- Added estimates for model expiration times
+
 * Tue Oct 24 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.10.24-1.fmi
 - Reduce verbose printing when using an older repo to reload querydata
 - Detect changes to model settings during reload

@@ -89,7 +89,7 @@ const char *LevelName(FmiLevelType theLevel)
     throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
-}
+}  // namespace
 
 namespace SmartMet
 {
@@ -188,7 +188,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
 
     // Establish hash value
     itsHashValue = 0;
-    BOOST_FOREACH(const auto & model, itsModels)
+    BOOST_FOREACH (const auto &model, itsModels)
     {
       boost::hash_combine(itsHashValue, model);
     }
@@ -198,11 +198,11 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
     for (std::size_t i = 0; i < itsModels.size(); i++)
     {
       const auto &validtimes = itsModels[i]->validTimes();
-      BOOST_FOREACH(const auto & t, *validtimes)
-      uniquetimes.insert(t);
+      BOOST_FOREACH (const auto &t, *validtimes)
+        uniquetimes.insert(t);
     }
-    BOOST_FOREACH(const auto & t, uniquetimes)
-    itsValidTimes->push_back(t);
+    BOOST_FOREACH (const auto &t, uniquetimes)
+      itsValidTimes->push_back(t);
   }
   catch (...)
   {
@@ -390,6 +390,7 @@ const NFmiMetTime &QImpl::originTime() const
     throw Spine::Exception(BCP, "Operation failed!", NULL);
   }
 }
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Return modification time of the model
@@ -403,9 +404,30 @@ boost::posix_time::ptime QImpl::modificationTime() const
     auto t = itsModels[0]->modificationTime();
 
     for (std::size_t i = 1; i < itsModels.size(); i++)
-    {
       t = std::max(t, itsModels[i]->modificationTime());
-    }
+
+    return t;
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Return estimated expiration time of the model
+ */
+// ----------------------------------------------------------------------
+
+boost::posix_time::ptime QImpl::expirationTime() const
+{
+  try
+  {
+    auto t = itsModels[0]->expirationTime();
+
+    for (std::size_t i = 1; i < itsModels.size(); i++)
+      t = std::max(t, itsModels[i]->expirationTime());
 
     return t;
   }
@@ -1300,7 +1322,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
                                                                // empty matrix by default)
                    const NFmiDataMatrix<bool> &theWaterFlags   // Water flags for landscaping (an
                                                                // empty matrix by default)
-                   )
+)
 {
   try
   {
@@ -1327,7 +1349,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
                                                                // empty matrix by default)
                    const NFmiDataMatrix<bool> &theWaterFlags   // Water flags for landscaping (an
                                                                // empty matrix by default)
-                   )
+)
 {
   try
   {
@@ -1557,8 +1579,22 @@ ts::Value WindCompass16(QImpl &q,
 {
   try
   {
-    static const char *names[] = {"N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE",
-                                  "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"};
+    static const char *names[] = {"N",
+                                  "NNE",
+                                  "NE",
+                                  "ENE",
+                                  "E",
+                                  "ESE",
+                                  "SE",
+                                  "SSE",
+                                  "S",
+                                  "SSW",
+                                  "SW",
+                                  "WSW",
+                                  "W",
+                                  "WNW",
+                                  "NW",
+                                  "NNW"};
 
     if (!q.param(kFmiWindDirection))
       return Spine::TimeSeries::None();
@@ -3472,7 +3508,7 @@ ts::TimeSeriesPtr QImpl::values(ParameterOptions &param,
   {
     ts::TimeSeriesPtr ret(new ts::TimeSeries);
 
-    BOOST_FOREACH(const boost::local_time::local_date_time & ldt, tlist)
+    BOOST_FOREACH (const boost::local_time::local_date_time &ldt, tlist)
     {
       ret->push_back(ts::TimedValue(ldt, value(param, ldt)));
     }
@@ -3492,7 +3528,7 @@ ts::TimeSeriesPtr QImpl::valuesAtPressure(ParameterOptions &param,
   {
     ts::TimeSeriesPtr ret(new ts::TimeSeries);
 
-    BOOST_FOREACH(const boost::local_time::local_date_time & ldt, tlist)
+    BOOST_FOREACH (const boost::local_time::local_date_time &ldt, tlist)
     {
       ret->push_back(ts::TimedValue(ldt, valueAtPressure(param, ldt, pressure)));
     }
@@ -3512,7 +3548,7 @@ ts::TimeSeriesPtr QImpl::valuesAtHeight(ParameterOptions &param,
   {
     ts::TimeSeriesPtr ret(new ts::TimeSeries);
 
-    BOOST_FOREACH(const boost::local_time::local_date_time & ldt, tlist)
+    BOOST_FOREACH (const boost::local_time::local_date_time &ldt, tlist)
     {
       ret->push_back(ts::TimedValue(ldt, valueAtHeight(param, ldt, height)));
     }
@@ -3705,7 +3741,7 @@ ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
   {
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
-    BOOST_FOREACH(const Spine::LocationPtr & loc, llist)
+    BOOST_FOREACH (const Spine::LocationPtr &loc, llist)
     {
       ParameterOptions paramOptions(param.par,
                                     param.producer,
@@ -3745,7 +3781,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
   {
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
-    BOOST_FOREACH(const Spine::LocationPtr & loc, llist)
+    BOOST_FOREACH (const Spine::LocationPtr &loc, llist)
     {
       ParameterOptions paramOptions(param.par,
                                     param.producer,
@@ -3784,7 +3820,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(ParameterOptions &param,
   {
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
-    BOOST_FOREACH(const Spine::LocationPtr & loc, llist)
+    BOOST_FOREACH (const Spine::LocationPtr &loc, llist)
     {
       ParameterOptions paramOptions(param.par,
                                     param.producer,
@@ -4213,6 +4249,6 @@ std::size_t hash_value(const QImpl &theQ)
   }
 }
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
