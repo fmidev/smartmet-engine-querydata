@@ -408,8 +408,9 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
       {
         removals.push_back(file_status.first);
       }
-      else if (file_status.second == Fmi::DirectoryMonitor::CREATE ||
-               file_status.second == Fmi::DirectoryMonitor::MODIFY)
+
+      if (file_status.second == Fmi::DirectoryMonitor::CREATE ||
+          file_status.second == Fmi::DirectoryMonitor::MODIFY)
       {
         additions.push_back(file_status.first);
       }
