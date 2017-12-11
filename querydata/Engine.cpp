@@ -13,6 +13,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
+#include <gis/OGR.h>
 #include <newbase/NFmiLatLonArea.h>
 #include <spine/Convenience.h>
 #include <spine/Exception.h>
@@ -917,10 +918,33 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
         return cached_coords->get();
     }
 
-    // Now we need either the original coordinates as is or need to project them
+    // Return original world XY directly with get_world_xy if spatial
+    // references match This is absolutely necessary to avoid gaps in
+    // WMS tiles since with proj(invproj(p)) may differ significantly
+    // from p outside the valid area of the projection.
+
+    if (theSR != nullptr)
+    {
+      auto datawkt = theQ->info()->Area()->WKT();
+      auto reqwkt = Fmi::OGR::exportToWkt(*theSR);
+
+      if (datawkt == reqwkt)
+      {
+        auto ftr = boost::async([=] { return boost::make_shared<Coordinates>(get_world_xy(theQ)); })
+                       .share();
+        itsCoordinateCache.insert(projhash, ftr);
+        return ftr.get();
+      }
+    }
+
+    // Now we need either the latlon coordinates as is or need to project them. It would
+    // also be possible to request native world XY coordinates and project from them
+    // directly to the requested CRS. In general it is safe to assume the original
+    // coordinates will be projected to latlons before being converted to the target
+    // spatial reference, hence caching the intermediate latlon values should in general
+    // be result in twice as fast conversions.
 
     auto cached_coords = itsCoordinateCache.find(qhash);
-
     if (cached_coords && theSR == nullptr)
       return cached_coords->get();
 
@@ -980,7 +1004,8 @@ ValuesPtr Engine::getValues(const Q& theQ,
                  auto tmp = boost::make_shared<Values>();
                  theQ->values(*tmp, theTime);
                  return tmp;
-               }).share();
+               })
+                   .share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);
@@ -1005,7 +1030,7 @@ int Engine::getLastConfigErrno()
   return lastConfigErrno;
 }
 
-}  // namespace QueryData
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 
