@@ -50,6 +50,8 @@ class Repository
 
   OriginTimes originTimes(const Producer& producer) const;
 
+  bool hasProducer(const Producer& producer) const;
+  
   // Must not use aliases for these!
   Q get(const Producer& producer) const;
   Q get(const Producer& producer, const OriginTime& origintime) const;

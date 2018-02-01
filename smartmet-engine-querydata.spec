@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 17.12.11
+Version: 18.2.1
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -72,6 +72,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Feb  1 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.1-1.fmi
+- Added Engine::hasProducer to test whether the producer name is valid
+
 * Mon Dec 11 2017 Mika Heiskanen <mika.heiskanen@fmi.fi> - 17.12.11-1.fmi
 - Return native world XY coodinates if spatial references match to avoid PROJ.4 inaccuracies
 

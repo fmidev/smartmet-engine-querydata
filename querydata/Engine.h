@@ -83,6 +83,8 @@ class Engine : public Spine::SmartMetEngine
   const ProducerList& producers() const;                    // available producers
   OriginTimes origintimes(const Producer& producer) const;  // available origintimes
 
+  bool hasProducer(const Producer& producer) const;
+
   CacheReportingStruct getCacheSizes() const;
 
   // select producer which has relevant data for the coordinate

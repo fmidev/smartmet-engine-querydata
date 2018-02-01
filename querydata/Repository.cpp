@@ -151,6 +151,25 @@ OriginTimes Repository::originTimes(const Producer& producer) const
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Test if the producer name is known as done in get()
+ */
+// ----------------------------------------------------------------------
+
+bool Repository::hasProducer(const Producer& producer) const
+{
+  try
+  {
+    ProducerConfigs::const_iterator prod_config = itsProducerConfigs.find(producer);
+    return (prod_config != itsProducerConfigs.end());
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Get newest data for the given producer
  */
 // ----------------------------------------------------------------------

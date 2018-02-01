@@ -266,6 +266,27 @@ const ProducerList& Engine::producers() const
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Test if the given producer is defined
+ */
+// ----------------------------------------------------------------------
+
+bool Engine::hasProducer(const Producer& producer) const
+{
+  try
+  {
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+   
+    Spine::ReadLock lock(repomanager->itsMutex);
+    return repomanager->itsRepo.hasProducer(producer);
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Get list of available origintimes for a producer
  */
 // ----------------------------------------------------------------------
@@ -296,7 +317,7 @@ Q Engine::get(const Producer& producer) const
   try
   {
     auto repomanager = boost::atomic_load(&itsRepoManager);
-
+   
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsRepo.get(producer);
   }
@@ -446,6 +467,13 @@ boost::posix_time::time_period Engine::getProducerTimePeriod(const Producer& pro
 {
   try
   {
+    // Handle unknown producers such as observations quickly without exceptions
+    if (!hasProducer(producer))
+    {
+      return boost::posix_time::time_period(
+          boost::posix_time::ptime(), boost::posix_time::hours(0));  // is_null will return true
+    }
+
     try
     {
       auto q = get(producer);
