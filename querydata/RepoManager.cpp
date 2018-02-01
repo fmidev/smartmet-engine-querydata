@@ -219,7 +219,7 @@ RepoManager::RepoManager(const std::string& configfile)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -260,7 +260,7 @@ void RepoManager::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -309,7 +309,7 @@ void RepoManager::shutdown()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -340,7 +340,7 @@ Fmi::DirectoryMonitor::Watcher RepoManager::id(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -366,7 +366,7 @@ void RepoManager::error(Fmi::DirectoryMonitor::Watcher /* id */,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -463,7 +463,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -578,7 +578,7 @@ void RepoManager::load(Producer producer, Files files)
     }
     catch (...)
     {
-      Spine::Exception exception(BCP, "QEngine failed to load the file!", NULL);
+      Spine::Exception exception(BCP, "QEngine failed to load the file!", nullptr);
       exception.addParameter("File", filename.c_str());
       std::cerr << exception.getStackTrace();
     }
@@ -622,7 +622,7 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

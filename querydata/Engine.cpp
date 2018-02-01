@@ -71,7 +71,7 @@ void Engine::init()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -185,7 +185,7 @@ void Engine::shutdown()
     std::cout << "  -- Shutdown requested (qengine)\n";
     auto repomanager = boost::atomic_load(&itsRepoManager);
 
-    if (repomanager != NULL)
+    if (repomanager != nullptr)
       repomanager->shutdown();
 
     if (itsSynchro)
@@ -193,7 +193,7 @@ void Engine::shutdown()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -203,7 +203,7 @@ void Engine::shutdownRequestFlagSet()
   {
     auto repomanager = boost::atomic_load(&itsRepoManager);
 
-    if (repomanager != NULL)
+    if (repomanager != nullptr)
       repomanager->shutdownRequestFlagSet();
 
     if (itsSynchro)
@@ -211,7 +211,7 @@ void Engine::shutdownRequestFlagSet()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -236,7 +236,7 @@ CacheReportingStruct Engine::getCacheSizes() const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -260,7 +260,7 @@ const ProducerList& Engine::producers() const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -302,7 +302,7 @@ OriginTimes Engine::origintimes(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -323,7 +323,7 @@ Q Engine::get(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -344,7 +344,7 @@ Q Engine::get(const Producer& producer, const boost::posix_time::ptime& originti
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -377,7 +377,7 @@ Producer Engine::find(double lon,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -411,7 +411,7 @@ Producer Engine::find(const ProducerList& producerlist,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -451,7 +451,7 @@ Repository::ContentTable Engine::getEngineContents(const std::string& timeFormat
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -492,7 +492,7 @@ boost::posix_time::time_period Engine::getProducerTimePeriod(const Producer& pro
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -508,7 +508,7 @@ std::list<MetaData> Engine::getEngineMetadata() const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -524,7 +524,7 @@ std::list<MetaData> Engine::getEngineMetadata(const MetaQueryOptions& theOptions
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -583,7 +583,7 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup) 
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -641,7 +641,7 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -657,7 +657,7 @@ Repository::MetaObject Engine::getSynchroInfos() const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -669,7 +669,7 @@ boost::optional<ProducerMap> Engine::getSyncProducers(const std::string& syncGro
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -681,7 +681,7 @@ void Engine::startSynchronize(Spine::Reactor* theReactor)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -722,7 +722,7 @@ const ProducerConfig& Engine::getProducerConfig(const std::string& producer) con
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -739,7 +739,7 @@ std::size_t hash_value(const OGRSpatialReference& theSR)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -772,7 +772,7 @@ NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -798,7 +798,7 @@ NFmiDataMatrix<NFmiPoint> get_latlons(const Q& theQ)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -833,7 +833,7 @@ void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -925,7 +925,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1001,7 +1001,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1043,7 +1043,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

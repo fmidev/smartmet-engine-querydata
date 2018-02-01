@@ -52,7 +52,7 @@ void Repository::add(const ProducerConfig& config)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -115,7 +115,7 @@ void Repository::add(const Producer& producer, SharedModel model)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -145,7 +145,7 @@ OriginTimes Repository::originTimes(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -216,7 +216,7 @@ Q Repository::get(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -282,7 +282,7 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -332,7 +332,7 @@ Q Repository::getAll(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -374,7 +374,7 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -415,7 +415,7 @@ void Repository::resize(const Producer& producer, std::size_t limit)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -439,7 +439,7 @@ bool leveltype_ok(const std::string& modeltype, const std::string& wantedtype)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -474,7 +474,7 @@ bool Repository::contains(const Repository::SharedModels& models,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -545,7 +545,7 @@ Producer Repository::find(const ProducerList& producerlist,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -618,7 +618,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
 
         // Get projection string
         std::string projectionText;
-        if (qi->Area() == NULL)
+        if (qi->Area() == nullptr)
         {
           projectionText = "nan";
         }
@@ -705,7 +705,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -773,7 +773,7 @@ std::list<MetaData> Repository::getRepoMetadata(const MetaQueryOptions& theOptio
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -800,7 +800,7 @@ std::list<MetaData> Repository::getRepoMetadata() const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -832,7 +832,7 @@ Repository::MetaObject Repository::getSynchroInfos() const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -859,7 +859,7 @@ SharedModel Repository::getModel(const Producer& producer,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -876,7 +876,7 @@ Repository::SharedModels Repository::getAllModels(const Producer& producer) cons
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

@@ -64,7 +64,7 @@ void dumpProducerMap(const SmartMet::Engine::Querydata::ProducerMap& map)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -81,7 +81,7 @@ void printList(const T& theList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -98,7 +98,7 @@ std::string makeRandomString(unsigned int length)
     static std::string& charset =
         *new std::string("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
     static int setSize = boost::numeric_cast<int>(charset.size());
-    static boost::random::mt19937 generator(boost::numeric_cast<unsigned int>(std::time(NULL)));
+    static boost::random::mt19937 generator(boost::numeric_cast<unsigned int>(std::time(nullptr)));
     static boost::random::uniform_int_distribution<> dist(0, setSize);
 
     std::string result;
@@ -113,7 +113,7 @@ std::string makeRandomString(unsigned int length)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception(BCP, "Operation failed!", NULL);
+    throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 }  // namespace anonymous
@@ -134,7 +134,7 @@ Synchronizer::Synchronizer(SmartMet::Engine::Querydata::Engine* itsParent,
       itsSocket(itsIoService),
       itsRemoteEnd(),
       itsTimer(itsIoService),
-      itsReactor(NULL),
+      itsReactor(nullptr),
       hasLaunched(false),
       isLaunchable(true)
 
@@ -170,7 +170,7 @@ Synchronizer::Synchronizer(SmartMet::Engine::Querydata::Engine* itsParent,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -184,7 +184,7 @@ Synchronizer::~Synchronizer()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -218,7 +218,7 @@ void Synchronizer::launch(Spine::Reactor* theReactor)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -237,7 +237,7 @@ void Synchronizer::shutdown()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -249,7 +249,7 @@ void Synchronizer::shutdownRequestFlagSet()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -277,7 +277,7 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& han
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -310,7 +310,7 @@ boost::optional<std::vector<bp::ptime> > Synchronizer::getSynchedData(const std:
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -356,7 +356,7 @@ void Synchronizer::send_broadcast()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -442,7 +442,7 @@ void Synchronizer::update_consensus()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -465,7 +465,7 @@ void Synchronizer::fire_timer(const boost::system::error_code& err)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -491,7 +491,7 @@ void Synchronizer::start_receive()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -525,7 +525,7 @@ void Synchronizer::handle_receive(const boost::system::error_code& err,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -572,7 +572,7 @@ void Synchronizer::process_message(const QueryDataMessage& incomingMessage)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -638,7 +638,7 @@ void SyncGroup::update(const ProducerMap& theUpdate)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -661,7 +661,7 @@ bool SynchronizerConfig::parse()
     }
     catch (...)
     {
-      Spine::Exception exception(BCP, "Operation failed!", NULL);
+      Spine::Exception exception(BCP, "Operation failed!", nullptr);
       itsFailedReason = exception.what();
       return false;
     }
@@ -674,7 +674,7 @@ bool SynchronizerConfig::parse()
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

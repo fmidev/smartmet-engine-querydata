@@ -102,7 +102,7 @@ Model::Model(const boost::filesystem::path& filename,
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -161,7 +161,7 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -346,7 +346,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -388,7 +388,7 @@ SharedInfo Model::info() const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -401,7 +401,7 @@ void Model::release(boost::shared_ptr<NFmiFastQueryInfo> theInfo) const
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
