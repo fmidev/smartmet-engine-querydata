@@ -28,6 +28,7 @@
 #include <boost/date_time/time_facet.hpp>
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/optional.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
@@ -2258,6 +2259,500 @@ ts::Value WeatherText(QImpl &q,
   }
 }
 
+// ----------------------------------------------------------------------
+/*!
+ * \brief Calculate the smart weather symbol if possible
+ */
+// ----------------------------------------------------------------------
+
+boost::optional<int> calc_symbol_number(QImpl &q,
+                                        const NFmiPoint &latlon,
+                                        const boost::local_time::local_date_time &ldt)
+{
+  const float thunder_limit1 = 30;
+  // const float thunder_limit2 = 60;
+
+  const float rain_limit1 = 0.025;
+  // const float rain_limit2 = 0.04;
+  const float rain_limit3 = 0.4;
+  const float rain_limit4 = 1.5;
+  // const float rain_limit5 = 2;
+  const float rain_limit6 = 4;
+  // const float rain_limit7 = 7;
+
+  // const int cloud_limit1 = 7;
+  const int cloud_limit2 = 20;
+  const int cloud_limit3 = 33;
+  // const int cloud_limit4 = 46;
+  // const int cloud_limit5 = 59;
+  const int cloud_limit6 = 72;
+  // const int cloud_limit7 = 85;
+  const int cloud_limit8 = 93;
+
+  try
+  {
+    // Cloudiness is almost always needed
+
+    if (!q.param(kFmiTotalCloudCover))
+      return {};
+
+    const auto n = q.interpolate(latlon, ldt, maxgap);
+
+    if (n == kFloatMissing)
+      return {};
+
+    // The first parameter we need always is POT. We allow it to be missing though.
+
+    if (q.param(kFmiProbabilityThunderstorm))
+    {
+      const auto thunder = q.interpolate(latlon, ldt, maxgap);
+
+      if (thunder >= thunder_limit1 && thunder != kFloatMissing)
+      {
+        int nclass = (n < cloud_limit6 ? 0 : (n < cloud_limit8 ? 1 : 2));
+        return 71 + 3 * nclass;  // 71,74,77
+      }
+    }
+
+    // No thunder (or not available). Then we always need precipitation rate
+
+    if (!q.param(kFmiPrecipitation1h))
+      return {};
+
+    const auto rain = q.interpolate(latlon, ldt, maxgap);
+
+    if (rain == kFloatMissing)
+      return {};
+
+    if (rain < rain_limit1)
+    {
+      // No precipitation. Now we need only fog/cloudiness
+
+      if (q.param(kFmiFogIntensity))
+      {
+        const auto fog = q.interpolate(latlon, ldt, maxgap);
+        if (fog > 0 && fog != kFloatMissing)
+          return 9;  // fog
+      }
+
+      // no rain, no fog (or not available), only cloudiness
+      if (n < cloud_limit2)
+        return 1;  // clear
+      if (n < cloud_limit3)
+        return 2;  // mostly clear
+      if (n < cloud_limit6)
+        return 4;  // partly cloudy
+      if (n < cloud_limit8)
+        return 6;  // mostly cloudy
+      return 7;    // overcast
+    }
+
+    // Since we have precipitation, we always need precipitation form
+    int rform = kFloatMissing;
+    if (q.param(kFmiPotentialPrecipitationForm))
+      rform = q.interpolate(latlon, ldt, maxgap);
+    else if (q.param(kFmiPrecipitationForm))
+      rform = q.interpolate(latlon, ldt, maxgap);
+
+    if (rform == kFloatMissing)
+      return {};
+
+    if (rform == 0)  // drizzle
+      return 11;
+
+    if (rform == 4)  // freezing drizzle
+      return 14;
+
+    if (rform == 5)  // freezing rain
+      return 17;
+
+    if (rform == 7 || rform == 8)  // snow or ice particles
+      return 57;                   // convert to plain snowfall + cloudy
+
+    // only water, sleet and snow left. Cloudiness limits
+    // are the same for them, precipitation limits are not.
+
+    int nclass = (n < cloud_limit6 ? 0 : (n < cloud_limit8 ? 1 : 2));
+
+    if (rform == 6)  // hail
+      return 61 + 3 * nclass;
+
+    if (rform == 1)  // water
+    {
+      // Now we need precipitation type too
+      int rtype = 1;  // large scale by default
+      if (q.param(kFmiPotentialPrecipitationType))
+        rtype = q.interpolate(latlon, ldt, maxgap);
+
+      if (rtype == 2)            // convective
+        return 21 + 3 * nclass;  // 21, 24, 27 for showers
+
+      // rtype=1:large scale precipitation (or rtype is missing)
+      int rclass = (rain < rain_limit3 ? 0 : (rain < rain_limit6 ? 1 : 2));
+      return 31 + 3 * nclass + rclass;  // 31-39 for precipitation
+    }
+
+    // rform=2:sleet and rform=3:snow map to 41-49 and 51-59 respectively
+
+    int rclass = (rain < rain_limit3 ? 0 : (rain < rain_limit4 ? 1 : 2));
+    return (10 * rform + 21 + 3 * nclass + rclass);
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Symbol = simplified SmartSymbol
+ */
+// ----------------------------------------------------------------------
+
+ts::Value SymbolNumber(QImpl &q,
+                       const Spine::Location &loc,
+                       const boost::local_time::local_date_time &ldt)
+{
+  try
+  {
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+
+    auto symbol = calc_symbol_number(q, latlon, ldt);
+
+    if (!symbol)
+      return Spine::TimeSeries::None();
+
+    // Add day/night information
+    Fmi::Astronomy::solar_position_t sp =
+        Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+
+    if (sp.dark())
+      return 100 + *symbol;
+    return *symbol;
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Symbol text
+ */
+// ----------------------------------------------------------------------
+
+ts::Value SymbolText(QImpl &q,
+                     const Spine::Location &loc,
+                     const boost::local_time::local_date_time &ldt,
+                     const std::string &lang)
+{
+  try
+  {
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+
+    auto symbol = calc_symbol_number(q, latlon, ldt);
+
+    if (!symbol)
+      return Spine::TimeSeries::None();
+
+    if (lang == "en")
+    {
+      switch (*symbol)
+      {
+        case 1:
+          return "clear";
+        case 2:
+          return "mostly clear";
+        case 4:
+          return "partly cloudy";
+        case 6:
+          return "mostly cloudy";
+        case 7:
+          return "overcast";
+        case 9:
+          return "fog";
+        case 71:
+          return "isolated thundershowers";
+        case 74:
+          return "scattered thundershowers";
+        case 77:
+          return "thundershowers";
+        case 21:
+          return "isolated showers";
+        case 24:
+          return "scattered showers";
+        case 27:
+          return "showers";
+        case 11:
+          return "drizzle";
+        case 14:
+          return "freezing drizzle";
+        case 17:
+          return "freezing rain";
+        case 31:
+          return "periods of light rain";
+        case 34:
+          return "periods of light rain";
+        case 37:
+          return "light rain";
+        case 32:
+          return "periods of moderate rain";
+        case 35:
+          return "periods of moderate rain";
+        case 38:
+          return "moderate rain";
+        case 33:
+          return "periods of heavy rain";
+        case 36:
+          return "periods of heavy rain";
+        case 39:
+          return "heavy rain";
+        case 41:
+          return "isolated light sleet showers";
+        case 44:
+          return "scattered light sleet showers";
+        case 47:
+          return "light sleet";
+        case 42:
+          return "isolated moderate sleet showers";
+        case 45:
+          return "scattered moderate sleet showers";
+        case 48:
+          return "moderate sleet";
+        case 43:
+          return "isolated heavy sleet showers";
+        case 46:
+          return "scattered heavy sleet showers";
+        case 49:
+          return "heavy sleet";
+        case 51:
+          return "isolated light snow showers";
+        case 54:
+          return "scattered light snow showers";
+        case 57:
+          return "light snowfall";
+        case 52:
+          return "isolated moderate snow showers";
+        case 55:
+          return "scattered moderate snow showers";
+        case 58:
+          return "moderate snowfall";
+        case 53:
+          return "isolated heavy snow showers";
+        case 56:
+          return "scattered heavy snow showers";
+        case 59:
+          return "heavy snowfall";
+        case 61:
+          return "isolated hail showers";
+        case 64:
+          return "scattered hail showers";
+        case 67:
+          return "hail showers";
+      }
+    }
+    else if (lang == "sv")
+    {
+      // From http://sv.ilmatieteenlaitos.fi/vadersymbolerna
+      switch (*symbol)
+      {
+        case 1:
+          return "klart";
+        case 2:
+          return "mest klart";
+        case 4:
+          return "halvklart";
+        case 6:
+          return "molnight";
+        case 7:
+          return "mulet";
+        case 9:
+          return "dimma";
+        case 71:
+          return "enstaka åskskurar";
+        case 74:
+          return "lokalt åskskurar";
+        case 77:
+          return "åskskurar";
+        case 21:
+          return "enstaka regnskurar";
+        case 24:
+          return "lokalt regnskurar";
+        case 27:
+          return "regnskurar";
+        case 11:
+          return "duggregn";
+        case 14:
+          return "underkylt duggregn";
+        case 17:
+          return "underkylt regn";
+        case 31:
+          return "tidvis lätt regn";
+        case 34:
+          return "tidvis lätt regn";
+        case 37:
+          return "lätt regn";
+        case 32:
+          return "tidvis måttligt regn";
+        case 35:
+          return "tidvis måttligt regn";
+        case 38:
+          return "måttligt regn";
+        case 33:
+          return "tidvis kraftigt regn";
+        case 36:
+          return "tidvis kraftigt regn";
+        case 39:
+          return "kraftigt regn";
+        case 41:
+          return "tidvis lätta byar ov snöblandat regn";
+        case 44:
+          return "tidvis lätta byar avd snäblandat regn";
+        case 47:
+          return "lätt snöblandat regn";
+        case 42:
+          return "tidvis måttliga byar av snöblandat regn";
+        case 45:
+          return "tidvis måttliga byar av snöblandat regn";
+        case 48:
+          return "måttligt snöblandat regn";
+        case 43:
+          return "tidvis kraftiga byar av snöblandat regn";
+        case 46:
+          return "tidvis kraftiga byar av snöblandat regn";
+        case 49:
+          return "kraftigt snöblandat regn";
+        case 51:
+          return "tidvis lätta snöbyar";
+        case 54:
+          return "tidvis lätta snöbyar";
+        case 57:
+          return "tidvis lätt snöfall";
+        case 52:
+          return "tidvis måttliga snöbyar";
+        case 55:
+          return "tidvis måttliga snöbyar";
+        case 58:
+          return "måttligt snöfall";
+        case 53:
+          return "tidvis ymniga snöbyar";
+        case 56:
+          return "tidvis ymniga snöbyar";
+        case 59:
+          return "ymnigt snöfall";
+        case 61:
+          return "enstaka hagelskurar";
+        case 64:
+          return "lokalt hagelskurar";
+        case 67:
+          return "hagelskurar";
+      }
+    }
+    else
+    {
+      switch (*symbol)
+      {
+        case 1:
+          return "selkeää";
+        case 2:
+          return "enimmäkseen selkeää";
+        case 4:
+          return "puolipilvistä";
+        case 6:
+          return "enimmäkseen pilvistä";
+        case 7:
+          return "pilvistä";
+        case 9:
+          return "sumua";
+        case 71:
+          return "yksittäisiä ukkoskuuroja";
+        case 74:
+          return "paikoin ukkoskuuroja";
+        case 77:
+          return "ukkoskuuroja";
+        case 21:
+          return "yksittäisiä sadekuuroja";
+        case 24:
+          return "paikoin sadekuuroja";
+        case 27:
+          return "sadekuuroja";
+        case 11:
+          return "tihkusadetta";
+        case 14:
+          return "jäätävää tihkua";
+        case 17:
+          return "jäätävää sadetta";
+        case 31:
+          return "ajoittain heikkoa vesisadetta";
+        case 34:
+          return "ajoittain heikkoa vesisadetta";
+        case 37:
+          return "heikkoa vesisadetta";
+        case 32:
+          return "ajoittain kohtalaista vesisadetta";
+        case 35:
+          return "ajoittain kohtalaista vesisadetta";
+        case 38:
+          return "kohtalaista vesisadetta";
+        case 33:
+          return "ajoittain voimakasta vesisadetta";
+        case 36:
+          return "ajoittain voimakasta vesisadetta";
+        case 39:
+          return "voimakasta vesisadetta";
+        case 41:
+          return "ajoittain heikkoja räntäkuuroja";
+        case 44:
+          return "ajoittain heikkoja räntäkuuroja";
+        case 47:
+          return "heikkoa räntäsadetta";
+        case 42:
+          return "ajoittain kohtalaisia räntäkuuroja";
+        case 45:
+          return "ajoittain kohtalaisia räntäkuuroja";
+        case 48:
+          return "kohtalaista räntäsadetta";
+        case 43:
+          return "ajoittain voimakkaita räntäkuuroja";
+        case 46:
+          return "ajoittain voimakkaita räntäkuuroja";
+        case 49:
+          return "voimakasta räntäsadetta";
+        case 51:
+          return "ajoittain heikkoja lumikuuroja";
+        case 54:
+          return "ajoittain heikkoja lumikuuroja";
+        case 57:
+          return "heikkoa lumisadetta";
+        case 52:
+          return "ajoittain kohtalaisia lumikuuroja";
+        case 55:
+          return "ajoittain kohtalaisia lumikuuroja";
+        case 58:
+          return "kohtalaista lumisadetta";
+        case 53:
+          return "ajoittain sakeita lumikuuroja";
+        case 56:
+          return "ajoittain sakeita lumikuuroja";
+        case 59:
+          return "runsasta lumisadetta";
+        case 61:
+          return "yksittäisiä raekuuroja";
+        case 64:
+          return "paikoin raekuuroja";
+        case 67:
+          return "raekuuroja";
+      }
+    }
+    throw Spine::Exception(BCP, "Unknown symbol value : " + Fmi::to_string(*symbol));
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
 // ======================================================================
 
 ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_date_time &ldt)
@@ -2364,6 +2859,12 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
 
         else if (pname == "weathersymbol")
           retval = WeatherSymbol(*this, loc, ldt);
+
+        else if (pname == "symbol")
+          retval = SymbolNumber(*this, loc, ldt);
+
+        else if (pname == "symboltext")
+          retval = SymbolText(*this, loc, ldt, opt.language);
 
         else if (pname == "snow1hlower")
           retval = Snow1hLower(*this, loc, ldt);

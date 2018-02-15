@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.2.9
+Version: 18.2.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -72,6 +72,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Feb 15 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.15-1.fmi
+- Added parameter 'symbol', an improved weather symbol
+- Added parameter 'symboltext'
+
+* Wed Feb 14 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.14-1.fmi
+- Beta version: added parameter 'symbol'
+
 * Fri Feb  9 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.9-1.fmi
 - Repackaged since base class SmartMetEngine size changed
 
