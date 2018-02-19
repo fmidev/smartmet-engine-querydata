@@ -405,6 +405,18 @@ boost::shared_ptr<std::vector<NFmiPoint>> Model::makeLatLonCache()
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Uncache related data
+ */
+// ----------------------------------------------------------------------
+
+void Model::uncache() const
+{
+  if (itsValidPoints)
+    itsValidPoints->uncache();
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Return an unique hash for the object
  */
 // ----------------------------------------------------------------------

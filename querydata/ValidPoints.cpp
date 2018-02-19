@@ -23,11 +23,11 @@ namespace Querydata
 {
 // ----------------------------------------------------------------------
 /*!
- * \brief The destructor cleans up the cached points
+ * \brief Clean up the cached points
  */
 // ----------------------------------------------------------------------
 
-ValidPoints::~ValidPoints()
+void ValidPoints::uncache() const
 {
   if (itsCacheFile.empty())
     return;

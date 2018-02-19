@@ -29,9 +29,10 @@ namespace Querydata
 class ValidPoints
 {
  public:
-  ~ValidPoints();
   ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, std::size_t hash);
   bool isvalid(unsigned long index) const;
+
+  void uncache() const;
 
  private:
   ValidPoints();

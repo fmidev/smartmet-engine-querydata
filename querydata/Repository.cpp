@@ -35,9 +35,7 @@ namespace Querydata
  */
 // ----------------------------------------------------------------------
 
-Repository::Repository() : itsProducers()
-{
-}
+Repository::Repository() : itsProducers() {}
 // ----------------------------------------------------------------------
 /*!
  * \brief Add a new producer configuration
@@ -410,7 +408,8 @@ void Repository::resize(const Producer& producer, std::size_t limit)
                 << models.begin()->second.path() << std::endl;
 #endif
       // the oldest file is the one first sorted by origintime
-      models.erase(models.begin());
+      models.begin()->second->uncache();  // uncache validpoints
+      models.erase(models.begin());       // and erase the model
     }
   }
   catch (...)
@@ -880,7 +879,7 @@ Repository::SharedModels Repository::getAllModels(const Producer& producer) cons
   }
 }
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

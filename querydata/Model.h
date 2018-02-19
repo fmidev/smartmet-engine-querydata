@@ -71,6 +71,8 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   void setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache);
   boost::shared_ptr<std::vector<NFmiPoint>> makeLatLonCache();
 
+  void uncache() const;
+
  private:
   Model();
   Model(const Model& theModel);
