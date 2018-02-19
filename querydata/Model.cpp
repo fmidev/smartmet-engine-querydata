@@ -11,6 +11,7 @@
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiGeoTools.h>
 #include <newbase/NFmiQueryData.h>
+#include <spine/Convenience.h>
 #include <spine/Exception.h>
 #include <spine/Hash.h>
 
@@ -32,6 +33,7 @@ namespace Querydata
 // ----------------------------------------------------------------------
 
 Model::Model(const boost::filesystem::path& filename,
+             const std::string& validpointscachedir,
              const Producer& producer,
              const std::string& levelname,
              bool climatology,
@@ -64,6 +66,12 @@ Model::Model(const boost::filesystem::path& filename,
     itsModificationTime =
         boost::posix_time::from_time_t(boost::filesystem::last_write_time(filename));
 
+    // Unique hash value for this model
+
+    itsHashValue = 0;
+    boost::hash_combine(itsHashValue, itsPath);
+    boost::hash_combine(itsHashValue, itsModificationTime);
+
     // We need an info object to intialize some data members
 
     boost::shared_ptr<NFmiFastQueryInfo> qinfo =
@@ -73,32 +81,22 @@ Model::Model(const boost::filesystem::path& filename,
 
     itsQueryInfoPool.push_front(qinfo);
 
-    // Rereference for some extra speed
-
-    auto& qi = *qinfo;
-
     // This may be slow for huge data with missing values,
     // hence we configure separately whether this initialization
     // needs to be done or not. findvalidpoint acts accordingly.
 
     if (!itsFullGrid)
-      itsValidPoints.reset(new ValidPoints(qi));
+      itsValidPoints.reset(new ValidPoints(*qinfo, validpointscachedir, itsHashValue));
 
     // Requesting the valid times repeatedly is slow if we have to do
     // a time conversion to ptime every time - hence we optimize
 
     auto& vt = *itsValidTimeList;
-    for (qi.ResetTime(); qi.NextTime();)
+    for (qinfo->ResetTime(); qinfo->NextTime();)
     {
-      const NFmiMetTime& t = qi.ValidTime();
+      const NFmiMetTime& t = qinfo->ValidTime();
       vt.push_back(t);
     }
-
-    // Unique hash value for this model
-
-    itsHashValue = 0;
-    boost::hash_combine(itsHashValue, itsPath);
-    boost::hash_combine(itsHashValue, itsModificationTime);
   }
   catch (...)
   {
@@ -120,49 +118,16 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
       itsModificationTime(theModel.itsModificationTime),
       itsProducer(theModel.itsProducer),
       itsLevelName(theModel.itsLevelName),
+      itsUpdateInterval(theModel.itsUpdateInterval),
+      itsMinimumExpirationTime(theModel.itsMinimumExpirationTime),
       itsClimatology(theModel.itsClimatology),
-      itsFullGrid(true)  // we assume nearest valid point data is never needed for filtered data
-      ,
+      itsFullGrid(theModel.itsFullGrid),
       itsQueryData(theData),
-      itsValidPoints(),
-      itsValidTimeList(new ValidTimeList()),
+      itsValidPoints(theModel.itsValidPoints),
+      itsValidTimeList(theModel.itsValidTimeList),
       itsQueryInfoPoolMutex(),
       itsQueryInfoPool()
 {
-  try
-  {
-    // We need an info object to intialize some data members
-
-    boost::shared_ptr<NFmiFastQueryInfo> qinfo =
-        boost::make_shared<NFmiFastQueryInfo>(itsQueryData.get());
-
-    // Might as well pool it for subsequent use
-
-    itsQueryInfoPool.push_front(qinfo);
-
-    // Rereference for some extra speed
-
-    auto& qi = *qinfo;
-
-    // As in the other constructor, just in case we decide we need valid point information anyway
-
-    if (!itsFullGrid)
-      itsValidPoints.reset(new ValidPoints(qi));
-
-    // Requesting the valid times repeatedly is slow if we have to do
-    // a time conversion to ptime every time - hence we optimize
-
-    auto& vt = *itsValidTimeList;
-    for (qi.ResetTime(); qi.NextTime();)
-    {
-      const NFmiMetTime& t = qi.ValidTime();
-      vt.push_back(t);
-    }
-  }
-  catch (...)
-  {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
-  }
 }
 
 // ----------------------------------------------------------------------

@@ -98,10 +98,13 @@ struct RepoManager
   using LatLonCache = Fmi::Cache::Cache<std::size_t, boost::shared_ptr<std::vector<NFmiPoint>>>;
 
   LatLonCache itsLatLonCache;
+
+  std::string itsValidPointsCacheDir = "/var/smartmet/querydata/validpoints";
+
   boost::shared_ptr<RepoManager> itsOldRepoManager;
 };
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

@@ -146,7 +146,6 @@ RepoManager::RepoManager(const std::string& configfile)
       itsMaxThreadCount(10),  // default if not configured
       itsShutdownRequested(false),
       itsLatLonCache(500)  // TODO: hard coded 500 different grids
-
 {
   boost::system::error_code ec;
 
@@ -176,6 +175,7 @@ RepoManager::RepoManager(const std::string& configfile)
 
       lookupHostSetting(itsConfig, itsMaxThreadCount, "maxthreads", hostname);
       lookupHostSetting(itsConfig, itsVerbose, "verbose", hostname);
+      lookupHostSetting(itsConfig, itsValidPointsCacheDir, "valid_points_cache_dir", hostname);
 
       // Phase 1: Establish producer setting
 
@@ -542,6 +542,7 @@ void RepoManager::load(Producer producer, Files files)
           std::cout << Spine::log_time_str() + " QENGINE LOAD " + filename.string() << std::endl;
 
         model = boost::make_shared<Model>(filename,
+                                          itsValidPointsCacheDir,
                                           conf.producer,
                                           conf.leveltype,
                                           conf.isclimatology,

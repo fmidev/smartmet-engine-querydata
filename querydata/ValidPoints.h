@@ -15,6 +15,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 class NFmiFastQueryInfo;
@@ -28,16 +29,18 @@ namespace Querydata
 class ValidPoints
 {
  public:
-  ValidPoints(NFmiFastQueryInfo& qinfo);
+  ~ValidPoints();
+  ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, std::size_t hash);
   bool isvalid(unsigned long index) const;
 
  private:
   ValidPoints();
 
   std::vector<bool> itsMask;
+  std::string itsCacheFile = "";
 };
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

@@ -5,9 +5,15 @@
 // ======================================================================
 
 #include "ValidPoints.h"
-
-#include <spine/Exception.h>
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/serialization/vector.hpp>
+#include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>
+#include <spine/Convenience.h>
+#include <spine/Exception.h>
+#include <fstream>
 
 namespace SmartMet
 {
@@ -15,6 +21,22 @@ namespace Engine
 {
 namespace Querydata
 {
+// ----------------------------------------------------------------------
+/*!
+ * \brief The destructor cleans up the cached points
+ */
+// ----------------------------------------------------------------------
+
+ValidPoints::~ValidPoints()
+{
+  if (itsCacheFile.empty())
+    return;
+
+  // We ignore errors on purpose
+  boost::system::error_code ec;
+  boost::filesystem::remove(itsCacheFile, ec);
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Construct the class from queryinfo
@@ -27,55 +49,81 @@ namespace Querydata
  */
 // ----------------------------------------------------------------------
 
-ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo) : itsMask(qinfo.SizeLocations(), false)
+ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, std::size_t hash)
+    : itsMask(qinfo.SizeLocations(), false)
 {
+  itsCacheFile = cachedir + "/" + Fmi::to_string(hash);
+
+  if (!boost::filesystem::is_directory(cachedir))
+    boost::filesystem::create_directories(cachedir);
+
+  // Try using a cached file first
   try
   {
-    qinfo.First();
+    if (boost::filesystem::exists(itsCacheFile))
+    {
+      std::ifstream file(itsCacheFile);
+      boost::archive::binary_iarchive archive(file);
+      archive& BOOST_SERIALIZATION_NVP(itsMask);
+      return;
+    }
+  }
+  catch (...)
+  {
+    std::cerr << Spine::log_time_str() << " failed to unserialize " << itsCacheFile << std::endl;
+  }
+
+  // Calculate from querydata and cache the results
+  try
+  {
+    // Speed up changing between times
+    qinfo.FirstTime();
+    auto first_time = qinfo.TimeIndex();
+    qinfo.LastTime();
+    auto last_time = qinfo.TimeIndex();
+
     for (qinfo.ResetLocation(); qinfo.NextLocation();)
     {
-      // point is known to be ok for first found valid value
+      // seek any valid value for the point
 
-      for (qinfo.ResetLevel(); qinfo.NextLevel();)
+      for (qinfo.ResetParam(); qinfo.NextParam();)
       {
-        for (qinfo.ResetParam(); qinfo.NextParam();)
+        for (qinfo.ResetLevel(); qinfo.NextLevel();)
         {
-#if 1
-          // Check only the first and last times
-          qinfo.FirstTime();
+          // Check only the first and last times for speed
+          qinfo.TimeIndex(first_time);
           if (qinfo.FloatValue() != kFloatMissing)
           {
             itsMask[qinfo.LocationIndex()] = true;
             goto nextpoint;
           }
-          qinfo.LastTime();
+          qinfo.TimeIndex(last_time);
           if (qinfo.FloatValue() != kFloatMissing)
           {
             itsMask[qinfo.LocationIndex()] = true;
             goto nextpoint;
           }
-#else
-          // Check all times
-          for (qinfo.ResetTime(); qinfo.NextTime();)
-          {
-            if (qinfo.FloatValue() != kFloatMissing)
-            {
-              itsMask[qinfo.LocationIndex()] = true;
-              goto nextpoint;
-            }
-          }
-#endif
         }
       }
-    nextpoint:
-      ;
+    nextpoint:;
+    }
+
+    try
+    {
+      std::ofstream file(itsCacheFile);
+      boost::archive::binary_oarchive archive(file);
+      archive& BOOST_SERIALIZATION_NVP(itsMask);
+    }
+    catch (...)
+    {
+      std::cerr << Spine::log_time_str() << " failed to serialize " << itsCacheFile << std::endl;
     }
   }
   catch (...)
   {
     throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
-}
+}  // namespace Querydata
 
 // ----------------------------------------------------------------------
 /*!
@@ -98,7 +146,7 @@ bool ValidPoints::isvalid(unsigned long index) const
   }
 }
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

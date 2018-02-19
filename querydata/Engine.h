@@ -155,7 +155,7 @@ class Engine : public Spine::SmartMetEngine
 
 };  // class Engine
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 
