@@ -110,9 +110,12 @@ ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, 
 
     try
     {
-      std::ofstream file(itsCacheFile);
+      // We use a temporary file just in case a shutdown comes during the serialization
+      std::string tmpfile = itsCacheFile + ".tmp";
+      std::ofstream file(tmpfile);
       boost::archive::binary_oarchive archive(file);
       archive& BOOST_SERIALIZATION_NVP(itsMask);
+      boost::filesystem::rename(tmpfile, itsCacheFile);
     }
     catch (...)
     {
