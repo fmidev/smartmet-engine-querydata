@@ -27,6 +27,7 @@ Requires: boost-date-time
 Requires: boost-iostreams
 Requires: boost-regex
 Requires: boost-thread
+Requires: boost-serialization
 Requires: boost-system
 Requires: smartmet-library-newbase >= 18.2.8
 Requires: smartmet-library-macgyver >= 18.2.12

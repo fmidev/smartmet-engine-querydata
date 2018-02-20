@@ -93,6 +93,7 @@ LIBS = -L$(libdir) \
 	-lboost_filesystem \
 	-lboost_iostreams \
 	-lboost_regex \
+	-lboost_serialization \
 	-lboost_system \
 	-lgdal \
 	-lprotobuf \
