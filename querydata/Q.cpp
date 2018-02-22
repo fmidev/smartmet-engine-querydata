@@ -2265,9 +2265,9 @@ ts::Value WeatherText(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-boost::optional<int> calc_symbol_number(QImpl &q,
-                                        const NFmiPoint &latlon,
-                                        const boost::local_time::local_date_time &ldt)
+boost::optional<int> calc_smart_symbol(QImpl &q,
+                                       const NFmiPoint &latlon,
+                                       const boost::local_time::local_date_time &ldt)
 {
   const float thunder_limit1 = 30;
   // const float thunder_limit2 = 60;
@@ -2405,19 +2405,19 @@ boost::optional<int> calc_symbol_number(QImpl &q,
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Symbol = simplified SmartSymbol
+ * \brief SmartSymbol
  */
 // ----------------------------------------------------------------------
 
-ts::Value SymbolNumber(QImpl &q,
-                       const Spine::Location &loc,
-                       const boost::local_time::local_date_time &ldt)
+ts::Value SmartSymbolNumber(QImpl &q,
+                            const Spine::Location &loc,
+                            const boost::local_time::local_date_time &ldt)
 {
   try
   {
     NFmiPoint latlon(loc.longitude, loc.latitude);
 
-    auto symbol = calc_symbol_number(q, latlon, ldt);
+    auto symbol = calc_smart_symbol(q, latlon, ldt);
 
     if (!symbol)
       return Spine::TimeSeries::None();
@@ -2442,16 +2442,16 @@ ts::Value SymbolNumber(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value SymbolText(QImpl &q,
-                     const Spine::Location &loc,
-                     const boost::local_time::local_date_time &ldt,
-                     const std::string &lang)
+ts::Value SmartSymbolText(QImpl &q,
+                          const Spine::Location &loc,
+                          const boost::local_time::local_date_time &ldt,
+                          const std::string &lang)
 {
   try
   {
     NFmiPoint latlon(loc.longitude, loc.latitude);
 
-    auto symbol = calc_symbol_number(q, latlon, ldt);
+    auto symbol = calc_smart_symbol(q, latlon, ldt);
 
     if (!symbol)
       return Spine::TimeSeries::None();
@@ -2860,11 +2860,11 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
         else if (pname == "weathersymbol")
           retval = WeatherSymbol(*this, loc, ldt);
 
-        else if (pname == "symbol")
-          retval = SymbolNumber(*this, loc, ldt);
+        else if (pname == "smartsymbol")
+          retval = SmartSymbolNumber(*this, loc, ldt);
 
-        else if (pname == "symboltext")
-          retval = SymbolText(*this, loc, ldt, opt.language);
+        else if (pname == "smartsymboltext")
+          retval = SmartSymbolText(*this, loc, ldt, opt.language);
 
         else if (pname == "snow1hlower")
           retval = Snow1hLower(*this, loc, ldt);
