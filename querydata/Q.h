@@ -153,18 +153,13 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                              NFmiDataMatrix<NFmiLocationCache>& theLocationCache);
 
   void values(NFmiDataMatrix<float>& theMatrix,
-              const NFmiDataMatrix<float>& theDEMValues =
-                  NFmiDataMatrix<float>(),  // DEM values for landscaping
-              const NFmiDataMatrix<bool>& theWaterFlags =
-                  NFmiDataMatrix<bool>()  // Water flags for landscaping
-  );
+              const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
+              const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
   void values(NFmiDataMatrix<float>& theMatrix,
               const NFmiMetTime& theInterpolatedTime,
-              const NFmiDataMatrix<float>& theDEMValues =
-                  NFmiDataMatrix<float>(),  // DEM values for landscaping
-              const NFmiDataMatrix<bool>& theWaterFlags =
-                  NFmiDataMatrix<bool>()  // Water flags for landscaping
-  );
+              const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
+              const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
+
   void values(const NFmiDataMatrix<NFmiPoint>& theLatlonMatrix,
               NFmiDataMatrix<float>& theValues,
               const NFmiMetTime& theTime,
@@ -176,15 +171,13 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                      int y1,
                      int x2,
                      int y2,
-                     const NFmiDataMatrix<float>& theDEMValues =
-                         NFmiDataMatrix<float>(),  // DEM values for landscaping
-                     const NFmiDataMatrix<bool>& theWaterFlags =
-                         NFmiDataMatrix<bool>()  // Water flags for landscaping
-                     ) const;
+                     const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
+                     const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>()) const;
 
   void pressureValues(NFmiDataMatrix<float>& theValues,
                       const NFmiMetTime& theInterpolatedTime,
                       float wantedPressureLevel);
+
   void pressureValues(NFmiDataMatrix<float>& theValues,
                       const NFmiGrid& theWantedGrid,
                       const NFmiMetTime& theInterpolatedTime,
@@ -220,54 +213,54 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                                   const Fmi::LandCover& theLandCover);
 
   // one location, one timestep
-  Spine::TimeSeries::Value value(ParameterOptions& param,
+  Spine::TimeSeries::Value value(const ParameterOptions& param,
                                  const boost::local_time::local_date_time& ldt);
-  Spine::TimeSeries::Value valueAtPressure(ParameterOptions& param,
+  Spine::TimeSeries::Value valueAtPressure(const ParameterOptions& param,
                                            const boost::local_time::local_date_time& ldt,
                                            float pressure);
-  Spine::TimeSeries::Value valueAtHeight(ParameterOptions& param,
+  Spine::TimeSeries::Value valueAtHeight(const ParameterOptions& param,
                                          const boost::local_time::local_date_time& ldt,
                                          float height);
   // one location, many timesteps
-  Spine::TimeSeries::TimeSeriesPtr values(ParameterOptions& param,
+  Spine::TimeSeries::TimeSeriesPtr values(const ParameterOptions& param,
                                           const Spine::TimeSeriesGenerator::LocalTimeList& tlist);
   Spine::TimeSeries::TimeSeriesPtr valuesAtPressure(
-      ParameterOptions& param,
+      const ParameterOptions& param,
       const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
       float pressure);
   Spine::TimeSeries::TimeSeriesPtr valuesAtHeight(
-      ParameterOptions& param,
+      const ParameterOptions& param,
       const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
       float height);
   // many locations (indexmask), many timesteps
   Spine::TimeSeries::TimeSeriesGroupPtr values(
-      ParameterOptions& param,
+      const ParameterOptions& param,
       const NFmiIndexMask& indexmask,
       const Spine::TimeSeriesGenerator::LocalTimeList& tlist);
   Spine::TimeSeries::TimeSeriesGroupPtr valuesAtPressure(
-      ParameterOptions& param,
+      const ParameterOptions& param,
       const NFmiIndexMask& indexmask,
       const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
       float pressure);
   Spine::TimeSeries::TimeSeriesGroupPtr valuesAtHeight(
-      ParameterOptions& param,
+      const ParameterOptions& param,
       const NFmiIndexMask& indexmask,
       const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
       float height);
   // many locations (llist), many timesteps
   Spine::TimeSeries::TimeSeriesGroupPtr values(
-      ParameterOptions& param,
+      const ParameterOptions& param,
       const Spine::LocationList& llist,
       const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
       const double& maxdistance);
   Spine::TimeSeries::TimeSeriesGroupPtr valuesAtPressure(
-      ParameterOptions& param,
+      const ParameterOptions& param,
       const Spine::LocationList& llist,
       const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
       const double& maxdistance,
       float pressure);
   Spine::TimeSeries::TimeSeriesGroupPtr valuesAtHeight(
-      ParameterOptions& param,
+      const ParameterOptions& param,
       const Spine::LocationList& llist,
       const Spine::TimeSeriesGenerator::LocalTimeList& tlist,
       const double& maxdistance,

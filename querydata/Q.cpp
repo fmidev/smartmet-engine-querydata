@@ -2755,7 +2755,7 @@ ts::Value SmartSymbolText(QImpl &q,
 
 // ======================================================================
 
-ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_date_time &ldt)
+ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::local_date_time &ldt)
 {
   try
   {
@@ -3219,7 +3219,7 @@ ts::Value QImpl::value(ParameterOptions &opt, const boost::local_time::local_dat
   }
 }
 
-ts::Value QImpl::valueAtPressure(ParameterOptions &opt,
+ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
                                  const boost::local_time::local_date_time &ldt,
                                  float pressure)
 {
@@ -3610,7 +3610,7 @@ ts::Value QImpl::valueAtPressure(ParameterOptions &opt,
   }
 }
 
-ts::Value QImpl::valueAtHeight(ParameterOptions &opt,
+ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
                                const boost::local_time::local_date_time &ldt,
                                float height)
 {
@@ -4002,7 +4002,7 @@ ts::Value QImpl::valueAtHeight(ParameterOptions &opt,
 }
 
 // one location, many timesteps
-ts::TimeSeriesPtr QImpl::values(ParameterOptions &param,
+ts::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
                                 const Spine::TimeSeriesGenerator::LocalTimeList &tlist)
 {
   try
@@ -4021,7 +4021,7 @@ ts::TimeSeriesPtr QImpl::values(ParameterOptions &param,
     throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
-ts::TimeSeriesPtr QImpl::valuesAtPressure(ParameterOptions &param,
+ts::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
                                           const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
                                           float pressure)
 {
@@ -4041,7 +4041,7 @@ ts::TimeSeriesPtr QImpl::valuesAtPressure(ParameterOptions &param,
     throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
-ts::TimeSeriesPtr QImpl::valuesAtHeight(ParameterOptions &param,
+ts::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                         const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
                                         float height)
 {
@@ -4063,7 +4063,7 @@ ts::TimeSeriesPtr QImpl::valuesAtHeight(ParameterOptions &param,
 }
 
 // many locations (indexmask), many timesteps
-ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
+ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                      const NFmiIndexMask &indexmask,
                                      const Spine::TimeSeriesGenerator::LocalTimeList &tlist)
 {
@@ -4118,7 +4118,7 @@ ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
   }
 }
 ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
-    ParameterOptions &param,
+    const ParameterOptions &param,
     const NFmiIndexMask &indexmask,
     const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
     float pressure)
@@ -4173,7 +4173,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
     throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
-ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(ParameterOptions &param,
+ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                              const NFmiIndexMask &indexmask,
                                              const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
                                              float height)
@@ -4233,7 +4233,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(ParameterOptions &param,
 
 // BUG?? Why is maxdistance in the API?
 
-ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
+ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                      const Spine::LocationList &llist,
                                      const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
                                      const double & /* maxdistance */)
@@ -4272,7 +4272,7 @@ ts::TimeSeriesGroupPtr QImpl::values(ParameterOptions &param,
   }
 }
 ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
-    ParameterOptions &param,
+    const ParameterOptions &param,
     const Spine::LocationList &llist,
     const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
     const double & /* maxdistance */,
@@ -4311,7 +4311,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
     throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
-ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(ParameterOptions &param,
+ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                              const Spine::LocationList &llist,
                                              const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
                                              const double & /* maxdistance */,
