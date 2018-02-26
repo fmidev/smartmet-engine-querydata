@@ -152,14 +152,30 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   bool calcLatlonCachePoints(NFmiQueryInfo& theTargetInfo,
                              NFmiDataMatrix<NFmiLocationCache>& theLocationCache);
 
+  // Generic access to grid values:
   void values(NFmiDataMatrix<float>& theMatrix,
               const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
               const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
+
   void values(NFmiDataMatrix<float>& theMatrix,
               const NFmiMetTime& theInterpolatedTime,
               const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
               const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
 
+  // Needed for metaparameters:
+
+  void values(NFmiDataMatrix<float>& theMatrix,
+              const ParameterOptions& theParam,
+              const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
+              const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
+
+  void values(NFmiDataMatrix<float>& theMatrix,
+              const ParameterOptions& theParam,
+              const NFmiMetTime& theInterpolatedTime,
+              const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
+              const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
+
+  // For arbitrary coordinates:
   void values(const NFmiDataMatrix<NFmiPoint>& theLatlonMatrix,
               NFmiDataMatrix<float>& theValues,
               const NFmiMetTime& theTime,
@@ -274,6 +290,9 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
  private:
   QImpl();
+
+  Spine::TimeSeries::Value dataIndependentValue(
+      const ParameterOptions& opt, const boost::local_time::local_date_time& ldt) const;
 
   std::vector<SharedModel> itsModels;
   std::vector<SharedInfo> itsInfos;  // used only in destructor and MultiInfo constructor
