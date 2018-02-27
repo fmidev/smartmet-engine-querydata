@@ -2836,7 +2836,8 @@ ts::Value SmartSymbolText(QImpl &q,
 // ----------------------------------------------------------------------
 
 ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
-                                      const boost::local_time::local_date_time &ldt) const
+                                      const boost::local_time::local_date_time &ldt,
+                                      double levelResult) const
 {
   // Some shorthand variables
   const std::string &pname = opt.par.name();
@@ -2897,7 +2898,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     return loc.timezone;
 
   if (pname == "level")
-    return Fmi::to_string(levelValue());
+    return levelResult;
 
   if (pname == "latlon" || pname == "lonlat")
     return ts::LonLat(loc.longitude, loc.latitude);
@@ -3251,7 +3252,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
       }
       case Spine::Parameter::Type::DataIndependent:
       {
-        retval = dataIndependentValue(opt, ldt);
+        retval = dataIndependentValue(opt, ldt, levelValue());
         break;
       }
     }
@@ -3324,7 +3325,7 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
       }
       case Spine::Parameter::Type::DataIndependent:
       {
-        retval = dataIndependentValue(opt, ldt);
+        retval = dataIndependentValue(opt, ldt, pressure);
         break;
       }
     }
@@ -3397,7 +3398,7 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
       }
       case Spine::Parameter::Type::DataIndependent:
       {
-        retval = dataIndependentValue(opt, ldt);
+        retval = dataIndependentValue(opt, ldt, height);
         break;
       }
     }

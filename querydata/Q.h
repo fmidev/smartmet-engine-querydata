@@ -285,8 +285,9 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
  private:
   QImpl();
 
-  Spine::TimeSeries::Value dataIndependentValue(
-      const ParameterOptions& opt, const boost::local_time::local_date_time& ldt) const;
+  Spine::TimeSeries::Value dataIndependentValue(const ParameterOptions& opt,
+                                                const boost::local_time::local_date_time& ldt,
+                                                double levelResult) const;
 
   std::vector<SharedModel> itsModels;
   std::vector<SharedInfo> itsInfos;  // used only in destructor and MultiInfo constructor

@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 18.2.27
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -73,6 +73,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Feb 27 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.27-2.fmi
+- Fixed data independent value level to be height/pressure for respective queries
+
 * Tue Feb 27 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.27-1.fmi
 - Added a method to get meta parameters values in the original grid
 
