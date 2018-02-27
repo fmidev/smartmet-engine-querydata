@@ -14,7 +14,7 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 18.2.22
+BuildRequires: smartmet-library-spine-devel >= 18.2.27
 BuildRequires: smartmet-library-newbase-devel >= 18.2.8
 BuildRequires: smartmet-library-macgyver-devel >= 18.2.12
 BuildRequires: protobuf-compiler
@@ -33,7 +33,7 @@ Requires: smartmet-library-newbase >= 18.2.8
 Requires: smartmet-library-macgyver >= 18.2.12
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 18.2.22
+Requires: smartmet-library-spine >= 18.2.27
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
