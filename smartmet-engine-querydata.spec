@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.2.22
+Version: 18.2.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -73,6 +73,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Feb 27 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.27-1.fmi
+- Added a method to get meta parameters values in the original grid
+
 * Thu Feb 22 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.2.22-1.fmi
 - Symbol and SymbolText changed to SmartSymbol and SmartSymbolText
 

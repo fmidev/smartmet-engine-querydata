@@ -1314,7 +1314,7 @@ bool QImpl::calcLatlonCachePoints(NFmiQueryInfo &theTargetInfo,
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Interpolate values
+ * \brief Extract values at grid points
  * \param theDemValues DEM values for landscaping (an empty matrix by default)
  * \param theWaterFlags Water flags for landscaping (an empty matrix by default)
  */
@@ -1339,7 +1339,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Interpolate values
+ * \brief Extract time interpolated values at grid points
  * \param theInterpolatedTime The desired time
  * \param theDemValues DEM values for landscaping (an empty matrix by default)
  * \param theWaterFlags Water flags for landscaping (an empty matrix by default)
@@ -1357,6 +1357,83 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
       itsInfo->LandscapeValues(theMatrix, theInterpolatedTime, theDEMValues, theWaterFlags);
     else
       itsInfo->Values(theMatrix, theInterpolatedTime);
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Extract time interpolated values at grid points
+ * \param theInterpolatedTime The desired time
+ * \param theDemValues DEM values for landscaping (an empty matrix by default)
+ * \param theWaterFlags Water flags for landscaping (an empty matrix by default)
+ */
+// ----------------------------------------------------------------------
+
+void QImpl::values(NFmiDataMatrix<float> &theMatrix,
+                   const Spine::Parameter &theParam,
+                   const boost::posix_time::ptime &theInterpolatedTime,
+                   const NFmiDataMatrix<float> &theDEMValues,
+                   const NFmiDataMatrix<bool> &theWaterFlags)
+{
+  try
+  {
+    switch (theParam.type())
+    {
+      case Spine::Parameter::Type::Data:
+      case Spine::Parameter::Type::Landscaped:
+      {
+        if (!param(theParam.number()))
+          throw Spine::Exception(BCP,
+                                 "Parameter " + theParam.name() + " is not available in the data");
+        return values(theMatrix, theInterpolatedTime, theDEMValues, theWaterFlags);
+      }
+      case Spine::Parameter::Type::DataDerived:
+      case Spine::Parameter::Type::DataIndependent:
+      {
+        const auto nx = grid().XNumber();
+        const auto ny = grid().YNumber();
+        theMatrix.Resize(nx, ny, kFloatMissing);
+
+        // Now we need all kinds of extra variables because of the damned API
+
+        NFmiPoint dummy;
+        boost::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
+        boost::local_time::time_zone_ptr utc(new boost::local_time::posix_time_zone("UTC"));
+        boost::local_time::local_date_time localdatetime(theInterpolatedTime, utc);
+
+        auto stdlocale = std::locale::classic();
+
+        // we need to modify the coordinate for each point
+        for (std::size_t j = 0; j < ny; j++)
+          for (std::size_t i = 0; i < nx; i++)
+          {
+            auto coord = latLon(j * nx + i);
+            Spine::Location loc(coord.X(), coord.Y());
+            ParameterOptions opts(theParam,
+                                  Producer(),
+                                  loc,
+                                  "",
+                                  "",
+                                  *timeformatter,
+                                  "",
+                                  "",
+                                  stdlocale,
+                                  "",
+                                  false,
+                                  NFmiPoint(),
+                                  dummy);
+            auto result = value(opts, localdatetime);
+
+            if (boost::get<double>(&result))
+              theMatrix[i][j] = *boost::get<double>(&result);
+          }
+        break;
+      }
+    }
   }
   catch (...)
   {
@@ -3055,7 +3132,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
     ts::Value retval = Spine::TimeSeries::None();
 
     // Some shorthand variables
-    const std::string &pname = opt.par.name();
+    std::string pname = boost::algorithm::to_lower_copy(opt.par.name());
     const Spine::Location &loc = opt.loc;
 
     // Update last accessed point.

@@ -163,15 +163,9 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
               const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
 
   // Needed for metaparameters:
-
   void values(NFmiDataMatrix<float>& theMatrix,
-              const ParameterOptions& theParam,
-              const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
-              const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
-
-  void values(NFmiDataMatrix<float>& theMatrix,
-              const ParameterOptions& theParam,
-              const NFmiMetTime& theInterpolatedTime,
+              const Spine::Parameter& theParam,
+              const boost::posix_time::ptime& theInterpolatedTime,
               const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
               const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
 

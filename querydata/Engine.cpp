@@ -275,7 +275,7 @@ bool Engine::hasProducer(const Producer& producer) const
   try
   {
     auto repomanager = boost::atomic_load(&itsRepoManager);
-   
+
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsRepo.hasProducer(producer);
   }
@@ -317,7 +317,7 @@ Q Engine::get(const Producer& producer) const
   try
   {
     auto repomanager = boost::atomic_load(&itsRepoManager);
-   
+
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsRepo.get(producer);
   }
@@ -1031,6 +1031,49 @@ ValuesPtr Engine::getValues(const Q& theQ,
     auto ftr = boost::async([=] {
                  auto tmp = boost::make_shared<Values>();
                  theQ->values(*tmp, theTime);
+                 return tmp;
+               })
+                   .share();
+
+    // Store the shared future into the cache for other threads to see too
+    itsValuesCache.insert(theValuesHash, ftr);
+
+    // And wait for the future to finish along with other threads
+    return ftr.get();
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Get the data values
+ *
+ * Retrieval is done asynchronously through a shared future so that for
+ * example multiple WMS tile requests would not cause the same values
+ * to be retrieved twice.
+ */
+// ----------------------------------------------------------------------
+
+ValuesPtr Engine::getValues(const Q& theQ,
+                            const Spine::Parameter& theParam,
+                            std::size_t theValuesHash,
+                            boost::posix_time::ptime theTime) const
+{
+  try
+  {
+    // If there is a future in the cache, ask it for the values
+
+    auto values = itsValuesCache.find(theValuesHash);
+    if (values)
+      return values->get();
+
+    // Else create a shared future for calculating the values
+    auto ftr = boost::async([=] {
+                 auto tmp = boost::make_shared<Values>();
+                 theQ->values(*tmp, theParam, theTime);
                  return tmp;
                })
                    .share();
