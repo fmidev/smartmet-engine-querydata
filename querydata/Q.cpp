@@ -1405,7 +1405,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
         boost::local_time::time_zone_ptr utc(new boost::local_time::posix_time_zone("UTC"));
         boost::local_time::local_date_time localdatetime(theInterpolatedTime, utc);
 
-        auto stdlocale = std::locale::classic();
+        auto mylocale = std::locale::classic();
 
         // we need to modify the coordinate for each point
         for (std::size_t j = 0; j < ny; j++)
@@ -1421,7 +1421,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
                                   *timeformatter,
                                   "",
                                   "",
-                                  stdlocale,
+                                  mylocale,
                                   "",
                                   false,
                                   NFmiPoint(),
@@ -3133,7 +3133,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
     ts::Value retval = Spine::TimeSeries::None();
 
     // Some shorthand variables
-    std::string pname = boost::algorithm::to_lower_copy(opt.par.name());
+    std::string pname = boost::algorithm::to_lower_copy(opt.par.name(), std::locale::classic());
     const Spine::Location &loc = opt.loc;
 
     // Update last accessed point.
@@ -4017,6 +4017,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
       boost::local_time::time_zone_ptr utc(new boost::local_time::posix_time_zone("UTC"));
       boost::local_time::local_date_time localdatetime(theTime, utc);
 
+      auto mylocale = std::locale::classic();
+
       for (dstinfo.ResetLevel(); dstinfo.NextLevel();)
       {
         itsInfo->Level(*dstinfo.Level());
@@ -4040,7 +4042,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                                      *timeformatter,
                                      "",
                                      "",
-                                     std::locale::classic(),
+                                     mylocale,
                                      "",
                                      false,
                                      NFmiPoint(),
