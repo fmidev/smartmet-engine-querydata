@@ -50,6 +50,8 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
 
   Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
 
+  Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
+
   friend std::size_t hash_value(const Model& theModel);
 
   const boost::posix_time::ptime& originTime() const;
