@@ -426,6 +426,14 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
         itsRepo.remove(producer, file);
     }
 
+    // Handle aged models
+    auto cfg = producerConfig(producer);
+    if (cfg.max_age > 0)
+    {
+      Spine::WriteLock lock(itsMutex);
+      itsRepo.expire(producer, cfg.max_age);
+    }
+
     // Done if there are no additions
 
     if (additions.empty())

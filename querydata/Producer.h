@@ -39,6 +39,7 @@ typedef std::list<std::string> ProducerList;
  *         type                    = "grid";
  *         leveltype               = "surface";
  *         refresh_interval_secs   = 60;
+ *         max_age                 = "PT24H";
  *         number_to_keep          = 1;
  *         update_interval         = "PT1H";
  *         minimum_expires         = "PT5M";
@@ -59,10 +60,11 @@ struct ProducerConfig
   boost::regex pattern;
   std::string type = "grid";
   std::string leveltype = "surface";
-  unsigned int refresh_interval_secs = 60;
-  unsigned int number_to_keep = 1;
-  unsigned int update_interval = 3600;
-  unsigned int minimum_expires = 600;
+  unsigned int refresh_interval_secs = 60;  // once per minute
+  unsigned int number_to_keep = 1;          // at least one file
+  unsigned int update_interval = 3600;      // once per hour
+  unsigned int minimum_expires = 600;       // 10 minutes
+  unsigned int max_age = 0;                 // do not remove old models by default based on age
   double maxdistance = -1;
   bool ismultifile = false;
   bool isforecast = true;
@@ -77,7 +79,7 @@ struct ProducerConfig
            c.update_interval == update_interval && c.minimum_expires == minimum_expires &&
            c.refresh_interval_secs == refresh_interval_secs && c.leveltype == leveltype &&
            c.type == type && c.pattern == pattern && c.directory == directory &&
-           c.aliases == aliases && c.producer == producer;
+           c.aliases == aliases && c.producer == producer && c.max_age == max_age;
   }
   inline bool operator!=(const ProducerConfig& c) { return !operator==(c); }
 

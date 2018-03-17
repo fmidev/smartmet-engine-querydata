@@ -39,6 +39,7 @@ class Repository
 
   void remove(const Producer& producer, const boost::filesystem::path& path);
   void resize(const Producer& producer, std::size_t limit);
+  void expire(const Producer& producer, std::size_t max_age);
 
   Producer find(const ProducerList& producerlist,
                 const ProducerList& producerorder,
@@ -51,7 +52,7 @@ class Repository
   OriginTimes originTimes(const Producer& producer) const;
 
   bool hasProducer(const Producer& producer) const;
-  
+
   // Must not use aliases for these!
   Q get(const Producer& producer) const;
   Q get(const Producer& producer, const OriginTime& origintime) const;
@@ -91,7 +92,7 @@ class Repository
 
 };  // class Repository
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

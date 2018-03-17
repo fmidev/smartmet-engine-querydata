@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 18.3.17
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -73,6 +73,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sat Mar 17 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.3.17-2.fmi
+- Added a max_age setting for data sources
+
 * Sat Mar 17 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.3.17-1.fmi
 - Added a Model constructor for data created on the fly as needed by WMS heatmaps
 

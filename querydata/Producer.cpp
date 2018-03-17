@@ -70,6 +70,9 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
       else if (name == "number_to_keep")
         pinfo.number_to_keep = setting[i];
 
+      else if (name == "max_age")
+        pinfo.max_age = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
+
       else if (name == "update_interval")
         pinfo.update_interval = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
 
@@ -121,11 +124,9 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
   }
   catch (...)
   {
-    std::string nm("");
+    std::string nm;
     if (name.length() > 0)
-    {
       nm = " element " + name;
-    }
     throw Spine::Exception::Trace(BCP, "Operation failed for producer " + producer + nm);
   }
 }

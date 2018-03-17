@@ -420,6 +420,54 @@ void Repository::resize(const Producer& producer, std::size_t limit)
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Expire too old models
+ */
+// ----------------------------------------------------------------------
+
+void Repository::expire(const Producer& producer, std::size_t max_age)
+{
+  // max_age is in seconds, and 0 implies no limit exists
+
+  if (max_age == 0)
+    return;
+
+  auto now = boost::posix_time::second_clock::universal_time();
+  auto time_limit = now - boost::posix_time::seconds(max_age);
+
+  try
+  {
+    Producers::iterator producer_model = itsProducers.find(producer);
+
+    if (producer_model == itsProducers.end())
+      return;
+
+    SharedModels& models = producer_model->second;
+
+    if (models.empty())
+      return;
+
+    for (SharedModels::iterator time_model = models.begin(), end = models.end(); time_model != end;)
+    {
+      if (time_model->second->modificationTime() >= time_limit)
+        ++time_model;
+      else
+      {
+#ifdef MYDEBUG
+        std::cout << boost::posix_time::second_clock::local_time() << " Expiring "
+                  << time_model->second->path() << std::endl;
+#endif
+        models.erase(time_model++);
+      }
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Expiring model failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Match leveltypes
  *
  * Leveltype is OK if desired type is the same, or the desired
