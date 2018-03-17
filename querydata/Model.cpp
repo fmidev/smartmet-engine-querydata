@@ -132,6 +132,57 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Construct a model without querydata file
+ */
+// ----------------------------------------------------------------------
+
+Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
+    : itsHashValue(theHash)  // decided externally on purpose
+      ,
+      itsOriginTime(),
+      itsPath(""),
+      itsModificationTime(),
+      itsProducer(""),
+      itsLevelName(""),
+      itsUpdateInterval(0),
+      itsMinimumExpirationTime(999999),
+      itsClimatology(false),
+      itsFullGrid(true),
+      itsQueryData(theData),
+      itsValidPoints(),
+      itsValidTimeList(new ValidTimeList()),
+      itsQueryInfoPoolMutex(),
+      itsQueryInfoPool()
+{
+  try
+  {
+    // We need an info object to intialize some data members
+
+    boost::shared_ptr<NFmiFastQueryInfo> qinfo =
+        boost::make_shared<NFmiFastQueryInfo>(itsQueryData.get());
+
+    // Might as well pool it for subsequent use
+
+    itsQueryInfoPool.push_front(qinfo);
+
+    // Requesting the valid times repeatedly is slow if we have to do
+    // a time conversion to ptime every time - hence we optimize
+
+    auto& vt = *itsValidTimeList;
+    for (qinfo->ResetTime(); qinfo->NextTime();)
+    {
+      const NFmiMetTime& t = qinfo->ValidTime();
+      vt.push_back(t);
+    }
+  }
+  catch (...)
+  {
+    throw Spine::Exception(BCP, "Operation failed!", NULL);
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Origin time accessor
  */
 // ----------------------------------------------------------------------
