@@ -77,9 +77,10 @@ struct ProducerConfig
            c.isforecast == isforecast && c.ismultifile == ismultifile &&
            c.maxdistance == maxdistance && c.number_to_keep == number_to_keep &&
            c.update_interval == update_interval && c.minimum_expires == minimum_expires &&
-           c.refresh_interval_secs == refresh_interval_secs && c.leveltype == leveltype &&
-           c.type == type && c.pattern == pattern && c.directory == directory &&
-           c.aliases == aliases && c.producer == producer && c.max_age == max_age;
+           c.max_age == max_age && c.refresh_interval_secs == refresh_interval_secs &&
+           c.leveltype == leveltype && c.type == type && c.pattern == pattern &&
+           c.directory == directory && c.aliases == aliases && c.producer == producer &&
+           c.max_age == max_age;
   }
   inline bool operator!=(const ProducerConfig& c) { return !operator==(c); }
 
