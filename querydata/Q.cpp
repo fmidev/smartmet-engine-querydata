@@ -1,28 +1,5 @@
 #include "Q.h"
 #include "Model.h"
-
-#include <spine/Exception.h>
-#include <spine/ParameterFactory.h>
-
-#include <gis/Box.h>
-#include <gis/DEM.h>
-#include <gis/LandCover.h>
-
-#include <macgyver/Astronomy.h>
-#include <macgyver/CharsetTools.h>
-#include <macgyver/StringConversion.h>
-#include <macgyver/TimeFormatter.h>
-#include <macgyver/TimeZoneFactory.h>
-
-#include <newbase/NFmiGdalArea.h>
-#include <newbase/NFmiMetMath.h>
-#include <newbase/NFmiMultiQueryInfo.h>
-#include <newbase/NFmiQueryData.h>
-#include <newbase/NFmiQueryDataUtil.h>
-#include <newbase/NFmiTimeList.h>
-
-#include <gdal/ogr_spatialref.h>
-
 #include <boost/date_time/local_time/local_time_io.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/time_facet.hpp>
@@ -33,7 +10,23 @@
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <boost/timer/timer.hpp>
-
+#include <gdal/ogr_spatialref.h>
+#include <gis/Box.h>
+#include <gis/DEM.h>
+#include <gis/LandCover.h>
+#include <macgyver/Astronomy.h>
+#include <macgyver/CharsetTools.h>
+#include <macgyver/StringConversion.h>
+#include <macgyver/TimeFormatter.h>
+#include <macgyver/TimeZoneFactory.h>
+#include <newbase/NFmiGdalArea.h>
+#include <newbase/NFmiMetMath.h>
+#include <newbase/NFmiMultiQueryInfo.h>
+#include <newbase/NFmiQueryData.h>
+#include <newbase/NFmiQueryDataUtil.h>
+#include <newbase/NFmiTimeList.h>
+#include <spine/Exception.h>
+#include <spine/ParameterFactory.h>
 #include <cassert>
 #include <stdexcept>
 
