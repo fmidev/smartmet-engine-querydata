@@ -2824,6 +2824,28 @@ ts::Value SmartSymbolText(QImpl &q,
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Grid north deviation
+ */
+// ----------------------------------------------------------------------
+
+ts::Value GridNorth(const QImpl &q, const Spine::Location &loc)
+{
+  try
+  {
+    if (!q.isArea())
+      return Spine::TimeSeries::None();
+
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+    return q.area().TrueNorthAzimuth(latlon).Value();
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Extract data independent parameter value
  */
 // ----------------------------------------------------------------------
@@ -3104,6 +3126,9 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     auto pos = Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
     return pos.azimuth;
   }
+
+  if (pname == "gridnorth")
+    return GridNorth(*this, loc);
 
   // The following parameters are added for for obsengine compability reasons
   // so that we can have e.g. fmisid identifier for observations in query which
