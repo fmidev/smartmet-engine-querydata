@@ -127,6 +127,7 @@ bool lookupHostSetting(const libconfig::Config& theConfig,
 
 RepoManager::~RepoManager()
 {
+  itsExpirationThread.interrupt();
   itsMonitorThread.interrupt();
 }
 // ----------------------------------------------------------------------
@@ -257,10 +258,39 @@ void RepoManager::init()
     }
 
     itsMonitorThread = boost::thread(boost::bind(&Fmi::DirectoryMonitor::run, &itsMonitor));
+    itsExpirationThread = boost::thread(boost::bind(&RepoManager::expirationLoop, this));
   }
   catch (...)
   {
     throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Data expiration loop
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::expirationLoop()
+{
+  while (!itsShutdownRequested)
+  {
+    // Wait 30 seconds. TODO: use condition variable
+    for (int i = 0; i < 10 * 30 && !itsShutdownRequested; i++)
+      boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+
+    if (itsShutdownRequested)
+      break;
+
+    BOOST_FOREACH (const ProducerConfig& config, itsConfigList)
+    {
+      if (config.max_age > 0)
+      {
+        Spine::WriteLock lock(itsMutex);
+        itsRepo.expire(config.producer, config.max_age);
+      }
+    }
   }
 }
 
@@ -424,14 +454,6 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
       Spine::WriteLock lock(itsMutex);
       BOOST_FOREACH (const auto& file, removals)
         itsRepo.remove(producer, file);
-    }
-
-    // Handle aged models
-    auto cfg = producerConfig(producer);
-    if (cfg.max_age > 0)
-    {
-      Spine::WriteLock lock(itsMutex);
-      itsRepo.expire(producer, cfg.max_age);
     }
 
     // Done if there are no additions

@@ -15,6 +15,7 @@
 #include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
+#include <spine/Convenience.h>
 #include <spine/Exception.h>
 #include <spine/ParameterFactory.h>
 #include <spine/TableFormatter.h>
@@ -361,10 +362,10 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
     {
       if (time_model->second->path() == path)
       {
-        // #ifdef MYDEBUG
-        std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Deleting "
+#ifdef MYDEBUG
+        std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Deleting "
                   << time_model->second->path() << std::endl;
-        // #endif
+#endif
         time_model->second->uncache();  // uncache validpoints
         models.erase(time_model);
         break;
@@ -404,10 +405,10 @@ void Repository::resize(const Producer& producer, std::size_t limit)
 
     while (models.size() > limit)
     {
-      // #ifdef MYDEBUG
+#ifdef MYDEBUG
       std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Resize removal of "
                 << models.begin()->second->path() << std::endl;
-      // #endif
+#endif
       // the oldest file is the one first sorted by origintime
       models.begin()->second->uncache();  // uncache validpoints
       models.erase(models.begin());       // and erase the model
@@ -453,11 +454,11 @@ void Repository::expire(const Producer& producer, std::size_t max_age)
         ++time_model;
       else
       {
-        // #ifdef MYDEBUG
+#ifdef MYDEBUG
         std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Expiring "
                   << time_model->second->path() << std::endl;
         time_model->second->uncache();  // uncache validpoints
-        // #endif
+#endif
         models.erase(time_model++);
       }
     }
