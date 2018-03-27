@@ -577,6 +577,7 @@ void RepoManager::load(Producer producer, Files files)
                                           conf.leveltype,
                                           conf.isclimatology,
                                           conf.isfullgrid,
+                                          conf.isrelativeuv,
                                           conf.update_interval,
                                           conf.minimum_expires);
       }

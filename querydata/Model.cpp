@@ -38,6 +38,7 @@ Model::Model(const boost::filesystem::path& filename,
              const std::string& levelname,
              bool climatology,
              bool full,
+             bool relativeuv,
              unsigned int update_interval,
              unsigned int minimum_expiration_time)
     : itsOriginTime(),
@@ -48,6 +49,7 @@ Model::Model(const boost::filesystem::path& filename,
       itsMinimumExpirationTime(minimum_expiration_time),
       itsClimatology(climatology),
       itsFullGrid(full),
+      itsRelativeUV(relativeuv),
       itsQueryData(new NFmiQueryData(filename.string())),
       itsValidPoints(),
       itsValidTimeList(new ValidTimeList()),
@@ -122,6 +124,7 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
       itsMinimumExpirationTime(theModel.itsMinimumExpirationTime),
       itsClimatology(theModel.itsClimatology),
       itsFullGrid(theModel.itsFullGrid),
+      itsRelativeUV(theModel.itsRelativeUV),
       itsQueryData(theData),
       itsValidPoints(theModel.itsValidPoints),
       itsValidTimeList(theModel.itsValidTimeList),
@@ -148,6 +151,7 @@ Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
       itsMinimumExpirationTime(999999),
       itsClimatology(false),
       itsFullGrid(true),
+      itsRelativeUV(false),
       itsQueryData(theData),
       itsValidPoints(),
       itsValidTimeList(new ValidTimeList()),
@@ -272,13 +276,24 @@ bool Model::isClimatology() const
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Return true if grid ietoc smple
+ * \brief Return true if grid is full
  */
 // ----------------------------------------------------------------------
 
 bool Model::isFullGrid() const
 {
   return itsFullGrid;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Return true if wind U/V components are relative to the grid
+ */
+// ----------------------------------------------------------------------
+
+bool Model::isRelativeUV() const
+{
+  return itsRelativeUV;
 }
 
 // ----------------------------------------------------------------------

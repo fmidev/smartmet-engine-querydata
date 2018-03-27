@@ -64,6 +64,9 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
       else if (name == "fullgrid")
         pinfo.isfullgrid = setting[i];
 
+      else if (name == "relative_uv")
+        pinfo.isrelativeuv = setting[i];
+
       else if (name == "refresh_interval_secs")
         pinfo.refresh_interval_secs = setting[i];
 

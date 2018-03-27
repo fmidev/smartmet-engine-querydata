@@ -66,6 +66,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   FmiLevelType levelType() const;
   bool isClimatology() const;
   bool isFullGrid() const;
+  bool isRelativeUV() const;
 
   friend std::size_t hash_value(const QImpl& theQ);
   std::size_t gridHashValue() const;

@@ -43,6 +43,7 @@ typedef std::list<std::string> ProducerList;
  *         number_to_keep          = 1;
  *         update_interval         = "PT1H";
  *         minimum_expires         = "PT5M";
+ *         relative_uv             = false;
  * };
  * \endcode
  */
@@ -70,6 +71,7 @@ struct ProducerConfig
   bool isforecast = true;
   bool isclimatology = false;
   bool isfullgrid = true;
+  bool isrelativeuv = false;  // are U/V winds relative to grid orientation
 
   inline bool operator==(const ProducerConfig& c)
   {
@@ -80,7 +82,7 @@ struct ProducerConfig
            c.max_age == max_age && c.refresh_interval_secs == refresh_interval_secs &&
            c.leveltype == leveltype && c.type == type && c.pattern == pattern &&
            c.directory == directory && c.aliases == aliases && c.producer == producer &&
-           c.max_age == max_age;
+           c.max_age == max_age && c.isrelativeuv == isrelativeuv;
   }
   inline bool operator!=(const ProducerConfig& c) { return !operator==(c); }
 

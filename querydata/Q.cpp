@@ -516,6 +516,24 @@ bool QImpl::isFullGrid() const
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Return true if the wind U/V components are relative to the grid
+ */
+// ----------------------------------------------------------------------
+
+bool QImpl::isRelativeUV() const
+{
+  try
+  {
+    return itsModels[0]->isRelativeUV();
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Return the nearest grid point with valid data
  */
 // ----------------------------------------------------------------------

@@ -45,6 +45,7 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
         const std::string& levelname,
         bool climatology,
         bool full,
+        bool relativeuv,
         unsigned int update_interval,
         unsigned int minimum_expiration_time);
 
@@ -66,6 +67,7 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   const std::string& levelName() const;
   bool isClimatology() const;
   bool isFullGrid() const;
+  bool isRelativeUV() const;
 
   NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist) const;
 
@@ -94,8 +96,9 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   std::string itsLevelName;
   unsigned int itsUpdateInterval;
   unsigned int itsMinimumExpirationTime;
-  bool itsClimatology;
-  bool itsFullGrid;
+  bool itsClimatology{false};
+  bool itsFullGrid{false};
+  bool itsRelativeUV{false};
 
   // We need direct access to data in the manager
   boost::shared_ptr<NFmiQueryData> itsQueryData;
