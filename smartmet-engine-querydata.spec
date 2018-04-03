@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.3.27
-Release: 2%{?dist}.fmi
+Version: 18.4.3
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -73,6 +73,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Apr  3 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.4.3-1.fmi
+- Report missing querydata paths during the initialization
+
 * Tue Mar 27 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.3.27-2.fmi
 - Added setting relative_uv. By default wind U/V components are not relative to the grid
 

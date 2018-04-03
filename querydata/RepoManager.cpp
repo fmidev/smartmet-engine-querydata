@@ -237,11 +237,16 @@ void RepoManager::init()
 {
   try
   {
-    BOOST_FOREACH (const auto& pinfo, itsConfigList)
+    for (const auto& pinfo : itsConfigList)
     {
       // Note: watcher indexes start from 0, so we can index the producer
       // with a vector to find out which producer the callback instructs to update.
-      // Should be fast.
+
+      if (!boost::filesystem::exists(pinfo.directory))
+        std::cerr << (Spine::log_time_str() + ANSI_FG_RED + " [querydata] Producer '" +
+                      pinfo.producer + "' path '" + pinfo.directory.string() + "' is missing" +
+                      ANSI_FG_DEFAULT)
+                  << std::endl;
 
       auto id = itsMonitor.watch(pinfo.directory,
                                  pinfo.pattern,
