@@ -74,6 +74,11 @@ Model::Model(const boost::filesystem::path& filename,
     boost::hash_combine(itsHashValue, itsPath);
     boost::hash_combine(itsHashValue, itsModificationTime);
 
+    // querydata.conf changes may alter essential model properties
+    boost::hash_combine(itsHashValue, itsClimatology);
+    boost::hash_combine(itsHashValue, itsFullGrid);
+    boost::hash_combine(itsHashValue, itsRelativeUV);
+
     // We need an info object to intialize some data members
 
     boost::shared_ptr<NFmiFastQueryInfo> qinfo =
