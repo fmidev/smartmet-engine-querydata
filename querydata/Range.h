@@ -27,6 +27,6 @@ class Range
   ValueType mMin;
   ValueType mMax;
 };
-}
-}
-}
+}  // namespace Querydata
+}  // namespace Engine
+}  // namespace SmartMet

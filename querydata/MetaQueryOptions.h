@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <string>
 #include <list>
+#include <string>
 
 #include <newbase/NFmiPoint.h>
 
@@ -26,9 +26,7 @@ class MetaQueryOptions
  public:
   struct BBox
   {
-    BBox() : ul(0, 0), ur(0, 0), bl(0, 0), br(0, 0)
-    {
-    }
+    BBox() : ul(0, 0), ur(0, 0), bl(0, 0), br(0, 0) {}
     BBox(const NFmiPoint& newbl,
          const NFmiPoint& newbr,
          const NFmiPoint& newul,
@@ -140,6 +138,6 @@ class MetaQueryOptions
   bool itsHasLevelValues;
 };
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet

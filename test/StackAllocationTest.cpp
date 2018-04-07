@@ -13,7 +13,8 @@
 #include <iostream>
 #include <string>
 
-extern "C" {
+extern "C"
+{
 #include <signal.h>
 }
 

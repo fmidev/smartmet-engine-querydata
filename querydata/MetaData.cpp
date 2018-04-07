@@ -19,9 +19,7 @@ ModelLevel::ModelLevel(const std::string& theType, const std::string& theName, f
 {
 }
 
-MetaData::MetaData()
-{
-}
+MetaData::MetaData() {}
 
 }  // namespace Querydata
 }  // namespace Engine

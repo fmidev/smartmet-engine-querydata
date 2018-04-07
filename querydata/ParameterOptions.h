@@ -11,9 +11,9 @@
 #include <spine/Parameter.h>
 #include <spine/TimeSeriesGenerator.h>
 
-#include <newbase/NFmiPoint.h>
-#include <newbase/NFmiIndexMask.h>
 #include <newbase/NFmiFastQueryInfo.h>
+#include <newbase/NFmiIndexMask.h>
+#include <newbase/NFmiPoint.h>
 
 #include <macgyver/TimeFormatter.h>
 
@@ -58,6 +58,6 @@ struct ParameterOptions
   NFmiPoint& lastpoint;
 };
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet

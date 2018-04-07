@@ -29,6 +29,6 @@ class WGS84Envelope
   RangeLon mRangeLon;
   RangeLat mRangeLat;
 };
-}
-}
-}
+}  // namespace Querydata
+}  // namespace Engine
+}  // namespace SmartMet

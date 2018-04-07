@@ -11,7 +11,8 @@
 
 #include <libconfig.h++>
 
-extern "C" {
+extern "C"
+{
 #include <signal.h>
 }
 
@@ -37,9 +38,12 @@ int main()
     signal(SIGABRT, &sighandler);
     signal(SIGTERM, &sighandler);
 
-    cout << endl << "\tThis program will monitor test querydata." << endl
-         << "\tYou can abort the program by pressing Ctrl-C." << endl << endl << "\tThere are "
-         << timeout << " seconds before the program will" << endl << "\texit automatically." << endl
+    cout << endl
+         << "\tThis program will monitor test querydata." << endl
+         << "\tYou can abort the program by pressing Ctrl-C." << endl
+         << endl
+         << "\tThere are " << timeout << " seconds before the program will" << endl
+         << "\texit automatically." << endl
          << endl;
 
     // We'll run the method in a thread. If the user does not interrupt
@@ -53,8 +57,9 @@ int main()
   }
   catch (libconfig::ParseException& e)
   {
-    std::cerr << std::endl << "Parse error on line " << e.getLine() << " of '" << configfile
-              << "' : '" << e.getError() << "'" << std::endl;
+    std::cerr << std::endl
+              << "Parse error on line " << e.getLine() << " of '" << configfile << "' : '"
+              << e.getError() << "'" << std::endl;
     return 1;
   }
   catch (std::exception& e)

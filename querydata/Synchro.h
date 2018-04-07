@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include <spine/Thread.h>
-#include <boost/asio.hpp>
 #include <boost/array.hpp>
+#include <boost/asio.hpp>
 #include <boost/optional.hpp>
+#include <spine/Thread.h>
 
 #include <memory>
 #include <string>
@@ -154,6 +154,6 @@ class Synchronizer
   std::list<PendingUpdate> itsPendingUpdates;
 };
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet

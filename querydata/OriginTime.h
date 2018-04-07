@@ -19,7 +19,7 @@ typedef boost::posix_time::ptime OriginTime;
 typedef std::set<OriginTime> OriginTimes;
 typedef boost::posix_time::time_period OriginTimePeriod;
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
 

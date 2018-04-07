@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Producer.h"
 #include "Envelope.h"
+#include "Producer.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <list>
@@ -87,6 +87,6 @@ struct MetaData
   WGS84Envelope wgs84Envelope;
 };
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet

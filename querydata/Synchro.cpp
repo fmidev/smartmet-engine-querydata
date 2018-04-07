@@ -116,7 +116,7 @@ std::string makeRandomString(unsigned int length)
     throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
-}  // namespace anonymous
+}  // namespace
 
 namespace SmartMet
 {
@@ -587,13 +587,9 @@ void SyncGroup::setBaseline(const ProducerMap& theUpdate)
   itsConsensus = theUpdate;
 }
 
-SyncGroup::SyncGroup()
-{
-}
+SyncGroup::SyncGroup() {}
 
-SyncGroup::SyncGroup(const ProducerMap& theMap) : itsConsensus(theMap)
-{
-}
+SyncGroup::SyncGroup(const ProducerMap& theMap) : itsConsensus(theMap) {}
 
 void SyncGroup::update(const ProducerMap& theUpdate)
 {
@@ -642,13 +638,9 @@ void SyncGroup::update(const ProducerMap& theUpdate)
   }
 }
 
-SynchronizerConfig::~SynchronizerConfig()
-{
-}
+SynchronizerConfig::~SynchronizerConfig() {}
 
-SynchronizerConfig::SynchronizerConfig(const std::string& configFile) : ConfigBase(configFile)
-{
-}
+SynchronizerConfig::SynchronizerConfig(const std::string& configFile) : ConfigBase(configFile) {}
 
 bool SynchronizerConfig::parse()
 {
@@ -693,6 +685,6 @@ std::string SynchronizerConfig::getFailedReason() const
   return itsFailedReason;
 }
 
-}  // namespace Q
+}  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet

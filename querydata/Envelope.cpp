@@ -7,9 +7,7 @@ namespace Engine
 {
 namespace Querydata
 {
-WGS84Envelope::WGS84Envelope() : mRangeLon(-180.0, 180.0), mRangeLat(-90.0, 90.0)
-{
-}
+WGS84Envelope::WGS84Envelope() : mRangeLon(-180.0, 180.0), mRangeLat(-90.0, 90.0) {}
 
 WGS84Envelope::WGS84Envelope(const WGS84Envelope& other)
     : mRangeLon(other.getRangeLon()), mRangeLat(other.getRangeLat())
@@ -60,6 +58,6 @@ const WGS84Envelope::RangeLat& WGS84Envelope::getRangeLat() const
 {
   return mRangeLat;
 }
-}
-}
-}
+}  // namespace Querydata
+}  // namespace Engine
+}  // namespace SmartMet

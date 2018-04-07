@@ -11,9 +11,7 @@ Range::Range(const ValueType& first, const ValueType& second)
 {
 }
 
-Range::Range(const Range& other) : mMin(other.getMin()), mMax(other.getMax())
-{
-}
+Range::Range(const Range& other) : mMin(other.getMin()), mMax(other.getMax()) {}
 
 const Range& Range::operator=(const Range& other)
 {
@@ -37,6 +35,6 @@ void Range::set(const ValueType& a, const ValueType& b)
   mMin = std::min(a, b);
   mMax = std::max(a, b);
 }
-}
-}
-}
+}  // namespace Querydata
+}  // namespace Engine
+}  // namespace SmartMet
