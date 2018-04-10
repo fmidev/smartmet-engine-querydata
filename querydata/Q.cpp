@@ -1626,6 +1626,90 @@ std::string format_date(const boost::local_time::local_date_time &ldt,
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief WindUMS with true north orientation
+ */
+// ----------------------------------------------------------------------
+
+ts::Value WindUMS(QImpl &q,
+                  const Spine::Location &loc,
+                  const boost::local_time::local_date_time &ldt)
+{
+  try
+  {
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+    auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
+
+    if(!q.param(kFmiWindUMS))
+      return Spine::TimeSeries::None();
+
+    auto u = q.interpolate(latlon,ldt,maxgap);
+
+    if(angle == 0)
+      return u;
+    
+    if(!q.param(kFmiWindVMS))
+      return Spine::TimeSeries::None();
+
+    auto v = q.interpolate(latlon,ldt,maxgap);
+
+    if(u==kFloatMissing || v == kFloatMissing)
+      return Spine::TimeSeries::None();
+
+    // Unrotate U by the given angle
+
+    return u*cos(-angle) + v*sin(-angle);
+    
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief WindVMS with true north orientation
+ */
+// ----------------------------------------------------------------------
+
+ts::Value WindVMS(QImpl &q,
+                  const Spine::Location &loc,
+                  const boost::local_time::local_date_time &ldt)
+{
+  try
+  {
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+    auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
+
+    if(!q.param(kFmiWindVMS))
+      return Spine::TimeSeries::None();
+
+    auto v = q.interpolate(latlon,ldt,maxgap);
+
+    if(angle == 0)
+      return v;
+    
+    if(!q.param(kFmiWindUMS))
+      return Spine::TimeSeries::None();
+
+    auto u = q.interpolate(latlon,ldt,maxgap);
+
+    if(u==kFloatMissing || v == kFloatMissing)
+      return Spine::TimeSeries::None();
+
+    // Unrotate V by the given angle
+
+    return v*cos(-angle) - u*sin(-angle);
+    
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief WindCompass 8th
  */
 // ----------------------------------------------------------------------
@@ -2864,6 +2948,44 @@ ts::Value GridNorth(const QImpl &q, const Spine::Location &loc)
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Extract data value
+ */
+// ----------------------------------------------------------------------
+
+ts::Value QImpl::dataValue(const ParameterOptions &opt,
+                           const NFmiPoint& latlon,
+                           const boost::local_time::local_date_time &ldt)
+{
+  NFmiMetTime t = ldt;
+
+  // Change the year if the data contains climatology
+  if (isClimatology())
+  {
+    int year = originTime().PosixTime().date().year();
+    t.SetYear(boost::numeric_cast<short>(year));
+  }
+
+  float interpolatedValue = interpolate(latlon, t, maxgap);
+
+  // If we got no value and the proper flag is on,
+  // find the nearest point with valid values and use
+  // the values from that point
+  
+  if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
+  {
+    interpolatedValue = interpolate(opt.nearestpoint, t, maxgap);
+    if (interpolatedValue != kFloatMissing)
+      opt.lastpoint = opt.nearestpoint;
+  }
+  
+  if (interpolatedValue == kFloatMissing)
+    return Spine::TimeSeries::None();
+
+  return interpolatedValue;
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Extract data independent parameter value
  */
 // ----------------------------------------------------------------------
@@ -3201,37 +3323,8 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
       case Spine::Parameter::Type::Data:
       {
         opt.lastpoint = latlon;
-
         if (param(opt.par.number()))
-        {
-          NFmiMetTime t = ldt;
-
-          // Change the year if the data contains climatology
-          if (isClimatology())
-          {
-            int year = originTime().PosixTime().date().year();
-            t.SetYear(boost::numeric_cast<short>(year));
-          }
-
-          float interpolatedValue = interpolate(latlon, t, maxgap);
-
-          // If we got no value and the proper flag is on,
-          // find the nearest point with valid values and use
-          // the values from that point
-
-          if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
-          {
-            interpolatedValue = interpolate(opt.nearestpoint, t, maxgap);
-            if (interpolatedValue != kFloatMissing)
-              opt.lastpoint = opt.nearestpoint;
-          }
-
-          if (interpolatedValue == kFloatMissing)
-            retval = Spine::TimeSeries::None();
-          else
-            retval = interpolatedValue;
-        }
-
+          retval = dataValue(opt,latlon,ldt);
         break;
       }
       case Spine::Parameter::Type::DataDerived:
@@ -3281,6 +3374,22 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
         else if (pname == "snow1h")
           retval = Snow1h(*this, loc, ldt);
 
+        else if(pname == "windums")
+        {
+          if(isRelativeUV())
+              retval = WindUMS(*this, loc, ldt);
+          else if (param(kFmiWindUMS))
+            retval = dataValue(opt,latlon,ldt);
+        }          
+
+        else if(pname == "windvms")
+        {
+          if(isRelativeUV())
+              retval = WindVMS(*this, loc, ldt);
+          else if (param(kFmiWindVMS))
+            retval = dataValue(opt,latlon,ldt);
+        }
+        
         else
           throw Spine::Exception(BCP, "Unknown DataDerived parameter '" + pname + "'!");
 

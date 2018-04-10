@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.4.7
+Version: 18.4.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -14,7 +14,7 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 18.4.7
+BuildRequires: smartmet-library-spine-devel >= 18.4.10
 BuildRequires: smartmet-library-newbase-devel >= 18.4.7
 BuildRequires: smartmet-library-macgyver-devel >= 18.4.7
 BuildRequires: protobuf-compiler
@@ -33,7 +33,7 @@ Requires: smartmet-library-newbase >= 18.4.7
 Requires: smartmet-library-macgyver >= 18.4.7
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 18.4.7
+Requires: smartmet-library-spine >= 18.4.10
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -73,6 +73,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Apr 10 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.4.10-1.fmi
+- Added WindUMS and WindVMS handling for querydata which stores relative U/V components
+
 * Sat Apr  7 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.4.7-1.fmi
 - Upgrade to boost 1.66
 
