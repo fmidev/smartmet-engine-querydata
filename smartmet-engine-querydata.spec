@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.4.10
+Version: 18.4.13
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -73,6 +73,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Apr 13 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.4.13-1.fmi
+- Increased max number of files per producer from 1,000 to 1,000,000 to be able to process large archives
+
 * Tue Apr 10 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.4.10-1.fmi
 - Added WindUMS and WindVMS handling for querydata which stores relative U/V components
 

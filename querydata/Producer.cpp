@@ -111,9 +111,9 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
       throw Spine::Exception(BCP,
                              "Number of files to keep for producer " + producer + " must be > 0");
 
-    if (pinfo.number_to_keep >= 1000)
+    if (pinfo.number_to_keep >= 1000000)
       throw Spine::Exception(
-          BCP, "Number of files to keep for producer " + producer + " must be < 1000");
+          BCP, "Number of files to keep for producer " + producer + " must be < 1,000,000");
 
     if (pinfo.maxdistance >= 10000)
       throw Spine::Exception(
