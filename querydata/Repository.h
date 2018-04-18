@@ -66,9 +66,15 @@ class Repository
   ContentTable getRepoContents(const std::string& timeFormat,
                                const std::string& projectionFormat) const;
 
+  // All metadata
   std::list<MetaData> getRepoMetadata() const;
-
+  // Filter all metadata based on options
   std::list<MetaData> getRepoMetadata(const MetaQueryOptions& options) const;
+  // Metadata for a specific producer
+  std::list<MetaData> getRepoMetadata(const std::string& producer) const;
+  // Metadata for a specific producer and origintime
+  std::list<MetaData> getRepoMetadata(const std::string& producer,
+                                      const boost::posix_time::ptime& origintime) const;
 
   MetaObject getSynchroInfos() const;
 

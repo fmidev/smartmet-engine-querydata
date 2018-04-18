@@ -763,10 +763,25 @@ std::list<MetaData> Repository::getRepoMetadata(const MetaQueryOptions& theOptio
 {
   try
   {
-    // Get initial list of forecast metadata
-    auto propertyList = getRepoMetadata();
+    std::list<MetaData> propertyList;
 
-    // Filter according to the given options
+    // Avoid processing all metadata if producer and possibly origintime too are known,
+    // collecting all metadata may be quite slow
+
+    if (theOptions.hasProducer())
+    {
+      if (theOptions.hasOriginTime())
+        propertyList = getRepoMetadata(theOptions.getProducer(), theOptions.getOriginTime());
+      else
+        propertyList = getRepoMetadata(theOptions.getProducer());
+    }
+    else
+      propertyList = getRepoMetadata();
+
+    // Filter according to the given options. Producer and origintime filters
+    // might have been used already, but at this point the tests fail quickly,
+    // not worth optimizing.
+
     for (auto iter = propertyList.begin(); iter != propertyList.end();)
     {
       if (!filterProducer(*iter, theOptions))
@@ -827,21 +842,72 @@ std::list<MetaData> Repository::getRepoMetadata(const MetaQueryOptions& theOptio
   }
 }
 
+std::list<MetaData> Repository::getRepoMetadata(const std::string& producer) const
+{
+  try
+  {
+    std::list<MetaData> props;
+
+    const auto& producerpos = itsProducers.find(producer);
+    if (producerpos == itsProducers.end())
+      return props;
+
+    const auto& models = producerpos->second;
+
+    for (const auto& origintime_model : models)
+    {
+      QImpl q(origintime_model.second);
+      props.push_back(q.metaData());
+    }
+    return props;
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+std::list<MetaData> Repository::getRepoMetadata(const std::string& producer,
+                                                const boost::posix_time::ptime& origintime) const
+{
+  try
+  {
+    std::list<MetaData> props;
+
+    const auto& producerpos = itsProducers.find(producer);
+    if (producerpos == itsProducers.end())
+      return props;
+
+    const auto& models = producerpos->second;
+    const auto& modelpos = models.find(origintime);
+
+    if (modelpos == models.end())
+      return props;
+
+    QImpl q(modelpos->second);
+    props.push_back(q.metaData());
+
+    return props;
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
 std::list<MetaData> Repository::getRepoMetadata() const
 {
   try
   {
     std::list<MetaData> props;
 
-    for (auto prodit = itsProducers.begin(); prodit != itsProducers.end(); ++prodit)
+    for (const auto& producer_models : itsProducers)
     {
-      const SharedModels& theseModels = prodit->second;
+      const auto& models = producer_models.second;
 
-      const ProducerConfig thisConfig = itsProducerConfigs.find(prodit->first)->second;
-
-      for (auto modit = theseModels.begin(); modit != theseModels.end(); ++modit)
+      for (const auto& origintime_model : models)
       {
-        QImpl q(modit->second);
+        QImpl q(origintime_model.second);
         props.push_back(q.metaData());
       }
     }
