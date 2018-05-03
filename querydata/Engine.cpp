@@ -156,7 +156,7 @@ void Engine::configFileWatch()
           }
         }
       }
-      catch (std::exception& e)
+      catch (const std::exception& e)
       {
         if (strstr(e.what(), "syntax error") != nullptr)
           lastConfigErrno = ENOEXEC;

@@ -64,14 +64,14 @@ int main()
     cout << endl << "Ending the program after a " << timeout << " second timeout" << endl;
     engine.shutdownEngine();
   }
-  catch (libconfig::ParseException& e)
+  catch (const libconfig::ParseException& e)
   {
     std::cerr << std::endl
               << "Parse error on line " << e.getLine() << " of '" << configfile << "' : '"
               << e.getError() << "'" << std::endl;
     return 1;
   }
-  catch (std::exception& e)
+  catch (const std::exception& e)
   {
     cerr << "Exception: " << e.what();
     return 1;

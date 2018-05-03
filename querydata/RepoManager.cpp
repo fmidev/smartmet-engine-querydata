@@ -206,14 +206,14 @@ RepoManager::RepoManager(const std::string& configfile)
 
       this->configModTime = modtime;
     }
-    catch (libconfig::ParseException& e)
+    catch (const libconfig::ParseException& e)
     {
       throw Spine::Exception(BCP,
                              "Qengine configuration " + configfile + " error '" +
                                  std::string(e.getError()) + "' on line " +
                                  std::to_string(e.getLine()));
     }
-    catch (libconfig::ConfigException& e)
+    catch (const libconfig::ConfigException& e)
     {
       throw Spine::Exception(BCP, configfile + ": " + std::strerror(ec.value()));
     }

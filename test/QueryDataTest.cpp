@@ -331,7 +331,7 @@ int main(int argc, char* argv[])
           engine = new EngineW("/A file which surely does not exist");
           adderror("init should have failed with non-existing file");
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
           if (strstr(e.what(), "No such file or directory") == nullptr)
             adderror((std::string) "non-existent file should have given ENOENT but was " +
@@ -518,14 +518,14 @@ int main(int argc, char* argv[])
       }
     }
   }
-  catch (libconfig::ParseException& e)
+  catch (const libconfig::ParseException& e)
   {
     std::cerr << std::endl
               << "Parse error on line " << e.getLine() << " of '" << configfile << "' : '"
               << e.getError() << "'" << std::endl;
     return 1;
   }
-  catch (SmartMet::Spine::Exception& e)
+  catch (const SmartMet::Spine::Exception& e)
   {
     cerr << "Stack trace: " << endl << e.getStackTrace();
     return 120;
