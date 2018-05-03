@@ -591,7 +591,8 @@ void RepoManager::load(Producer producer, Files files)
       {
         std::ostringstream msg;
         msg << Spine::log_time_str() << " QENGINE ORIGINTIME for " << filename << " is "
-            << model->originTime() << std::endl;
+            << model->originTime() << " HASH VALUE is " << hash_value(*model) << "\n";
+
         std::cout << msg.str() << std::flush;
       }
 
