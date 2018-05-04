@@ -1639,26 +1639,25 @@ ts::Value WindUMS(QImpl &q,
     NFmiPoint latlon(loc.longitude, loc.latitude);
     auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
 
-    if(!q.param(kFmiWindUMS))
+    if (!q.param(kFmiWindUMS))
       return Spine::TimeSeries::None();
 
-    auto u = q.interpolate(latlon,ldt,maxgap);
+    auto u = q.interpolate(latlon, ldt, maxgap);
 
-    if(angle == 0)
+    if (angle == 0)
       return u;
-    
-    if(!q.param(kFmiWindVMS))
+
+    if (!q.param(kFmiWindVMS))
       return Spine::TimeSeries::None();
 
-    auto v = q.interpolate(latlon,ldt,maxgap);
+    auto v = q.interpolate(latlon, ldt, maxgap);
 
-    if(u==kFloatMissing || v == kFloatMissing)
+    if (u == kFloatMissing || v == kFloatMissing)
       return Spine::TimeSeries::None();
 
     // Unrotate U by the given angle
 
-    return u*cos(-angle) + v*sin(-angle);
-    
+    return u * cos(-angle) + v * sin(-angle);
   }
   catch (...)
   {
@@ -1681,26 +1680,25 @@ ts::Value WindVMS(QImpl &q,
     NFmiPoint latlon(loc.longitude, loc.latitude);
     auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
 
-    if(!q.param(kFmiWindVMS))
+    if (!q.param(kFmiWindVMS))
       return Spine::TimeSeries::None();
 
-    auto v = q.interpolate(latlon,ldt,maxgap);
+    auto v = q.interpolate(latlon, ldt, maxgap);
 
-    if(angle == 0)
+    if (angle == 0)
       return v;
-    
-    if(!q.param(kFmiWindUMS))
+
+    if (!q.param(kFmiWindUMS))
       return Spine::TimeSeries::None();
 
-    auto u = q.interpolate(latlon,ldt,maxgap);
+    auto u = q.interpolate(latlon, ldt, maxgap);
 
-    if(u==kFloatMissing || v == kFloatMissing)
+    if (u == kFloatMissing || v == kFloatMissing)
       return Spine::TimeSeries::None();
 
     // Unrotate V by the given angle
 
-    return v*cos(-angle) - u*sin(-angle);
-    
+    return v * cos(-angle) - u * sin(-angle);
   }
   catch (...)
   {
@@ -2953,7 +2951,7 @@ ts::Value GridNorth(const QImpl &q, const Spine::Location &loc)
 // ----------------------------------------------------------------------
 
 ts::Value QImpl::dataValue(const ParameterOptions &opt,
-                           const NFmiPoint& latlon,
+                           const NFmiPoint &latlon,
                            const boost::local_time::local_date_time &ldt)
 {
   NFmiMetTime t = ldt;
@@ -2970,14 +2968,14 @@ ts::Value QImpl::dataValue(const ParameterOptions &opt,
   // If we got no value and the proper flag is on,
   // find the nearest point with valid values and use
   // the values from that point
-  
+
   if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
   {
     interpolatedValue = interpolate(opt.nearestpoint, t, maxgap);
     if (interpolatedValue != kFloatMissing)
       opt.lastpoint = opt.nearestpoint;
   }
-  
+
   if (interpolatedValue == kFloatMissing)
     return Spine::TimeSeries::None();
 
@@ -3054,9 +3052,6 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
 
   if (pname == "level")
     return levelResult;
-
-  if (pname == "latlon" || pname == "lonlat")
-    return ts::LonLat(loc.longitude, loc.latitude);
 
   if (pname == "nearlatitude")
     return opt.lastpoint.Y();
@@ -3243,12 +3238,6 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
   if (pname.substr(0, 5) == "date(" && pname[pname.size() - 1] == ')')
     return format_date(ldt, opt.outlocale, pname.substr(5, pname.size() - 6));
 
-  if (pname == "latitude" || pname == "lat")
-    return loc.latitude;
-
-  if (pname == "longitude" || pname == "lon")
-    return loc.longitude;
-
   if (pname == "sunelevation")
   {
     auto pos = Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
@@ -3324,12 +3313,21 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
       {
         opt.lastpoint = latlon;
         if (param(opt.par.number()))
-          retval = dataValue(opt,latlon,ldt);
+          retval = dataValue(opt, latlon, ldt);
         break;
       }
       case Spine::Parameter::Type::DataDerived:
       {
-        if (pname == "windcompass8")
+        if (pname == "latitude" || pname == "lat")
+          retval = loc.latitude;
+
+        else if (pname == "longitude" || pname == "lon")
+          retval = loc.longitude;
+
+        else if (pname == "latlon" || pname == "lonlat")
+          retval = ts::LonLat(loc.longitude, loc.latitude);
+
+        else if (pname == "windcompass8")
           retval = WindCompass8(*this, loc, ldt);
 
         else if (pname == "windcompass16")
@@ -3374,22 +3372,22 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
         else if (pname == "snow1h")
           retval = Snow1h(*this, loc, ldt);
 
-        else if(pname == "windums")
+        else if (pname == "windums")
         {
-          if(isRelativeUV())
-              retval = WindUMS(*this, loc, ldt);
+          if (isRelativeUV())
+            retval = WindUMS(*this, loc, ldt);
           else if (param(kFmiWindUMS))
-            retval = dataValue(opt,latlon,ldt);
-        }          
-
-        else if(pname == "windvms")
-        {
-          if(isRelativeUV())
-              retval = WindVMS(*this, loc, ldt);
-          else if (param(kFmiWindVMS))
-            retval = dataValue(opt,latlon,ldt);
+            retval = dataValue(opt, latlon, ldt);
         }
-        
+
+        else if (pname == "windvms")
+        {
+          if (isRelativeUV())
+            retval = WindVMS(*this, loc, ldt);
+          else if (param(kFmiWindVMS))
+            retval = dataValue(opt, latlon, ldt);
+        }
+
         else
           throw Spine::Exception(BCP, "Unknown DataDerived parameter '" + pname + "'!");
 
