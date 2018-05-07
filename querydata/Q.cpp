@@ -3013,6 +3013,17 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       return Fmi::to_string(loc.geoid);
   }
 
+  // We allow coordinates to be both DataIndependent and DataDerived depending
+  // on the needs of plugins
+  if (pname == "latitude" || pname == "lat")
+    return loc.latitude;
+
+  if (pname == "longitude" || pname == "lon")
+    return loc.longitude;
+
+  if (pname == "latlon" || pname == "lonlat")
+    return ts::LonLat(loc.longitude, loc.latitude);
+
   if (pname == "region")
   {
     // This reintroduces an older bug/feature where
