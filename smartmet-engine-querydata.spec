@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.5.7
+Version: 18.5.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue May  8 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.5.8-1.fmi
+- Added more special cases for queries of latlon coordinates
+
 * Mon May  7 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.5.7-1.fmi
 - Allow latitude queries to be both DataIndependent and DataDerived to keep WFS working
 

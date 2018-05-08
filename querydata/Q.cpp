@@ -3436,6 +3436,7 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
 
     // Some shorthand variables
     const Spine::Location &loc = opt.loc;
+    std::string pname = boost::algorithm::to_lower_copy(opt.par.name(), std::locale::classic());
 
     // Update last accessed point.
 
@@ -3475,6 +3476,15 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
       }
       case Spine::Parameter::Type::DataDerived:
       {
+        if (pname == "latitude" || pname == "lat")
+          retval = loc.latitude;
+
+        else if (pname == "longitude" || pname == "lon")
+          retval = loc.longitude;
+
+        else if (pname == "latlon" || pname == "lonlat")
+          retval = ts::LonLat(loc.longitude, loc.latitude);
+
         break;
       }
       case Spine::Parameter::Type::DataIndependent:
@@ -3509,6 +3519,7 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
 
     // Some shorthand variables
     const Spine::Location &loc = opt.loc;
+    std::string pname = boost::algorithm::to_lower_copy(opt.par.name(), std::locale::classic());
 
     // Update last accessed point.
 
@@ -3548,6 +3559,15 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
       }
       case Spine::Parameter::Type::DataDerived:
       {
+        if (pname == "latitude" || pname == "lat")
+          retval = loc.latitude;
+
+        else if (pname == "longitude" || pname == "lon")
+          retval = loc.longitude;
+
+        else if (pname == "latlon" || pname == "lonlat")
+          retval = ts::LonLat(loc.longitude, loc.latitude);
+
         break;
       }
       case Spine::Parameter::Type::DataIndependent:
