@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.5.7
+Version: 0
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -16,7 +16,7 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
 BuildRequires: smartmet-library-spine-devel >= 18.5.4
-BuildRequires: smartmet-library-newbase-devel >= 18.5.2
+BuildRequires: smartmet-library-newbase-devel >= 0
 BuildRequires: smartmet-library-macgyver-devel >= 18.4.7
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -30,7 +30,7 @@ Requires: boost-regex
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
-Requires: smartmet-library-newbase >= 18.5.2
+Requires: smartmet-library-newbase >= 0
 Requires: smartmet-library-macgyver >= 18.4.7
 Requires: protobuf
 Requires: libconfig >= 1.4.9
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Upcoming
+- Added regridding methods with relative_uv parameter to control whether U/V adjustment needs to be applied
+
 * Mon May  7 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.5.7-1.fmi
 - Allow latitude queries to be both DataIndependent and DataDerived to keep WFS working
 
