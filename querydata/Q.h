@@ -194,6 +194,23 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                       const NFmiMetTime& theInterpolatedTime,
                       float wantedPressureLevel);
 
+  void pressureValues(NFmiDataMatrix<float>& theValues,
+                      const NFmiGrid& theWantedGrid,
+                      const NFmiMetTime& theInterpolatedTime,
+                      float wantedPressureLevel,
+                      bool relative_uv);
+
+  void gridValues(NFmiDataMatrix<float>& theValues,
+                  const NFmiGrid& theWantedGrid,
+                  const NFmiMetTime& theInterpolatedTime,
+                  bool relative_uv);
+
+  void heightValues(NFmiDataMatrix<float>& theValues,
+                    const NFmiGrid& theWantedGrid,
+                    const NFmiMetTime& theInterpolatedTime,
+                    float wantedHeightLevel,
+                    bool relative_uv);
+
   boost::shared_ptr<std::vector<NFmiPoint>> latLonCache() const;
 
   // Gridded landscaping; Load dem values and water flags for native (sub)grid or for given
