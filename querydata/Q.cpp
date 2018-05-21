@@ -1547,6 +1547,68 @@ void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
   }
 }
 
+void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
+                           const NFmiGrid &theWantedGrid,
+                           const NFmiMetTime &theInterpolatedTime,
+                           float wantedPressureLevel,
+                           bool relative_uv)
+{
+  try
+  {
+    return itsInfo->PressureValues(
+        theValues, theWantedGrid, theInterpolatedTime, wantedPressureLevel, relative_uv);
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Extract values for grid
+ */
+// ----------------------------------------------------------------------
+
+void QImpl::gridValues(NFmiDataMatrix<float> &theValues,
+                       const NFmiGrid &theWantedGrid,
+                       const NFmiMetTime &theInterpolatedTime,
+                       bool relative_uv)
+{
+  try
+  {
+    return itsInfo->GridValues(
+        theValues, theWantedGrid, theInterpolatedTime, relative_uv);
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Extract values for height level
+ */
+// ----------------------------------------------------------------------
+
+void QImpl::heightValues(NFmiDataMatrix<float> &theValues,
+                         const NFmiGrid &theWantedGrid,
+                         const NFmiMetTime &theInterpolatedTime,
+                         float wantedHeightLevel,
+                         bool relative_uv)
+{
+  try
+  {
+    return itsInfo->HeightValues(
+        theValues, theWantedGrid, theInterpolatedTime, wantedHeightLevel, relative_uv);
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Return the lat lon cache
