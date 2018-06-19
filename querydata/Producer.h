@@ -40,7 +40,7 @@ typedef std::list<std::string> ProducerList;
  *         leveltype               = "surface";
  *         refresh_interval_secs   = 60;
  *         max_age                 = "PT24H";
- *         number_to_keep          = 1;
+ *         number_to_keep          = 2;
  *         update_interval         = "PT1H";
  *         minimum_expires         = "PT5M";
  *         relative_uv             = false;
@@ -62,7 +62,7 @@ struct ProducerConfig
   std::string type = "grid";
   std::string leveltype = "surface";
   unsigned int refresh_interval_secs = 60;  // once per minute
-  unsigned int number_to_keep = 1;          // at least one file
+  unsigned int number_to_keep = 2;          // at least two files!
   unsigned int update_interval = 3600;      // once per hour
   unsigned int minimum_expires = 600;       // 10 minutes
   unsigned int max_age = 0;                 // do not remove old models by default based on age
@@ -73,6 +73,11 @@ struct ProducerConfig
   bool isfullgrid = true;
   bool isrelativeuv = false;  // are U/V winds relative to grid orientation
 
+  // Note: If number_to_keep is only one, during the one minute refresh interval a qengine
+  // status query might see a new file in some backends and an older one in others. There
+  // would be no common content, which may mess up production.
+
+  
   inline bool operator==(const ProducerConfig& c)
   {
     return c.isfullgrid == isfullgrid && c.isclimatology == isclimatology &&
