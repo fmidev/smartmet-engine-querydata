@@ -178,6 +178,8 @@ RepoManager::RepoManager(const std::string& configfile)
       lookupHostSetting(itsConfig, itsVerbose, "verbose", hostname);
       lookupHostSetting(itsConfig, itsValidPointsCacheDir, "valid_points_cache_dir", hostname);
 
+      itsRepo.verbose(itsVerbose);
+
       // Phase 1: Establish producer setting
 
       if (!itsConfig.exists("producers"))

@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.6.19
+Version: 18.6.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Jun 21 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.6.21-1.fmi
+- Report model removals in verbose mode
+
 * Tue Jun 19 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.6.19-1.fmi
 - Default number_to_keep is now 2
 

@@ -81,6 +81,8 @@ class Repository
   SharedModel getModel(const Producer& producer, const boost::filesystem::path& path) const;
   SharedModels getAllModels(const Producer& producer) const;
 
+  void verbose(bool flag);
+
  private:
   bool contains(const SharedModels& models,
                 double lon,
@@ -95,6 +97,7 @@ class Repository
   typedef std::map<Producer, ProducerConfig> ProducerConfigs;
   Producers itsProducers;
   ProducerConfigs itsProducerConfigs;
+  bool itsVerbose = false;
 
 };  // class Repository
 

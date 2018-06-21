@@ -362,10 +362,9 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
     {
       if (time_model->second->path() == path)
       {
-#ifdef MYDEBUG
-        std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Deleting "
-                  << time_model->second->path() << std::endl;
-#endif
+        if (itsVerbose)
+          std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Deleting "
+                    << time_model->second->path() << std::endl;
         time_model->second->uncache();  // uncache validpoints
         models.erase(time_model);
         break;
@@ -405,10 +404,10 @@ void Repository::resize(const Producer& producer, std::size_t limit)
 
     while (models.size() > limit)
     {
-#ifdef MYDEBUG
-      std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Resize removal of "
-                << models.begin()->second->path() << std::endl;
-#endif
+      if (itsVerbose)
+        std::cout << boost::posix_time::second_clock::local_time()
+                  << " [qengine] Resize removal of " << models.begin()->second->path() << std::endl;
+
       // the oldest file is the one first sorted by origintime
       models.begin()->second->uncache();  // uncache validpoints
       models.erase(models.begin());       // and erase the model
@@ -454,11 +453,10 @@ void Repository::expire(const Producer& producer, std::size_t max_age)
         ++time_model;
       else
       {
-#ifdef MYDEBUG
-        std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Expiring "
-                  << time_model->second->path() << std::endl;
+        if (itsVerbose)
+          std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Expiring "
+                    << time_model->second->path() << std::endl;
         time_model->second->uncache();  // uncache validpoints
-#endif
         models.erase(time_model++);
       }
     }
@@ -994,6 +992,11 @@ Repository::SharedModels Repository::getAllModels(const Producer& producer) cons
   {
     throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
+}
+
+void Repository::verbose(bool flag)
+{
+  itsVerbose = flag;
 }
 
 }  // namespace Querydata
