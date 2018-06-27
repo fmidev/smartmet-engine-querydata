@@ -50,11 +50,11 @@ Model::Model(const boost::filesystem::path& filename,
       itsClimatology(climatology),
       itsFullGrid(full),
       itsRelativeUV(relativeuv),
-      itsQueryData(new NFmiQueryData(filename.string())),
       itsValidPoints(),
       itsValidTimeList(new ValidTimeList()),
       itsQueryInfoPoolMutex(),
-      itsQueryInfoPool()
+      itsQueryInfoPool(),
+      itsQueryData(new NFmiQueryData(filename.string()))
 {
   try
   {
@@ -130,11 +130,11 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
       itsClimatology(theModel.itsClimatology),
       itsFullGrid(theModel.itsFullGrid),
       itsRelativeUV(theModel.itsRelativeUV),
-      itsQueryData(theData),
       itsValidPoints(theModel.itsValidPoints),
       itsValidTimeList(theModel.itsValidTimeList),
       itsQueryInfoPoolMutex(),
-      itsQueryInfoPool()
+      itsQueryInfoPool(),
+      itsQueryData(theData)
 {
 }
 
@@ -157,11 +157,11 @@ Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
       itsClimatology(false),
       itsFullGrid(true),
       itsRelativeUV(false),
-      itsQueryData(theData),
       itsValidPoints(),
       itsValidTimeList(new ValidTimeList()),
       itsQueryInfoPoolMutex(),
-      itsQueryInfoPool()
+      itsQueryInfoPool(),
+      itsQueryData(theData)
 {
   try
   {

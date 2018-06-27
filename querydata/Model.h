@@ -100,9 +100,6 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   bool itsFullGrid{false};
   bool itsRelativeUV{false};
 
-  // We need direct access to data in the manager
-  boost::shared_ptr<NFmiQueryData> itsQueryData;
-
   boost::shared_ptr<ValidPoints> itsValidPoints;
   boost::shared_ptr<ValidTimeList> itsValidTimeList;
 
@@ -113,6 +110,10 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
 
   mutable Spine::MutexType itsQueryInfoPoolMutex;
   mutable std::list<SharedInfo> itsQueryInfoPool;
+
+  // The actual reference to the data is after the pool above to make
+  // sure the destruction order makes sense.
+  boost::shared_ptr<NFmiQueryData> itsQueryData;
 };
 
 typedef boost::shared_ptr<Model> SharedModel;

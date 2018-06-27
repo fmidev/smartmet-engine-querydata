@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.6.21
+Version: 18.6.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Jun 27 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.6.27-1.fmi
+- More sensible destruction order for Model data members in order to avoid dangling pointers
+
 * Thu Jun 21 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.6.21-1.fmi
 - Report model removals in verbose mode
 
