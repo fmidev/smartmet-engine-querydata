@@ -21,7 +21,7 @@ class WGS84Envelope
   explicit WGS84Envelope();
   explicit WGS84Envelope(const WGS84Envelope& other);
   explicit WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo> info);
-  const WGS84Envelope& operator=(const WGS84Envelope& other);
+  WGS84Envelope& operator=(const WGS84Envelope& other);
   const RangeLon& getRangeLon() const;
   const RangeLat& getRangeLat() const;
 

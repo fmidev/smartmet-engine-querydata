@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.6.28
+Version: 18.7.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,9 +15,9 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 18.5.15
-BuildRequires: smartmet-library-newbase-devel >= 18.5.21
-BuildRequires: smartmet-library-macgyver-devel >= 18.4.11
+BuildRequires: smartmet-library-spine-devel >= 18.7.23
+BuildRequires: smartmet-library-newbase-devel >= 18.7.23
+BuildRequires: smartmet-library-macgyver-devel >= 18.7.23
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -30,11 +30,11 @@ Requires: boost-regex
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
-Requires: smartmet-library-newbase >= 18.5.21
-Requires: smartmet-library-macgyver >= 18.4.11
+Requires: smartmet-library-newbase >= 18.7.23
+Requires: smartmet-library-macgyver >= 18.7.23
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 18.5.15
+Requires: smartmet-library-spine >= 18.7.23
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Jul 23 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.7.23-1.fmi
+- Silenced CodeChecker warnings
+
 * Thu Jun 28 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.6.28-1.fmi
 - Fixed async executions to capture locals by reference to avoid locking memory mapped files
 

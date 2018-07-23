@@ -13,7 +13,7 @@ Range::Range(const ValueType& first, const ValueType& second)
 
 Range::Range(const Range& other) : mMin(other.getMin()), mMax(other.getMax()) {}
 
-const Range& Range::operator=(const Range& other)
+Range& Range::operator=(const Range& other)
 {
   mMin = other.getMin();
   mMax = other.getMax();
