@@ -186,7 +186,7 @@ Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
   }
   catch (...)
   {
-    throw Spine::Exception(BCP, "Operation failed!", NULL);
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

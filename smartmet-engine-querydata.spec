@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.7.23
+Version: 18.7.25
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -17,7 +17,7 @@ BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
 BuildRequires: smartmet-library-spine-devel >= 18.7.23
 BuildRequires: smartmet-library-newbase-devel >= 18.7.23
-BuildRequires: smartmet-library-macgyver-devel >= 18.7.23
+BuildRequires: smartmet-library-macgyver-devel >= 18.7.25
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -31,7 +31,7 @@ Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
 Requires: smartmet-library-newbase >= 18.7.23
-Requires: smartmet-library-macgyver >= 18.7.23
+Requires: smartmet-library-macgyver >= 18.7.25
 Requires: protobuf
 Requires: libconfig >= 1.4.9
 Requires: smartmet-library-spine >= 18.7.23
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Jul 25 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.7.25-1.fmi
+- Prefer nullptr over NULL
+
 * Mon Jul 23 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.7.23-1.fmi
 - Silenced CodeChecker warnings
 
