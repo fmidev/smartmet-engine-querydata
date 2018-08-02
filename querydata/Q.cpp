@@ -3,7 +3,6 @@
 #include <boost/date_time/local_time/local_time_io.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/time_facet.hpp>
-#include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/optional.hpp>
 #include <boost/range/algorithm/sort.hpp>
@@ -182,7 +181,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
 
     // Establish hash value
     itsHashValue = 0;
-    BOOST_FOREACH (const auto &model, itsModels)
+    for (const auto &model : itsModels)
     {
       boost::hash_combine(itsHashValue, model);
     }
@@ -192,10 +191,10 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
     for (std::size_t i = 0; i < itsModels.size(); i++)
     {
       const auto &validtimes = itsModels[i]->validTimes();
-      BOOST_FOREACH (const auto &t, *validtimes)
+      for (const auto &t : *validtimes)
         uniquetimes.insert(t);
     }
-    BOOST_FOREACH (const auto &t, uniquetimes)
+    for (const auto &t : uniquetimes)
       itsValidTimes->push_back(t);
   }
   catch (...)
@@ -1577,8 +1576,7 @@ void QImpl::gridValues(NFmiDataMatrix<float> &theValues,
 {
   try
   {
-    return itsInfo->GridValues(
-        theValues, theWantedGrid, theInterpolatedTime, relative_uv);
+    return itsInfo->GridValues(theValues, theWantedGrid, theInterpolatedTime, relative_uv);
   }
   catch (...)
   {
@@ -3661,7 +3659,7 @@ ts::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
   {
     ts::TimeSeriesPtr ret(new ts::TimeSeries);
 
-    BOOST_FOREACH (const boost::local_time::local_date_time &ldt, tlist)
+    for (const boost::local_time::local_date_time &ldt : tlist)
     {
       ret->push_back(ts::TimedValue(ldt, value(param, ldt)));
     }
@@ -3681,7 +3679,7 @@ ts::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
   {
     ts::TimeSeriesPtr ret(new ts::TimeSeries);
 
-    BOOST_FOREACH (const boost::local_time::local_date_time &ldt, tlist)
+    for (const boost::local_time::local_date_time &ldt : tlist)
     {
       ret->push_back(ts::TimedValue(ldt, valueAtPressure(param, ldt, pressure)));
     }
@@ -3701,7 +3699,7 @@ ts::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
   {
     ts::TimeSeriesPtr ret(new ts::TimeSeries);
 
-    BOOST_FOREACH (const boost::local_time::local_date_time &ldt, tlist)
+    for (const boost::local_time::local_date_time &ldt : tlist)
     {
       ret->push_back(ts::TimedValue(ldt, valueAtHeight(param, ldt, height)));
     }
@@ -3894,7 +3892,7 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
   {
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
-    BOOST_FOREACH (const Spine::LocationPtr &loc, llist)
+    for (const Spine::LocationPtr &loc : llist)
     {
       ParameterOptions paramOptions(param.par,
                                     param.producer,
@@ -3934,7 +3932,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
   {
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
-    BOOST_FOREACH (const Spine::LocationPtr &loc, llist)
+    for (const Spine::LocationPtr &loc : llist)
     {
       ParameterOptions paramOptions(param.par,
                                     param.producer,
@@ -3973,7 +3971,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
   {
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
-    BOOST_FOREACH (const Spine::LocationPtr &loc, llist)
+    for (const Spine::LocationPtr &loc : llist)
     {
       ParameterOptions paramOptions(param.par,
                                     param.producer,

@@ -310,7 +310,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   Spine::TimeSeries::Value dataValue(const ParameterOptions& opt,
                                      const NFmiPoint& latlon,
                                      const boost::local_time::local_date_time& ldt);
-  
+
   std::vector<SharedModel> itsModels;
   std::vector<SharedInfo> itsInfos;  // used only in destructor and MultiInfo constructor
   boost::shared_ptr<NFmiFastQueryInfo> itsInfo;    // or NFmiMultiQueryInfo

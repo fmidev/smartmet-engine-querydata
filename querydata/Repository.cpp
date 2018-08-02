@@ -6,10 +6,8 @@
 
 #include "Repository.h"
 #include "MetaQueryFilters.h"
-
 #include <boost/algorithm/string/join.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>
-#include <boost/foreach.hpp>
 #include <boost/regex.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <macgyver/StringConversion.h>
@@ -135,7 +133,7 @@ OriginTimes Repository::originTimes(const Producer& producer) const
     {
       const SharedModels& models = it->second;
 
-      BOOST_FOREACH (const auto& time_model, models)
+      for (const auto& time_model : models)
       {
         times.insert(time_model.first);
       }
@@ -320,7 +318,7 @@ Q Repository::getAll(const Producer& producer) const
     // Construct a vector of datas
 
     std::vector<SharedModel> okmodels;
-    BOOST_FOREACH (const auto& otime_model, models)
+    for (const auto& otime_model : models)
     {
       okmodels.push_back(otime_model.second);
     }
@@ -542,7 +540,7 @@ Producer Repository::find(const ProducerList& producerlist,
 {
   try
   {
-    BOOST_FOREACH (const Producer& producer, producerlist)
+    for (const Producer& producer : producerlist)
     {
       // Try primary names first
       Producers::const_iterator producer_model = itsProducers.find(producer);
@@ -562,7 +560,7 @@ Producer Repository::find(const ProducerList& producerlist,
 
     // Try aliases next in the given order
 
-    BOOST_FOREACH (const Producer& producer, producerorder)
+    for (const Producer& producer : producerorder)
     {
       ProducerConfigs::const_iterator prod_config = itsProducerConfigs.find(producer);
       if (prod_config == itsProducerConfigs.end())
@@ -575,7 +573,7 @@ Producer Repository::find(const ProducerList& producerlist,
 
       const std::set<std::string>& aliases = prod_config->second.aliases;
 
-      BOOST_FOREACH (const Producer& alias, producerlist)
+      for (const Producer& alias : producerlist)
       {
         if (aliases.find(alias) != aliases.end())
         {
@@ -744,7 +742,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
 
     Spine::TableFormatter::Names headers;
 
-    BOOST_FOREACH (const auto& p, ContentTableHeaders)
+    for (const auto& p : ContentTableHeaders)
     {
       headers.push_back(p);
     }

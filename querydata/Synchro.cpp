@@ -1,19 +1,13 @@
-
 #include "Synchro.h"
 #include "Engine.h"
-
 #include "QueryDataMessage.pb.h"
-
-#include <spine/Exception.h>
-#include <spine/Reactor.h>
-
-#include <macgyver/StringConversion.h>
-
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/foreach.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
+#include <macgyver/StringConversion.h>
+#include <spine/Exception.h>
+#include <spine/Reactor.h>
 
 #ifndef BROADCAST_TIMER_DELAY
 #define BROADCAST_TIMER_DELAY 10
@@ -392,9 +386,9 @@ void Synchronizer::update_consensus()
     }
 
     // Intersect each pending update with the current data (baseline set previously)
-    BOOST_FOREACH (auto& update, itsPendingUpdates)
+    for (auto& update : itsPendingUpdates)
     {
-      BOOST_FOREACH (auto& handler, update.handlers)
+      for (auto& handler : update.handlers)
       {
         // Find the handler from the current data
         auto it = itsSyncGroups.find(handler);

@@ -86,7 +86,7 @@ void Engine::configFileWatch()
   boost::system::error_code ec;
   std::time_t filetime = getConfigModTime();
 
-  while (itsShutdownRequested == false)
+  while (!itsShutdownRequested)
   {
     boost::this_thread::sleep_for(boost::chrono::seconds(1));
 
@@ -106,7 +106,7 @@ void Engine::configFileWatch()
     std::time_t newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
 
     // Was the file modified?
-    if (newfiletime != filetime && itsShutdownRequested == false)
+    if (newfiletime != filetime && !itsShutdownRequested)
     {
       // File changed
       // Go into cooling period of waiting a few seconds and checking again
@@ -115,7 +115,7 @@ void Engine::configFileWatch()
 
       try
       {
-        while (newfiletime != filetime && itsShutdownRequested == false)
+        while (newfiletime != filetime && !itsShutdownRequested)
         {
           std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
                            " updated, rereading\n";
@@ -124,7 +124,7 @@ void Engine::configFileWatch()
           newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
         }
 
-        if (itsShutdownRequested == false)
+        if (!itsShutdownRequested)
         {
           // Generate new repomanager according to new configs
           boost::shared_ptr<RepoManager> newrepomanager =
@@ -143,7 +143,7 @@ void Engine::configFileWatch()
 
           newrepomanager->removeOldManager();
 
-          if (itsShutdownRequested == false)
+          if (!itsShutdownRequested)
           {
             // Update current repomanager
             boost::atomic_store(&itsRepoManager, newrepomanager);

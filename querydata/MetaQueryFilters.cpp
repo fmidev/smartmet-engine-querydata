@@ -1,7 +1,5 @@
 
 #include "MetaQueryFilters.h"
-
-#include <boost/foreach.hpp>
 #include <boost/geometry/geometry.hpp>
 #include <spine/Convenience.h>
 #include <spine/Exception.h>
@@ -31,14 +29,7 @@ bool filterProducer(const MetaData& prop, const MetaQueryOptions& options)
     }
     else
     {
-      if (str_iequal(prop.producer, options.getProducer()))
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
+      return (str_iequal(prop.producer, options.getProducer()));
     }
   }
   catch (...)
@@ -52,21 +43,10 @@ bool filterOriginTime(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasOriginTime())
-    {
       // No origin time specified
       return true;
-    }
-    else
-    {
-      if (prop.originTime == options.getOriginTime())
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
+
+    return (prop.originTime == options.getOriginTime());
   }
   catch (...)
   {
@@ -79,21 +59,10 @@ bool filterFirstTime(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasFirstTime())
-    {
       // No time specified
       return true;
-    }
-    else
-    {
-      if (prop.firstTime == options.getFirstTime())
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
+
+    return (prop.firstTime == options.getFirstTime());
   }
   catch (...)
   {
@@ -106,21 +75,10 @@ bool filterLastTime(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasLastTime())
-    {
       // No time specified
       return true;
-    }
-    else
-    {
-      if (prop.lastTime == options.getLastTime())
-      {
-        return true;
-      }
-      else
-      {
-        return false;
-      }
-    }
+
+    return (prop.lastTime == options.getLastTime());
   }
   catch (...)
   {
@@ -140,10 +98,10 @@ bool filterParameters(const MetaData& prop, const MetaQueryOptions& options)
     else
     {
       auto params = options.getParameters();
-      BOOST_FOREACH (auto& param, params)
+      for (auto& param : params)
       {
         bool found = false;
-        BOOST_FOREACH (auto& fparam, prop.parameters)
+        for (auto& fparam : prop.parameters)
         {
           if (str_iequal(fparam.name, param))
           {
@@ -151,11 +109,9 @@ bool filterParameters(const MetaData& prop, const MetaQueryOptions& options)
             break;
           }
         }
-        if (found == false)
-        {
+        if (!found)
           // One miss is all we need to fail
           return false;
-        }
       }
 
       // If we made this far, all params have been found
@@ -180,10 +136,10 @@ bool filterLevelTypes(const MetaData& prop, const MetaQueryOptions& options)
     else
     {
       auto types = options.getLevelTypes();
-      BOOST_FOREACH (auto& type, types)
+      for (auto& type : types)
       {
         bool found = false;
-        BOOST_FOREACH (auto& flevel, prop.levels)
+        for (auto& flevel : prop.levels)
         {
           if (str_iequal(flevel.type, type))
           {
@@ -191,11 +147,9 @@ bool filterLevelTypes(const MetaData& prop, const MetaQueryOptions& options)
             break;
           }
         }
-        if (found == false)
-        {
+        if (!found)
           // One miss is all we need to fail
           return false;
-        }
       }
 
       // If we made this far, all levels have been found
@@ -220,10 +174,10 @@ bool filterLevelValues(const MetaData& prop, const MetaQueryOptions& options)
     else
     {
       auto values = options.getLevelValues();
-      BOOST_FOREACH (auto& value, values)
+      for (auto& value : values)
       {
         bool found = false;
-        BOOST_FOREACH (auto& flevel, prop.levels)
+        for (auto& flevel : prop.levels)
         {
           if (flevel.value == value)
           {
@@ -231,11 +185,9 @@ bool filterLevelValues(const MetaData& prop, const MetaQueryOptions& options)
             break;
           }
         }
-        if (found == false)
-        {
+        if (!found)
           // One miss is all we need to fail
           return false;
-        }
       }
 
       // If we made this far, all levels have been found
@@ -252,13 +204,11 @@ bool filterSynchro(const MetaData& prop, const std::vector<bp::ptime>& originTim
 {
   try
   {
-    BOOST_FOREACH (auto& time, originTimes)
+    for (auto& time : originTimes)
     {
       if (prop.originTime == time)
-      {
         // Time is in synchronized origin times
         return true;
-      }
     }
 
     // If we are here, there were no matches
@@ -300,15 +250,8 @@ bool filterBoundingBox(const MetaData& prop, const MetaQueryOptions& options)
 
       // Only accept complete overlap
 
-      if (bg::within(givenGeoBox, modelGeoBox))
-      {
-        // Given corners are inside the model box
-        return true;
-      }
-      else
-      {
-        return false;
-      }
+      // True if given corners are inside the model box
+      return (bg::within(givenGeoBox, modelGeoBox));
     }
   }
   catch (...)

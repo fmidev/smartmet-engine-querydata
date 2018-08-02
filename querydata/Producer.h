@@ -77,7 +77,6 @@ struct ProducerConfig
   // status query might see a new file in some backends and an older one in others. There
   // would be no common content, which may mess up production.
 
-  
   inline bool operator==(const ProducerConfig& c)
   {
     return c.isfullgrid == isfullgrid && c.isclimatology == isclimatology &&

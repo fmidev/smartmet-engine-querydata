@@ -31,22 +31,17 @@
 #include "Model.h"
 #include "Producer.h"
 #include "Repository.h"
-
+#include <boost/bind.hpp>
+#include <boost/date_time/posix_time/posix_time_io.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/make_shared.hpp>
+#include <macgyver/AnsiEscapeCodes.h>
+#include <macgyver/StringConversion.h>
+#include <macgyver/TypeName.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
 #include <spine/Exception.h>
-
-#include <macgyver/AnsiEscapeCodes.h>
-#include <macgyver/StringConversion.h>
-#include <macgyver/TypeName.h>
-
-#include <boost/bind.hpp>
-#include <boost/date_time/posix_time/posix_time_io.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
-#include <boost/make_shared.hpp>
-
 #include <cassert>
 #include <set>
 #include <sstream>
@@ -290,7 +285,7 @@ void RepoManager::expirationLoop()
     if (itsShutdownRequested)
       break;
 
-    BOOST_FOREACH (const ProducerConfig& config, itsConfigList)
+    for (const ProducerConfig& config : itsConfigList)
     {
       if (config.max_age > 0)
       {
@@ -367,7 +362,7 @@ Fmi::DirectoryMonitor::Watcher RepoManager::id(const Producer& producer) const
   {
     // no lock needed, this method is private, caller is responsible
 
-    BOOST_FOREACH (const ProducerMap::value_type& it, itsProducerMap)
+    for (const auto& it : itsProducerMap)
     {
       if (it.second == producer)
         return it.first;
@@ -438,7 +433,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
 
     Files removals;
     Files additions;
-    BOOST_FOREACH (const auto& file_status, *status)
+    for (const auto& file_status : *status)
     {
       if (file_status.second == Fmi::DirectoryMonitor::DELETE ||
           file_status.second == Fmi::DirectoryMonitor::MODIFY)
@@ -459,7 +454,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     {
       // Take the lock only when needed
       Spine::WriteLock lock(itsMutex);
-      BOOST_FOREACH (const auto& file, removals)
+      for (const auto& file : removals)
         itsRepo.remove(producer, file);
     }
 
@@ -651,7 +646,7 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
     // jams the server. Must study more carefully.
     // Spine::ReadLock lock(mutex);
 
-    BOOST_FOREACH (const ProducerConfig& config, itsConfigList)
+    for (const ProducerConfig& config : itsConfigList)
     {
       if (config.producer == producer)
         return config;
