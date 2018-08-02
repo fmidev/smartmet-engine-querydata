@@ -2304,59 +2304,59 @@ ts::Value WeatherText(QImpl &q,
       switch (boost::numeric_cast<int>(w))
       {
         case 1:
-          return "klart";
+          return u8"klart";
         case 2:
-          return "halvklart";
+          return u8"halvklart";
         case 3:
-          return "mulet";
+          return u8"mulet";
         case 21:
-          return "lätta regnskurar";
+          return u8"l\u00e4tta regnskurar";
         case 22:
-          return "regnskurar";
+          return u8"regnskurar";
         case 23:
-          return "kraftiga regnskurar";
+          return u8"kraftiga regnskurar";
         case 31:
-          return "lätt regn";
+          return u8"l\u00e4tt regn";
         case 32:
-          return "regn";
+          return u8"regn";
         case 33:
-          return "rikligt regn";
+          return u8"rikligt regn";
         case 41:
-          return "lätta snöbyar";
+          return u8"l\u00e4tta sn\u00f6byar";
         case 42:
-          return "snöbyar";
+          return u8"sn\u00f6byar";
         case 43:
-          return "täta snöbyar";
+          return u8"t\u00e4ta sn\u00f6byar";
         case 51:
-          return "lätt snöfall";
+          return u8"l\u00e4tt sn\u00f6fall";
         case 52:
-          return "snöfall";
+          return u8"sn\u00f6fall";
         case 53:
-          return "ymnigt snöfall";
+          return u8"ymnigt sn\u00f6fall";
         case 61:
-          return "åskskurar";
+          return u8"\00e5skskurar";
         case 62:
-          return "kraftiga åskskurar";
+          return u8"kraftiga \00e5skskurar";
         case 63:
-          return "åska";
+          return u8"\00e5ska";
         case 64:
-          return "häftigt åskväder";
+          return u8"h\u00e4ftigt \00e5skv\u00e4der";
         case 71:
-          return "lätta skurar av snöblandat regn";
+          return u8"l\u00e4tta skurar av sn\u00f6blandat regn";
         case 72:
-          return "skurar av snöblandat regn";
+          return u8"skurar av sn\u00f6blandat regn";
         case 73:
-          return "kraftiga skurar av snöblandad regn";
+          return u8"kraftiga skurar av sn\u00f6blandad regn";
         case 81:
-          return "lätt snöblandat regn";
+          return u8"l\u00e4tt sn\u00f6blandat regn";
         case 82:
-          return "snöblandat regn";
+          return u8"sn\u00f6blandat regn";
         case 83:
-          return "kraftigt snöblandat regn";
+          return u8"kraftigt sn\u00f6blandat regn";
         case 91:
-          return "dis";
+          return u8"dis";
         case 92:
-          return "dimma";
+          return u8"dimma";
       }
     }
     else if (lang == "et")
@@ -2364,59 +2364,59 @@ ts::Value WeatherText(QImpl &q,
       switch (boost::numeric_cast<int>(w))
       {
         case 1:
-          return "selge";
+          return u8"selge";
         case 2:
-          return "poolpilves";
+          return u8"poolpilves";
         case 3:
-          return "pilves";
+          return u8"pilves";
         case 21:
-          return "kerged vihmahood";
+          return u8"kerged vihmahood";
         case 22:
-          return "hoogvihm";
+          return u8"hoogvihm";
         case 23:
-          return "tugevad vihmahood";
+          return u8"tugevad vihmahood";
         case 31:
-          return "nõrk vihmasadu";
+          return u8"n\u00f5rk vihmasadu";
         case 32:
-          return "vihmasadu";
+          return u8"vihmasadu";
         case 33:
-          return "vihmasadu";
+          return u8"vihmasadu";
         case 41:
-          return "nõrgad lumehood";
+          return u8"n\u00f5rgad lumehood";
         case 42:
-          return "hooglumi";
+          return u8"hooglumi";
         case 43:
-          return "tihedad lumesajuhood";
+          return u8"tihedad lumesajuhood";
         case 51:
-          return "nõrk lumesadu";
+          return u8"n\u00f5rk lumesadu";
         case 52:
-          return "lumesadu";
+          return u8"lumesadu";
         case 53:
-          return "tihe lumesadu";
+          return u8"tihe lumesadu";
         case 61:
-          return "äikesehood";
+          return u8"\u00e4ikesehood";
         case 62:
-          return "tugevad äikesehood";
+          return u8"tugevad \u00e4ikesehood";
         case 63:
-          return "äike";
+          return u8"\u00e4ike";
         case 64:
-          return "tugev äike";
+          return u8"tugev \u00e4ike";
         case 71:
-          return "ñörgad lörtsihood";
+          return u8"\u00f1\u00f6rgad l\u00f6rtsihood";
         case 72:
-          return "lörtsihood";
+          return u8"l\u00f6rtsihood";
         case 73:
-          return "tugev lörtsihood";
+          return u8"tugev l\u00f6rtsihood";
         case 81:
-          return "nõrk lörtsisadu";
+          return u8"n\u00f5rk l\u00f6rtsisadu";
         case 82:
-          return "lörtsisadu";
+          return u8"l\u00f6rtsisadu";
         case 83:
-          return "tugev lörtsisadu";
+          return u8"tugev l\u00f6rtsisadu";
         case 91:
-          return "udu";
+          return u8"udu";
         case 92:
-          return "uduvinet";
+          return u8"uduvinet";
       }
     }
     else
@@ -2424,59 +2424,59 @@ ts::Value WeatherText(QImpl &q,
       switch (boost::numeric_cast<int>(w))
       {
         case 1:
-          return "selkeää";
+          return u8"selke\u00e4\u00e4";
         case 2:
-          return "puolipilvistä";
+          return u8"puolipilvist\u00e4";
         case 3:
-          return "pilvistä";
+          return u8"pilvist\u00e4";
         case 21:
-          return "heikkoja sadekuuroja";
+          return u8"heikkoja sadekuuroja";
         case 22:
-          return "sadekuuroja";
+          return u8"sadekuuroja";
         case 23:
-          return "voimakkaita sadekuuroja";
+          return u8"voimakkaita sadekuuroja";
         case 31:
-          return "heikkoa vesisadetta";
+          return u8"heikkoa vesisadetta";
         case 32:
-          return "vesisadetta";
+          return u8"vesisadetta";
         case 33:
-          return "voimakasta vesisadetta";
+          return u8"voimakasta vesisadetta";
         case 41:
-          return "heikkoja lumikuuroja";
+          return u8"heikkoja lumikuuroja";
         case 42:
-          return "lumikuuroja";
+          return u8"lumikuuroja";
         case 43:
-          return "voimakkaita lumikuuroja";
+          return u8"voimakkaita lumikuuroja";
         case 51:
-          return "heikkoa lumisadetta";
+          return u8"heikkoa lumisadetta";
         case 52:
-          return "lumisadetta";
+          return u8"lumisadetta";
         case 53:
-          return "voimakasta lumisadetta";
+          return u8"voimakasta lumisadetta";
         case 61:
-          return "ukkoskuuroja";
+          return u8"ukkoskuuroja";
         case 62:
-          return "voimakkaita ukkoskuuroja";
+          return u8"voimakkaita ukkoskuuroja";
         case 63:
-          return "ukkosta";
+          return u8"ukkosta";
         case 64:
-          return "voimakasta ukkosta";
+          return u8"voimakasta ukkosta";
         case 71:
-          return "heikkoja räntäkuuroja";
+          return u8"heikkoja r\u00e4nt\u00e4kuuroja";
         case 72:
-          return "räntäkuuroja";
+          return u8"r\u00e4nt\u00e4kuuroja";
         case 73:
-          return "voimakkaita räntäkuuroja";
+          return u8"voimakkaita r\u00e4nt\u00e4kuuroja";
         case 81:
-          return "heikkoa räntäsadetta";
+          return u8"heikkoa r\u00e4nt\u00e4sadetta";
         case 82:
-          return "räntäsadetta";
+          return u8"r\u00e4nt\u00e4sadetta";
         case 83:
-          return "voimakasta räntäsadetta";
+          return u8"voimakasta r\u00e4nt\u00e4sadetta";
         case 91:
-          return "utua";
+          return u8"utua";
         case 92:
-          return "sumua";
+          return u8"sumua";
       }
     }
 
@@ -2484,7 +2484,7 @@ ts::Value WeatherText(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Spine::Exception::Trace(BCP, u8"Operation failed!");
   }
 }
 
@@ -2787,95 +2787,95 @@ ts::Value SmartSymbolText(QImpl &q,
       switch (*symbol)
       {
         case 1:
-          return "klart";
+          return u8"klart";
         case 2:
-          return "mest klart";
+          return u8"mest klart";
         case 4:
-          return "halvklart";
+          return u8"halvklart";
         case 6:
-          return "molnight";
+          return u8"molnight";
         case 7:
-          return "mulet";
+          return u8"mulet";
         case 9:
-          return "dimma";
+          return u8"dimma";
         case 71:
-          return "enstaka åskskurar";
+          return u8"enstaka \00e5skskurar";
         case 74:
-          return "lokalt åskskurar";
+          return u8"lokalt \00e5skskurar";
         case 77:
-          return "åskskurar";
+          return u8"\00e5skskurar";
         case 21:
-          return "enstaka regnskurar";
+          return u8"enstaka regnskurar";
         case 24:
-          return "lokalt regnskurar";
+          return u8"lokalt regnskurar";
         case 27:
-          return "regnskurar";
+          return u8"regnskurar";
         case 11:
-          return "duggregn";
+          return u8"duggregn";
         case 14:
-          return "underkylt duggregn";
+          return u8"underkylt duggregn";
         case 17:
-          return "underkylt regn";
+          return u8"underkylt regn";
         case 31:
-          return "tidvis lätt regn";
+          return u8"tidvis l\u00e4tt regn";
         case 34:
-          return "tidvis lätt regn";
+          return u8"tidvis l\u00e4tt regn";
         case 37:
-          return "lätt regn";
+          return u8"l\u00e4tt regn";
         case 32:
-          return "tidvis måttligt regn";
+          return u8"tidvis m\00e5ttligt regn";
         case 35:
-          return "tidvis måttligt regn";
+          return u8"tidvis m\00e5ttligt regn";
         case 38:
-          return "måttligt regn";
+          return u8"m\00e5ttligt regn";
         case 33:
-          return "tidvis kraftigt regn";
+          return u8"tidvis kraftigt regn";
         case 36:
-          return "tidvis kraftigt regn";
+          return u8"tidvis kraftigt regn";
         case 39:
-          return "kraftigt regn";
+          return u8"kraftigt regn";
         case 41:
-          return "tidvis lätta byar ov snöblandat regn";
+          return u8"tidvis l\u00e4tta byar ov sn\u00f6blandat regn";
         case 44:
-          return "tidvis lätta byar avd snäblandat regn";
+          return u8"tidvis l\u00e4tta byar avd sn\u00e4blandat regn";
         case 47:
-          return "lätt snöblandat regn";
+          return u8"l\u00e4tt sn\u00f6blandat regn";
         case 42:
-          return "tidvis måttliga byar av snöblandat regn";
+          return u8"tidvis m\00e5ttliga byar av sn\u00f6blandat regn";
         case 45:
-          return "tidvis måttliga byar av snöblandat regn";
+          return u8"tidvis m\00e5ttliga byar av sn\u00f6blandat regn";
         case 48:
-          return "måttligt snöblandat regn";
+          return u8"m\00e5ttligt sn\u00f6blandat regn";
         case 43:
-          return "tidvis kraftiga byar av snöblandat regn";
+          return u8"tidvis kraftiga byar av sn\u00f6blandat regn";
         case 46:
-          return "tidvis kraftiga byar av snöblandat regn";
+          return u8"tidvis kraftiga byar av sn\u00f6blandat regn";
         case 49:
-          return "kraftigt snöblandat regn";
+          return u8"kraftigt sn\u00f6blandat regn";
         case 51:
-          return "tidvis lätta snöbyar";
+          return u8"tidvis l\u00e4tta sn\u00f6byar";
         case 54:
-          return "tidvis lätta snöbyar";
+          return u8"tidvis l\u00e4tta sn\u00f6byar";
         case 57:
-          return "tidvis lätt snöfall";
+          return u8"tidvis l\u00e4tt sn\u00f6fall";
         case 52:
-          return "tidvis måttliga snöbyar";
+          return u8"tidvis m\00e5ttliga sn\u00f6byar";
         case 55:
-          return "tidvis måttliga snöbyar";
+          return u8"tidvis m\00e5ttliga sn\u00f6byar";
         case 58:
-          return "måttligt snöfall";
+          return u8"m\00e5ttligt sn\u00f6fall";
         case 53:
-          return "tidvis ymniga snöbyar";
+          return u8"tidvis ymniga sn\u00f6byar";
         case 56:
-          return "tidvis ymniga snöbyar";
+          return u8"tidvis ymniga sn\u00f6byar";
         case 59:
-          return "ymnigt snöfall";
+          return u8"ymnigt sn\u00f6fall";
         case 61:
-          return "enstaka hagelskurar";
+          return u8"enstaka hagelskurar";
         case 64:
-          return "lokalt hagelskurar";
+          return u8"lokalt hagelskurar";
         case 67:
-          return "hagelskurar";
+          return u8"hagelskurar";
       }
     }
     else
@@ -2883,95 +2883,95 @@ ts::Value SmartSymbolText(QImpl &q,
       switch (*symbol)
       {
         case 1:
-          return "selkeää";
+          return u8"selke\u00e4\u00e4";
         case 2:
-          return "enimmäkseen selkeää";
+          return u8"enimm\u00e4kseen selke\u00e4\u00e4";
         case 4:
-          return "puolipilvistä";
+          return u8"puolipilvist\u00e4";
         case 6:
-          return "enimmäkseen pilvistä";
+          return u8"enimm\u00e4kseen pilvist\u00e4";
         case 7:
-          return "pilvistä";
+          return u8"pilvist\u00e4";
         case 9:
-          return "sumua";
+          return u8"sumua";
         case 71:
-          return "yksittäisiä ukkoskuuroja";
+          return u8"yksitt\u00e4isi\u00e4 ukkoskuuroja";
         case 74:
-          return "paikoin ukkoskuuroja";
+          return u8"paikoin ukkoskuuroja";
         case 77:
-          return "ukkoskuuroja";
+          return u8"ukkoskuuroja";
         case 21:
-          return "yksittäisiä sadekuuroja";
+          return u8"yksitt\u00e4isi\u00e4 sadekuuroja";
         case 24:
-          return "paikoin sadekuuroja";
+          return u8"paikoin sadekuuroja";
         case 27:
-          return "sadekuuroja";
+          return u8"sadekuuroja";
         case 11:
-          return "tihkusadetta";
+          return u8"tihkusadetta";
         case 14:
-          return "jäätävää tihkua";
+          return u8"j\u00e4\u00e4t\u00e4v\u00e4\u00e4 tihkua";
         case 17:
-          return "jäätävää sadetta";
+          return u8"j\u00e4\u00e4t\u00e4v\u00e4\u00e4 sadetta";
         case 31:
-          return "ajoittain heikkoa vesisadetta";
+          return u8"ajoittain heikkoa vesisadetta";
         case 34:
-          return "ajoittain heikkoa vesisadetta";
+          return u8"ajoittain heikkoa vesisadetta";
         case 37:
-          return "heikkoa vesisadetta";
+          return u8"heikkoa vesisadetta";
         case 32:
-          return "ajoittain kohtalaista vesisadetta";
+          return u8"ajoittain kohtalaista vesisadetta";
         case 35:
-          return "ajoittain kohtalaista vesisadetta";
+          return u8"ajoittain kohtalaista vesisadetta";
         case 38:
-          return "kohtalaista vesisadetta";
+          return u8"kohtalaista vesisadetta";
         case 33:
-          return "ajoittain voimakasta vesisadetta";
+          return u8"ajoittain voimakasta vesisadetta";
         case 36:
-          return "ajoittain voimakasta vesisadetta";
+          return u8"ajoittain voimakasta vesisadetta";
         case 39:
-          return "voimakasta vesisadetta";
+          return u8"voimakasta vesisadetta";
         case 41:
-          return "ajoittain heikkoja räntäkuuroja";
+          return u8"ajoittain heikkoja r\u00e4nt\u00e4kuuroja";
         case 44:
-          return "ajoittain heikkoja räntäkuuroja";
+          return u8"ajoittain heikkoja r\u00e4nt\u00e4kuuroja";
         case 47:
-          return "heikkoa räntäsadetta";
+          return u8"heikkoa r\u00e4nt\u00e4sadetta";
         case 42:
-          return "ajoittain kohtalaisia räntäkuuroja";
+          return u8"ajoittain kohtalaisia r\u00e4nt\u00e4kuuroja";
         case 45:
-          return "ajoittain kohtalaisia räntäkuuroja";
+          return u8"ajoittain kohtalaisia r\u00e4nt\u00e4kuuroja";
         case 48:
-          return "kohtalaista räntäsadetta";
+          return u8"kohtalaista r\u00e4nt\u00e4sadetta";
         case 43:
-          return "ajoittain voimakkaita räntäkuuroja";
+          return u8"ajoittain voimakkaita r\u00e4nt\u00e4kuuroja";
         case 46:
-          return "ajoittain voimakkaita räntäkuuroja";
+          return u8"ajoittain voimakkaita r\u00e4nt\u00e4kuuroja";
         case 49:
-          return "voimakasta räntäsadetta";
+          return u8"voimakasta r\u00e4nt\u00e4sadetta";
         case 51:
-          return "ajoittain heikkoja lumikuuroja";
+          return u8"ajoittain heikkoja lumikuuroja";
         case 54:
-          return "ajoittain heikkoja lumikuuroja";
+          return u8"ajoittain heikkoja lumikuuroja";
         case 57:
-          return "heikkoa lumisadetta";
+          return u8"heikkoa lumisadetta";
         case 52:
-          return "ajoittain kohtalaisia lumikuuroja";
+          return u8"ajoittain kohtalaisia lumikuuroja";
         case 55:
-          return "ajoittain kohtalaisia lumikuuroja";
+          return u8"ajoittain kohtalaisia lumikuuroja";
         case 58:
-          return "kohtalaista lumisadetta";
+          return u8"kohtalaista lumisadetta";
         case 53:
-          return "ajoittain sakeita lumikuuroja";
+          return u8"ajoittain sakeita lumikuuroja";
         case 56:
-          return "ajoittain sakeita lumikuuroja";
+          return u8"ajoittain sakeita lumikuuroja";
         case 59:
-          return "runsasta lumisadetta";
+          return u8"runsasta lumisadetta";
         case 61:
-          return "yksittäisiä raekuuroja";
+          return u8"yksitt\u00e4isi\u00e4 raekuuroja";
         case 64:
-          return "paikoin raekuuroja";
+          return u8"paikoin raekuuroja";
         case 67:
-          return "raekuuroja";
+          return u8"raekuuroja";
       }
     }
     throw Spine::Exception(BCP, "Unknown symbol value : " + Fmi::to_string(*symbol));
