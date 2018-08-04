@@ -308,10 +308,8 @@ MetaData QImpl::metaData()
       meta.WKT = "nan";
       return meta;
     }
-    else
-    {
-      meta.WKT = qi.Area()->WKT();
-    }
+
+    meta.WKT = qi.Area()->WKT();
 
     // Get querydata area info
 
@@ -1672,7 +1670,7 @@ std::string format_date(const boost::local_time::local_date_time &ldt,
 {
   try
   {
-    typedef boost::date_time::time_facet<boost::local_time::local_date_time, char> tfacet;
+    using tfacet = boost::date_time::time_facet<boost::local_time::local_date_time, char>;
     std::ostringstream os;
     os.imbue(std::locale(llocale, new tfacet(fmt.c_str())));
     os << ldt;
