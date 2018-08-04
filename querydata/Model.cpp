@@ -343,7 +343,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
     bool ok = false;
     double bestdistance = maxdist * 1000;
 
-    for (int y = 1;; y++)
+    for (unsigned int y = 1;; y++)
     {
       int j = (2 * (y % 2) - 1) * (y >> 1);  // 0,-1,1,-2,2,-3,3...
 
@@ -353,7 +353,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
       if (distance > bestdistance)
         break;
 
-      for (int x = 1;; x++)
+      for (unsigned int x = 1;; x++)
       {
         int i = (2 * (x % 2) - 1) * (x >> 1);  // 0,-1,1,-2,2,-3,3...
 
