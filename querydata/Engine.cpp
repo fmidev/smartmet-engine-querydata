@@ -35,7 +35,6 @@ namespace Querydata
 
 Engine::Engine(const std::string& configfile)
     : itsRepoManager(boost::make_shared<RepoManager>(configfile)),
-      itsSynchro(),
       itsConfigFile(configfile),
       itsActiveThreadCount(0),
       lastConfigErrno(EINPROGRESS)
