@@ -1429,7 +1429,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
                                   dummy);
             auto result = value(opts, localdatetime);
 
-            if (boost::get<double>(&result))
+            if (boost::get<double>(&result) != nullptr)
               theMatrix[i][j] = *boost::get<double>(&result);
           }
         break;
@@ -3449,7 +3449,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
       }
     }
 
-    if (boost::get<double>(&retval))
+    if (boost::get<double>(&retval) != nullptr)
     {
       if (*(boost::get<double>(&retval)) == kFloatMissing)
         retval = Spine::TimeSeries::None();
@@ -3532,7 +3532,7 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
       }
     }
 
-    if (boost::get<double>(&retval))
+    if (boost::get<double>(&retval) != nullptr)
     {
       if (*(boost::get<double>(&retval)) == kFloatMissing)
         retval = Spine::TimeSeries::None();
@@ -3615,7 +3615,7 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
       }
     }
 
-    if (boost::get<double>(&retval))
+    if (boost::get<double>(&retval) != nullptr)
     {
       if (*(boost::get<double>(&retval)) == kFloatMissing)
         retval = Spine::TimeSeries::None();
@@ -4259,7 +4259,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                                      dummy);
 
             auto result = value(options, localdatetime);
-            if (boost::get<double>(&result))
+            if (boost::get<double>(&result) != nullptr)
               dstinfo.FloatValue(*boost::get<double>(&result));
           }
         }
