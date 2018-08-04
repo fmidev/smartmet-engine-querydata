@@ -63,7 +63,7 @@ void Repository::add(const Producer& producer, SharedModel model)
 {
   try
   {
-    Producers::iterator producer_model = itsProducers.find(producer);
+    auto producer_model = itsProducers.find(producer);
 
     // Establish the model map for the producer
 
@@ -156,7 +156,7 @@ bool Repository::hasProducer(const Producer& producer) const
 {
   try
   {
-    ProducerConfigs::const_iterator prod_config = itsProducerConfigs.find(producer);
+    const auto prod_config = itsProducerConfigs.find(producer);
     return (prod_config != itsProducerConfigs.end());
   }
   catch (...)
@@ -177,7 +177,7 @@ Q Repository::get(const Producer& producer) const
   {
     // If the data is multifile return all of them instead of just the latest file
 
-    ProducerConfigs::const_iterator prod_config = itsProducerConfigs.find(producer);
+    const auto prod_config = itsProducerConfigs.find(producer);
     if (prod_config != itsProducerConfigs.end())
     {
       if (prod_config->second.ismultifile)
@@ -186,7 +186,7 @@ Q Repository::get(const Producer& producer) const
 
     // Return the latest model only
 
-    Producers::const_iterator producer_model = itsProducers.find(producer);
+    const auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
     {
@@ -227,7 +227,7 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
 {
   try
   {
-    Producers::const_iterator producer_model = itsProducers.find(producer);
+    const auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
     {
@@ -295,7 +295,7 @@ Q Repository::getAll(const Producer& producer) const
   {
     // Find the models
 
-    Producers::const_iterator producer_model = itsProducers.find(producer);
+    const auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
     {
@@ -343,7 +343,7 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
 {
   try
   {
-    Producers::iterator producer_model = itsProducers.find(producer);
+    auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
       throw Spine::Exception(
@@ -385,7 +385,7 @@ void Repository::resize(const Producer& producer, std::size_t limit)
 {
   try
   {
-    Producers::iterator producer_model = itsProducers.find(producer);
+    auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
       throw Spine::Exception(
@@ -435,7 +435,7 @@ void Repository::expire(const Producer& producer, std::size_t max_age)
 
   try
   {
-    Producers::iterator producer_model = itsProducers.find(producer);
+    auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
       return;
@@ -543,7 +543,7 @@ Producer Repository::find(const ProducerList& producerlist,
     for (const Producer& producer : producerlist)
     {
       // Try primary names first
-      Producers::const_iterator producer_model = itsProducers.find(producer);
+      const auto producer_model = itsProducers.find(producer);
 
       if (producer_model != itsProducers.end())
       {
@@ -562,7 +562,7 @@ Producer Repository::find(const ProducerList& producerlist,
 
     for (const Producer& producer : producerorder)
     {
-      ProducerConfigs::const_iterator prod_config = itsProducerConfigs.find(producer);
+      const auto prod_config = itsProducerConfigs.find(producer);
       if (prod_config == itsProducerConfigs.end())
         continue;
 
@@ -571,13 +571,13 @@ Producer Repository::find(const ProducerList& producerlist,
           (usedatamaxdist && prod_config->second.maxdistance > 0 ? prod_config->second.maxdistance
                                                                  : maxdist);
 
-      const std::set<std::string>& aliases = prod_config->second.aliases;
+      const auto& aliases = prod_config->second.aliases;
 
       for (const Producer& alias : producerlist)
       {
         if (aliases.find(alias) != aliases.end())
         {
-          Producers::const_iterator producer_model = itsProducers.find(producer);
+          const auto producer_model = itsProducers.find(producer);
           if (producer_model != itsProducers.end())
           {
             if (contains(producer_model->second, lon, lat, chosenmaxdist, leveltype))
@@ -844,7 +844,7 @@ std::list<MetaData> Repository::getRepoMetadata(const std::string& producer) con
   {
     std::list<MetaData> props;
 
-    const auto& producerpos = itsProducers.find(producer);
+    const auto producerpos = itsProducers.find(producer);
     if (producerpos == itsProducers.end())
       return props;
 
@@ -870,12 +870,12 @@ std::list<MetaData> Repository::getRepoMetadata(const std::string& producer,
   {
     std::list<MetaData> props;
 
-    const auto& producerpos = itsProducers.find(producer);
+    const auto producerpos = itsProducers.find(producer);
     if (producerpos == itsProducers.end())
       return props;
 
     const auto& models = producerpos->second;
-    const auto& modelpos = models.find(origintime);
+    const auto modelpos = models.find(origintime);
 
     if (modelpos == models.end())
       return props;
@@ -953,7 +953,7 @@ SharedModel Repository::getModel(const Producer& producer,
 {
   try
   {
-    Producers::const_iterator producer_model = itsProducers.find(producer);
+    const auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
       return {};
@@ -979,7 +979,7 @@ Repository::SharedModels Repository::getAllModels(const Producer& producer) cons
 {
   try
   {
-    Producers::const_iterator producer_model = itsProducers.find(producer);
+    const auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
       return SharedModels();
