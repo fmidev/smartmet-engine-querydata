@@ -3275,7 +3275,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     return Fmi::to_string(minutes);
   }
   if (pname == "timestring")
-    return format_date(ldt, opt.outlocale, opt.timestring.c_str());
+    return format_date(ldt, opt.outlocale, opt.timestring);
 
   if (pname == "wday")
     return format_date(ldt, opt.outlocale, "%a");
