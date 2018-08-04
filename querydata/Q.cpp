@@ -2556,13 +2556,13 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
     }
 
     // Since we have precipitation, we always need precipitation form
-    float rform = kFloatMissing;
+    int rform = static_cast<int>(kFloatMissing);
     if (q.param(kFmiPotentialPrecipitationForm))
-      rform = q.interpolate(latlon, ldt, maxgap);
+      rform = static_cast<int>(q.interpolate(latlon, ldt, maxgap));
     else if (q.param(kFmiPrecipitationForm))
-      rform = q.interpolate(latlon, ldt, maxgap);
+      rform = static_cast<int>(q.interpolate(latlon, ldt, maxgap));
 
-    if (rform == kFloatMissing)
+    if (rform == static_cast<int>(kFloatMissing))
       return {};
 
     if (rform == 0)  // drizzle
@@ -2588,9 +2588,9 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
     if (rform == 1)  // water
     {
       // Now we need precipitation type too
-      float rtype = 1;  // large scale by default
+      int rtype = 1;  // large scale by default
       if (q.param(kFmiPotentialPrecipitationType))
-        rtype = q.interpolate(latlon, ldt, maxgap);
+        rtype = static_cast<int>(q.interpolate(latlon, ldt, maxgap));
 
       if (rtype == 2)            // convective
         return 21 + 3 * nclass;  // 21, 24, 27 for showers
