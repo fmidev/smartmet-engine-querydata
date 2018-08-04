@@ -63,13 +63,13 @@ class MetaQueryOptions
 
   bp::ptime getOriginTime() const;
 
-  void setFirstTime(const bp::ptime& startTime);
+  void setFirstTime(const bp::ptime& firstTime);
 
   bool hasFirstTime() const;
 
   bp::ptime getFirstTime() const;
 
-  void setLastTime(const bp::ptime& endTime);
+  void setLastTime(const bp::ptime& lastTime);
 
   bool hasLastTime() const;
 
@@ -81,10 +81,10 @@ class MetaQueryOptions
 
   std::list<std::string> getParameters() const;
 
-  void setBoundingBox(const NFmiPoint& bl,
-                      const NFmiPoint& br,
-                      const NFmiPoint& ul,
-                      const NFmiPoint& ur);
+  void setBoundingBox(const NFmiPoint& ul,
+                      const NFmiPoint& ur,
+                      const NFmiPoint& bl,
+                      const NFmiPoint& br);
 
   void setBoundingBox(const NFmiPoint& bl, const NFmiPoint& ur);
 
