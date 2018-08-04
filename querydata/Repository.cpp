@@ -28,15 +28,6 @@ namespace Querydata
 {
 // ----------------------------------------------------------------------
 /*!
- * \brief Repository constructor
- *
- * We just initialize the map of models to be empty
- */
-// ----------------------------------------------------------------------
-
-Repository::Repository() : itsProducers() {}
-// ----------------------------------------------------------------------
-/*!
  * \brief Add a new producer configuration
  */
 // ----------------------------------------------------------------------

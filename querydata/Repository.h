@@ -32,7 +32,7 @@ namespace Querydata
 class Repository
 {
  public:
-  Repository();
+  Repository() = default;
 
   void add(const ProducerConfig& config);
   void add(const Producer& producer, SharedModel model);
