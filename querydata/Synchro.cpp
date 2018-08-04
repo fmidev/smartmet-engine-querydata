@@ -527,7 +527,7 @@ void Synchronizer::process_message(const QueryDataMessage& incomingMessage)
 {
   try
   {
-    auto name = incomingMessage.name();
+    const auto& name = incomingMessage.name();
 
     // Ignore messages to self
     if (name != itsHostName)
@@ -540,7 +540,7 @@ void Synchronizer::process_message(const QueryDataMessage& incomingMessage)
 
       for (int i = 0; i < incomingMessage.prodinfos_size(); ++i)
       {
-        auto info = incomingMessage.prodinfos(i);
+        const auto& info = incomingMessage.prodinfos(i);
 
         std::size_t osize = boost::numeric_cast<std::size_t>(info.origintimes_size());
 

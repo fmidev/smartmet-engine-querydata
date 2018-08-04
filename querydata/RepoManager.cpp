@@ -304,7 +304,7 @@ void RepoManager::expirationLoop()
 
 void RepoManager::setOldManager(boost::shared_ptr<RepoManager> oldmanager)
 {
-  itsOldRepoManager = oldmanager;
+  itsOldRepoManager = std::move(oldmanager);
 }
 
 // ----------------------------------------------------------------------
