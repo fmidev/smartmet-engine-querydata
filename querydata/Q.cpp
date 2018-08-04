@@ -3285,7 +3285,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
   {
     auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
     auto seconds = stime.daylength().total_seconds();
-    auto minutes = boost::numeric_cast<long>(round(seconds / 60.0));
+    auto minutes = lround(seconds / 60.0);
     return Fmi::to_string(minutes);
   }
   if (pname == "timestring")
