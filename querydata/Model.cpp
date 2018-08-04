@@ -134,7 +134,7 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
       itsValidTimeList(theModel.itsValidTimeList),
       itsQueryInfoPoolMutex(),
       itsQueryInfoPool(),
-      itsQueryData(theData)
+      itsQueryData(std::move(theData))
 {
 }
 
@@ -161,7 +161,7 @@ Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
       itsValidTimeList(new ValidTimeList()),
       itsQueryInfoPoolMutex(),
       itsQueryInfoPool(),
-      itsQueryData(theData)
+      itsQueryData(std::move(theData))
 {
   try
   {
