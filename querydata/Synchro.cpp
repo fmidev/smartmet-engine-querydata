@@ -581,8 +581,6 @@ void SyncGroup::setBaseline(const ProducerMap& theUpdate)
   itsConsensus = theUpdate;
 }
 
-SyncGroup::SyncGroup() {}
-
 SyncGroup::SyncGroup(const ProducerMap& theMap) : itsConsensus(theMap) {}
 
 void SyncGroup::update(const ProducerMap& theUpdate)
@@ -631,8 +629,6 @@ void SyncGroup::update(const ProducerMap& theUpdate)
     throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
-
-SynchronizerConfig::~SynchronizerConfig() {}
 
 SynchronizerConfig::SynchronizerConfig(const std::string& configFile) : ConfigBase(configFile) {}
 

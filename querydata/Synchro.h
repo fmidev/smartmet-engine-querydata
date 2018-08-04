@@ -48,7 +48,7 @@ struct PendingUpdate
 class SyncGroup
 {
  public:
-  SyncGroup();
+  SyncGroup() = default;
 
   SyncGroup(const ProducerMap& theMap);
 
