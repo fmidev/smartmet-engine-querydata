@@ -353,7 +353,7 @@ const WGS84Envelope &QImpl::getWGS84Envelope()
   Spine::UpgradeWriteLock writelock(readlock);
 
   if (not itsWGS84Envelope)
-    itsWGS84Envelope.reset(new WGS84Envelope(itsInfo));
+    itsWGS84Envelope = boost::movelib::make_unique<WGS84Envelope>(itsInfo);
   return *itsWGS84Envelope;
 }
 
