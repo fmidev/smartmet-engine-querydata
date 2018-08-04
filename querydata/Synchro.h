@@ -8,13 +8,12 @@
 
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
+#include <boost/move/unique_ptr.hpp>
 #include <boost/optional.hpp>
+#include <spine/ConfigBase.h>
 #include <spine/Thread.h>
-
 #include <memory>
 #include <string>
-
-#include <spine/ConfigBase.h>
 
 namespace SmartMet
 {
@@ -143,7 +142,7 @@ class Synchronizer
 
   boost::array<char, 32768> itsSocketBuffer;
 
-  std::unique_ptr<boost::thread> itsCommThread;
+  boost::movelib::unique_ptr<boost::thread> itsCommThread;
 
   std::string itsSendBuffer;
 

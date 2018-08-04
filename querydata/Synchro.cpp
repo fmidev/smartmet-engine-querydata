@@ -190,9 +190,9 @@ void Synchronizer::launch(Spine::Reactor* theReactor)
       itsTimer.async_wait(boost::bind(&Synchronizer::fire_timer, this, _1));
 
       // Start thread for async operations
-      itsCommThread.reset(new boost::thread(boost::bind(
+      itsCommThread = boost::movelib::make_unique<boost::thread>(boost::bind(
           static_cast<std::size_t (boost::asio::io_service::*)(void)>(&ba::io_service::run),
-          &itsIoService)));
+          &itsIoService));
 
       // Start listening for broadcasts
       start_receive();
