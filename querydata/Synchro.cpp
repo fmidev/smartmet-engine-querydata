@@ -347,10 +347,10 @@ void Synchronizer::update_consensus()
 
     std::set<std::string> updatedHandlers;
 
-    for (auto it = uriMap.begin(); it != uriMap.end(); ++it)
+    for (const auto& uri : uriMap)
     {
-      itsSyncGroups[it->first].setBaseline(metadata);
-      updatedHandlers.insert(it->first);
+      itsSyncGroups[uri.first].setBaseline(metadata);
+      updatedHandlers.insert(uri.first);
     }
 
     // Intersect each pending update with the current data (baseline set previously)
@@ -555,9 +555,9 @@ void SyncGroup::update(const ProducerMap& theUpdate)
 {
   try
   {
-    for (auto it = theUpdate.begin(); it != theUpdate.end(); ++it)
+    for (const auto& update : theUpdate)
     {
-      auto& producerName = it->first;
+      auto& producerName = update.first;
 
       auto myProducerIt = itsConsensus.find(producerName);
 
@@ -565,10 +565,10 @@ void SyncGroup::update(const ProducerMap& theUpdate)
       if (myProducerIt != itsConsensus.end())
       {
         // Make set intersection between the current contents and the new
-        std::size_t result_length = std::max(it->second.size(), myProducerIt->second.size());
+        std::size_t result_length = std::max(update.second.size(), myProducerIt->second.size());
         std::vector<bp::ptime> result(result_length);
-        auto end = std::set_intersection(it->second.begin(),
-                                         it->second.end(),
+        auto end = std::set_intersection(update.second.begin(),
+                                         update.second.end(),
                                          myProducerIt->second.begin(),
                                          myProducerIt->second.end(),
                                          result.begin());
