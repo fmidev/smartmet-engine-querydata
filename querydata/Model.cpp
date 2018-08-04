@@ -304,7 +304,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
     NFmiFastQueryInfo qi(itsQueryData.get());
 
     if (!qi.NearestPoint(latlon) || !qi.IsGrid())
-      return NFmiPoint(kFloatMissing, kFloatMissing);
+      return {kFloatMissing, kFloatMissing};
 
     // If the model covers all grid points, we're done
 
@@ -314,7 +314,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
       double distance = NFmiGeoTools::GeoDistance(latlon.X(), latlon.Y(), p.X(), p.Y());
       if (distance <= 1000 * maxdist)
         return p;
-      return NFmiPoint(kFloatMissing, kFloatMissing);
+      return {kFloatMissing, kFloatMissing};
     }
 
     // The model does not cover the entire grid, but for example
