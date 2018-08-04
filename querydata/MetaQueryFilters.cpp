@@ -23,14 +23,8 @@ bool filterProducer(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasProducer())
-    {
-      // No producer specified
-      return true;
-    }
-    else
-    {
-      return (str_iequal(prop.producer, options.getProducer()));
-    }
+      return true;  // No producer specified
+    return (str_iequal(prop.producer, options.getProducer()));
   }
   catch (...)
   {
@@ -43,8 +37,7 @@ bool filterOriginTime(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasOriginTime())
-      // No origin time specified
-      return true;
+      return true;  // No origin time specified
 
     return (prop.originTime == options.getOriginTime());
   }
@@ -59,8 +52,7 @@ bool filterFirstTime(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasFirstTime())
-      // No time specified
-      return true;
+      return true;  // No time specified
 
     return (prop.firstTime == options.getFirstTime());
   }
@@ -75,8 +67,7 @@ bool filterLastTime(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasLastTime())
-      // No time specified
-      return true;
+      return true;  // No time specified
 
     return (prop.lastTime == options.getLastTime());
   }
@@ -91,32 +82,26 @@ bool filterParameters(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasParameters())
-    {
-      // No parameters specified
-      return true;
-    }
-    else
-    {
-      auto params = options.getParameters();
-      for (auto& param : params)
-      {
-        bool found = false;
-        for (auto& fparam : prop.parameters)
-        {
-          if (str_iequal(fparam.name, param))
-          {
-            found = true;
-            break;
-          }
-        }
-        if (!found)
-          // One miss is all we need to fail
-          return false;
-      }
+      return true;  // No parameters specified
 
-      // If we made this far, all params have been found
-      return true;
+    auto params = options.getParameters();
+    for (auto& param : params)
+    {
+      bool found = false;
+      for (auto& fparam : prop.parameters)
+      {
+        if (str_iequal(fparam.name, param))
+        {
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+        return false;  // One miss is all we need to fail
     }
+
+    // If we made this far, all params have been found
+    return true;
   }
   catch (...)
   {
@@ -129,32 +114,27 @@ bool filterLevelTypes(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasLevelTypes())
+      return true;  // No parameters specified
+
+    auto types = options.getLevelTypes();
+    for (auto& type : types)
     {
-      // No parameters specified
-      return true;
-    }
-    else
-    {
-      auto types = options.getLevelTypes();
-      for (auto& type : types)
+      bool found = false;
+      for (auto& flevel : prop.levels)
       {
-        bool found = false;
-        for (auto& flevel : prop.levels)
+        if (str_iequal(flevel.type, type))
         {
-          if (str_iequal(flevel.type, type))
-          {
-            found = true;
-            break;
-          }
+          found = true;
+          break;
         }
-        if (!found)
-          // One miss is all we need to fail
-          return false;
       }
 
-      // If we made this far, all levels have been found
-      return true;
+      if (!found)
+        return false;  // One miss is all we need to fail
     }
+
+    // If we made this far, all levels have been found
+    return true;
   }
   catch (...)
   {
@@ -167,32 +147,27 @@ bool filterLevelValues(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasLevelValues())
+      return true;  // No parameters specified
+
+    auto values = options.getLevelValues();
+    for (auto& value : values)
     {
-      // No parameters specified
-      return true;
-    }
-    else
-    {
-      auto values = options.getLevelValues();
-      for (auto& value : values)
+      bool found = false;
+      for (auto& flevel : prop.levels)
       {
-        bool found = false;
-        for (auto& flevel : prop.levels)
+        if (flevel.value == value)
         {
-          if (flevel.value == value)
-          {
-            found = true;
-            break;
-          }
+          found = true;
+          break;
         }
-        if (!found)
-          // One miss is all we need to fail
-          return false;
       }
 
-      // If we made this far, all levels have been found
-      return true;
+      if (!found)
+        return false;  // One miss is all we need to fail
     }
+
+    // If we made this far, all levels have been found
+    return true;
   }
   catch (...)
   {
@@ -207,8 +182,7 @@ bool filterSynchro(const MetaData& prop, const std::vector<bp::ptime>& originTim
     for (auto& time : originTimes)
     {
       if (prop.originTime == time)
-        // Time is in synchronized origin times
-        return true;
+        return true;  // Time is in synchronized origin times
     }
 
     // If we are here, there were no matches
@@ -225,34 +199,28 @@ bool filterBoundingBox(const MetaData& prop, const MetaQueryOptions& options)
   try
   {
     if (!options.hasBoundingBox())
-    {
-      // No BB specified
-      return true;
-    }
-    else
-    {
-      auto givenBox = options.getBoundingBox();
-      auto givenurlon = givenBox.ur.X();
-      auto givenurlat = givenBox.ur.Y();
-      auto givenbllon = givenBox.bl.X();
-      auto givenbllat = givenBox.bl.Y();
+      return true;  // No BB specified
 
-      //		  BoxType givenGeoBox(degree_point(givenbllon,givenbllat),
-      // degree_point(givenurlon,givenurlat));
+    auto givenBox = options.getBoundingBox();
+    auto givenurlon = givenBox.ur.X();
+    auto givenurlat = givenBox.ur.Y();
+    auto givenbllon = givenBox.bl.X();
+    auto givenbllat = givenBox.bl.Y();
 
-      degree_point ur(givenurlon, givenurlat);
-      degree_point bl(givenbllon, givenbllat);
+    //		  BoxType givenGeoBox(degree_point(givenbllon,givenbllat),
+    // degree_point(givenurlon,givenurlat));
 
-      BoxType modelGeoBox(degree_point(prop.bllon, prop.bllat),
-                          degree_point(prop.urlon, prop.urlat));
+    degree_point ur(givenurlon, givenurlat);
+    degree_point bl(givenbllon, givenbllat);
 
-      BoxType givenGeoBox(bl, ur);
+    BoxType modelGeoBox(degree_point(prop.bllon, prop.bllat), degree_point(prop.urlon, prop.urlat));
 
-      // Only accept complete overlap
+    BoxType givenGeoBox(bl, ur);
 
-      // True if given corners are inside the model box
-      return (bg::within(givenGeoBox, modelGeoBox));
-    }
+    // Only accept complete overlap
+
+    // True if given corners are inside the model box
+    return (bg::within(givenGeoBox, modelGeoBox));
   }
   catch (...)
   {
