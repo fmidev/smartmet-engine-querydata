@@ -21,7 +21,7 @@ namespace Querydata
 
 struct ModelParameter
 {
-  ModelParameter(const std::string& theName, const std::string& theDesc, int thePrecision);
+  ModelParameter(std::string theName, std::string theDesc, int thePrecision);
   std::string name;
   std::string description;
   int precision;
@@ -36,7 +36,7 @@ struct ModelParameter
 
 struct ModelLevel
 {
-  ModelLevel(const std::string& theType, const std::string& theName, float theValue);
+  ModelLevel(std::string theType, std::string theName, float theValue);
   std::string type;
   std::string name;
   float value;

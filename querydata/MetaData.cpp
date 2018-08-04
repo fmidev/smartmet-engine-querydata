@@ -7,15 +7,13 @@ namespace Engine
 {
 namespace Querydata
 {
-ModelParameter::ModelParameter(const std::string& theName,
-                               const std::string& theDesc,
-                               int thePrecision)
-    : name(theName), description(theDesc), precision(thePrecision)
+ModelParameter::ModelParameter(std::string theName, std::string theDesc, int thePrecision)
+    : name(std::move(theName)), description(std::move(theDesc)), precision(thePrecision)
 {
 }
 
-ModelLevel::ModelLevel(const std::string& theType, const std::string& theName, float theValue)
-    : type(theType), name(theName), value(theValue)
+ModelLevel::ModelLevel(std::string theType, std::string theName, float theValue)
+    : type(std::move(theType)), name(std::move(theName)), value(theValue)
 {
 }
 
