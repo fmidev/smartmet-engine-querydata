@@ -140,8 +140,7 @@ bool ValidPoints::isvalid(unsigned long index) const
   {
     if (index >= itsMask.size())
       return false;
-    else
-      return itsMask[index];
+    return itsMask[index];
   }
   catch (...)
   {
