@@ -219,7 +219,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   bool loadDEMAndWaterFlags(const Fmi::DEM& theDEM,
                             const Fmi::LandCover& theLandCover,
                             double theResolution,
-                            const NFmiDataMatrix<NFmiLocationCache>& locCache,
+                            const NFmiDataMatrix<NFmiLocationCache>& theLocationCache,
                             NFmiDataMatrix<float>& theDemMatrix,
                             NFmiDataMatrix<bool>& theWaterFlagMatrix,
                             int x1 = 0,
