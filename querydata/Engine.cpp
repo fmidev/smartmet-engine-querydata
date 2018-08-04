@@ -745,8 +745,8 @@ NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
 
     const auto& grid = theQ->grid();
 
-    const long unsigned int nx = grid.XNumber();
-    const long unsigned int ny = grid.YNumber();
+    const auto nx = grid.XNumber();
+    const auto ny = grid.YNumber();
 
     NFmiDataMatrix<NFmiPoint> coords(nx, ny);
 
@@ -774,8 +774,8 @@ NFmiDataMatrix<NFmiPoint> get_latlons(const Q& theQ)
 
     const auto& grid = theQ->grid();
 
-    const long unsigned int nx = grid.XNumber();
-    const long unsigned int ny = grid.YNumber();
+    const auto nx = grid.XNumber();
+    const auto ny = grid.YNumber();
 
     NFmiDataMatrix<NFmiPoint> coords(nx, ny);
 
