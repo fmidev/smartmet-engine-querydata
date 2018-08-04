@@ -467,15 +467,14 @@ boost::posix_time::time_period Engine::getProducerTimePeriod(const Producer& pro
       auto q = get(producer);
       auto validtimes = q->validTimes();
       if (validtimes->empty())
-        return boost::posix_time::time_period(
-            boost::posix_time::ptime(), boost::posix_time::hours(0));  // is_null will return true
+        return {boost::posix_time::ptime(),
+                boost::posix_time::hours(0)};  // is_null will return true
       else
-        return boost::posix_time::time_period(validtimes->front(), validtimes->back());
+        return {validtimes->front(), validtimes->back()};
     }
     catch (...)
     {
-      return boost::posix_time::time_period(
-          boost::posix_time::ptime(), boost::posix_time::hours(0));  // is_null will return true
+      return {boost::posix_time::ptime(), boost::posix_time::hours(0)};  // is_null will return true
     }
   }
   catch (...)
