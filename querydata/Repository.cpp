@@ -922,19 +922,19 @@ Repository::MetaObject Repository::getSynchroInfos() const
   {
     Repository::MetaObject props;
 
-    for (auto prodit = itsProducers.begin(); prodit != itsProducers.end(); ++prodit)
+    for (const auto& prodit : itsProducers)
     {
-      const SharedModels& theseModels = prodit->second;
+      const SharedModels& theseModels = prodit.second;
 
-      const ProducerConfig thisConfig = itsProducerConfigs.find(prodit->first)->second;
+      const ProducerConfig thisConfig = itsProducerConfigs.find(prodit.first)->second;
 
       std::vector<bp::ptime> originTimes;
 
-      for (auto modit = theseModels.begin(); modit != theseModels.end(); ++modit)
+      for (const auto& modit : theseModels)
       {
         // Get querydata origintime
 
-        originTimes.push_back(modit->first);
+        originTimes.push_back(modit.first);
       }
 
       props.insert(std::make_pair(thisConfig.producer, originTimes));
