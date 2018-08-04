@@ -41,8 +41,8 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
  public:
   Model(const boost::filesystem::path& filename,
         const std::string& validpointscachedir,
-        const Producer& producer,
-        const std::string& levelname,
+        Producer producer,
+        std::string levelname,
         bool climatology,
         bool full,
         bool relativeuv,
