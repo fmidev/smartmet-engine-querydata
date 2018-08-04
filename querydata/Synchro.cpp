@@ -45,12 +45,12 @@ void dumpProducerMap(const SmartMet::Engine::Querydata::ProducerMap& map)
 {
   try
   {
-    for (auto it = map.begin(); it != map.end(); ++it)
+    for (const auto& p : map)
     {
-      std::cout << "Producer: " << it->first << std::endl;
-      for (auto it2 = it->second.begin(); it2 != it->second.end(); ++it2)
+      std::cout << "Producer: " << p.first << std::endl;
+      for (const auto& m : p.second)
       {
-        std::cout << " " << *it2;
+        std::cout << " " << m;
       }
       std::cout << std::endl;
     }
