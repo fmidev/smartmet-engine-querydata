@@ -20,7 +20,7 @@ class WGS84Envelope
   /* Default range: Latitude(-90,90) Longitude(-180,180) */
   explicit WGS84Envelope();
   explicit WGS84Envelope(const WGS84Envelope& other);
-  explicit WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo> info);
+  explicit WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo>& info);
   WGS84Envelope& operator=(const WGS84Envelope& other);
   const RangeLon& getRangeLon() const;
   const RangeLat& getRangeLat() const;

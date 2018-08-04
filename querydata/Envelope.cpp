@@ -14,7 +14,7 @@ WGS84Envelope::WGS84Envelope(const WGS84Envelope& other)
 {
 }
 
-WGS84Envelope::WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo> info)
+WGS84Envelope::WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo>& info)
     : mRangeLon(-180.0, 180.0), mRangeLat(-90.0, 90.0)
 {
   // Calculate latlon boundary
