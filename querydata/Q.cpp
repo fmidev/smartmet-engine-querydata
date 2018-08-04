@@ -251,9 +251,9 @@ MetaData QImpl::metaData()
     if (qi.FirstTime() && qi.NextTime())
     {
       qi.FirstTime();
-      NFmiTime t1 = qi.ValidTime();
+      auto t1 = qi.ValidTime();
       qi.NextTime();
-      NFmiTime t2 = qi.ValidTime();
+      auto t2 = qi.ValidTime();
       meta.timeStep = t2.DifferenceInMinutes(t1);
     }
     else
