@@ -624,9 +624,9 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
 
       const ProducerConfig thisConfig = itsProducerConfigs.find(prodit.first)->second;
 
-      for (auto modit = theseModels.begin(); modit != theseModels.end(); ++modit)
+      for (const auto& modit : theseModels)
       {
-        auto model = modit->second;
+        auto model = modit.second;
         auto qi = model->info();
 
         // Time range
@@ -699,7 +699,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         ++column;
 
         // insert model file path
-        resultTable->set(column, row, modit->second->path().string());
+        resultTable->set(column, row, modit.second->path().string());
         ++column;
 
         // Insert parameters
@@ -722,7 +722,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         ++column;
 
         // insert origin time
-        resultTable->set(column, row, timeFormatter->format(modit->first));
+        resultTable->set(column, row, timeFormatter->format(modit.first));
         ++column;
 
         // Insert min time
