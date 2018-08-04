@@ -441,7 +441,7 @@ std::size_t Model::gridHashValue() const
 
 void Model::setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache)
 {
-  itsQueryData->SetLatLonCache(theCache);
+  itsQueryData->SetLatLonCache(std::move(theCache));
 }
 
 // ----------------------------------------------------------------------
