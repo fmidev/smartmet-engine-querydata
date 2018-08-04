@@ -168,7 +168,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
       itsInfos.push_back(model->info());
 
     if (itsInfos.size() > 1)
-      itsInfo.reset(new NFmiMultiQueryInfo(itsInfos));
+      itsInfo = boost::make_shared<NFmiMultiQueryInfo>(itsInfos);
     else
       itsInfo = itsInfos[0];
 
