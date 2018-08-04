@@ -317,23 +317,19 @@ void Synchronizer::send_broadcast()
     // The host name
     mesg.set_name(itsHostName);
 
-    for (auto iter = metadata.begin(); iter != metadata.end(); ++iter)
+    for (const auto& meta : metadata)
     {
       QueryDataMessage::ProducerInfo* thisProducer = mesg.add_prodinfos();
 
-      thisProducer->set_prodname(iter->first);
-      for (auto it = iter->second.begin(); it != iter->second.end(); ++it)
-      {
-        thisProducer->add_origintimes(Fmi::to_iso_string(*it));
-      }
+      thisProducer->set_prodname(meta.first);
+      for (const auto& time : meta.second)
+        thisProducer->add_origintimes(Fmi::to_iso_string(time));
     }
 
     // Add known handlers
     auto uriMap = itsReactor->getURIMap();
-    for (auto it = uriMap.begin(); it != uriMap.end(); ++it)
-    {
-      mesg.add_handlers(it->first);
-    }
+    for (const auto& uri : uriMap)
+      mesg.add_handlers(uri.first);
 
     // Send message asynchronously
     mesg.SerializeToString(&itsSendBuffer);
