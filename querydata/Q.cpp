@@ -2016,8 +2016,7 @@ ts::Value FeelsLike(QImpl &q,
 
     if (ret == kFloatMissing)
       return Spine::TimeSeries::None();
-    else
-      return ret;
+    return ret;
   }
   catch (...)
   {
@@ -2060,8 +2059,7 @@ ts::Value ApparentTemperature(QImpl &q,
 
     if (ret == kFloatMissing)
       return Spine::TimeSeries::None();
-    else
-      return ret;
+    return ret;
   }
   catch (...)
   {
@@ -2091,14 +2089,10 @@ ts::Value Snow1hLower(QImpl &q,
     {
       return Spine::TimeSeries::None();
     }
-    else
-    {
-      float ret = FmiSnowLowerLimit(prec1h);
-      if (ret == kFloatMissing)
-        return Spine::TimeSeries::None();
-      else
-        return ret;
-    }
+    float ret = FmiSnowLowerLimit(prec1h);
+    if (ret == kFloatMissing)
+      return Spine::TimeSeries::None();
+    return ret;
   }
   catch (...)
   {
@@ -2124,17 +2118,12 @@ ts::Value Snow1hUpper(QImpl &q,
 
     // FmiSnowUpperLimit fails if input is 'nan', check here.
     if (prec1h == kFloatMissing)
-    {
       return Spine::TimeSeries::None();
-    }
-    else
-    {
-      float ret = FmiSnowUpperLimit(prec1h);
-      if (ret == kFloatMissing)
-        return Spine::TimeSeries::None();
-      else
-        return ret;
-    }
+
+    float ret = FmiSnowUpperLimit(prec1h);
+    if (ret == kFloatMissing)
+      return Spine::TimeSeries::None();
+    return ret;
   }
   catch (...)
   {
@@ -2205,8 +2194,7 @@ ts::Value WeatherSymbol(QImpl &q,
         Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
     if (sp.dark())
       return 100 + symbol;
-    else
-      return symbol;
+    return symbol;
   }
   catch (...)
   {
