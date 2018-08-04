@@ -125,7 +125,6 @@ Synchronizer::Synchronizer(SmartMet::Engine::Querydata::Engine* itsParent,
       itsSocket(itsIoService),
       itsTimer(itsIoService),
       itsReactor(nullptr),
-      hasLaunched(false),
       isLaunchable(true)
 
 {
