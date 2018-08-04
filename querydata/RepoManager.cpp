@@ -137,7 +137,6 @@ RepoManager::~RepoManager()
 
 RepoManager::RepoManager(const std::string& configfile)
     : itsVerbose(false),
-      itsMonitor(),
       itsThreadCount(0),
       itsMaxThreadCount(10),  // default if not configured
       itsShutdownRequested(false),
