@@ -160,7 +160,7 @@ void Engine::configFileWatch()
       {
         if (strstr(e.what(), "syntax error") != nullptr)
           lastConfigErrno = ENOEXEC;
-        std::cerr << (std::string) "Error reading new config: " + e.what() + "\n";
+        std::cerr << std::string{"Error reading new config: "} + e.what() + "\n";
       }
 
       filetime = newfiletime;  // Update time even if there is an error
