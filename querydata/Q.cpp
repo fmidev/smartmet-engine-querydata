@@ -2556,7 +2556,7 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
     }
 
     // Since we have precipitation, we always need precipitation form
-    int rform = kFloatMissing;
+    float rform = kFloatMissing;
     if (q.param(kFmiPotentialPrecipitationForm))
       rform = q.interpolate(latlon, ldt, maxgap);
     else if (q.param(kFmiPrecipitationForm))
@@ -2588,7 +2588,7 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
     if (rform == 1)  // water
     {
       // Now we need precipitation type too
-      int rtype = 1;  // large scale by default
+      float rtype = 1;  // large scale by default
       if (q.param(kFmiPotentialPrecipitationType))
         rtype = q.interpolate(latlon, ldt, maxgap);
 
