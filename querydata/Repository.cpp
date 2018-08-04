@@ -645,9 +645,9 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
           if (!paramName.empty())
             params.push_back(paramName);
           else
-            params.push_back(Fmi::to_string(paramID));
+            params.emplace_back(Fmi::to_string(paramID));
 
-          descriptions.push_back(qi->Param().GetParamName().CharPtr());
+          descriptions.emplace_back(qi->Param().GetParamName().CharPtr());
         }
 
         // Get the available levelvalues
@@ -656,9 +656,9 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         {
           float level = qi->Level()->LevelValue();
           if (level != kFloatMissing)
-            levels.push_back(Fmi::to_string(level));
+            levels.emplace_back(Fmi::to_string(level));
           else
-            levels.push_back("-");
+            levels.emplace_back("-");
         }
 
         // Get projection string
