@@ -517,7 +517,7 @@ void Synchronizer::process_message(const QueryDataMessage& incomingMessage)
       {
         const auto& info = incomingMessage.prodinfos(i);
 
-        std::size_t osize = boost::numeric_cast<std::size_t>(info.origintimes_size());
+        auto osize = boost::numeric_cast<std::size_t>(info.origintimes_size());
 
         std::vector<bp::ptime> theseTimes(osize);
 
