@@ -355,8 +355,7 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
       throw Spine::Exception(
           BCP, "Repository remove: No data available for producer '" + producer + "'");
 
-    for (SharedModels::iterator time_model = models.begin(), end = models.end(); time_model != end;
-         ++time_model)
+    for (auto time_model = models.begin(), end = models.end(); time_model != end; ++time_model)
     {
       if (time_model->second->path() == path)
       {
@@ -445,7 +444,7 @@ void Repository::expire(const Producer& producer, std::size_t max_age)
     if (models.empty())
       return;
 
-    for (SharedModels::iterator time_model = models.begin(), end = models.end(); time_model != end;)
+    for (auto time_model = models.begin(), end = models.end(); time_model != end;)
     {
       if (time_model->second->modificationTime() >= time_limit)
         ++time_model;
@@ -547,7 +546,7 @@ Producer Repository::find(const ProducerList& producerlist,
 
       if (producer_model != itsProducers.end())
       {
-        ProducerConfigs::const_iterator prod_config = itsProducerConfigs.find(producer);
+        const auto prod_config = itsProducerConfigs.find(producer);
         // Use data maxdistance if allowed and it is set
         double chosenmaxdist =
             (usedatamaxdist && prod_config->second.maxdistance > 0 ? prod_config->second.maxdistance
