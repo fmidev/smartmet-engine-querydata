@@ -23,12 +23,12 @@ WGS84Envelope::WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo>& info)
   const NFmiPoint& b2Point = info->LatLon(0);
   mRangeLon.set(b2Point.X(), b2Point.X());
   mRangeLat.set(b2Point.Y(), b2Point.Y());
-  const unsigned long nX = info->GridXNumber();
-  const unsigned long nY = info->GridYNumber();
-  for (unsigned long yId = 0; yId < nY; yId++)
+  const auto nX = info->GridXNumber();
+  const auto nY = info->GridYNumber();
+  for (std::size_t yId = 0; yId < nY; yId++)
   {
-    unsigned long baseId = yId * nX;
-    for (unsigned long id = baseId; id < baseId + nX; id++)
+    auto baseId = yId * nX;
+    for (std::size_t id = baseId; id < baseId + nX; id++)
     {
       const NFmiPoint& b2Point = info->LatLon(id);
       mRangeLon.set(std::min(mRangeLon.getMin(), b2Point.X()),
