@@ -171,8 +171,8 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
     if (theModels.empty())
       throw Spine::Exception(BCP, "Cannot initialize any empty view over multiple models");
 
-    for (std::size_t i = 0; i < itsModels.size(); i++)
-      itsInfos.push_back(itsModels[i]->info());
+    for (auto &model : itsModels)
+      itsInfos.push_back(model->info());
 
     if (itsInfos.size() > 1)
       itsInfo.reset(new NFmiMultiQueryInfo(itsInfos));
