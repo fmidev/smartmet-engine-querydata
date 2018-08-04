@@ -223,21 +223,10 @@ void Engine::shutdownRequestFlagSet()
 
 CacheReportingStruct Engine::getCacheSizes() const
 {
-  try
-  {
-    CacheReportingStruct ret;
-
-    ret.coordinate_cache_max_size = itsCoordinateCache.maxSize();
-    ret.coordinate_cache_size = itsCoordinateCache.size();
-    ret.values_cache_max_size = itsValuesCache.maxSize();
-    ret.values_cache_size = itsValuesCache.size();
-
-    return ret;
-  }
-  catch (...)
-  {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
-  }
+  return CacheReportingStruct{itsCoordinateCache.maxSize(),
+                              itsCoordinateCache.size(),
+                              itsValuesCache.maxSize(),
+                              itsValuesCache.size()};
 }
 
 // ----------------------------------------------------------------------

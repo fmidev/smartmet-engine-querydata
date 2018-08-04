@@ -43,10 +43,10 @@ struct RepoManager;
 
 struct CacheReportingStruct
 {
-  int coordinate_cache_max_size;
-  int coordinate_cache_size;
-  int values_cache_max_size;
-  int values_cache_size;
+  std::size_t coordinate_cache_max_size;
+  std::size_t coordinate_cache_size;
+  std::size_t values_cache_max_size;
+  std::size_t values_cache_size;
 };
 
 class Engine : public Spine::SmartMetEngine
