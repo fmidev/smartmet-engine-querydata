@@ -789,8 +789,8 @@ void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
     if (theCoord.X() >= 0 && theCoord.X() < theCoords.NX() - 1 && theCoord.Y() >= 0 &&
         theCoord.Y() < theCoords.NY() - 1)
     {
-      std::size_t i = static_cast<std::size_t>(theCoord.X());
-      std::size_t j = static_cast<std::size_t>(theCoord.Y());
+      auto i = static_cast<std::size_t>(theCoord.X());
+      auto j = static_cast<std::size_t>(theCoord.Y());
       NFmiPoint badcoord(std::numeric_limits<float>::quiet_NaN(),
                          std::numeric_limits<float>::quiet_NaN());
       theCoords[i + 0][j + 0] = badcoord;
