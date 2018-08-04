@@ -41,8 +41,7 @@ Model::Model(const boost::filesystem::path& filename,
              bool relativeuv,
              unsigned int update_interval,
              unsigned int minimum_expiration_time)
-    : itsOriginTime(),
-      itsPath(filename),
+    : itsPath(filename),
       itsProducer(producer),
       itsLevelName(levelname),
       itsUpdateInterval(update_interval),
@@ -50,10 +49,7 @@ Model::Model(const boost::filesystem::path& filename,
       itsClimatology(climatology),
       itsFullGrid(full),
       itsRelativeUV(relativeuv),
-      itsValidPoints(),
       itsValidTimeList(new ValidTimeList()),
-      itsQueryInfoPoolMutex(),
-      itsQueryInfoPool(),
       itsQueryData(new NFmiQueryData(filename.string()))
 {
   try
@@ -132,8 +128,6 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
       itsRelativeUV(theModel.itsRelativeUV),
       itsValidPoints(theModel.itsValidPoints),
       itsValidTimeList(theModel.itsValidTimeList),
-      itsQueryInfoPoolMutex(),
-      itsQueryInfoPool(),
       itsQueryData(std::move(theData))
 {
 }
@@ -141,26 +135,17 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
 // ----------------------------------------------------------------------
 /*!
  * \brief Construct a model without querydata file
+ *
+ * Note: The hash is given from the outside on purpose
  */
 // ----------------------------------------------------------------------
 
 Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
-    : itsHashValue(theHash)  // decided externally on purpose
-      ,
-      itsOriginTime(),
-      itsPath(""),
-      itsModificationTime(),
-      itsProducer(""),
-      itsLevelName(""),
+    : itsHashValue(theHash),
       itsUpdateInterval(0),
       itsMinimumExpirationTime(999999),
-      itsClimatology(false),
       itsFullGrid(true),
-      itsRelativeUV(false),
-      itsValidPoints(),
       itsValidTimeList(new ValidTimeList()),
-      itsQueryInfoPoolMutex(),
-      itsQueryInfoPool(),
       itsQueryData(std::move(theData))
 {
   try

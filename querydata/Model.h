@@ -96,9 +96,9 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   std::string itsLevelName;
   unsigned int itsUpdateInterval;
   unsigned int itsMinimumExpirationTime;
-  bool itsClimatology{false};
-  bool itsFullGrid{false};
-  bool itsRelativeUV{false};
+  bool itsClimatology = false;
+  bool itsFullGrid = false;
+  bool itsRelativeUV = false;
 
   boost::shared_ptr<ValidPoints> itsValidPoints;
   boost::shared_ptr<ValidTimeList> itsValidTimeList;
