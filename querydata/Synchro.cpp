@@ -166,16 +166,9 @@ Synchronizer::Synchronizer(SmartMet::Engine::Querydata::Engine* itsParent,
 
 Synchronizer::~Synchronizer()
 {
-  try
-  {
-    itsIoService.stop();
-    if (itsCommThread)
-      itsCommThread->join();
-  }
-  catch (...)
-  {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
-  }
+  itsIoService.stop();
+  if (itsCommThread)
+    itsCommThread->join();
 }
 
 void Synchronizer::launch(Spine::Reactor* theReactor)
