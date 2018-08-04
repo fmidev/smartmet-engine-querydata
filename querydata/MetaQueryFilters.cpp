@@ -14,9 +14,9 @@ using namespace Spine;
 
 namespace bg = boost::geometry;
 
-typedef bg::model::point<double, 2, bg::cs::cartesian> degree_point;
+using degree_point = bg::model::point<double, 2, bg::cs::cartesian>;
 
-typedef bg::model::box<degree_point> BoxType;
+using BoxType = bg::model::box<degree_point>;
 
 bool filterProducer(const MetaData& prop, const MetaQueryOptions& options)
 {
