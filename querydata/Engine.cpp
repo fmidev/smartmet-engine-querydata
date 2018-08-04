@@ -54,7 +54,7 @@ void Engine::init()
     itsValuesCache.resize(5000);
     auto repomanager = boost::atomic_load(&itsRepoManager);
     repomanager->init();
-    itsSynchro.reset(new Synchronizer(this, itsConfigFile));
+    itsSynchro = boost::make_shared<Synchronizer>(this, itsConfigFile);
 
     // Wait until all initial data has been loaded
     while (!repomanager->ready() && !itsShutdownRequested)
