@@ -314,8 +314,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
       double distance = NFmiGeoTools::GeoDistance(latlon.X(), latlon.Y(), p.X(), p.Y());
       if (distance <= 1000 * maxdist)
         return p;
-      else
-        return NFmiPoint(kFloatMissing, kFloatMissing);
+      return NFmiPoint(kFloatMissing, kFloatMissing);
     }
 
     // The model does not cover the entire grid, but for example
@@ -362,8 +361,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
 
     if (ok)
       return bestpoint;
-    else
-      return NFmiPoint(kFloatMissing, kFloatMissing);
+    return NFmiPoint(kFloatMissing, kFloatMissing);
   }
   catch (...)
   {
@@ -399,13 +397,11 @@ SharedInfo Model::info() const
       qinfo->First();  // reset for first use
       return qinfo;
     }
-    else
-    {
-      auto qinfo = itsQueryInfoPool.front();
-      itsQueryInfoPool.pop_front();
-      qinfo->First();  // reset after prior use
-      return qinfo;
-    }
+
+    auto qinfo = itsQueryInfoPool.front();
+    itsQueryInfoPool.pop_front();
+    qinfo->First();  // reset after prior use
+    return qinfo;
   }
   catch (...)
   {
