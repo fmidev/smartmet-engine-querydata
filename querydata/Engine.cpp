@@ -458,8 +458,7 @@ boost::posix_time::time_period Engine::getProducerTimePeriod(const Producer& pro
     // Handle unknown producers such as observations quickly without exceptions
     if (!hasProducer(producer))
     {
-      return boost::posix_time::time_period(
-          boost::posix_time::ptime(), boost::posix_time::hours(0));  // is_null will return true
+      return {boost::posix_time::ptime(), boost::posix_time::hours(0)};  // is_null will return true
     }
 
     try
