@@ -273,8 +273,8 @@ MetaData QImpl::metaData()
       const std::string paramDesc = qi.Param().GetParamName().CharPtr();
       const std::string paramPrec = qi.Param().GetParam()->Precision().CharPtr();
       // Find the numerical part of the precision string
-      auto dot = paramPrec.find(".");
-      auto fchar = paramPrec.find("f");
+      auto dot = paramPrec.find('.');
+      auto fchar = paramPrec.find('f');
       if ((dot != std::string::npos) && (fchar != std::string::npos))
       {
         auto theNumber = std::string(paramPrec.begin() + dot + 1, paramPrec.begin() + fchar);
