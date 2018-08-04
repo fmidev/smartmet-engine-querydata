@@ -51,7 +51,7 @@ struct ModelLevel
 
 struct MetaData
 {
-  MetaData();
+  MetaData() = default;
   Producer producer;
   boost::posix_time::ptime originTime;
   boost::posix_time::ptime firstTime;

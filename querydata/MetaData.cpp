@@ -17,8 +17,6 @@ ModelLevel::ModelLevel(std::string theType, std::string theName, float theValue)
 {
 }
 
-MetaData::MetaData() {}
-
 }  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
