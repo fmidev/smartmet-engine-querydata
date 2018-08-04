@@ -469,8 +469,8 @@ boost::posix_time::time_period Engine::getProducerTimePeriod(const Producer& pro
       if (validtimes->empty())
         return {boost::posix_time::ptime(),
                 boost::posix_time::hours(0)};  // is_null will return true
-      else
-        return {validtimes->front(), validtimes->back()};
+
+      return {validtimes->front(), validtimes->back()};
     }
     catch (...)
     {
@@ -521,52 +521,43 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup) 
   {
     auto syncProducers = itsSynchro->getSynchedData(syncGroup);
 
-    if (syncProducers)
+    if (!syncProducers)
+      return std::list<MetaData>();  // Unknown sync group
+
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+
+    std::list<MetaData> repocontent;
     {
-      auto repomanager = boost::atomic_load(&itsRepoManager);
-
-      std::list<MetaData> repocontent;
-      {
-        Spine::ReadLock lock(repomanager->itsMutex);
-
-        repocontent = repomanager->itsRepo.getRepoMetadata();
-      }
-
-      if (repocontent.empty())
-      {
-        // No point filtering an empty list
-        return repocontent;
-      }
-
-      for (auto iter = repocontent.begin(); iter != repocontent.end();)
-      {
-        auto& producer = iter->producer;
-
-        auto syncIt = syncProducers->find(producer);
-        if (syncIt == syncProducers->end())
-        {
-          // This producer is not available in this synchronization group
-          repocontent.erase(iter++);
-          continue;
-        }
-
-        // Filter according to synchroed origin times
-        if (!filterSynchro(*iter, syncIt->second))
-        {
-          repocontent.erase(iter++);
-          continue;
-        }
-
-        ++iter;
-      }
-
-      return repocontent;
+      Spine::ReadLock lock(repomanager->itsMutex);
+      repocontent = repomanager->itsRepo.getRepoMetadata();
     }
-    else
+
+    if (repocontent.empty())
+      return repocontent;  // No point filtering an empty list
+
+    for (auto iter = repocontent.begin(); iter != repocontent.end();)
     {
-      // Unknown sync group
-      return std::list<MetaData>();
+      auto& producer = iter->producer;
+
+      auto syncIt = syncProducers->find(producer);
+      if (syncIt == syncProducers->end())
+      {
+        // This producer is not available in this synchronization group
+        repocontent.erase(iter++);
+        continue;
+      }
+
+      // Filter according to synchroed origin times
+      if (!filterSynchro(*iter, syncIt->second))
+      {
+        repocontent.erase(iter++);
+        continue;
+      }
+
+      ++iter;
     }
+
+    return repocontent;
   }
   catch (...)
   {
@@ -582,49 +573,40 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup,
     auto syncProducers = itsSynchro->getSynchedData(syncGroup);
     auto repomanager = boost::atomic_load(&itsRepoManager);
 
-    if (syncProducers)
+    if (!syncProducers)
+      return std::list<MetaData>();  // Unknown sync group
+
+    std::list<MetaData> repocontent;
     {
-      std::list<MetaData> repocontent;
-      {
-        Spine::ReadLock lock(repomanager->itsMutex);
-
-        repocontent = repomanager->itsRepo.getRepoMetadata(options);
-      }
-
-      if (repocontent.empty())
-      {
-        // No point filtering an empty list
-        return repocontent;
-      }
-
-      for (auto iter = repocontent.begin(); iter != repocontent.end();)
-      {
-        auto& producer = iter->producer;
-        auto syncIt = syncProducers->find(producer);
-        if (syncIt == syncProducers->end())
-        {
-          // This producer is not available in this synchronization group
-          repocontent.erase(iter++);
-          continue;
-        }
-
-        // Filter according to synchroed origin times
-        if (!filterSynchro(*iter, syncIt->second))
-        {
-          repocontent.erase(iter++);
-          continue;
-        }
-
-        ++iter;
-      }
-
-      return repocontent;
+      Spine::ReadLock lock(repomanager->itsMutex);
+      repocontent = repomanager->itsRepo.getRepoMetadata(options);
     }
-    else
+
+    if (repocontent.empty())
+      return repocontent;  // No point filtering an empty list
+
+    for (auto iter = repocontent.begin(); iter != repocontent.end();)
     {
-      // Unknown sync group
-      return std::list<MetaData>();
+      auto& producer = iter->producer;
+      auto syncIt = syncProducers->find(producer);
+      if (syncIt == syncProducers->end())
+      {
+        // This producer is not available in this synchronization group
+        repocontent.erase(iter++);
+        continue;
+      }
+
+      // Filter according to synchroed origin times
+      if (!filterSynchro(*iter, syncIt->second))
+      {
+        repocontent.erase(iter++);
+        continue;
+      }
+
+      ++iter;
     }
+
+    return repocontent;
   }
   catch (...)
   {
