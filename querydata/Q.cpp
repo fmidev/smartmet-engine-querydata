@@ -143,7 +143,7 @@ QImpl::QImpl(SharedModel theModel)
 {
   try
   {
-    itsModels.push_back(theModel);
+    itsModels.emplace_back(theModel);
     itsInfos.push_back(theModel->info());
     itsInfo = theModel->info();
 
