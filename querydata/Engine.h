@@ -139,12 +139,12 @@ class Engine : public Spine::SmartMetEngine
 
   ValuesPtr getValues(const Q& theQ,
                       std::size_t theValuesHash,
-                      boost::posix_time::ptime theOptionsTime) const;
+                      boost::posix_time::ptime theTime) const;
 
   ValuesPtr getValues(const Q& theQ,
                       const Spine::Parameter& theParam,
                       std::size_t theValuesHash,
-                      boost::posix_time::ptime theOptionsTime) const;
+                      boost::posix_time::ptime theTime) const;
 
  protected:
   void init();
