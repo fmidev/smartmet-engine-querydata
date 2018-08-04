@@ -3055,8 +3055,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
   {
     if (loc.geoid == 0)  // not sure why this is still here
       return Spine::TimeSeries::None();
-    else
-      return Fmi::to_string(loc.geoid);
+    return Fmi::to_string(loc.geoid);
   }
 
   // We allow coordinates to be both DataIndependent and DataDerived depending
