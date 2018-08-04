@@ -619,11 +619,11 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
 
     int row = 0;
 
-    for (auto prodit = itsProducers.begin(); prodit != itsProducers.end(); ++prodit)
+    for (const auto& prodit : itsProducers)
     {
-      const SharedModels& theseModels = prodit->second;
+      const SharedModels& theseModels = prodit.second;
 
-      const ProducerConfig thisConfig = itsProducerConfigs.find(prodit->first)->second;
+      const ProducerConfig thisConfig = itsProducerConfigs.find(prodit.first)->second;
 
       for (auto modit = theseModels.begin(); modit != theseModels.end(); ++modit)
       {
@@ -687,7 +687,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         int column = 0;
 
         // insert producer name
-        resultTable->set(column, row, prodit->first);
+        resultTable->set(column, row, prodit.first);
         ++column;
 
         // Insert aliases
