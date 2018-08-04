@@ -361,7 +361,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
 
     if (ok)
       return bestpoint;
-    return NFmiPoint(kFloatMissing, kFloatMissing);
+    return {kFloatMissing, kFloatMissing};
   }
   catch (...)
   {
