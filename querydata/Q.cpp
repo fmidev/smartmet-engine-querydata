@@ -122,15 +122,8 @@ bool iswater(const Spine::Location &theLocation)
 
 QImpl::~QImpl()
 {
-  try
-  {
-    for (std::size_t i = 0; i < itsInfos.size(); i++)
-      itsModels[i]->release(itsInfos[i]);
-  }
-  catch (...)
-  {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
-  }
+  for (std::size_t i = 0; i < itsInfos.size(); i++)
+    itsModels[i]->release(itsInfos[i]);
 }
 
 // ----------------------------------------------------------------------
