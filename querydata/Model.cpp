@@ -433,7 +433,7 @@ void Model::release(boost::shared_ptr<NFmiFastQueryInfo> theInfo) const
   try
   {
     Spine::WriteLock lock(itsQueryInfoPoolMutex);
-    itsQueryInfoPool.push_front(theInfo);
+    itsQueryInfoPool.emplace_front(theInfo);
   }
   catch (...)
   {
