@@ -3707,10 +3707,10 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
   {
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
-    for (NFmiIndexMask::const_iterator it = indexmask.begin(); it != indexmask.end(); ++it)
+    for (const auto &mask : indexmask)
     {
       // Indexed latlon
-      NFmiPoint latlon(latLon(*it));
+      NFmiPoint latlon(latLon(mask));
 
       Spine::Location location(param.loc.geoid,
                                param.loc.name,
@@ -3763,10 +3763,10 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
   {
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
-    for (NFmiIndexMask::const_iterator it = indexmask.begin(); it != indexmask.end(); ++it)
+    for (const auto &mask : indexmask)
     {
       // Indexed latlon
-      NFmiPoint latlon(latLon(*it));
+      NFmiPoint latlon(latLon(mask));
 
       Spine::Location location(param.loc.geoid,
                                param.loc.name,
@@ -3818,10 +3818,10 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
   {
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
-    for (NFmiIndexMask::const_iterator it = indexmask.begin(); it != indexmask.end(); ++it)
+    for (const auto &mask : indexmask)
     {
       // Indexed latlon
-      NFmiPoint latlon(latLon(*it));
+      NFmiPoint latlon(latLon(mask));
 
       Spine::Location location(param.loc.geoid,
                                param.loc.name,
@@ -4014,16 +4014,14 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
 
     if (theResolution < 0)
       throw Spine::Exception(BCP, "Resolution must be nonnegative!");
-    else if (theResolution < 0.01)
+
+    if (theResolution < 0.01)
     {
       if (theResolution > 0)
-      {
         throw Spine::Exception(BCP, "Resolutions below 10 meters are not supported!");
-      }
-      else if (theLocationCache.NX() > 0)
-      {
+
+      if (theLocationCache.NX() > 0)
         throw Spine::Exception(BCP, "Nonzero resolution must be given with locations!");
-      }
     }
 
     const NFmiGrid &nativeGrid = grid();
