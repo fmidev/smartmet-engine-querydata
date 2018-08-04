@@ -243,7 +243,7 @@ void Synchronizer::shutdownRequestFlagSet()
   }
 }
 
-boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& handler)
+boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& syncGroup)
 {
   try
   {
@@ -254,7 +254,7 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& han
       throw Spine::Exception(BCP,
                              "Attempted to get synched metadata from a non-synching QEngine node");
     }
-    auto it = itsSyncGroups.find(handler);
+    auto it = itsSyncGroups.find(syncGroup);
     if (it == itsSyncGroups.end())
       return boost::optional<ProducerMap>();  // unknown handler
     return boost::optional<ProducerMap>(it->second.getConsensus());
@@ -265,13 +265,13 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& han
   }
 }
 
-boost::optional<std::vector<bp::ptime> > Synchronizer::getSynchedData(const std::string& handler,
+boost::optional<std::vector<bp::ptime> > Synchronizer::getSynchedData(const std::string& syncGroup,
                                                                       const std::string& producer)
 {
   try
   {
     Spine::WriteLock lock(itsMutex);
-    auto it = itsSyncGroups.find(handler);
+    auto it = itsSyncGroups.find(syncGroup);
     if (it == itsSyncGroups.end())
       return std::vector<bp::ptime>{};  // // Unknown handler
 
