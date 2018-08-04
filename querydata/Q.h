@@ -113,15 +113,15 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   float interpolate(const NFmiPoint& theLatLon,
                     const NFmiMetTime& theTime,
-                    int theMaxMinuteRange = 0);
+                    int theMaxMinuteGap = 0);
   float interpolateAtPressure(const NFmiPoint& theLatLon,
                               const NFmiMetTime& theTime,
                               float thePressure,
-                              int theMaxMinuteRange = 0);
+                              int theMaxMinuteGap = 0);
   float interpolateAtHeight(const NFmiPoint& theLatLon,
                             const NFmiMetTime& theTime,
                             float theHeight,
-                            int theMaxMinuteRange = 0);
+                            int theMaxMinuteGap = 0);
 
   NFmiPoint latLon(long theIndex) const;
 
@@ -220,8 +220,8 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                             const Fmi::LandCover& theLandCover,
                             double theResolution,
                             const NFmiDataMatrix<NFmiLocationCache>& locCache,
-                            NFmiDataMatrix<float>& demMatrix,
-                            NFmiDataMatrix<bool>& waterFlagMatrix,
+                            NFmiDataMatrix<float>& theDemMatrix,
+                            NFmiDataMatrix<bool>& theWaterFlagMatrix,
                             int x1 = 0,
                             int y1 = 0,
                             int x2 = 0,
@@ -241,12 +241,12 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                                   const Fmi::LandCover& theLandCover);
 
   // one location, one timestep
-  Spine::TimeSeries::Value value(const ParameterOptions& param,
+  Spine::TimeSeries::Value value(const ParameterOptions& opt,
                                  const boost::local_time::local_date_time& ldt);
-  Spine::TimeSeries::Value valueAtPressure(const ParameterOptions& param,
+  Spine::TimeSeries::Value valueAtPressure(const ParameterOptions& opt,
                                            const boost::local_time::local_date_time& ldt,
                                            float pressure);
-  Spine::TimeSeries::Value valueAtHeight(const ParameterOptions& param,
+  Spine::TimeSeries::Value valueAtHeight(const ParameterOptions& opt,
                                          const boost::local_time::local_date_time& ldt,
                                          float height);
   // one location, many timesteps
