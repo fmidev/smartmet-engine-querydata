@@ -80,7 +80,7 @@ class SynchronizerConfig : public Spine::ConfigBase
  private:
   std::string itsHostName;
 
-  unsigned short itsPort;
+  unsigned short itsPort = 0;
 
   std::string itsFailedReason;
 };
@@ -123,7 +123,7 @@ class Synchronizer
 
   std::string itsHostName;
 
-  unsigned short itsPort;
+  unsigned short itsPort = 0;
 
   ba::io_service itsIoService;
 
@@ -137,9 +137,9 @@ class Synchronizer
 
   Spine::Reactor* itsReactor;
 
-  bool hasLaunched;
+  bool hasLaunched = false;
 
-  bool isLaunchable;
+  bool isLaunchable = false;
 
   boost::array<char, 32768> itsSocketBuffer;
 
