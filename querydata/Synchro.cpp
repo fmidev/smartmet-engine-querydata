@@ -256,14 +256,8 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& han
     }
     auto it = itsSyncGroups.find(handler);
     if (it == itsSyncGroups.end())
-    {
-      // Unknown handler
-      return boost::optional<ProducerMap>();
-    }
-    else
-    {
-      return boost::optional<ProducerMap>(it->second.getConsensus());
-    }
+      return boost::optional<ProducerMap>();  // unknown handler
+    return boost::optional<ProducerMap>(it->second.getConsensus());
   }
   catch (...)
   {
@@ -279,24 +273,13 @@ boost::optional<std::vector<bp::ptime> > Synchronizer::getSynchedData(const std:
     Spine::WriteLock lock(itsMutex);
     auto it = itsSyncGroups.find(handler);
     if (it == itsSyncGroups.end())
-    {
-      // Unknown handler
-      return boost::optional<std::vector<bp::ptime> >();
-    }
-    else
-    {
-      auto producerMap = it->second.getConsensus();
-      auto it2 = producerMap.find(producer);
-      if (it2 == producerMap.end())
-      {
-        // Unknown producer
-        return boost::optional<std::vector<bp::ptime> >();
-      }
-      else
-      {
-        return boost::optional<std::vector<bp::ptime> >(it2->second);
-      }
-    }
+      return std::vector<bp::ptime>{};  // // Unknown handler
+
+    auto producerMap = it->second.getConsensus();
+    auto it2 = producerMap.find(producer);
+    if (it2 == producerMap.end())
+      return std::vector<bp::ptime>{};  // Unknown producer
+    return std::vector<bp::ptime>(it2->second);
   }
   catch (...)
   {
