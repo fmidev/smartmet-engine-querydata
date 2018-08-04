@@ -10,12 +10,11 @@ namespace Engine
 {
 namespace Querydata
 {
-using namespace Spine;
-
 namespace bg = boost::geometry;
 
-using degree_point = bg::model::point<double, 2, bg::cs::cartesian>;
+using Spine::str_iequal;
 
+using degree_point = bg::model::point<double, 2, bg::cs::cartesian>;
 using BoxType = bg::model::box<degree_point>;
 
 bool filterProducer(const MetaData& prop, const MetaQueryOptions& options)
