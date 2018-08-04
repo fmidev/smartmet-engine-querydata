@@ -1778,7 +1778,7 @@ ts::Value WindCompass8(QImpl &q,
 {
   try
   {
-    static const char *names[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+    static std::vector<std::string> names{"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
 
     if (!q.param(kFmiWindDirection))
       return Spine::TimeSeries::None();
@@ -1789,7 +1789,7 @@ ts::Value WindCompass8(QImpl &q,
       return Spine::TimeSeries::None();
 
     int i = static_cast<int>((value + 22.5) / 45) % 8;
-    return names[i];
+    return names.at(i);
   }
   catch (...)
   {
@@ -1809,22 +1809,22 @@ ts::Value WindCompass16(QImpl &q,
 {
   try
   {
-    static const char *names[] = {"N",
-                                  "NNE",
-                                  "NE",
-                                  "ENE",
-                                  "E",
-                                  "ESE",
-                                  "SE",
-                                  "SSE",
-                                  "S",
-                                  "SSW",
-                                  "SW",
-                                  "WSW",
-                                  "W",
-                                  "WNW",
-                                  "NW",
-                                  "NNW"};
+    static std::vector<std::string> names{"N",
+                                          "NNE",
+                                          "NE",
+                                          "ENE",
+                                          "E",
+                                          "ESE",
+                                          "SE",
+                                          "SSE",
+                                          "S",
+                                          "SSW",
+                                          "SW",
+                                          "WSW",
+                                          "W",
+                                          "WNW",
+                                          "NW",
+                                          "NNW"};
 
     if (!q.param(kFmiWindDirection))
       return Spine::TimeSeries::None();
@@ -1835,7 +1835,7 @@ ts::Value WindCompass16(QImpl &q,
       return Spine::TimeSeries::None();
 
     int i = static_cast<int>((value + 11.25) / 22.5) % 16;
-    return names[i];
+    return names.at(i);
   }
   catch (...)
   {
@@ -1855,10 +1855,10 @@ ts::Value WindCompass32(QImpl &q,
 {
   try
   {
-    static const char *names[] = {"N", "NbE", "NNE", "NEbN", "NE", "NEbE", "ENE", "EbN",
-                                  "E", "EbS", "ESE", "SEbE", "SE", "SEbS", "SSE", "SbE",
-                                  "S", "SbW", "SSW", "SWbS", "SW", "SWbW", "WSW", "WbS",
-                                  "W", "WbN", "WNW", "NWbW", "NW", "NWbN", "NNW", "NbW"};
+    static std::vector<std::string> names{"N", "NbE", "NNE", "NEbN", "NE", "NEbE", "ENE", "EbN",
+                                          "E", "EbS", "ESE", "SEbE", "SE", "SEbS", "SSE", "SbE",
+                                          "S", "SbW", "SSW", "SWbS", "SW", "SWbW", "WSW", "WbS",
+                                          "W", "WbN", "WNW", "NWbW", "NW", "NWbN", "NNW", "NbW"};
 
     if (!q.param(kFmiWindDirection))
       return Spine::TimeSeries::None();
@@ -1869,7 +1869,7 @@ ts::Value WindCompass32(QImpl &q,
       return Spine::TimeSeries::None();
 
     int i = static_cast<int>((value + 5.625) / 11.25) % 32;
-    return names[i];
+    return names.at(i);
   }
   catch (...)
   {
