@@ -852,7 +852,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
       {
         double x = c[i][j].X();
         double y = c[i][j].Y();
-        if (!transformation->Transform(1, &x, &y))
+        if (transformation->Transform(1, &x, &y) == 0)
         {
           x = nan;
           y = nan;
@@ -869,7 +869,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     // We also have to check whether some grid cells cross the 180th meridian
     // and discard them
 
-    if (theSR.IsGeographic())
+    if (theSR.IsGeographic() != 0)
     {
       const auto& grid = theQ->grid();
       auto northpole = grid.LatLonToGrid(0, 90);
