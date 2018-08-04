@@ -164,7 +164,7 @@ QImpl::QImpl(SharedModel theModel)
 // ----------------------------------------------------------------------
 
 QImpl::QImpl(const std::vector<SharedModel> &theModels)
-    : itsModels(theModels), itsInfos(), itsValidTimes(new ValidTimeList)
+    : itsModels(theModels), itsValidTimes(new ValidTimeList)
 {
   try
   {
