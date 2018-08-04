@@ -56,31 +56,31 @@ struct MetaData
   boost::posix_time::ptime originTime;
   boost::posix_time::ptime firstTime;
   boost::posix_time::ptime lastTime;
-  long timeStep;    // Minutes
-  long nTimeSteps;  // number of timesteps
+  long timeStep = 0;    // Minutes
+  long nTimeSteps = 0;  // number of timesteps
 
   std::string WKT;
 
-  double ullon;  // Area corners
-  double ullat;
-  double urlon;
-  double urlat;
-  double bllon;
-  double bllat;
-  double brlon;
-  double brlat;
-  double clon;
-  double clat;
+  double ullon = 0;  // Area corners
+  double ullat = 0;
+  double urlon = 0;
+  double urlat = 0;
+  double bllon = 0;
+  double bllat = 0;
+  double brlon = 0;
+  double brlat = 0;
+  double clon = 0;
+  double clat = 0;
 
-  unsigned int xNumber;
-  unsigned int yNumber;
-  double xResolution;  // in km
-  double yResolution;
+  unsigned int xNumber = 0;
+  unsigned int yNumber = 0;
+  double xResolution = 0;  // in km
+  double yResolution = 0;
 
-  double areaWidth;  // in km
-  double areaHeight;
+  double areaWidth = 0;  // in km
+  double areaHeight = 0;
 
-  double aspectRatio;
+  double aspectRatio = 0;
 
   std::list<ModelLevel> levels;
   std::list<ModelParameter> parameters;
