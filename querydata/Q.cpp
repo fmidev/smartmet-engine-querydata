@@ -188,9 +188,9 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
 
     // Establish unique valid times
     std::set<boost::posix_time::ptime> uniquetimes;
-    for (std::size_t i = 0; i < itsModels.size(); i++)
+    for (auto &model : itsModels)
     {
-      const auto &validtimes = itsModels[i]->validTimes();
+      const auto &validtimes = model->validTimes();
       for (const auto &t : *validtimes)
         uniquetimes.insert(t);
     }
