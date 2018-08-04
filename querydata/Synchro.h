@@ -50,7 +50,7 @@ class SyncGroup
  public:
   SyncGroup() = default;
 
-  SyncGroup(const ProducerMap& theMap);
+  SyncGroup(ProducerMap theMap);
 
   void setBaseline(const ProducerMap& theUpdate);
 

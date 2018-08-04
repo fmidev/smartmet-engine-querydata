@@ -549,7 +549,7 @@ void SyncGroup::setBaseline(const ProducerMap& theUpdate)
   itsConsensus = theUpdate;
 }
 
-SyncGroup::SyncGroup(const ProducerMap& theMap) : itsConsensus(theMap) {}
+SyncGroup::SyncGroup(ProducerMap theMap) : itsConsensus(std::move(theMap)) {}
 
 void SyncGroup::update(const ProducerMap& theUpdate)
 {
