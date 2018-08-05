@@ -166,7 +166,7 @@ Synchronizer::Synchronizer(SmartMet::Engine::Querydata::Engine* itsParent,
 Synchronizer::~Synchronizer()
 {
   itsIoService.stop();
-  if (itsCommThread)
+  if (itsCommThread != nullptr)
     itsCommThread->join();
 }
 
