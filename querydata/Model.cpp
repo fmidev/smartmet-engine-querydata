@@ -329,7 +329,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
 
     for (unsigned int y = 1;; y++)
     {
-      int j = (2 * (y % 2) - 1) * (y >> 1);  // 0,-1,1,-2,2,-3,3...
+      int j = (2 * (y % 2) - 1) * (y >> 1);  // 0,-1,1,-2,2,-3,3... NOLINT(hicpp-signed-bitwise)
 
       NFmiPoint p = qi.PeekLocationLatLon(0, j);
       double distance = NFmiGeoTools::GeoDistance(latlon.X(), latlon.Y(), p.X(), p.Y());
@@ -339,7 +339,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
 
       for (unsigned int x = 1;; x++)
       {
-        int i = (2 * (x % 2) - 1) * (x >> 1);  // 0,-1,1,-2,2,-3,3...
+        int i = (2 * (x % 2) - 1) * (x >> 1);  // 0,-1,1,-2,2,-3,3... NOLINT(hicpp-signed-bitwise)
 
         p = qi.PeekLocationLatLon(i, j);
 
