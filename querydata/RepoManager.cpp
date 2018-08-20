@@ -507,7 +507,8 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
  */
 // ----------------------------------------------------------------------
 
-void RepoManager::load(Producer producer, Files files)
+void RepoManager::load(Producer producer,
+                       Files files)  // NOLINT(performance-unnecessary-value-param)
 {
   if (itsShutdownRequested)
   {
