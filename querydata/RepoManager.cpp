@@ -140,7 +140,7 @@ RepoManager::RepoManager(const std::string& configfile)
       itsThreadCount(0),
       itsMaxThreadCount(10),  // default if not configured
       itsShutdownRequested(false),
-      itsLatLonCache(500)  // TODO: hard coded 500 different grids
+      itsLatLonCache(500)  // TODO(mheiskan): hard coded 500 different grids
 {
   boost::system::error_code ec;
 

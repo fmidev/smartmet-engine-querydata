@@ -219,7 +219,7 @@ MetaData QImpl::metaData()
   {
     MetaData meta;
 
-    // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    // TODO(mheiskan): should not access NFmiFastQueryInfo directly
     NFmiFastQueryInfo &qi = *itsInfo;
 
     meta.producer = itsModels[0]->producer();
