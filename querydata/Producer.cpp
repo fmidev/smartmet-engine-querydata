@@ -92,8 +92,11 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
         pinfo.leveltype = static_cast<const char *>(setting[i]);
 
       else
-        throw Spine::Exception(
-            BCP, "QEngine: Unknown producer setting named " + name + " for producer " + producer);
+        throw Spine::Exception(BCP,
+                               std::string("QEngine: Unknown producer setting named ")
+                                   .append(name)
+                                   .append(" for producer ")
+                                   .append(producer));
     }
 
     // Sanity checks
