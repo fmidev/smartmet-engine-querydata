@@ -784,7 +784,8 @@ const NFmiArea &QImpl::area() const
 {
   try
   {
-    assert(itsInfo->Area() != nullptr);
+    if (itsInfo->Area() == nullptr)
+      throw Spine::Exception(BCP, "Attempt to access unset area in querydata");
     return *itsInfo->Area();
   }
   catch (...)
@@ -803,7 +804,8 @@ const NFmiGrid &QImpl::grid() const
 {
   try
   {
-    assert(itsInfo->Grid() != nullptr);
+    if (itsInfo->Grid() == nullptr)
+      throw Spine::Exception(BCP, "Attempt to access unset grid in querydata");
     return *itsInfo->Grid();
   }
   catch (...)
