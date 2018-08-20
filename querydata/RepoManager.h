@@ -37,14 +37,14 @@ struct RepoManager
   // callback requests
 
   void update(Fmi::DirectoryMonitor::Watcher id,
-              boost::filesystem::path dir,
-              boost::regex pattern,
-              Fmi::DirectoryMonitor::Status status);
+              const boost::filesystem::path& dir,
+              const boost::regex& pattern,
+              const Fmi::DirectoryMonitor::Status& status);
 
   void error(Fmi::DirectoryMonitor::Watcher id,
-             boost::filesystem::path dir,
-             boost::regex pattern,
-             std::string message);
+             const boost::filesystem::path& dir,
+             const boost::regex& pattern,
+             const std::string& message);
 
   void init();
   bool ready() const;

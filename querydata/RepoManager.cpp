@@ -386,9 +386,9 @@ Fmi::DirectoryMonitor::Watcher RepoManager::id(const Producer& producer) const
 // ----------------------------------------------------------------------
 
 void RepoManager::error(Fmi::DirectoryMonitor::Watcher /* id */,
-                        boost::filesystem::path dir,
-                        boost::regex /* pattern */,
-                        std::string message)
+                        const boost::filesystem::path& dir,
+                        const boost::regex& /* pattern */,
+                        const std::string& message)
 {
   try
   {
@@ -420,9 +420,9 @@ void RepoManager::error(Fmi::DirectoryMonitor::Watcher /* id */,
 // ----------------------------------------------------------------------
 
 void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
-                         boost::filesystem::path /* dir */,
-                         boost::regex /* pattern */,
-                         Fmi::DirectoryMonitor::Status status)
+                         const boost::filesystem::path& /* dir */,
+                         const boost::regex& /* pattern */,
+                         const Fmi::DirectoryMonitor::Status& status)
 {
   try
   {
