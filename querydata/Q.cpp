@@ -4159,7 +4159,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     NFmiParamDescriptor pdesc(pbag);
 
     NFmiTimeList tlist;
-    tlist.Add(new NFmiMetTime(theTime));
+    tlist.Add(new NFmiMetTime(theTime));  // NOLINT(cppcoreguidelines-owning-memory)
     NFmiTimeDescriptor tdesc(itsInfo->OriginTime(), tlist);
 
     // Establish new projection and the required grid size of the desired resolution
