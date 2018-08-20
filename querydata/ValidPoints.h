@@ -30,7 +30,7 @@ class ValidPoints
 {
  public:
   ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, std::size_t hash);
-  bool isvalid(unsigned long index) const;
+  bool isvalid(std::size_t index) const;
 
   void uncache() const;
 

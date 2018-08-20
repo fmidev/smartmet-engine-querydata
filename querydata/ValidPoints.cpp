@@ -134,7 +134,7 @@ ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, 
  */
 // ----------------------------------------------------------------------
 
-bool ValidPoints::isvalid(unsigned long index) const
+bool ValidPoints::isvalid(std::size_t index) const
 {
   try
   {
