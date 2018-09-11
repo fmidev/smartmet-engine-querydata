@@ -33,6 +33,28 @@ namespace ts = SmartMet::Spine::TimeSeries;
 
 namespace
 {
+// SmartSymbol / WeatherNumber calculation limits
+
+const float thunder_limit1 = 30;
+const float thunder_limit2 = 60;
+
+const float rain_limit1 = 0.025;
+const float rain_limit2 = 0.04;
+const float rain_limit3 = 0.4;
+const float rain_limit4 = 1.5;
+const float rain_limit5 = 2;
+const float rain_limit6 = 4;
+const float rain_limit7 = 7;
+
+const int cloud_limit1 = 7;
+const int cloud_limit2 = 20;
+const int cloud_limit3 = 33;
+const int cloud_limit4 = 46;
+const int cloud_limit5 = 59;
+const int cloud_limit6 = 72;
+const int cloud_limit7 = 85;
+const int cloud_limit8 = 93;
+
 const char *LevelName(FmiLevelType theLevel)
 {
   try
@@ -2479,26 +2501,6 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
                                        const NFmiPoint &latlon,
                                        const boost::local_time::local_date_time &ldt)
 {
-  const float thunder_limit1 = 30;
-  // const float thunder_limit2 = 60;
-
-  const float rain_limit1 = 0.025;
-  // const float rain_limit2 = 0.04;
-  const float rain_limit3 = 0.4;
-  const float rain_limit4 = 1.5;
-  // const float rain_limit5 = 2;
-  const float rain_limit6 = 4;
-  // const float rain_limit7 = 7;
-
-  // const int cloud_limit1 = 7;
-  const int cloud_limit2 = 20;
-  const int cloud_limit3 = 33;
-  // const int cloud_limit4 = 46;
-  // const int cloud_limit5 = 59;
-  const int cloud_limit6 = 72;
-  // const int cloud_limit7 = 85;
-  const int cloud_limit8 = 93;
-
   try
   {
     // Cloudiness is almost always needed
@@ -2615,6 +2617,129 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Calculate the weather number used as basis for SmartSymbol
+ */
+// ----------------------------------------------------------------------
+
+boost::optional<int> calc_weather_number(QImpl &q,
+                                         const NFmiPoint &latlon,
+                                         const boost::local_time::local_date_time &ldt)
+{
+  try
+  {
+    // Cloudiness is optional
+    float n = kFloatMissing;
+    if (q.param(kFmiTotalCloudCover))
+      n = q.interpolate(latlon, ldt, maxgap);
+
+    int n_class = 9;  // missing
+    if (n == kFloatMissing)
+      n_class = 9;
+    else if (n < cloud_limit1)
+      n_class = 0;
+    else if (n < cloud_limit2)
+      n_class = 1;
+    else if (n < cloud_limit3)
+      n_class = 2;
+    else if (n < cloud_limit4)
+      n_class = 3;
+    else if (n < cloud_limit5)
+      n_class = 4;
+    else if (n < cloud_limit6)
+      n_class = 5;
+    else if (n < cloud_limit7)
+      n_class = 6;
+    else if (n < cloud_limit8)
+      n_class = 7;
+    else
+      n_class = 8;
+
+    // Precipitation is optional
+    float rain = kFloatMissing;
+    if (q.param(kFmiPrecipitation1h))
+      rain = q.interpolate(latlon, ldt, maxgap);
+
+    int rain_class = 9;  // missing
+    if (rain == kFloatMissing)
+      rain_class = 9;
+    else if (rain < rain_limit1)
+      rain_class = 0;
+    else if (rain < rain_limit2)
+      rain_class = 1;
+    else if (rain < rain_limit3)
+      rain_class = 2;
+    else if (rain < rain_limit4)
+      rain_class = 3;
+    else if (rain < rain_limit5)
+      rain_class = 4;
+    else if (rain < rain_limit6)
+      rain_class = 5;
+    else if (rain < rain_limit7)
+      rain_class = 6;
+    else
+      rain_class = 7;
+
+    // Precipitation form is optional
+    float rform = kFloatMissing;
+    if (q.param(kFmiPotentialPrecipitationForm))
+      rform = q.interpolate(latlon, ldt, maxgap);
+    else if (q.param(kFmiPrecipitationForm))
+      rform = q.interpolate(latlon, ldt, maxgap);
+
+    int rform_class = (rform == kFloatMissing ? 9 : static_cast<int>(rform));
+
+    // Precipitation type is optional
+    float rtype = kFloatMissing;
+    if (q.param(kFmiPotentialPrecipitationType))
+      rtype = q.interpolate(latlon, ldt, maxgap);
+
+    int rtype_class = (rtype == kFloatMissing ? 9 : static_cast<int>(rtype));
+
+    // Thunder is optional
+    float thunder = kFloatMissing;
+    if (q.param(kFmiProbabilityThunderstorm))
+      thunder = q.interpolate(latlon, ldt, maxgap);
+
+    int thunder_class = 9;
+    if (thunder == kFloatMissing)
+      thunder_class = 9;
+    else if (thunder < thunder_limit1)
+      thunder_class = 1;
+    else if (thunder < thunder_limit2)
+      thunder_class = 2;
+    else
+      thunder_class = 3;
+
+    // Fog is optional
+    float fog = kFloatMissing;
+    if (q.param(kFmiFogIntensity))
+      fog = q.interpolate(latlon, ldt, maxgap);
+
+    int fog_class = (fog == kFloatMissing ? 9 : static_cast<int>(fog));
+
+    // Build the number
+    const int version = 1;
+    const int cloud_class = 0;  // not available yet
+
+    // clang-format off
+    return (10000000 * version +
+            1000000 * thunder_class +
+            100000 * rform_class +
+            10000 * rtype_class +
+            1000 * rain_class +
+            100 * fog_class +
+            10 * n_class +
+            cloud_class);
+    // clang-format on
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}  // namespace Querydata
+
+// ----------------------------------------------------------------------
+/*!
  * \brief SmartSymbol
  */
 // ----------------------------------------------------------------------
@@ -2639,6 +2764,33 @@ ts::Value SmartSymbolNumber(QImpl &q,
     if (sp.dark())
       return 100 + *symbol;
     return *symbol;
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief WeatherNumber
+ */
+// ----------------------------------------------------------------------
+
+ts::Value WeatherNumber(QImpl &q,
+                        const Spine::Location &loc,
+                        const boost::local_time::local_date_time &ldt)
+{
+  try
+  {
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+
+    auto number = calc_weather_number(q, latlon, ldt);
+
+    if (!number)
+      return Spine::TimeSeries::None();
+
+    return *number;
   }
   catch (...)
   {
@@ -3413,6 +3565,9 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
 
         else if (pname == "smartsymboltext")
           retval = SmartSymbolText(*this, loc, ldt, opt.language);
+
+        else if (pname == "weathernumber")
+          retval = WeatherNumber(*this, loc, ldt);
 
         else if (pname == "snow1hlower")
           retval = Snow1hLower(*this, loc, ldt);
