@@ -123,7 +123,7 @@ SRCS = $(filter-out %.pb.cpp, $(wildcard $(SUBNAME)/*.cpp)) $(COMPILED_PB_SRCS)
 HDRS = $(filter-out %.pb.h, $(wildcard $(SUBNAME)/*.h)) $(COMPILED_PB_HDRS)
 OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
 
-.PHONY: test rpm
+.PHONY: rpm
 
 # The rules
 
@@ -141,7 +141,7 @@ clean:
 	rm -rf obj
 
 format:
-	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp test/*.cpp
+	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp examples/*.cpp
 
 install:
 	@mkdir -p $(includedir)/$(INCDIR)
@@ -152,9 +152,6 @@ install:
 	done
 	@mkdir -p $(enginedir)
 	$(INSTALL_PROG) $(LIBFILE) $(enginedir)/$(LIBFILE)
-
-test:
-	cd test && make test
 
 objdir:
 	@mkdir -p $(objdir)
