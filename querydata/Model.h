@@ -47,7 +47,8 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
         bool full,
         bool relativeuv,
         unsigned int update_interval,
-        unsigned int minimum_expiration_time);
+        unsigned int minimum_expiration_time,
+        bool mmap);
 
   Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
 

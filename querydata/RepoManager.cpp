@@ -581,7 +581,8 @@ void RepoManager::load(Producer producer,
                                           conf.isfullgrid,
                                           conf.isrelativeuv,
                                           conf.update_interval,
-                                          conf.minimum_expires);
+                                          conf.minimum_expires,
+                                          conf.mmap);
       }
 
       if (itsVerbose && load_new_data)

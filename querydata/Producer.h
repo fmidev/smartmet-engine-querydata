@@ -41,6 +41,7 @@ typedef std::list<std::string> ProducerList;
  *         refresh_interval_secs   = 60;
  *         max_age                 = "PT24H";
  *         number_to_keep          = 2;
+ *         mmap                    = true;
  *         update_interval         = "PT1H";
  *         minimum_expires         = "PT5M";
  *         relative_uv             = false;
@@ -72,6 +73,7 @@ struct ProducerConfig
   bool isclimatology = false;
   bool isfullgrid = true;
   bool isrelativeuv = false;  // are U/V winds relative to grid orientation
+  bool mmap = true;
 
   // Note: If number_to_keep is only one, during the one minute refresh interval a qengine
   // status query might see a new file in some backends and an older one in others. There
@@ -86,7 +88,7 @@ struct ProducerConfig
            c.max_age == max_age && c.refresh_interval_secs == refresh_interval_secs &&
            c.leveltype == leveltype && c.type == type && c.pattern == pattern &&
            c.directory == directory && c.aliases == aliases && c.producer == producer &&
-           c.max_age == max_age && c.isrelativeuv == isrelativeuv;
+           c.max_age == max_age && c.isrelativeuv == isrelativeuv && c.mmap == mmap;
   }
   inline bool operator!=(const ProducerConfig& c) { return !operator==(c); }
 

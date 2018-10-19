@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.9.11
+Version: 18.10.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Oct 19 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.10.19-1.fmi
+- Added "mmap" setting for producers to be able to disable memory mapping
+
 * Tue Sep 11 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.9.11-1.fmi
 - Added calculation of 'weathernumber'
 

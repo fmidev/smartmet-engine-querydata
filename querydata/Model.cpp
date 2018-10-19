@@ -40,7 +40,8 @@ Model::Model(const boost::filesystem::path& filename,
              bool full,
              bool relativeuv,
              unsigned int update_interval,
-             unsigned int minimum_expiration_time)
+             unsigned int minimum_expiration_time,
+             bool mmap)
     : itsPath(filename),
       itsProducer(std::move(producer)),
       itsLevelName(std::move(levelname)),
@@ -50,7 +51,7 @@ Model::Model(const boost::filesystem::path& filename,
       itsFullGrid(full),
       itsRelativeUV(relativeuv),
       itsValidTimeList(new ValidTimeList()),
-      itsQueryData(new NFmiQueryData(filename.string()))
+      itsQueryData(new NFmiQueryData(filename.string(), mmap))
 {
   try
   {

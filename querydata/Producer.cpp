@@ -85,6 +85,9 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
       else if (name == "maxdistance")
         pinfo.maxdistance = setting[i];
 
+      else if (name == "mmap")
+        pinfo.mmap = setting[i];
+
       else if (name == "type")
         pinfo.type = static_cast<const char *>(setting[i]);
 
