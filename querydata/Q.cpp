@@ -2692,6 +2692,8 @@ boost::optional<int> calc_weather_number(QImpl &q,
     float rtype = kFloatMissing;
     if (q.param(kFmiPotentialPrecipitationType))
       rtype = q.interpolate(latlon, ldt, maxgap);
+    else if (q.param(kFmiPrecipitationType))
+      rtype = q.interpolate(latlon, ldt, maxgap);
 
     int rtype_class = (rtype == kFloatMissing ? 9 : static_cast<int>(rtype));
 

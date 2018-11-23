@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 18.10.19
+Version: 18.11.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,9 +15,9 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 18.9.11
-BuildRequires: smartmet-library-newbase-devel >= 18.9.11
-BuildRequires: smartmet-library-macgyver-devel >= 18.9.5
+BuildRequires: smartmet-library-spine-devel >= 18.11.9
+BuildRequires: smartmet-library-newbase-devel >= 18.10.23
+BuildRequires: smartmet-library-macgyver-devel >= 18.11.12
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -30,11 +30,11 @@ Requires: boost-regex
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
-Requires: smartmet-library-newbase >= 18.9.11
-Requires: smartmet-library-macgyver >= 18.9.5
+Requires: smartmet-library-newbase >= 18.10.23
+Requires: smartmet-library-macgyver >= 18.11.12
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 18.9.11
+Requires: smartmet-library-spine >= 18.11.9
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Nov 23 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.11.23-1.fmi
+- Use PrecipitationType if PotentialPrecipitationType is not available in WeatherNumber calculation
+
 * Fri Oct 19 2018 Mika Heiskanen <mika.heiskanen@fmi.fi> - 18.10.19-1.fmi
 - Added "mmap" setting for producers to be able to disable memory mapping
 
