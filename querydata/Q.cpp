@@ -2706,11 +2706,11 @@ boost::optional<int> calc_weather_number(QImpl &q,
     if (thunder == kFloatMissing)
       thunder_class = 9;
     else if (thunder < thunder_limit1)
-      thunder_class = 1;
+      thunder_class = 0;
     else if (thunder < thunder_limit2)
-      thunder_class = 2;
+      thunder_class = 1;
     else
-      thunder_class = 3;
+      thunder_class = 2;
 
     // Fog is optional
     float fog = kFloatMissing;
