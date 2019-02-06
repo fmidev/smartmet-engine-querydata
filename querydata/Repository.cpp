@@ -306,12 +306,18 @@ Q Repository::getAll(const Producer& producer) const
       throw ex;
     }
 
-    // Construct a vector of datas
+    // Construct a vector of datas with similar grids only
 
     std::vector<SharedModel> okmodels;
+    boost::optional<std::size_t> hash;
+
     for (const auto& otime_model : models)
     {
+      auto tmphash = otime_model.second->gridHashValue();
+      if (hash && *hash != tmphash)
+        okmodels.clear();
       okmodels.push_back(otime_model.second);
+      hash = tmphash;
     }
 
     // Construct a view of the data

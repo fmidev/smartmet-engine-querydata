@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 19.1.28
+Version: 19.2.6
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -16,7 +16,7 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
 BuildRequires: smartmet-library-spine-devel >= 18.12.13
-BuildRequires: smartmet-library-newbase-devel >= 19.1.28
+BuildRequires: smartmet-library-newbase-devel >= 19.2.6
 BuildRequires: smartmet-library-macgyver-devel >= 18.11.24
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -30,7 +30,7 @@ Requires: boost-regex
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
-Requires: smartmet-library-newbase >= 19.1.28
+Requires: smartmet-library-newbase >= 19.2.6
 Requires: smartmet-library-macgyver >= 18.11.24
 Requires: protobuf
 Requires: libconfig >= 1.4.9
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Feb  6 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.2.6-1.fmi
+- Return only models with identical grids when multifile=true
+
 * Mon Jan 28 2019 Pertti Kinnia <pertti.kinnia@fmi.fi> - 19.1.28-1.fmi
 - Fixed weathernumber thunder probability classification (BS-1491)
 
