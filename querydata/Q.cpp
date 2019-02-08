@@ -2595,6 +2595,8 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
       int rtype = 1;  // large scale by default
       if (q.param(kFmiPotentialPrecipitationType))
         rtype = static_cast<int>(q.interpolate(latlon, ldt, maxgap));
+      else if (q.param(kFmiPrecipitationType))
+        rtype = static_cast<int>(q.interpolate(latlon, ldt, maxgap));
 
       if (rtype == 2)            // convective
         return 21 + 3 * nclass;  // 21, 24, 27 for showers

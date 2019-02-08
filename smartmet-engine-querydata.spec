@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 19.2.6
+Version: 19.2.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Feb  8 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.2.8-1.fmi
+- Use PrecipitationType if PotentialPrecipitationType is not available for SmartSymbol calculation
+
 * Wed Feb  6 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.2.6-1.fmi
 - Return only models with identical grids when multifile=true
 
