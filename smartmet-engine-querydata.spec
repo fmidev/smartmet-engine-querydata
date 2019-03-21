@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 19.2.8
+Version: 19.3.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,8 +15,8 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 18.12.13
-BuildRequires: smartmet-library-newbase-devel >= 19.2.6
+BuildRequires: smartmet-library-spine-devel >= 19.3.14
+BuildRequires: smartmet-library-newbase-devel >= 19.3.21
 BuildRequires: smartmet-library-macgyver-devel >= 18.11.24
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -30,11 +30,11 @@ Requires: boost-regex
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
-Requires: smartmet-library-newbase >= 19.2.6
+Requires: smartmet-library-newbase >= 19.3.21
 Requires: smartmet-library-macgyver >= 18.11.24
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 18.12.13
+Requires: smartmet-library-spine >= 19.3.14
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Mar 21 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.3.21-1.fmi
+- Allow producer list to be empty
+
 * Fri Feb  8 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.2.8-1.fmi
 - Use PrecipitationType if PotentialPrecipitationType is not available for SmartSymbol calculation
 
