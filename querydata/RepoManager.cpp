@@ -186,6 +186,11 @@ RepoManager::RepoManager(const std::string& configfile)
 
       // Phase 2: Parse individual producer settings
 
+      if (prods.getLength() == 0)
+        std::cerr << (Spine::log_time_str() + ANSI_FG_YELLOW + " [querydata] producer list empty" +
+                      ANSI_FG_DEFAULT)
+                  << std::endl;
+
       for (int i = 0; i < prods.getLength(); ++i)
       {
         Producer prod = prods[i];
@@ -631,7 +636,7 @@ void RepoManager::load(Producer producer,
 
 bool RepoManager::ready() const
 {
-  return (itsThreadCount == 0 && itsMonitor.ready());
+  return (itsConfigList.empty() || (itsThreadCount == 0 && itsMonitor.ready()));
 }
 // ----------------------------------------------------------------------
 /*!
