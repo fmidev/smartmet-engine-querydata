@@ -671,7 +671,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         // Defaults to newbase form
         else
         {
-          projectionText = qi->Area()->AreaStr();
+          projectionText = qi->Area()->ProjStr();
         }
 
         // For nicer output in browsers we replace for example ",PROJCS" with ", PROJCS"

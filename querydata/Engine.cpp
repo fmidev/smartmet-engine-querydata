@@ -13,8 +13,8 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
+#include <fmt/format.h>
 #include <gis/OGR.h>
-#include <newbase/NFmiLatLonArea.h>
 #include <spine/Convenience.h>
 #include <spine/Exception.h>
 #include <chrono>
@@ -826,10 +826,10 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
 
     // The input data is here always newbase NFmiLatLon coordinates
 
-    NFmiLatLonArea tmp;
-    OGRErr err = src->SetFromUserInput(tmp.WKT().c_str());
+    auto proj4 = fmt::format("+proj=eqc +R={:.0f} +wktext +over +no_defs +towgs84=0,0,0", kRearth);
+    OGRErr err = src->SetFromUserInput(proj4.c_str());
     if (err != OGRERR_NONE)
-      throw Spine::Exception(BCP, "Unable to set WKT: '" + tmp.WKT());
+      throw Spine::Exception(BCP, "Unable to set WKT: '" + proj4);
 
     // Clones the spatial reference object
     std::unique_ptr<OGRCoordinateTransformation> transformation(

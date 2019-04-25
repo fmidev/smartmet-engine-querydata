@@ -95,6 +95,7 @@ LIBS = -L$(libdir) \
 	-lboost_regex \
 	-lboost_serialization \
 	-lboost_system \
+	-lfmt \
 	-lgdal \
 	-lprotobuf \
 	-lbz2 -lz

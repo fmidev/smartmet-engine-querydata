@@ -18,7 +18,6 @@
 #include <macgyver/StringConversion.h>
 #include <macgyver/TimeFormatter.h>
 #include <macgyver/TimeZoneFactory.h>
-#include <newbase/NFmiGdalArea.h>
 #include <newbase/NFmiMetMath.h>
 #include <newbase/NFmiMultiQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
@@ -4325,8 +4324,9 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
     // Establish new projection and the required grid size of the desired resolution
 
-    auto newarea =
-        boost::make_shared<NFmiGdalArea>("FMI", theCrs, theXmin, theYmin, theXmax, theYmax);
+    boost::shared_ptr<NFmiArea> newarea(
+        NFmiArea::CreateFromBBox(theCrs, NFmiPoint(theXmin, theYmin), NFmiPoint(theXmax, theYmax)));
+
     double datawidth = newarea->WorldXYWidth() / 1000.0;  // view extent in kilometers
     double dataheight = newarea->WorldXYHeight() / 1000.0;
     int width = static_cast<int>(datawidth / theResolution);
