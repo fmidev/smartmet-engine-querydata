@@ -718,10 +718,6 @@ NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
     if (!theQ->isGrid())
       throw Spine::Exception(BCP, "Trying to contour non-gridded data");
 
-    // For latlon data GridToWorldXY returns metric units even though we want geographic coordinates
-    auto id = theQ->area().ClassId();
-    bool islatlon = (id == kNFmiLatLonArea || id == kNFmiRotatedLatLonArea);
-
     const auto& grid = theQ->grid();
 
     const auto nx = grid.XNumber();
@@ -729,12 +725,22 @@ NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
 
     NFmiDataMatrix<NFmiPoint> coords(nx, ny);
 
+#ifndef WGS84
+    // For latlon data GridToWorldXY returns metric units even though we want geographic coordinates
+    auto id = theQ->area().ClassId();
+    bool islatlon = (id == kNFmiLatLonArea || id == kNFmiRotatedLatLonArea);
+#endif
+
     for (std::size_t j = 0; j < ny; j++)
       for (std::size_t i = 0; i < nx; i++)
+#ifdef WGS84
+        coords[i][j] = grid.GridToWorldXY(i, j);
+#else
         if (islatlon)
           coords[i][j] = grid.GridToLatLon(i, j);
         else
           coords[i][j] = grid.GridToWorldXY(i, j);
+#endif
 
     return coords;
   }
@@ -744,6 +750,7 @@ NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
   }
 }
 
+#ifndef WGS84
 NFmiDataMatrix<NFmiPoint> get_latlons(const Q& theQ)
 {
   try
@@ -758,6 +765,8 @@ NFmiDataMatrix<NFmiPoint> get_latlons(const Q& theQ)
 
     NFmiDataMatrix<NFmiPoint> coords(nx, ny);
 
+    // WGS84 TODO: should use vectorized GDAL calls to get all coordinates at once
+
     for (std::size_t j = 0; j < ny; j++)
       for (std::size_t i = 0; i < nx; i++)
         coords[i][j] = grid.GridToLatLon(i, j);
@@ -769,6 +778,7 @@ NFmiDataMatrix<NFmiPoint> get_latlons(const Q& theQ)
     throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
+#endif
 
 // ----------------------------------------------------------------------
 /*!
@@ -820,20 +830,12 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     // Copy the original coordinates for projection
     auto coords = boost::make_shared<Coordinates>(*theCoords);
 
-    // Create the coordinate transformation
+    // Clones the spatial reference object. OGR takes pointers, not const pointers, hence we must
+    // use a cast.
 
-    std::unique_ptr<OGRSpatialReference> src(new OGRSpatialReference);
-
-    // The input data is here always newbase NFmiLatLon coordinates
-
-    auto proj4 = fmt::format("+proj=eqc +R={:.0f} +wktext +over +no_defs +towgs84=0,0,0", kRearth);
-    OGRErr err = src->SetFromUserInput(proj4.c_str());
-    if (err != OGRERR_NONE)
-      throw Spine::Exception(BCP, "Unable to set WKT: '" + proj4);
-
-    // Clones the spatial reference object
+    auto& area = const_cast<NFmiArea&>(theQ->area());
     std::unique_ptr<OGRCoordinateTransformation> transformation(
-        OGRCreateCoordinateTransformation(src.get(), &theSR));
+        OGRCreateCoordinateTransformation(area.SpatialReference(), &theSR));
 
     if (!transformation)
       throw Spine::Exception(
@@ -901,71 +903,55 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 {
   try
   {
-    // Hash value of latlon coordinates and projected coordinates
+    // Hash value of original WorldXY coordinates
     auto qhash = theQ->gridHashValue();
+
+    // Hash value of projected coordinates
     auto projhash = qhash;
 
     if (theSR != nullptr)
     {
-      boost::hash_combine(projhash, hash_value(*theSR));
+      // Return original world XY directly with get_world_xy if spatial
+      // references match This is absolutely necessary to avoid gaps in
+      // WMS tiles since with proj(invproj(p)) may differ significantly
+      // from p outside the valid area of the projection.
 
-      auto cached_coords = itsCoordinateCache.find(projhash);
-      if (cached_coords)
-        return cached_coords->get();
-    }
-
-    // Return original world XY directly with get_world_xy if spatial
-    // references match This is absolutely necessary to avoid gaps in
-    // WMS tiles since with proj(invproj(p)) may differ significantly
-    // from p outside the valid area of the projection.
-
-    if (theSR != nullptr)
-    {
       auto datawkt = theQ->info()->Area()->WKT();
       auto reqwkt = Fmi::OGR::exportToWkt(*theSR);
 
-      if (datawkt == reqwkt)
-      {
-        auto ftr = boost::async([&] { return boost::make_shared<Coordinates>(get_world_xy(theQ)); })
-                       .share();
-        itsCoordinateCache.insert(projhash, ftr);
-        return ftr.get();
-      }
+      if (datawkt != reqwkt)
+        boost::hash_combine(projhash, hash_value(*theSR));
     }
 
-    // Now we need either the latlon coordinates as is or need to project them. It would
-    // also be possible to request native world XY coordinates and project from them
-    // directly to the requested CRS. In general it is safe to assume the original
-    // coordinates will be projected to latlons before being converted to the target
-    // spatial reference, hence caching the intermediate latlon values should in general
-    // be result in twice as fast conversions.
-
-    auto cached_coords = itsCoordinateCache.find(qhash);
-    if (cached_coords && theSR == nullptr)
+    // Search cache for the projected coordinates or WorldXY coordinates
+    auto cached_coords = itsCoordinateCache.find(projhash);
+    if (cached_coords)
       return cached_coords->get();
 
-    if (!cached_coords)
-    {
-      auto ftr =
-          boost::async([&] { return boost::make_shared<Coordinates>(get_latlons(theQ)); }).share();
-      itsCoordinateCache.insert(qhash, ftr);
-      ftr.get();
-      cached_coords = itsCoordinateCache.find(qhash);
-    }
+    // Now we need to to get WorldXY coordinates
+
+    auto ftr =
+        boost::async([&] { return boost::make_shared<Coordinates>(get_world_xy(theQ)); }).share();
+    itsCoordinateCache.insert(projhash, ftr);
+    auto worldxy = ftr.get();
+
+    // Return WorldXY if so requested
+
+    if (qhash == projhash)
+      return worldxy;
+
+    // Project to target SR. Do NOT use intermediate latlons in any datum, or the Z value will not
+    // be included in all stages of the projection, and large errors will occur if the datums
+    // differ significantly (e.g. sphere vs ellipsoid)
 
     // g++ 4.8.5 does not allow get to be called inside the lambda below, had to place it here
 
-    auto coords = cached_coords->get();
-
-    if (theSR == nullptr)
-      return coords;
-
     // Project the coordinates
 
-    auto ftr = boost::async([&] { return project_coordinates(coords, theQ, *theSR); }).share();
+    auto ftr2 = boost::async([&] { return project_coordinates(worldxy, theQ, *theSR); }).share();
 
-    itsCoordinateCache.insert(projhash, ftr);
-    return ftr.get();
+    itsCoordinateCache.insert(projhash, ftr2);
+    return ftr2.get();
   }
   catch (...)
   {
