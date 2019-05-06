@@ -928,11 +928,12 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
     if (cached_coords)
       return cached_coords->get();
 
-    // Now we need to to get WorldXY coordinates
+    // Now we need to to get WorldXY coordinates. We cache the result so that it does not
+    // have to be calculated again - even though it is a fast calculation.
 
     auto ftr =
         boost::async([&] { return boost::make_shared<Coordinates>(get_world_xy(theQ)); }).share();
-    itsCoordinateCache.insert(projhash, ftr);
+    itsCoordinateCache.insert(qhash, ftr);
     auto worldxy = ftr.get();
 
     // Return WorldXY if so requested
