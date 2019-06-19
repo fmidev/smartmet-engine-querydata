@@ -2206,6 +2206,8 @@ ts::Value WeatherSymbol(QImpl &q,
       return Spine::TimeSeries::None();
 
     float symbol = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    if (symbol == kFloatMissing)
+      return kFloatMissing;
 
     Fmi::Astronomy::solar_position_t sp =
         Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
@@ -2758,7 +2760,7 @@ ts::Value SmartSymbolNumber(QImpl &q,
 
     auto symbol = calc_smart_symbol(q, latlon, ldt);
 
-    if (!symbol)
+    if (!symbol || *symbol == kFloatMissing)
       return Spine::TimeSeries::None();
 
     // Add day/night information

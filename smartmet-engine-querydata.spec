@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 19.3.21
+Version: 19.6.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Jun 19 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.6.19-1.fmi
+- Fixed handling of missing values for WeatherSymbol calculations
+
 * Thu Mar 21 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.3.21-1.fmi
 - Allow producer list to be empty
 
