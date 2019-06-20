@@ -3189,7 +3189,7 @@ ts::Value QImpl::dataValue(const ParameterOptions &opt,
 
 ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
                                       const boost::local_time::local_date_time &ldt,
-                                      double levelResult) const
+                                      double levelResult)
 {
   // Some shorthand variables
   const std::string &pname = opt.par.name();
@@ -3315,6 +3315,9 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
 
   if (pname == "origintime")
   {
+    if (!time(ldt.utc_time()))
+      return Spine::TimeSeries::None();
+
     boost::posix_time::ptime utc = originTime();
     boost::local_time::local_date_time localt(utc, ldt.zone());
     return opt.timeformatter.format(localt);

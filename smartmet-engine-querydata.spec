@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 19.6.19
+Version: 19.6.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Jun 20 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.6.20-1.fmi
+- Return correct origintime for multifile data
+
 * Wed Jun 19 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.6.19-1.fmi
 - Fixed handling of missing values for WeatherSymbol calculations
 
