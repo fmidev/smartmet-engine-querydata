@@ -2205,6 +2205,8 @@ ts::Value WeatherSymbol(QImpl &q,
       return Spine::TimeSeries::None();
 
     float symbol = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    if (symbol == kFloatMissing)
+      return kFloatMissing;
 
     Fmi::Astronomy::solar_position_t sp =
         Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
@@ -2757,7 +2759,7 @@ ts::Value SmartSymbolNumber(QImpl &q,
 
     auto symbol = calc_smart_symbol(q, latlon, ldt);
 
-    if (!symbol)
+    if (!symbol || *symbol == kFloatMissing)
       return Spine::TimeSeries::None();
 
     // Add day/night information
@@ -3186,7 +3188,7 @@ ts::Value QImpl::dataValue(const ParameterOptions &opt,
 
 ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
                                       const boost::local_time::local_date_time &ldt,
-                                      double levelResult) const
+                                      double levelResult)
 {
   // Some shorthand variables
   const std::string &pname = opt.par.name();
@@ -3312,6 +3314,16 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
 
   if (pname == "origintime")
   {
+    if (!time(ldt.utc_time()))
+    {
+      // Search first valid time after the desired time, and choose that origintime
+      bool ok = false;
+      for (resetTime(); !ok && nextTime();)
+        ok = (validTime() > ldt.utc_time());
+      if (!ok)
+        return Spine::TimeSeries::None();
+    }
+
     boost::posix_time::ptime utc = originTime();
     boost::local_time::local_date_time localt(utc, ldt.zone());
     return opt.timeformatter.format(localt);

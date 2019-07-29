@@ -305,7 +305,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   Spine::TimeSeries::Value dataIndependentValue(const ParameterOptions& opt,
                                                 const boost::local_time::local_date_time& ldt,
-                                                double levelResult) const;
+                                                double levelResult);
 
   Spine::TimeSeries::Value dataValue(const ParameterOptions& opt,
                                      const NFmiPoint& latlon,

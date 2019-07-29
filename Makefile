@@ -176,4 +176,9 @@ querydata/%.pb.cpp: %.proto; mkdir -p tmp
 	mv tmp/QueryDataMessage.pb.cc $(SUBNAME)/QueryDataMessage.pb.cpp
 	rm -rf tmp 
 
+test:
+	@echo Querydata engine has no automatically runnable tests as for now
+	@echo There are some tests under test subdirectory but remain unautomated
+	@test "$$CI" = "true" && true || false
+
 -include $(wildcard obj/*.d)

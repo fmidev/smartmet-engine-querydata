@@ -15,6 +15,7 @@
 #include <boost/thread.hpp>
 #include <fmt/format.h>
 #include <gis/OGR.h>
+#include <macgyver/StringConversion.h>
 #include <spine/Convenience.h>
 #include <spine/Exception.h>
 #include <chrono>
@@ -998,7 +999,8 @@ ValuesPtr Engine::getValues(const Q& theQ,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Spine::Exception::Trace(BCP, "Failed to retrieve data")
+        .addParameter("time", Fmi::to_iso_extended_string(theTime));
   }
 }
 
@@ -1041,7 +1043,8 @@ ValuesPtr Engine::getValues(const Q& theQ,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Spine::Exception::Trace(BCP, "Failed to retrieve data")
+        .addParameter("time", Fmi::to_iso_extended_string(theTime));
   }
 }
 
