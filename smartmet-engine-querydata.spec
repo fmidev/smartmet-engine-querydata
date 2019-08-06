@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 19.7.29
+Version: 19.8.6
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Aug  6 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.8.6-1.fmi
+- Use std::async instead of boost::async for better exception propagation
+
 * Mon Jul 29 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.7.29-1.fmi
 - Improved error messages
 

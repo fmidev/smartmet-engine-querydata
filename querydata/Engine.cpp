@@ -927,7 +927,8 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 
       if (datawkt == reqwkt)
       {
-        auto ftr = boost::async([&] { return boost::make_shared<Coordinates>(get_world_xy(theQ)); })
+        auto ftr = std::async(std::launch::async,
+                              [&] { return boost::make_shared<Coordinates>(get_world_xy(theQ)); })
                        .share();
         itsCoordinateCache.insert(projhash, ftr);
         return ftr.get();
@@ -947,8 +948,9 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 
     if (!cached_coords)
     {
-      auto ftr =
-          boost::async([&] { return boost::make_shared<Coordinates>(get_latlons(theQ)); }).share();
+      auto ftr = std::async(std::launch::async,
+                            [&] { return boost::make_shared<Coordinates>(get_latlons(theQ)); })
+                     .share();
       itsCoordinateCache.insert(qhash, ftr);
       ftr.get();
       cached_coords = itsCoordinateCache.find(qhash);
@@ -963,7 +965,9 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 
     // Project the coordinates
 
-    auto ftr = boost::async([&] { return project_coordinates(coords, theQ, *theSR); }).share();
+    auto ftr =
+        std::async(std::launch::async, [&] { return project_coordinates(coords, theQ, *theSR); })
+            .share();
 
     itsCoordinateCache.insert(projhash, ftr);
     return ftr.get();
@@ -997,11 +1001,12 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = boost::async([&] {
-                 auto tmp = boost::make_shared<Values>();
-                 theQ->values(*tmp, theTime);
-                 return tmp;
-               })
+    auto ftr = std::async(std::launch::async,
+                          [&] {
+                            auto tmp = boost::make_shared<Values>();
+                            theQ->values(*tmp, theTime);
+                            return tmp;
+                          })
                    .share();
 
     // Store the shared future into the cache for other threads to see too
@@ -1041,11 +1046,12 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = boost::async([&] {
-                 auto tmp = boost::make_shared<Values>();
-                 theQ->values(*tmp, theParam, theTime);
-                 return tmp;
-               })
+    auto ftr = std::async(std::launch::async,
+                          [&] {
+                            auto tmp = boost::make_shared<Values>();
+                            theQ->values(*tmp, theParam, theTime);
+                            return tmp;
+                          })
                    .share();
 
     // Store the shared future into the cache for other threads to see too
