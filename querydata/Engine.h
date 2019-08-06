@@ -9,14 +9,13 @@
 #include "Producer.h"
 #include "Repository.h"
 #include "Synchro.h"
-
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/thread/future.hpp>
 #include <gdal/ogr_spatialref.h>
 #include <macgyver/Cache.h>
 #include <spine/SmartMetEngine.h>
+#include <future>
 #include <string>
 #include <system_error>
 
@@ -65,11 +64,11 @@ class Engine : public Spine::SmartMetEngine
   const std::string itsConfigFile;
 
   // Cached querydata coordinates.
-  typedef Fmi::Cache::Cache<std::size_t, boost::shared_future<CoordinatesPtr>> CoordinateCache;
+  typedef Fmi::Cache::Cache<std::size_t, std::shared_future<CoordinatesPtr>> CoordinateCache;
   mutable CoordinateCache itsCoordinateCache;
 
   // Cached querydata values
-  typedef Fmi::Cache::Cache<std::size_t, boost::shared_future<ValuesPtr>> ValuesCache;
+  typedef Fmi::Cache::Cache<std::size_t, std::shared_future<ValuesPtr>> ValuesCache;
   mutable ValuesCache itsValuesCache;
 
   int itsActiveThreadCount;

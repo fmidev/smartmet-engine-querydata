@@ -984,11 +984,12 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = boost::async([&] {
-                 auto tmp = boost::make_shared<Values>();
-                 theQ->values(*tmp, theTime);
-                 return tmp;
-               })
+    auto ftr = std::async(std::launch::async,
+                          [&] {
+                            auto tmp = boost::make_shared<Values>();
+                            theQ->values(*tmp, theTime);
+                            return tmp;
+                          })
                    .share();
 
     // Store the shared future into the cache for other threads to see too
@@ -1028,11 +1029,12 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = boost::async([&] {
-                 auto tmp = boost::make_shared<Values>();
-                 theQ->values(*tmp, theParam, theTime);
-                 return tmp;
-               })
+    auto ftr = std::async(std::launch::async,
+                          [&] {
+                            auto tmp = boost::make_shared<Values>();
+                            theQ->values(*tmp, theParam, theTime);
+                            return tmp;
+                          })
                    .share();
 
     // Store the shared future into the cache for other threads to see too
