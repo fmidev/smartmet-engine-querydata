@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 19.8.28
+Version: 19.9.26
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -26,7 +26,6 @@ BuildRequires: bzip2-devel
 Requires: boost-filesystem
 Requires: boost-date-time
 Requires: boost-iostreams
-Requires: boost-regex
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
@@ -74,6 +73,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Sep 26 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.9.26-1.fmi
+- Use atomic counters and status booleans (TSAN)
+- Added ASAN & TSAN builds
+
 * Wed Aug 28 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.8.28-1.fmi
 - Repackaged since Spine::Location ABI changed
 

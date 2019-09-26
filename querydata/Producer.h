@@ -1,9 +1,8 @@
 #pragma once
 
-#include <libconfig.h++>
-
 #include <boost/filesystem/path.hpp>
 #include <boost/regex.hpp>
+#include <libconfig.h++>
 #include <list>
 #include <set>
 #include <string>
@@ -60,6 +59,7 @@ struct ProducerConfig
   std::set<std::string> aliases;
   boost::filesystem::path directory;
   boost::regex pattern;
+  std::string pattern_str;  // because boost::regex has no operator==
   std::string type = "grid";
   std::string leveltype = "surface";
   unsigned int refresh_interval_secs = 60;  // once per minute
@@ -86,7 +86,7 @@ struct ProducerConfig
            c.maxdistance == maxdistance && c.number_to_keep == number_to_keep &&
            c.update_interval == update_interval && c.minimum_expires == minimum_expires &&
            c.max_age == max_age && c.refresh_interval_secs == refresh_interval_secs &&
-           c.leveltype == leveltype && c.type == type && c.pattern == pattern &&
+           c.leveltype == leveltype && c.type == type && c.pattern_str == pattern_str &&
            c.directory == directory && c.aliases == aliases && c.producer == producer &&
            c.max_age == max_age && c.isrelativeuv == isrelativeuv && c.mmap == mmap;
   }

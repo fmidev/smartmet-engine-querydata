@@ -41,6 +41,7 @@ namespace
   }
 #endif
 
+#ifndef NDEBUG  
 void dumpProducerMap(const SmartMet::Engine::Querydata::ProducerMap& map)
 {
   try
@@ -61,6 +62,7 @@ void dumpProducerMap(const SmartMet::Engine::Querydata::ProducerMap& map)
     throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
   }
 }
+#endif
 
 template <class T>
 void printList(const T& theList)

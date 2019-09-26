@@ -61,7 +61,7 @@ static std::string configToStr(ProducerConfig cfg)
   for (auto alias : cfg.aliases)
     strstr << "  alias = \"" << alias << "\";" << endl;
   strstr << "  directory = \"" << cfg.directory.string() << "\";" << endl
-         << "  pattern = \"" << cfg.pattern << "\";" << endl
+         << "  pattern = \"" << cfg.pattern_str << "\";" << endl
          << "  type = \"" << cfg.type << "\";" << endl
          << "  leveltype = \"" << cfg.leveltype << "\";" << endl
          << "  refresh_interval_secs = " << cfg.refresh_interval_secs << ";" << endl

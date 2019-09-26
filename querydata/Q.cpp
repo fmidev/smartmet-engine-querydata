@@ -3526,8 +3526,9 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
           }
           break;
         }
-        // Fall through to normal handling if the data is not surface data,
+	// normal handling continues below
       }
+      // fall through
       case Spine::Parameter::Type::Data:
       {
         opt.lastpoint = latlon;
