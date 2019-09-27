@@ -50,7 +50,10 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
         pinfo.directory = boost::filesystem::path(static_cast<const char *>(setting[i]));
 
       else if (name == "pattern")
-        pinfo.pattern = setting[i];
+	{
+	  pinfo.pattern = setting[i];
+	  pinfo.pattern_str = setting[i].c_str();
+	}
 
       else if (name == "multifile")
         pinfo.ismultifile = setting[i];
@@ -107,7 +110,7 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
     if (pinfo.directory.empty())
       throw Spine::Exception(BCP, "No directory specified for producer " + producer);
 
-    if (pinfo.pattern.empty())
+    if (pinfo.pattern_str.empty())
       throw Spine::Exception(BCP, "No pattern specified for producer " + producer);
 
     if (pinfo.refresh_interval_secs < 1)

@@ -8,7 +8,6 @@
 #include "MetaQueryFilters.h"
 #include <boost/algorithm/string/join.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>
-#include <boost/regex.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>

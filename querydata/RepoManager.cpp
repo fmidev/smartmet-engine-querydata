@@ -137,8 +137,8 @@ RepoManager::~RepoManager()
 
 RepoManager::RepoManager(const std::string& configfile)
     : itsVerbose(false),
-      itsThreadCount(0),
       itsMaxThreadCount(10),  // default if not configured
+      itsThreadCount(0),
       itsShutdownRequested(false),
       itsLatLonCache(500)  // TODO(mheiskan): hard coded 500 different grids
 {

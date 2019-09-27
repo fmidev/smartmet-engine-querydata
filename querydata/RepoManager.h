@@ -11,7 +11,7 @@
 #include <macgyver/Cache.h>
 #include <macgyver/DirectoryMonitor.h>
 #include <spine/Thread.h>
-#include <atomic>
+#include <boost/atomic.hpp>
 #include <memory>
 
 namespace SmartMet
@@ -93,9 +93,9 @@ struct RepoManager
   Fmi::DirectoryMonitor::Watcher id(const Producer& producer) const;
   RepoManager();
 
-  std::atomic<int> itsThreadCount;
   int itsMaxThreadCount;
-  bool itsShutdownRequested;
+  boost::atomic<int> itsThreadCount;
+  boost::atomic<bool> itsShutdownRequested{false};
 
   using LatLonCache = Fmi::Cache::Cache<std::size_t, boost::shared_ptr<std::vector<NFmiPoint>>>;
 

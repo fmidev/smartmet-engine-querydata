@@ -9,6 +9,7 @@
 #include "Producer.h"
 #include "Repository.h"
 #include "Synchro.h"
+#include <boost/atomic.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -150,7 +151,7 @@ class Engine : public Spine::SmartMetEngine
   void shutdown();
   void shutdownRequestFlagSet();
   std::time_t getConfigModTime();
-  int lastConfigErrno;
+  boost::atomic<int> lastConfigErrno;
   int getLastConfigErrno();
 
  private:
