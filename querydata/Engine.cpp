@@ -829,7 +829,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   try
   {
     // Copy the original coordinates for projection
-    auto coords = boost::make_shared<Coordinates>(*theCoords);
+    auto coords = std::make_shared<Coordinates>(*theCoords);
 
     // Clones the spatial reference object. OGR takes pointers, not const pointers, hence we must
     // use a cast.
@@ -933,7 +933,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
     // have to be calculated again - even though it is a fast calculation.
 
     auto ftr =
-        boost::async([&] { return boost::make_shared<Coordinates>(get_world_xy(theQ)); }).share();
+        std::async([&] { return std::make_shared<Coordinates>(get_world_xy(theQ)); }).share();
     itsCoordinateCache.insert(qhash, ftr);
     auto worldxy = ftr.get();
 
@@ -950,7 +950,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 
     // Project the coordinates
 
-    auto ftr2 = boost::async([&] { return project_coordinates(worldxy, theQ, *theSR); }).share();
+    auto ftr2 = std::async([&] { return project_coordinates(worldxy, theQ, *theSR); }).share();
 
     itsCoordinateCache.insert(projhash, ftr2);
     return ftr2.get();
@@ -986,7 +986,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
     // Else create a shared future for calculating the values
     auto ftr = std::async(std::launch::async,
                           [&] {
-                            auto tmp = boost::make_shared<Values>();
+                            auto tmp = std::make_shared<Values>();
                             theQ->values(*tmp, theTime);
                             return tmp;
                           })
@@ -1031,7 +1031,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
     // Else create a shared future for calculating the values
     auto ftr = std::async(std::launch::async,
                           [&] {
-                            auto tmp = boost::make_shared<Values>();
+                            auto tmp = std::make_shared<Values>();
                             theQ->values(*tmp, theParam, theTime);
                             return tmp;
                           })

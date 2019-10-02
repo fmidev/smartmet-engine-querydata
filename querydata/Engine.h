@@ -23,10 +23,10 @@
 class NFmiPoint;
 
 typedef NFmiDataMatrix<NFmiPoint> Coordinates;
-typedef boost::shared_ptr<Coordinates> CoordinatesPtr;
+typedef std::shared_ptr<Coordinates> CoordinatesPtr;
 
 typedef NFmiDataMatrix<float> Values;
-typedef boost::shared_ptr<Values> ValuesPtr;
+typedef std::shared_ptr<Values> ValuesPtr;
 
 namespace SmartMet
 {
