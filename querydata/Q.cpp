@@ -4532,7 +4532,7 @@ bool QImpl::needsWraparound() const
   if (dx < 0)
     dx += 360;
 
-  auto test_width = (x2 - x1) * (nx + 1) / nx;
+  auto test_width = dx * (nx + 1) / nx;
 
   // In the GFS case the rounding error is about 1e-4
   return (std::abs(test_width - 360) < 1e-3);
