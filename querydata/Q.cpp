@@ -3525,7 +3525,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
           }
           break;
         }
-	// normal handling continues below
+        // normal handling continues below
       }
       // fall through
       case Spine::Parameter::Type::Data:
@@ -4527,6 +4527,10 @@ bool QImpl::needsWraparound() const
    *
    * ==> (x1-x1)*1441/1440 = 360  ==> we need to generate an extra cell by wrapping around
    */
+
+  auto dx = x2 - x1;  // PROJ.4 may return -0.25 instead of 359.75
+  if (dx < 0)
+    dx += 360;
 
   auto test_width = (x2 - x1) * (nx + 1) / nx;
 
