@@ -1210,7 +1210,7 @@ bool QImpl::locationIndex(unsigned long theIndex)
  */
 // ----------------------------------------------------------------------
 
-bool QImpl::calcTimeCache(NFmiQueryInfo &theTargetInfo, checkedVector<NFmiTimeCache> &theTimeCache)
+bool QImpl::calcTimeCache(NFmiQueryInfo &theTargetInfo, std::vector<NFmiTimeCache> &theTimeCache)
 {
   try
   {
@@ -3526,7 +3526,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
           }
           break;
         }
-	// normal handling continues below
+        // normal handling continues below
       }
       // fall through
       case Spine::Parameter::Type::Data:

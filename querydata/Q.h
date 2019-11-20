@@ -137,7 +137,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   unsigned long locationIndex(void) const;
   bool locationIndex(unsigned long theIndex);
 
-  bool calcTimeCache(NFmiQueryInfo& theTargetInfo, checkedVector<NFmiTimeCache>& theTimeCache);
+  bool calcTimeCache(NFmiQueryInfo& theTargetInfo, std::vector<NFmiTimeCache>& theTimeCache);
   NFmiTimeCache calcTimeCache(const NFmiMetTime& theTime);
   float cachedInterpolation(const NFmiTimeCache& theTimeCache);
   float cachedInterpolation(const NFmiLocationCache& theLocationCache);
