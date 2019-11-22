@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 19.10.31
+Version: 19.11.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -16,7 +16,7 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
 BuildRequires: smartmet-library-spine-devel >= 19.10.31
-BuildRequires: smartmet-library-newbase-devel >= 19.10.31
+BuildRequires: smartmet-library-newbase-devel >= 19.11.21
 BuildRequires: smartmet-library-macgyver-devel >= 19.9.26
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -29,7 +29,7 @@ Requires: boost-iostreams
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
-Requires: smartmet-library-newbase >= 19.10.31
+Requires: smartmet-library-newbase >= 19.11.21
 Requires: smartmet-library-macgyver >= 19.9.26
 Requires: protobuf
 Requires: libconfig >= 1.4.9
@@ -73,6 +73,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Nov 22 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.11.22-1.fmi
+- Use std::vector instead of checkedVector
+
 * Thu Oct 31 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.10.31-1.fmi
 - Rebuilt due to newbase API/ABI changes
 

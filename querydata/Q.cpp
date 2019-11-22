@@ -1209,7 +1209,7 @@ bool QImpl::locationIndex(unsigned long theIndex)
  */
 // ----------------------------------------------------------------------
 
-bool QImpl::calcTimeCache(NFmiQueryInfo &theTargetInfo, checkedVector<NFmiTimeCache> &theTimeCache)
+bool QImpl::calcTimeCache(NFmiQueryInfo &theTargetInfo, std::vector<NFmiTimeCache> &theTimeCache)
 {
   try
   {
