@@ -98,6 +98,15 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   bool nextLevel();
   float levelValue() const;
 
+  void resetLocation();
+  bool firstLocation();
+  bool nextLocation();
+  NFmiPoint worldXY() const;
+  NFmiPoint latLon() const;
+
+  OGRSpatialReference* SpatialReference() { return itsInfo->SpatialReference(); }
+  const OGRSpatialReference* SpatialReference() const { return itsInfo->SpatialReference(); }
+
   FmiParameterName parameterName() const;  // Param().GetParamIdent()
 
   bool isGrid() const;
