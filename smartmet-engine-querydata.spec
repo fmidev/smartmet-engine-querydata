@@ -15,8 +15,8 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 19.10.31
-BuildRequires: smartmet-library-newbase-devel >= 19.11.21
+BuildRequires: smartmet-library-spine-devel >= 19.11.20
+BuildRequires: smartmet-library-newbase-devel >= 19.11.20
 BuildRequires: smartmet-library-macgyver-devel >= 19.9.26
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -33,7 +33,7 @@ Requires: smartmet-library-newbase >= 19.11.21
 Requires: smartmet-library-macgyver >= 19.9.26
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 19.10.31
+Requires: smartmet-library-spine >= 19.11.20
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -78,6 +78,9 @@ rm -rf $RPM_BUILD_ROOT
 
 * Fri Nov 22 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.11.22-1.fmi
 - Use std::vector instead of checkedVector
+
+* Wed Nov 20 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.11.20-1.fmi
+- Rebuilt due to newbase API changes
 
 * Thu Oct 31 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.10.31-1.fmi
 - Rebuilt due to newbase API/ABI changes
