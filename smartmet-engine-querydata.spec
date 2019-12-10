@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 19.11.25
+Version: 19.12.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -21,8 +21,9 @@ BuildRequires: smartmet-library-macgyver-devel >= 19.9.26
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
-BuildRequires: gdal-devel
+BuildRequires: gdal30-devel
 BuildRequires: bzip2-devel
+Requires: gdal30-libs
 Requires: boost-filesystem
 Requires: boost-date-time
 Requires: boost-iostreams
@@ -45,7 +46,7 @@ SmartMet querydata engine
 Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
-Requires: gdal-devel
+Requires: gdal30-devel
 Obsoletes: smartmet-brainstorm-qengine-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.

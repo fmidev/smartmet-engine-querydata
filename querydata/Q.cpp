@@ -9,7 +9,7 @@
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <boost/timer/timer.hpp>
-#include <gdal/ogr_spatialref.h>
+#include <ogr_spatialref.h>
 #include <gis/Box.h>
 #include <gis/DEM.h>
 #include <gis/LandCover.h>

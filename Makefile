@@ -49,7 +49,8 @@ ifeq ($(CXX), clang++)
 
  INCLUDES = \
 	-isystem $(includedir) \
-	-isystem $(includedir)/smartmet
+	-isystem $(includedir)/smartmet \
+	-isystem $(PREFIX)/gdal30/include
 
 else
 
@@ -72,7 +73,8 @@ else
 
  INCLUDES = \
 	-I$(includedir) \
-	-I$(includedir)/smartmet
+	-I$(includedir)/smartmet \
+	-I$(PREFIX)/gdal30/include
 
 endif
 
@@ -99,6 +101,7 @@ LIBS = -L$(libdir) \
 	-lsmartmet-gis \
 	-lsmartmet-macgyver \
 	-lsmartmet-newbase \
+	-L$(PREFIX)/gdal30/lib `pkg-config --libs gdal30` \
 	-lboost_date_time \
 	-lboost_regex \
 	-lboost_thread \
@@ -107,7 +110,6 @@ LIBS = -L$(libdir) \
 	-lboost_serialization \
 	-lboost_system \
 	-lfmt \
-	-lgdal \
 	-lprotobuf \
 	-lbz2 -lz
 
