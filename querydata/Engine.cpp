@@ -702,7 +702,7 @@ std::size_t hash_value(const OGRSpatialReference& theSR)
     char* wkt;
     theSR.exportToWkt(&wkt);
     std::string tmp(wkt);
-    OGRFree(wkt);
+    CPLFree(wkt);
     boost::hash<std::string> hasher;
     return hasher(tmp);
   }

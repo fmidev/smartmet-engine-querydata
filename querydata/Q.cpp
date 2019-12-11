@@ -9,7 +9,6 @@
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <boost/timer/timer.hpp>
-#include <ogr_spatialref.h>
 #include <gis/Box.h>
 #include <gis/DEM.h>
 #include <gis/LandCover.h>
@@ -26,6 +25,7 @@
 #include <spine/Exception.h>
 #include <spine/ParameterFactory.h>
 #include <cassert>
+#include <ogr_spatialref.h>
 #include <stdexcept>
 
 namespace ts = SmartMet::Spine::TimeSeries;
@@ -4507,7 +4507,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     char *tmp;
     theCrs.exportToWkt(&tmp);
     boost::hash_combine(hash, tmp);
-    OGRFree(tmp);
+    CPLFree(tmp);
 
     auto model = boost::make_shared<Model>(*itsModels[0], data, hash);
     return boost::make_shared<QImpl>(model);
