@@ -4349,7 +4349,7 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
 
 Q QImpl::sample(const Spine::Parameter &theParameter,
                 const boost::posix_time::ptime &theTime,
-                const OGRSpatialReference &theCrs,
+                OGRSpatialReference &theCrs,
                 double theXmin,
                 double theYmin,
                 double theXmax,
@@ -4391,8 +4391,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
     // Establish new projection and the required grid size of the desired resolution
 
-    boost::shared_ptr<NFmiArea> newarea(
-        NFmiArea::CreateFromBBox(theCrs, NFmiPoint(theXmin, theYmin), NFmiPoint(theXmax, theYmax)));
+    boost::shared_ptr<NFmiArea> newarea(NFmiArea::CreateFromBBox(
+        &theCrs, NFmiPoint(theXmin, theYmin), NFmiPoint(theXmax, theYmax)));
 
     double datawidth = newarea->WorldXYWidth() / 1000.0;  // view extent in kilometers
     double dataheight = newarea->WorldXYHeight() / 1000.0;

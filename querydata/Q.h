@@ -240,7 +240,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   boost::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
                                   const boost::posix_time::ptime& theTime,
-                                  const OGRSpatialReference& theCrs,
+                                  OGRSpatialReference& theCrs,
                                   double theXmin,
                                   double theYmin,
                                   double theXmax,
