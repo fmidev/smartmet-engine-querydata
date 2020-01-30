@@ -146,8 +146,22 @@ bool Repository::hasProducer(const Producer& producer) const
 {
   try
   {
-    const auto prod_config = itsProducerConfigs.find(producer);
-    return (prod_config != itsProducerConfigs.end());
+    const auto pos = itsProducerConfigs.find(producer);
+    if (pos != itsProducerConfigs.end())
+      return true;
+
+    // Check aliases
+
+    for (const auto& prod_config : itsProducerConfigs)
+    {
+      const auto& config = prod_config.second;
+      const auto& aliases = config.aliases;
+
+      if (aliases.find(producer) != aliases.end())
+        return true;
+    }
+
+    return false;
   }
   catch (...)
   {
