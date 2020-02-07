@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.1.30
+Version: 20.2.7
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -16,8 +16,8 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
 BuildRequires: smartmet-library-spine-devel >= 20.1.15
-BuildRequires: smartmet-library-newbase-devel >= 20.1.29
-BuildRequires: smartmet-library-macgyver-devel >= 20.1.9
+BuildRequires: smartmet-library-newbase-devel >= 20.2.6
+BuildRequires: smartmet-library-macgyver-devel >= 20.2.5
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -30,8 +30,8 @@ Requires: boost-iostreams
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
-Requires: smartmet-library-newbase >= 20.1.29
-Requires: smartmet-library-macgyver >= 20.1.9
+Requires: smartmet-library-newbase >= 20.2.6
+Requires: smartmet-library-macgyver >= 20.2.5
 Requires: protobuf
 Requires: libconfig >= 1.4.9
 Requires: smartmet-library-spine >= 20.1.15
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Feb  7 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.2.7-1.fmi
+- Repackaged due to newbase ABI changes
+
 * Thu Jan 30 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.1.30-1.fmi
 - hasProducer now recognizes aliases too
 
