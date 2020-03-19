@@ -20,6 +20,7 @@
 #include <spine/Exception.h>
 #include <chrono>
 #include <exception>
+#include <ogr_spatialref.h>
 #include <system_error>
 
 namespace SmartMet

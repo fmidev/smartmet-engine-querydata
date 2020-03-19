@@ -13,12 +13,13 @@
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <ogr_spatialref.h>
 #include <macgyver/Cache.h>
 #include <spine/SmartMetEngine.h>
 #include <future>
 #include <string>
 #include <system_error>
+
+class OGRSpatialReference;
 
 class NFmiPoint;
 
