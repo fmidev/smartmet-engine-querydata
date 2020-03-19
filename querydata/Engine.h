@@ -109,6 +109,9 @@ class Engine : public Spine::SmartMetEngine
   // get current engine contents
   Repository::ContentTable getEngineContents(const std::string& timeFormat,
                                              const std::string& projectionFormat) const;
+  Repository::ContentTable getEngineContents(const std::string& producer,
+                                             const std::string& timeFormat,
+                                             const std::string& projectionFormat) const;
 
   // Get producer data period
 

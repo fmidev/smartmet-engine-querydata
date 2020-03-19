@@ -65,6 +65,9 @@ class Repository
 
   ContentTable getRepoContents(const std::string& timeFormat,
                                const std::string& projectionFormat) const;
+  ContentTable getRepoContents(const std::string& producer,
+                               const std::string& timeFormat,
+                               const std::string& projectionFormat) const;
 
   // All metadata
   std::list<MetaData> getRepoMetadata() const;
