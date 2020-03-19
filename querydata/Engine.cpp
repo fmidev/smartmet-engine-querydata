@@ -447,6 +447,32 @@ Repository::ContentTable Engine::getEngineContents(const std::string& timeFormat
 
 // ----------------------------------------------------------------------
 /*!
+ *\ brief Return currently mapped files for a producer as table
+ */
+// ----------------------------------------------------------------------
+
+Repository::ContentTable Engine::getEngineContents(const std::string& producer,
+                                                   const std::string& timeFormat,
+                                                   const std::string& projectionFormat) const
+{
+  try
+  {
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+
+    if (producer.empty())
+      return repomanager->itsRepo.getRepoContents(timeFormat, projectionFormat);
+    return repomanager->itsRepo.getRepoContents(producer, timeFormat, projectionFormat);
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Return the time period for the given producer
  *
  * Returns a timeperiod for which is_null() is true if there is no data.

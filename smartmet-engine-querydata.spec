@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.2.13
+Version: 20.3.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,9 +15,9 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 20.2.7
-BuildRequires: smartmet-library-newbase-devel >= 20.2.6
-BuildRequires: smartmet-library-macgyver-devel >= 20.2.5
+BuildRequires: smartmet-library-spine-devel >= 20.3.9
+BuildRequires: smartmet-library-newbase-devel >= 20.2.13
+BuildRequires: smartmet-library-macgyver-devel >= 20.3.5
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -30,11 +30,11 @@ Requires: boost-iostreams
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
-Requires: smartmet-library-newbase >= 20.2.6
-Requires: smartmet-library-macgyver >= 20.2.5
+Requires: smartmet-library-newbase >= 20.2.13
+Requires: smartmet-library-macgyver >= 20.3.5
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 20.2.7
+Requires: smartmet-library-spine >= 20.3.9
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Mar 19 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.3.19-1.fmi
+- Added possibility to filter repo contents based on the producer name
+
 * Thu Feb 13 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.2.13-1.fmi
 - Forward declare GDAL classes in headers to avoid dependency escalation
 

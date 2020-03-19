@@ -607,6 +607,14 @@ Producer Repository::find(const ProducerList& producerlist,
 Repository::ContentTable Repository::getRepoContents(const std::string& timeFormat,
                                                      const std::string& projectionFormat) const
 {
+  std::string producer = "";
+  return getRepoContents(producer, timeFormat, projectionFormat);
+}
+
+Repository::ContentTable Repository::getRepoContents(const std::string& producer,
+                                                     const std::string& timeFormat,
+                                                     const std::string& projectionFormat) const
+{
   try
   {
     static const std::vector<std::string>& ContentTableHeaders =
@@ -630,6 +638,10 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
 
     for (const auto& prodit : itsProducers)
     {
+      // Skip all but the wanted producer
+      if (!producer.empty() && producer != prodit.first)
+        continue;
+
       const SharedModels& theseModels = prodit.second;
 
       const ProducerConfig thisConfig = itsProducerConfigs.find(prodit.first)->second;
@@ -674,18 +686,12 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
         // Get projection string
         std::string projectionText;
         if (qi->Area() == nullptr)
-        {
           projectionText = "nan";
-        }
         else if (projectionFormat == "wkt")
-        {
           projectionText = qi->Area()->WKT();
-        }
         // Defaults to newbase form
         else
-        {
           projectionText = qi->Area()->ProjStr();
-        }
 
         // For nicer output in browsers we replace for example ",PROJCS" with ", PROJCS"
         boost::regex rex(",([A-Z])");
