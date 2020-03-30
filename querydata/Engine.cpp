@@ -16,6 +16,7 @@
 #include <fmt/format.h>
 #include <gis/OGR.h>
 #include <macgyver/StringConversion.h>
+#include <newbase/NFmiCoordinateTransformation.h>
 #include <spine/Convenience.h>
 #include <spine/Exception.h>
 #include <chrono>
@@ -858,16 +859,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     // Copy the original coordinates for projection
     auto coords = std::make_shared<Coordinates>(*theCoords);
 
-    // Clones the spatial reference object. OGR takes pointers, not const pointers, hence we must
-    // use a cast.
-
-    auto& area = const_cast<NFmiArea&>(theQ->area());
-    std::unique_ptr<OGRCoordinateTransformation> transformation(
-        OGRCreateCoordinateTransformation(area.SpatialReference(), &theSR));
-
-    if (!transformation)
-      throw Spine::Exception(
-          BCP, "Failed to create the requested coordinate transformation during contouring");
+    NFmiCoordinateTransformation transformation(*theQ->SpatialReference(), theSR);
 
     // Project the coordinates one at a time
 
@@ -875,20 +867,10 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     auto nx = c.NX();
     auto ny = c.NY();
 
-    double nan = std::numeric_limits<double>::quiet_NaN();
-
     for (std::size_t j = 0; j < ny; j++)
       for (std::size_t i = 0; i < nx; i++)
       {
-        double x = c[i][j].X();
-        double y = c[i][j].Y();
-        if (transformation->Transform(1, &x, &y) == 0)
-        {
-          x = nan;
-          y = nan;
-        }
-
-        c[i][j] = NFmiPoint(x, y);
+        transformation.Transform(c[i][j]);
       }
 
     // If the target SR is geographic, we must discard the grid cells containing

@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.3.19
+Version: 20.3.30
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -16,7 +16,7 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
 BuildRequires: smartmet-library-spine-devel >= 20.3.9
-BuildRequires: smartmet-library-newbase-devel >= 20.2.13
+BuildRequires: smartmet-library-newbase-devel >= 20.3.30
 BuildRequires: smartmet-library-macgyver-devel >= 20.3.5
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -30,7 +30,7 @@ Requires: boost-iostreams
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
-Requires: smartmet-library-newbase >= 20.2.13
+Requires: smartmet-library-newbase >= 20.3.30
 Requires: smartmet-library-macgyver >= 20.3.5
 Requires: protobuf
 Requires: libconfig >= 1.4.9
@@ -74,6 +74,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Mar 30 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.3.30-1.fmi
+- Use NFmiSpatialReference and NFmiCoordinateTransformation
+
 * Thu Mar 19 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.3.19-1.fmi
 - Added possibility to filter repo contents based on the producer name
 
