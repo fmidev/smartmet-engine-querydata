@@ -1354,16 +1354,16 @@ float QImpl::cachedInterpolation(const NFmiLocationCache &theLocationCache,
  */
 // ----------------------------------------------------------------------
 
-void QImpl::landscapeCachedInterpolation(NFmiDataMatrix<float> &theMatrix,
-                                         const NFmiDataMatrix<NFmiLocationCache> &theLocationCache,
-                                         const NFmiTimeCache &theTimeCache,
-                                         const NFmiDataMatrix<float> &theDEMValues,
-                                         const NFmiDataMatrix<bool> &theWaterFlags)
+NFmiDataMatrix<float> QImpl::landscapeCachedInterpolation(
+    const NFmiDataMatrix<NFmiLocationCache> &theLocationCache,
+    const NFmiTimeCache &theTimeCache,
+    const NFmiDataMatrix<float> &theDEMValues,
+    const NFmiDataMatrix<bool> &theWaterFlags)
 {
   try
   {
-    itsInfo->LandscapeCachedInterpolation(
-        theMatrix, theLocationCache, theTimeCache, theDEMValues, theWaterFlags);
+    return itsInfo->LandscapeCachedInterpolation(
+        theLocationCache, theTimeCache, theDEMValues, theWaterFlags);
   }
   catch (...)
   {
@@ -1398,16 +1398,15 @@ bool QImpl::calcLatlonCachePoints(NFmiQueryInfo &theTargetInfo,
  */
 // ----------------------------------------------------------------------
 
-void QImpl::values(NFmiDataMatrix<float> &theMatrix,
-                   const NFmiDataMatrix<float> &theDEMValues,
-                   const NFmiDataMatrix<bool> &theWaterFlags)
+NFmiDataMatrix<float> QImpl::values(const NFmiDataMatrix<float> &theDEMValues,
+                                    const NFmiDataMatrix<bool> &theWaterFlags)
 {
   try
   {
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
-      itsInfo->LandscapeValues(theMatrix, theDEMValues, theWaterFlags);
+      return itsInfo->LandscapeValues(theDEMValues, theWaterFlags);
     else
-      itsInfo->Values(theMatrix);
+      return itsInfo->Values();
   }
   catch (...)
   {
@@ -1424,17 +1423,16 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
  */
 // ----------------------------------------------------------------------
 
-void QImpl::values(NFmiDataMatrix<float> &theMatrix,
-                   const NFmiMetTime &theInterpolatedTime,
-                   const NFmiDataMatrix<float> &theDEMValues,
-                   const NFmiDataMatrix<bool> &theWaterFlags)
+NFmiDataMatrix<float> QImpl::values(const NFmiMetTime &theInterpolatedTime,
+                                    const NFmiDataMatrix<float> &theDEMValues,
+                                    const NFmiDataMatrix<bool> &theWaterFlags)
 {
   try
   {
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
-      itsInfo->LandscapeValues(theMatrix, theInterpolatedTime, theDEMValues, theWaterFlags);
+      return itsInfo->LandscapeValues(theInterpolatedTime, theDEMValues, theWaterFlags);
     else
-      itsInfo->Values(theMatrix, theInterpolatedTime);
+      return itsInfo->Values(theInterpolatedTime);
   }
   catch (...)
   {
@@ -1451,11 +1449,10 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
  */
 // ----------------------------------------------------------------------
 
-void QImpl::values(NFmiDataMatrix<float> &theMatrix,
-                   const Spine::Parameter &theParam,
-                   const boost::posix_time::ptime &theInterpolatedTime,
-                   const NFmiDataMatrix<float> &theDEMValues,
-                   const NFmiDataMatrix<bool> &theWaterFlags)
+NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
+                                    const boost::posix_time::ptime &theInterpolatedTime,
+                                    const NFmiDataMatrix<float> &theDEMValues,
+                                    const NFmiDataMatrix<bool> &theWaterFlags)
 {
   try
   {
@@ -1467,14 +1464,14 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
         if (!param(theParam.number()))
           throw Spine::Exception(BCP,
                                  "Parameter " + theParam.name() + " is not available in the data");
-        return values(theMatrix, theInterpolatedTime, theDEMValues, theWaterFlags);
+        return values(theInterpolatedTime, theDEMValues, theWaterFlags);
       }
       case Spine::Parameter::Type::DataDerived:
       case Spine::Parameter::Type::DataIndependent:
       {
         const auto nx = grid().XNumber();
         const auto ny = grid().YNumber();
-        theMatrix.Resize(nx, ny, kFloatMissing);
+        NFmiDataMatrix<float> values(nx, ny, kFloatMissing);
 
         // Now we need all kinds of extra variables because of the damned API
 
@@ -1507,11 +1504,12 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
             auto result = value(opts, localdatetime);
 
             if (boost::get<double>(&result) != nullptr)
-              theMatrix[i][j] = *boost::get<double>(&result);
+              values[i][j] = *boost::get<double>(&result);
           }
-        break;
+        return values;
       }
     }
+    return {};  // NOTREACHED
   }
   catch (...)
   {
@@ -1525,15 +1523,14 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
  */
 // ----------------------------------------------------------------------
 
-void QImpl::values(const NFmiDataMatrix<NFmiPoint> &theLatlonMatrix,
-                   NFmiDataMatrix<float> &theValues,
-                   const NFmiMetTime &theTime,
-                   float P,
-                   float H)
+NFmiDataMatrix<float> QImpl::values(const NFmiCoordinateMatrix &theLatlonMatrix,
+                                    const NFmiMetTime &theTime,
+                                    float P,
+                                    float H)
 {
   try
   {
-    itsInfo->Values(theLatlonMatrix, theValues, theTime, P, H);
+    return itsInfo->Values(theLatlonMatrix, theTime, P, H);
   }
   catch (...)
   {
@@ -1547,24 +1544,24 @@ void QImpl::values(const NFmiDataMatrix<NFmiPoint> &theLatlonMatrix,
  */
 // ----------------------------------------------------------------------
 
-void QImpl::croppedValues(NFmiDataMatrix<float> &theMatrix,
-                          int x1,
-                          int y1,
-                          int x2,
-                          int y2,
-                          const NFmiDataMatrix<float> &theDEMValues,  // DEM values for landscaping
-                                                                      // (an empty matrix by
-                                                                      // default)
-                          const NFmiDataMatrix<bool> &theWaterFlags   // Water flags for landscaping
-                          // (an empty matrix by default)
-                          ) const
+NFmiDataMatrix<float> QImpl::croppedValues(
+    int x1,
+    int y1,
+    int x2,
+    int y2,
+    const NFmiDataMatrix<float> &theDEMValues,  // DEM values for landscaping
+                                                // (an empty matrix by
+                                                // default)
+    const NFmiDataMatrix<bool> &theWaterFlags   // Water flags for landscaping
+    // (an empty matrix by default)
+    ) const
 {
   try
   {
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
-      itsInfo->LandscapeCroppedValues(theMatrix, x1, y1, x2, y2, theDEMValues, theWaterFlags);
+      return itsInfo->LandscapeCroppedValues(x1, y1, x2, y2, theDEMValues, theWaterFlags);
     else
-      itsInfo->CroppedValues(theMatrix, x1, y1, x2, y2);
+      return itsInfo->CroppedValues(x1, y1, x2, y2);
   }
   catch (...)
   {
@@ -1578,13 +1575,12 @@ void QImpl::croppedValues(NFmiDataMatrix<float> &theMatrix,
  */
 // ----------------------------------------------------------------------
 
-void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
-                           const NFmiMetTime &theInterpolatedTime,
-                           float wantedPressureLevel)
+NFmiDataMatrix<float> QImpl::pressureValues(const NFmiMetTime &theInterpolatedTime,
+                                            float wantedPressureLevel)
 {
   try
   {
-    return itsInfo->PressureValues(theValues, theInterpolatedTime, wantedPressureLevel);
+    return itsInfo->PressureValues(theInterpolatedTime, wantedPressureLevel);
   }
   catch (...)
   {
@@ -1598,15 +1594,13 @@ void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
  */
 // ----------------------------------------------------------------------
 
-void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
-                           const NFmiGrid &theWantedGrid,
-                           const NFmiMetTime &theInterpolatedTime,
-                           float wantedPressureLevel)
+NFmiDataMatrix<float> QImpl::pressureValues(const NFmiGrid &theWantedGrid,
+                                            const NFmiMetTime &theInterpolatedTime,
+                                            float wantedPressureLevel)
 {
   try
   {
-    return itsInfo->PressureValues(
-        theValues, theWantedGrid, theInterpolatedTime, wantedPressureLevel);
+    return itsInfo->PressureValues(theWantedGrid, theInterpolatedTime, wantedPressureLevel);
   }
   catch (...)
   {
@@ -1614,16 +1608,15 @@ void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
   }
 }
 
-void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
-                           const NFmiGrid &theWantedGrid,
-                           const NFmiMetTime &theInterpolatedTime,
-                           float wantedPressureLevel,
-                           bool relative_uv)
+NFmiDataMatrix<float> QImpl::pressureValues(const NFmiGrid &theWantedGrid,
+                                            const NFmiMetTime &theInterpolatedTime,
+                                            float wantedPressureLevel,
+                                            bool relative_uv)
 {
   try
   {
     return itsInfo->PressureValues(
-        theValues, theWantedGrid, theInterpolatedTime, wantedPressureLevel, relative_uv);
+        theWantedGrid, theInterpolatedTime, wantedPressureLevel, relative_uv);
   }
   catch (...)
   {
@@ -1637,14 +1630,13 @@ void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
  */
 // ----------------------------------------------------------------------
 
-void QImpl::gridValues(NFmiDataMatrix<float> &theValues,
-                       const NFmiGrid &theWantedGrid,
-                       const NFmiMetTime &theInterpolatedTime,
-                       bool relative_uv)
+NFmiDataMatrix<float> QImpl::gridValues(const NFmiGrid &theWantedGrid,
+                                        const NFmiMetTime &theInterpolatedTime,
+                                        bool relative_uv)
 {
   try
   {
-    return itsInfo->GridValues(theValues, theWantedGrid, theInterpolatedTime, relative_uv);
+    return itsInfo->GridValues(theWantedGrid, theInterpolatedTime, relative_uv);
   }
   catch (...)
   {
@@ -1658,16 +1650,15 @@ void QImpl::gridValues(NFmiDataMatrix<float> &theValues,
  */
 // ----------------------------------------------------------------------
 
-void QImpl::heightValues(NFmiDataMatrix<float> &theValues,
-                         const NFmiGrid &theWantedGrid,
-                         const NFmiMetTime &theInterpolatedTime,
-                         float wantedHeightLevel,
-                         bool relative_uv)
+NFmiDataMatrix<float> QImpl::heightValues(const NFmiGrid &theWantedGrid,
+                                          const NFmiMetTime &theInterpolatedTime,
+                                          float wantedHeightLevel,
+                                          bool relative_uv)
 {
   try
   {
     return itsInfo->HeightValues(
-        theValues, theWantedGrid, theInterpolatedTime, wantedHeightLevel, relative_uv);
+        theWantedGrid, theInterpolatedTime, wantedHeightLevel, relative_uv);
   }
   catch (...)
   {
@@ -4430,13 +4421,14 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
       if (loadDEMAndWaterFlags(
               theDem, theLandCover, theResolution, locCache, demMatrix, waterFlagMatrix))
-        landscapeCachedInterpolation(valueMatrix, locCache, timeCache, demMatrix, waterFlagMatrix);
+        valueMatrix = landscapeCachedInterpolation(locCache, timeCache, demMatrix, waterFlagMatrix);
       else
         // Target grid does not intersect the native grid
         //
         valueMatrix.Resize(locCache.NX(), locCache.NY(), kFloatMissing);
 
-      int nx = valueMatrix.NX(), n;
+      int nx = valueMatrix.NX();
+      int n;
 
       for (dstinfo.ResetLocation(), n = 0; dstinfo.NextLocation(); n++)
       {

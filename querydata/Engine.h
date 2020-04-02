@@ -14,6 +14,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <macgyver/Cache.h>
+#include <newbase/NFmiCoordinateMatrix.h>
 #include <spine/SmartMetEngine.h>
 #include <future>
 #include <string>
@@ -23,8 +24,7 @@ class OGRSpatialReference;
 
 class NFmiPoint;
 
-typedef NFmiDataMatrix<NFmiPoint> Coordinates;
-typedef std::shared_ptr<Coordinates> CoordinatesPtr;
+typedef std::shared_ptr<NFmiCoordinateMatrix> CoordinatesPtr;
 
 typedef NFmiDataMatrix<float> Values;
 typedef std::shared_ptr<Values> ValuesPtr;

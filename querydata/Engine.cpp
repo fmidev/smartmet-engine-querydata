@@ -740,74 +740,14 @@ std::size_t hash_value(const OGRSpatialReference& theSR)
   }
 }
 
-NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
+// TODO: Do we really need this anymore? Creating a CoordinateMatrix is quite fast
+NFmiCoordinateMatrix get_world_xy(const Q& theQ)
 {
-  try
-  {
-    if (!theQ->isGrid())
-      throw Spine::Exception(BCP, "Trying to contour non-gridded data");
+  if (!theQ->isGrid())
+    throw Spine::Exception(BCP, "Trying to contour non-gridded data");
 
-    const auto& grid = theQ->grid();
-
-    const auto nx = grid.XNumber();
-    const auto ny = grid.YNumber();
-
-    NFmiDataMatrix<NFmiPoint> coords(nx, ny);
-
-#ifndef WGS84
-    // For latlon data GridToWorldXY returns metric units even though we want geographic coordinates
-    auto id = theQ->area().ClassId();
-    bool islatlon = (id == kNFmiLatLonArea || id == kNFmiRotatedLatLonArea);
-#endif
-
-    for (std::size_t j = 0; j < ny; j++)
-      for (std::size_t i = 0; i < nx; i++)
-#ifdef WGS84
-        coords[i][j] = grid.GridToWorldXY(i, j);
-#else
-        if (islatlon)
-          coords[i][j] = grid.GridToLatLon(i, j);
-        else
-          coords[i][j] = grid.GridToWorldXY(i, j);
-#endif
-
-    return coords;
-  }
-  catch (...)
-  {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
-  }
+  return theQ->CoordinateMatrix();
 }
-
-#ifndef WGS84
-NFmiDataMatrix<NFmiPoint> get_latlons(const Q& theQ)
-{
-  try
-  {
-    if (!theQ->isGrid())
-      throw Spine::Exception(BCP, "Trying to contour non-gridded data");
-
-    const auto& grid = theQ->grid();
-
-    const auto nx = grid.XNumber();
-    const auto ny = grid.YNumber();
-
-    NFmiDataMatrix<NFmiPoint> coords(nx, ny);
-
-    // WGS84 TODO: should use vectorized GDAL calls to get all coordinates at once
-
-    for (std::size_t j = 0; j < ny; j++)
-      for (std::size_t i = 0; i < nx; i++)
-        coords[i][j] = grid.GridToLatLon(i, j);
-
-    return coords;
-  }
-  catch (...)
-  {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-#endif
 
 // ----------------------------------------------------------------------
 /*!
@@ -815,7 +755,7 @@ NFmiDataMatrix<NFmiPoint> get_latlons(const Q& theQ)
  */
 // ----------------------------------------------------------------------
 
-void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
+void mark_cell_bad(NFmiCoordinateMatrix& theCoords, const NFmiPoint& theCoord)
 {
   try
   {
@@ -824,18 +764,18 @@ void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
 
       return;
 
-    if (theCoord.X() >= 0 && theCoord.X() < theCoords.NX() - 1 && theCoord.Y() >= 0 &&
-        theCoord.Y() < theCoords.NY() - 1)
+    if (theCoord.X() >= 0 && theCoord.X() < theCoords.Width() - 1 && theCoord.Y() >= 0 &&
+        theCoord.Y() < theCoords.Height() - 1)
     {
       auto i = static_cast<std::size_t>(theCoord.X());
       auto j = static_cast<std::size_t>(theCoord.Y());
       NFmiPoint badcoord(std::numeric_limits<float>::quiet_NaN(),
                          std::numeric_limits<float>::quiet_NaN());
-      theCoords[i + 0][j + 0] = badcoord;
-      theCoords[i + 1][j + 0] = badcoord;
+      theCoords(i + 0, j + 0) = badcoord;
+      theCoords(i + 1, j + 0) = badcoord;
       // Marking two vertices bad is enough to invalidate the cell
-      // theCoords[i+0][j+1] = badcoord;
-      // theCoords[i+1][j+1] = badcoord;
+      // theCoords(i+0,j+1])= badcoord;
+      // theCoords(i+1],+1])= badcoord;
     }
   }
   catch (...)
@@ -857,21 +797,10 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   try
   {
     // Copy the original coordinates for projection
-    auto coords = std::make_shared<Coordinates>(*theCoords);
 
     NFmiCoordinateTransformation transformation(*theQ->SpatialReference(), theSR);
-
-    // Project the coordinates one at a time
-
-    auto& c = *coords;  // avoid dereferencing the shared pointed all the time for speed
-    auto nx = c.NX();
-    auto ny = c.NY();
-
-    for (std::size_t j = 0; j < ny; j++)
-      for (std::size_t i = 0; i < nx; i++)
-      {
-        transformation.Transform(c[i][j]);
-      }
+    auto coords = std::make_shared<NFmiCoordinateMatrix>(*theCoords);
+    coords->Transform(transformation);
 
     // If the target SR is geographic, we must discard the grid cells containing
     // the north or south poles since the cell vertex coordinates wrap around
@@ -883,6 +812,8 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
 
     if (theSR.IsGeographic() != 0)
     {
+      auto& c = *coords;
+
       const auto& grid = theQ->grid();
       auto northpole = grid.LatLonToGrid(0, 90);
       mark_cell_bad(c, northpole);
@@ -891,13 +822,17 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
 
       NFmiPoint badcoord(std::numeric_limits<double>::quiet_NaN(),
                          std::numeric_limits<double>::quiet_NaN());
+
+      const auto nx = c.Width();
+      const auto ny = c.Height();
+
       for (std::size_t j = 0; j < ny; j++)
         for (std::size_t i = 0; i + 1 < nx; i++)
         {
-          double lon1 = c[i][j].X();
-          double lon2 = c[i + 1][j].X();
+          double lon1 = c.X(i, j);
+          double lon2 = c.X(i + 1, j);
           if (lon1 != kFloatMissing && lon2 != kFloatMissing && std::abs(lon1 - lon2) > 180)
-            c[i][j] = badcoord;
+            c.Set(i, j, badcoord);
         }
     }
 
@@ -942,7 +877,8 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
     // have to be calculated again - even though it is a fast calculation.
 
     auto ftr =
-        std::async([&] { return std::make_shared<Coordinates>(get_world_xy(theQ)); }).share();
+        std::async([&] { return std::make_shared<NFmiCoordinateMatrix>(get_world_xy(theQ)); })
+            .share();
     itsCoordinateCache.insert(qhash, ftr);
     auto worldxy = ftr.get();
 
@@ -994,11 +930,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
 
     // Else create a shared future for calculating the values
     auto ftr = std::async(std::launch::async,
-                          [&] {
-                            auto tmp = std::make_shared<Values>();
-                            theQ->values(*tmp, theTime);
-                            return tmp;
-                          })
+                          [&] { return std::make_shared<Values>(theQ->values(theTime)); })
                    .share();
 
     // Store the shared future into the cache for other threads to see too
@@ -1039,11 +971,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
 
     // Else create a shared future for calculating the values
     auto ftr = std::async(std::launch::async,
-                          [&] {
-                            auto tmp = std::make_shared<Values>();
-                            theQ->values(*tmp, theParam, theTime);
-                            return tmp;
-                          })
+                          [&] { return std::make_shared<Values>(theQ->values(theParam, theTime)); })
                    .share();
 
     // Store the shared future into the cache for other threads to see too
