@@ -798,7 +798,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   {
     // Copy the original coordinates for projection
 
-    NFmiCoordinateTransformation transformation(*theQ->SpatialReference(), theSR);
+    NFmiCoordinateTransformation transformation(theQ->SpatialReference(), theSR);
     auto coords = std::make_shared<NFmiCoordinateMatrix>(*theCoords);
     coords->Transform(transformation);
 

@@ -102,8 +102,8 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   NFmiPoint worldXY() const;
   NFmiPoint latLon() const;
 
-  OGRSpatialReference* SpatialReference() { return itsInfo->SpatialReference(); }
-  const OGRSpatialReference* SpatialReference() const { return itsInfo->SpatialReference(); }
+  OGRSpatialReference& SpatialReference() { return itsInfo->SpatialReference(); }
+  const OGRSpatialReference& SpatialReference() const { return itsInfo->SpatialReference(); }
 
   NFmiCoordinateMatrix CoordinateMatrix() const { return itsInfo->CoordinateMatrix(); }
 
