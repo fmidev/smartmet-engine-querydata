@@ -723,12 +723,12 @@ const ProducerConfig& Engine::getProducerConfig(const std::string& producer) con
   }
 }
 
-std::size_t hash_value(const OGRSpatialReference& theSR)
+std::size_t hash_value(const NFmiSpatialReference& theSR)
 {
   try
   {
     char* wkt;
-    theSR.exportToWkt(&wkt);
+    theSR.get()->exportToWkt(&wkt);
     std::string tmp(wkt);
     CPLFree(wkt);
     boost::hash<std::string> hasher;
@@ -792,7 +792,7 @@ void mark_cell_bad(NFmiCoordinateMatrix& theCoords, const NFmiPoint& theCoord)
 
 CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
                                    const Q& theQ,
-                                   OGRSpatialReference& theSR)
+                                   const NFmiSpatialReference& theSR)
 {
   try
   {
@@ -844,7 +844,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   }
 }
 
-CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* theSR) const
+CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const NFmiSpatialReference& theSR) const
 {
   try
   {
@@ -895,7 +895,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 
     // Project the coordinates
 
-    auto ftr2 = std::async([&] { return project_coordinates(worldxy, theQ, *theSR); }).share();
+    auto ftr2 = std::async([&] { return project_coordinates(worldxy, theQ, theSR); }).share();
 
     itsCoordinateCache.insert(projhash, ftr2);
     return ftr2.get();

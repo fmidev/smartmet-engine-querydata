@@ -20,7 +20,7 @@
 #include <string>
 #include <system_error>
 
-class OGRSpatialReference;
+class NFmiSpatialReference;
 
 class NFmiPoint;
 
@@ -139,7 +139,7 @@ class Engine : public Spine::SmartMetEngine
   // get producer's configuration
   const ProducerConfig& getProducerConfig(const std::string& producer) const;
 
-  CoordinatesPtr getWorldCoordinates(const Q& theQ, OGRSpatialReference* theSR) const;
+  CoordinatesPtr getWorldCoordinates(const Q& theQ, const NFmiSpatialReference& theSR) const;
 
   ValuesPtr getValues(const Q& theQ,
                       std::size_t theValuesHash,

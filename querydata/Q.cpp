@@ -4340,7 +4340,7 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
 
 Q QImpl::sample(const Spine::Parameter &theParameter,
                 const boost::posix_time::ptime &theTime,
-                OGRSpatialReference &theCrs,
+                const NFmiSpatialReference &theCrs,
                 double theXmin,
                 double theYmin,
                 double theXmax,
@@ -4497,7 +4497,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     boost::hash_combine(hash, theYmax);
 
     char *tmp;
-    theCrs.exportToWkt(&tmp);
+    theCrs.get()->exportToWkt(&tmp);
     boost::hash_combine(hash, tmp);
     CPLFree(tmp);
 
