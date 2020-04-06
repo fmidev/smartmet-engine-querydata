@@ -4340,7 +4340,7 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
 
 Q QImpl::sample(const Spine::Parameter &theParameter,
                 const boost::posix_time::ptime &theTime,
-                const NFmiSpatialReference &theCrs,
+                const Fmi::SpatialReference &theCrs,
                 double theXmin,
                 double theYmin,
                 double theXmax,

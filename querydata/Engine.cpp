@@ -14,9 +14,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 #include <fmt/format.h>
+#include <gis/CoordinateTransformation.h>
 #include <gis/OGR.h>
 #include <macgyver/StringConversion.h>
-#include <newbase/NFmiCoordinateTransformation.h>
 #include <spine/Convenience.h>
 #include <spine/Exception.h>
 #include <chrono>
@@ -723,7 +723,7 @@ const ProducerConfig& Engine::getProducerConfig(const std::string& producer) con
   }
 }
 
-std::size_t hash_value(const NFmiSpatialReference& theSR)
+std::size_t hash_value(const Fmi::SpatialReference& theSR)
 {
   try
   {
@@ -792,13 +792,13 @@ void mark_cell_bad(NFmiCoordinateMatrix& theCoords, const NFmiPoint& theCoord)
 
 CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
                                    const Q& theQ,
-                                   const NFmiSpatialReference& theSR)
+                                   const Fmi::SpatialReference& theSR)
 {
   try
   {
     // Copy the original coordinates for projection
 
-    NFmiCoordinateTransformation transformation(theQ->SpatialReference(), theSR);
+    Fmi::CoordinateTransformation transformation(theQ->SpatialReference(), theSR);
     auto coords = std::make_shared<NFmiCoordinateMatrix>(*theCoords);
     coords->Transform(transformation);
 
@@ -844,7 +844,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   }
 }
 
-CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const NFmiSpatialReference& theSR) const
+CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const Fmi::SpatialReference& theSR) const
 {
   try
   {

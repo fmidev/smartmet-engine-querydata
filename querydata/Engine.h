@@ -20,14 +20,17 @@
 #include <string>
 #include <system_error>
 
-class NFmiSpatialReference;
-
 class NFmiPoint;
 
 typedef std::shared_ptr<NFmiCoordinateMatrix> CoordinatesPtr;
 
 typedef NFmiDataMatrix<float> Values;
 typedef std::shared_ptr<Values> ValuesPtr;
+
+namespace Fmi
+{
+class SpatialReference;
+}
 
 namespace SmartMet
 {
@@ -139,7 +142,7 @@ class Engine : public Spine::SmartMetEngine
   // get producer's configuration
   const ProducerConfig& getProducerConfig(const std::string& producer) const;
 
-  CoordinatesPtr getWorldCoordinates(const Q& theQ, const NFmiSpatialReference& theSR) const;
+  CoordinatesPtr getWorldCoordinates(const Q& theQ, const Fmi::SpatialReference& theSR) const;
 
   ValuesPtr getValues(const Q& theQ,
                       std::size_t theValuesHash,

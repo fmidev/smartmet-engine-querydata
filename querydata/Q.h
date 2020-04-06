@@ -32,12 +32,12 @@ class NFmiArea;
 class NFmiMetTime;
 class NFmiPoint;
 class NFmiFastQueryInfo;
-class NFmiSpatialReference;
 
 namespace Fmi
 {
 class DEM;
 class LandCover;
+class SpatialReference;
 }  // namespace Fmi
 
 namespace SmartMet
@@ -101,7 +101,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   NFmiPoint worldXY() const;
   NFmiPoint latLon() const;
 
-  const NFmiSpatialReference& SpatialReference() const { return itsInfo->SpatialReference(); }
+  const Fmi::SpatialReference& SpatialReference() const { return itsInfo->SpatialReference(); }
 
   NFmiCoordinateMatrix CoordinateMatrix() const { return itsInfo->CoordinateMatrix(); }
 
@@ -229,7 +229,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   boost::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
                                   const boost::posix_time::ptime& theTime,
-                                  const NFmiSpatialReference& theCrs,
+                                  const Fmi::SpatialReference& theCrs,
                                   double theXmin,
                                   double theYmin,
                                   double theXmax,
