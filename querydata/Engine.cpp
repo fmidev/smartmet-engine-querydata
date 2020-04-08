@@ -855,8 +855,8 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
 
           double x1 = c.X(i, j);
           double x2 = c.X(i + 1, j + 1);
-          double y1 = c.X(i, j);
-          double y2 = c.X(i + 1, j + 1);
+          double y1 = c.Y(i, j);
+          double y2 = c.Y(i + 1, j + 1);
           double dx = std::abs(x2 - x1);
           double dy = std::abs(y2 - y1);
           if (dx != 0)
