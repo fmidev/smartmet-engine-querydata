@@ -810,6 +810,12 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     // We also have to check whether some grid cells cross the 180th meridian
     // and discard them
 
+    // If the target SR is no geographic, we discard all very elongated cells
+    // since they are likely spanning the world
+
+    NFmiPoint badcoord(std::numeric_limits<double>::quiet_NaN(),
+                       std::numeric_limits<double>::quiet_NaN());
+
     if (theSR.IsGeographic() != 0)
     {
       auto& c = *coords;
@@ -819,9 +825,6 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
       mark_cell_bad(c, northpole);
       auto southpole = grid.LatLonToGrid(0, -90);
       mark_cell_bad(c, southpole);
-
-      NFmiPoint badcoord(std::numeric_limits<double>::quiet_NaN(),
-                         std::numeric_limits<double>::quiet_NaN());
 
       const auto nx = c.Width();
       const auto ny = c.Height();
@@ -833,6 +836,41 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
           double lon2 = c.X(i + 1, j);
           if (lon1 != kFloatMissing && lon2 != kFloatMissing && std::abs(lon1 - lon2) > 180)
             c.Set(i, j, badcoord);
+        }
+    }
+
+    else
+    {
+      auto& c = *coords;
+
+      const auto nx = c.Width();
+      const auto ny = c.Height();
+
+      for (std::size_t j = 0; j + 1 < ny; j++)
+        for (std::size_t i = 0; i + 1 < nx; i++)
+        {
+          // Checking one diagonal should be sufficient, but to make sure
+          // one could maybe check the other diagonal too. Insufficient information
+          // on different types of problems.
+
+          double x1 = c.X(i, j);
+          double x2 = c.X(i + 1, j + 1);
+          double y1 = c.X(i, j);
+          double y2 = c.X(i + 1, j + 1);
+          double dx = std::abs(x2 - x1);
+          double dy = std::abs(y2 - y1);
+          if (dx != 0)
+          {
+            if (dx / dy > 100 || dx / dy < 0.01)
+              c.Set(i, j, badcoord);
+          }
+          else if (dy != 0)
+          {
+            if (dy / dx > 100 || dy / dx < 0.01)
+              c.Set(i, j, badcoord);
+          }
+          else
+            c.Set(i, j, badcoord);  // zero length diagonal not allowed
         }
     }
 
