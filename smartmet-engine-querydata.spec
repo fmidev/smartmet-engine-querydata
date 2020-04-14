@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.4.8
+Version: 20.4.14
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -16,9 +16,9 @@ BuildRequires: make
 BuildRequires: boost-devel
 BuildRequires: libconfig >= 1.4.9
 BuildRequires: smartmet-library-spine-devel >= 20.3.9
-BuildRequires: smartmet-library-newbase-devel >= 20.4.6
+BuildRequires: smartmet-library-newbase-devel >= 20.4.12
 BuildRequires: smartmet-library-macgyver-devel >= 20.3.5
-BuildRequires: smartmet-library-gis-devel >= 20.4.6
+BuildRequires: smartmet-library-gis-devel >= 20.4.12
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -31,9 +31,9 @@ Requires: boost-iostreams
 Requires: boost-thread
 Requires: boost-serialization
 Requires: boost-system
-Requires: smartmet-library-newbase >= 20.4.6
+Requires: smartmet-library-newbase >= 20.4.12
 Requires: smartmet-library-macgyver >= 20.3.5
-Requires: smartmet-library-gis >= 20.4.6
+Requires: smartmet-library-gis >= 20.4.12
 Requires: protobuf
 Requires: libconfig >= 1.4.9
 Requires: smartmet-library-spine >= 20.3.9
@@ -76,6 +76,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Apr 14 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.14-1.fmi
+- Use Fmi::CoordinateMatrix instead of NFmiCoordinateMatrix
+
 * Wed Apr  8 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.8-1.fmi
 - Added checking of projected metric coordinates for very elongated cells
 

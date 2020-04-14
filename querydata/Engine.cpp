@@ -24,6 +24,14 @@
 #include <ogr_spatialref.h>
 #include <system_error>
 
+#include <iomanip>
+
+namespace
+{
+auto badcoord = std::make_pair(std::numeric_limits<double>::quiet_NaN(),
+                               std::numeric_limits<double>::quiet_NaN());
+}
+
 namespace SmartMet
 {
 namespace Engine
@@ -741,7 +749,7 @@ std::size_t hash_value(const Fmi::SpatialReference& theSR)
 }
 
 // TODO: Do we really need this anymore? Creating a CoordinateMatrix is quite fast
-NFmiCoordinateMatrix get_world_xy(const Q& theQ)
+Fmi::CoordinateMatrix get_world_xy(const Q& theQ)
 {
   if (!theQ->isGrid())
     throw Spine::Exception(BCP, "Trying to contour non-gridded data");
@@ -755,7 +763,7 @@ NFmiCoordinateMatrix get_world_xy(const Q& theQ)
  */
 // ----------------------------------------------------------------------
 
-void mark_cell_bad(NFmiCoordinateMatrix& theCoords, const NFmiPoint& theCoord)
+void mark_cell_bad(Fmi::CoordinateMatrix& theCoords, const NFmiPoint& theCoord)
 {
   try
   {
@@ -764,13 +772,11 @@ void mark_cell_bad(NFmiCoordinateMatrix& theCoords, const NFmiPoint& theCoord)
 
       return;
 
-    if (theCoord.X() >= 0 && theCoord.X() < theCoords.Width() - 1 && theCoord.Y() >= 0 &&
-        theCoord.Y() < theCoords.Height() - 1)
+    if (theCoord.X() >= 0 && theCoord.X() < theCoords.width() - 1 && theCoord.Y() >= 0 &&
+        theCoord.Y() < theCoords.height() - 1)
     {
       auto i = static_cast<std::size_t>(theCoord.X());
       auto j = static_cast<std::size_t>(theCoord.Y());
-      NFmiPoint badcoord(std::numeric_limits<float>::quiet_NaN(),
-                         std::numeric_limits<float>::quiet_NaN());
       theCoords(i + 0, j + 0) = badcoord;
       theCoords(i + 1, j + 0) = badcoord;
       // Marking two vertices bad is enough to invalidate the cell
@@ -799,8 +805,8 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     // Copy the original coordinates for projection
 
     Fmi::CoordinateTransformation transformation(theQ->SpatialReference(), theSR);
-    auto coords = std::make_shared<NFmiCoordinateMatrix>(*theCoords);
-    coords->Transform(transformation);
+    auto coords = std::make_shared<Fmi::CoordinateMatrix>(*theCoords);
+    coords->transform(transformation);
 
     // If the target SR is geographic, we must discard the grid cells containing
     // the north or south poles since the cell vertex coordinates wrap around
@@ -813,10 +819,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     // If the target SR is no geographic, we discard all very elongated cells
     // since they are likely spanning the world
 
-    NFmiPoint badcoord(std::numeric_limits<double>::quiet_NaN(),
-                       std::numeric_limits<double>::quiet_NaN());
-
-    if (theSR.IsGeographic() != 0)
+    if (theSR.isGeographic() != 0)
     {
       auto& c = *coords;
 
@@ -826,51 +829,16 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
       auto southpole = grid.LatLonToGrid(0, -90);
       mark_cell_bad(c, southpole);
 
-      const auto nx = c.Width();
-      const auto ny = c.Height();
+      const auto nx = c.width();
+      const auto ny = c.height();
 
       for (std::size_t j = 0; j < ny; j++)
         for (std::size_t i = 0; i + 1 < nx; i++)
         {
-          double lon1 = c.X(i, j);
-          double lon2 = c.X(i + 1, j);
+          double lon1 = c.x(i, j);
+          double lon2 = c.x(i + 1, j);
           if (lon1 != kFloatMissing && lon2 != kFloatMissing && std::abs(lon1 - lon2) > 180)
-            c.Set(i, j, badcoord);
-        }
-    }
-
-    else
-    {
-      auto& c = *coords;
-
-      const auto nx = c.Width();
-      const auto ny = c.Height();
-
-      for (std::size_t j = 0; j + 1 < ny; j++)
-        for (std::size_t i = 0; i + 1 < nx; i++)
-        {
-          // Checking one diagonal should be sufficient, but to make sure
-          // one could maybe check the other diagonal too. Insufficient information
-          // on different types of problems.
-
-          double x1 = c.X(i, j);
-          double x2 = c.X(i + 1, j + 1);
-          double y1 = c.Y(i, j);
-          double y2 = c.Y(i + 1, j + 1);
-          double dx = std::abs(x2 - x1);
-          double dy = std::abs(y2 - y1);
-          if (dx != 0)
-          {
-            if (dx / dy > 100 || dx / dy < 0.01)
-              c.Set(i, j, badcoord);
-          }
-          else if (dy != 0)
-          {
-            if (dy / dx > 100 || dy / dx < 0.01)
-              c.Set(i, j, badcoord);
-          }
-          else
-            c.Set(i, j, badcoord);  // zero length diagonal not allowed
+            c.set(i, j, badcoord);
         }
     }
 
@@ -915,7 +883,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const Fmi::SpatialRefe
     // have to be calculated again - even though it is a fast calculation.
 
     auto ftr =
-        std::async([&] { return std::make_shared<NFmiCoordinateMatrix>(get_world_xy(theQ)); })
+        std::async([&] { return std::make_shared<Fmi::CoordinateMatrix>(get_world_xy(theQ)); })
             .share();
     itsCoordinateCache.insert(qhash, ftr);
     auto worldxy = ftr.get();

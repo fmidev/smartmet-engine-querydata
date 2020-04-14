@@ -1523,7 +1523,7 @@ NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
  */
 // ----------------------------------------------------------------------
 
-NFmiDataMatrix<float> QImpl::values(const NFmiCoordinateMatrix &theLatlonMatrix,
+NFmiDataMatrix<float> QImpl::values(const Fmi::CoordinateMatrix &theLatlonMatrix,
                                     const NFmiMetTime &theTime,
                                     float P,
                                     float H)

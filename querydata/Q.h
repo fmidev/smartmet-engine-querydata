@@ -21,7 +21,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
-#include <newbase/NFmiCoordinateMatrix.h>
+#include <gis/CoordinateMatrix.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/Thread.h>
 #include <spine/TimeSeries.h>
@@ -103,7 +103,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   const Fmi::SpatialReference& SpatialReference() const { return itsInfo->SpatialReference(); }
 
-  NFmiCoordinateMatrix CoordinateMatrix() const { return itsInfo->CoordinateMatrix(); }
+  Fmi::CoordinateMatrix CoordinateMatrix() const { return itsInfo->CoordinateMatrix(); }
 
   FmiParameterName parameterName() const;  // Param().GetParamIdent()
 
@@ -175,7 +175,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                                const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
 
   // For arbitrary coordinates:
-  NFmiDataMatrix<float> values(const NFmiCoordinateMatrix& theLatlonMatrix,
+  NFmiDataMatrix<float> values(const Fmi::CoordinateMatrix& theLatlonMatrix,
                                const NFmiMetTime& theTime,
                                float P = kFloatMissing,
                                float H = kFloatMissing);
