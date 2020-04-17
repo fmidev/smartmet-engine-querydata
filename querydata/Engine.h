@@ -142,6 +142,7 @@ class Engine : public Spine::SmartMetEngine
   // get producer's configuration
   const ProducerConfig& getProducerConfig(const std::string& producer) const;
 
+  CoordinatesPtr getWorldCoordinates(const Q& theQ) const;
   CoordinatesPtr getWorldCoordinates(const Q& theQ, const Fmi::SpatialReference& theSR) const;
 
   ValuesPtr getValues(const Q& theQ,

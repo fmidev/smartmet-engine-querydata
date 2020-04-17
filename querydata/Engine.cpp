@@ -748,15 +748,6 @@ std::size_t hash_value(const Fmi::SpatialReference& theSR)
   }
 }
 
-// TODO: Do we really need this anymore? Creating a CoordinateMatrix is quite fast
-Fmi::CoordinateMatrix get_world_xy(const Q& theQ)
-{
-  if (!theQ->isGrid())
-    throw Spine::Exception(BCP, "Trying to contour non-gridded data");
-
-  return theQ->CoordinateMatrix();
-}
-
 // ----------------------------------------------------------------------
 /*!
  * \brief Mark the given coordinate cell as bad
@@ -860,46 +851,31 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const Fmi::SpatialRefe
     // Hash value of projected coordinates
     auto projhash = qhash;
 
-    if (theSR != nullptr)
-    {
-      // Return original world XY directly with get_world_xy if spatial
-      // references match This is absolutely necessary to avoid gaps in
-      // WMS tiles since with proj(invproj(p)) may differ significantly
-      // from p outside the valid area of the projection.
+    // Return original world XY directly with get_world_xy if spatial
+    // references match This is absolutely necessary to avoid gaps in
+    // WMS tiles since with proj(invproj(p)) may differ significantly
+    // from p outside the valid area of the projection.
 
-      auto datawkt = theQ->info()->Area()->WKT();
-      auto reqwkt = Fmi::OGR::exportToWkt(*theSR);
+    auto datawkt = theQ->info()->Area()->WKT();
+    auto reqwkt = Fmi::OGR::exportToWkt(theSR);
 
-      if (datawkt != reqwkt)
-        boost::hash_combine(projhash, hash_value(*theSR));
-    }
+    if (datawkt != reqwkt)
+      boost::hash_combine(projhash, hash_value(*theSR));
 
-    // Search cache for the projected coordinates or WorldXY coordinates
+    if (qhash == projhash)
+      return getWorldCoordinates(theQ);
+
+    // Search cache for the projected coordinates
     auto cached_coords = itsCoordinateCache.find(projhash);
     if (cached_coords)
       return cached_coords->get();
 
-    // Now we need to to get WorldXY coordinates. We cache the result so that it does not
-    // have to be calculated again - even though it is a fast calculation.
-
-    auto ftr =
-        std::async([&] { return std::make_shared<Fmi::CoordinateMatrix>(get_world_xy(theQ)); })
-            .share();
-    itsCoordinateCache.insert(qhash, ftr);
-    auto worldxy = ftr.get();
-
-    // Return WorldXY if so requested
-
-    if (qhash == projhash)
-      return worldxy;
+    // Now we need to to get WorldXY coordinates - this is fast
+    auto worldxy = getWorldCoordinates(theQ);
 
     // Project to target SR. Do NOT use intermediate latlons in any datum, or the Z value will not
     // be included in all stages of the projection, and large errors will occur if the datums
     // differ significantly (e.g. sphere vs ellipsoid)
-
-    // g++ 4.8.5 does not allow get to be called inside the lambda below, had to place it here
-
-    // Project the coordinates
 
     auto ftr2 = std::async([&] { return project_coordinates(worldxy, theQ, theSR); }).share();
 
@@ -910,6 +886,11 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const Fmi::SpatialRefe
   {
     throw Spine::Exception::Trace(BCP, "Operation failed!");
   }
+}
+
+CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ) const
+{
+  return std::make_shared<Fmi::CoordinateMatrix>(theQ->CoordinateMatrix());
 }
 
 // ----------------------------------------------------------------------
