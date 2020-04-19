@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.4.14
+Version: 20.4.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -13,30 +13,29 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: rpm-build
 BuildRequires: gcc-c++
 BuildRequires: make
-BuildRequires: boost-devel
+BuildRequires: boost169-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 20.3.9
-BuildRequires: smartmet-library-newbase-devel >= 20.4.12
-BuildRequires: smartmet-library-macgyver-devel >= 20.3.5
-BuildRequires: smartmet-library-gis-devel >= 20.4.12
+BuildRequires: smartmet-library-gis-devel >= 20.4.18
+BuildRequires: smartmet-library-spine-devel >= 20.4.18
+BuildRequires: smartmet-library-newbase-devel >= 20.4.18
+BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
 BuildRequires: gdal30-devel
 BuildRequires: bzip2-devel
 Requires: gdal30-libs
-Requires: boost-filesystem
-Requires: boost-date-time
-Requires: boost-iostreams
-Requires: boost-thread
-Requires: boost-serialization
-Requires: boost-system
-Requires: smartmet-library-newbase >= 20.4.12
-Requires: smartmet-library-macgyver >= 20.3.5
-Requires: smartmet-library-gis >= 20.4.12
+Requires: boost169-filesystem
+Requires: boost169-date-time
+Requires: boost169-iostreams
+Requires: boost169-thread
+Requires: boost169-serialization
+Requires: boost169-system
+Requires: smartmet-library-newbase >= 20.4.18
+Requires: smartmet-library-macgyver >= 20.4.18
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 20.3.9
+Requires: smartmet-library-spine >= 20.4.18
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -76,6 +75,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
+- Upgraded to Boost 1.69
+
 * Tue Apr 14 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.14-1.fmi
 - Use Fmi::CoordinateMatrix instead of NFmiCoordinateMatrix
 

@@ -32,6 +32,13 @@ DEFINES = -DUNIX -DWGS84 -D_REENTRANT
 GCC_DIAG_COLOR ?= always
 CXX_STD ?= c++11
 
+# Boost 1.69
+
+ifneq "$(wildcard /usr/include/boost169)" ""
+  INCLUDES += -I/usr/include/boost169
+  LIBS += -L/usr/lib64/boost169
+endif
+
 ifeq ($(CXX), clang++)
 
  FLAGS = \
@@ -48,31 +55,29 @@ ifeq ($(CXX), clang++)
 	-Wno-unused-macros \
 	-Wno-documentation-unknown-command
 
- INCLUDES = \
+ INCLUDES += \
 	-isystem $(includedir) \
 	-isystem $(includedir)/smartmet \
 	-isystem $(PREFIX)/gdal30/include
 
 else
 
- FLAGS = -std=$(CXX_STD) -fPIC -MD -Wall -W -Wno-unused-parameter -fno-omit-frame-pointer -fdiagnostics-color=$(GCC_DIAG_COLOR) -Wnon-virtual-dtor
+ FLAGS = -std=$(CXX_STD) -fPIC -MD -Wall -W -Wno-unused-parameter -fno-omit-frame-pointer -fdiagnostics-color=$(GCC_DIAG_COLOR)
 
  FLAGS_DEBUG = \
 	-Wcast-align \
 	-Winline \
 	-Wno-multichar \
 	-Wno-pmf-conversions \
-	-Woverloaded-virtual  \
 	-Wpointer-arith \
 	-Wcast-qual \
-	-Wredundant-decls \
 	-Wwrite-strings \
 	-Wsign-promo \
 	-Wno-deprecated-declarations
 
  FLAGS_RELEASE = -Wuninitialized
 
- INCLUDES = \
+ INCLUDES += \
 	-I$(includedir) \
 	-I$(includedir)/smartmet \
 	-I$(PREFIX)/gdal30/include
@@ -97,7 +102,7 @@ else
   override CFLAGS += $(CFLAGS_RELEASE)
 endif
 
-LIBS = -L$(libdir) \
+LIBS += -L$(libdir) \
 	-lsmartmet-spine \
 	-lsmartmet-gis \
 	-lsmartmet-macgyver \
