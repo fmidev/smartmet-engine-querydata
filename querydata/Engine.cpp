@@ -46,7 +46,7 @@ ParameterTranslations read_translations(const std::string& configfile)
     // Establish default language
 
     std::string language;
-    if (config.lookupValue("default", language))
+    if (config.lookupValue("language", language))
       translations.setDefaultLanguage(language);
 
     // Read all parameter translations. We assume JSON encoded strings to avoid config file
