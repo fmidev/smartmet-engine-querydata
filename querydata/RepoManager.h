@@ -7,11 +7,11 @@
 #pragma once
 
 #include "Repository.h"
+#include <boost/atomic.hpp>
 #include <boost/thread.hpp>
 #include <macgyver/Cache.h>
 #include <macgyver/DirectoryMonitor.h>
 #include <spine/Thread.h>
-#include <boost/atomic.hpp>
 #include <memory>
 
 namespace SmartMet

@@ -15,6 +15,7 @@
 #include "MetaData.h"
 #include "Model.h"
 #include "ParameterOptions.h"
+#include "ParameterTranslations.h"
 #include "ValidTimeList.h"
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -298,6 +299,11 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   bool needsWraparound() const;
 
+  void setParameterTranslations(boost::shared_ptr<ParameterTranslations> translations)
+  {
+    itsParameterTranslations = translations;
+  }
+
  private:
   QImpl();
 
@@ -317,6 +323,8 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   Spine::MutexType itsWGS84EnvelopeMutex;
   WGS84Envelope::Unique itsWGS84Envelope;
+
+  boost::shared_ptr<ParameterTranslations> itsParameterTranslations;
 
 };  // class QImpl
 

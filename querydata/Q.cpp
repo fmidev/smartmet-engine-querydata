@@ -2274,7 +2274,8 @@ ts::Value WeatherSymbol(QImpl &q,
 ts::Value WeatherText(QImpl &q,
                       const Spine::Location &loc,
                       const boost::local_time::local_date_time &ldt,
-                      const std::string &lang)
+                      const std::string &lang,
+                      const ParameterTranslations &translations)
 {
   try
   {
@@ -2286,250 +2287,11 @@ ts::Value WeatherText(QImpl &q,
     if (w == kFloatMissing)
       return Spine::TimeSeries::None();
 
-    // Source: /smartdev/www/wap.weatherproof.fi/sms/funcs.php
-    if (lang == "en")
-    {
-      switch (boost::numeric_cast<int>(w))
-      {
-        case 1:
-          return "sunny";
-        case 2:
-          return "partly cloudy";
-        case 3:
-          return "cloudy";
-        case 21:
-          return "light showers";
-        case 22:
-          return "showers";
-        case 23:
-          return "heavy showers";
-        case 31:
-          return "light rain";
-        case 32:
-          return "rain";
-        case 33:
-          return "heavy rain";
-        case 41:
-          return "light snow showers";
-        case 42:
-          return "snow showers";
-        case 43:
-          return "heavy snow showers";
-        case 51:
-          return "light snowfall";
-        case 52:
-          return "snowfall";
-        case 53:
-          return "heavy snowfall";
-        case 61:
-          return "thundershowers";
-        case 62:
-          return "heavy thundershowers";
-        case 63:
-          return "thunder";
-        case 64:
-          return "heavy thunder";
-        case 71:
-          return "light sleet showers";
-        case 72:
-          return "sleet showers";
-        case 73:
-          return "heavy sleet showers";
-        case 81:
-          return "light sleet rain";
-        case 82:
-          return "sleet rain";
-        case 83:
-          return "heavy sleet rain";
-        case 91:
-          return "fog";
-        case 92:
-          return "fog";
-      }
-    }
-    else if (lang == "sv")
-    {
-      // From http://sv.ilmatieteenlaitos.fi/vadersymbolerna
-      switch (boost::numeric_cast<int>(w))
-      {
-        case 1:
-          return u8"klart";
-        case 2:
-          return u8"halvklart";
-        case 3:
-          return u8"mulet";
-        case 21:
-          return u8"l\u00e4tta regnskurar";
-        case 22:
-          return u8"regnskurar";
-        case 23:
-          return u8"kraftiga regnskurar";
-        case 31:
-          return u8"l\u00e4tt regn";
-        case 32:
-          return u8"regn";
-        case 33:
-          return u8"rikligt regn";
-        case 41:
-          return u8"l\u00e4tta sn\u00f6byar";
-        case 42:
-          return u8"sn\u00f6byar";
-        case 43:
-          return u8"t\u00e4ta sn\u00f6byar";
-        case 51:
-          return u8"l\u00e4tt sn\u00f6fall";
-        case 52:
-          return u8"sn\u00f6fall";
-        case 53:
-          return u8"ymnigt sn\u00f6fall";
-        case 61:
-          return u8"\00e5skskurar";
-        case 62:
-          return u8"kraftiga \00e5skskurar";
-        case 63:
-          return u8"\00e5ska";
-        case 64:
-          return u8"h\u00e4ftigt \00e5skv\u00e4der";
-        case 71:
-          return u8"l\u00e4tta skurar av sn\u00f6blandat regn";
-        case 72:
-          return u8"skurar av sn\u00f6blandat regn";
-        case 73:
-          return u8"kraftiga skurar av sn\u00f6blandad regn";
-        case 81:
-          return u8"l\u00e4tt sn\u00f6blandat regn";
-        case 82:
-          return u8"sn\u00f6blandat regn";
-        case 83:
-          return u8"kraftigt sn\u00f6blandat regn";
-        case 91:
-          return u8"dis";
-        case 92:
-          return u8"dimma";
-      }
-    }
-    else if (lang == "et")
-    {
-      switch (boost::numeric_cast<int>(w))
-      {
-        case 1:
-          return u8"selge";
-        case 2:
-          return u8"poolpilves";
-        case 3:
-          return u8"pilves";
-        case 21:
-          return u8"kerged vihmahood";
-        case 22:
-          return u8"hoogvihm";
-        case 23:
-          return u8"tugevad vihmahood";
-        case 31:
-          return u8"n\u00f5rk vihmasadu";
-        case 32:
-          return u8"vihmasadu";
-        case 33:
-          return u8"vihmasadu";
-        case 41:
-          return u8"n\u00f5rgad lumehood";
-        case 42:
-          return u8"hooglumi";
-        case 43:
-          return u8"tihedad lumesajuhood";
-        case 51:
-          return u8"n\u00f5rk lumesadu";
-        case 52:
-          return u8"lumesadu";
-        case 53:
-          return u8"tihe lumesadu";
-        case 61:
-          return u8"\u00e4ikesehood";
-        case 62:
-          return u8"tugevad \u00e4ikesehood";
-        case 63:
-          return u8"\u00e4ike";
-        case 64:
-          return u8"tugev \u00e4ike";
-        case 71:
-          return u8"\u00f1\u00f6rgad l\u00f6rtsihood";
-        case 72:
-          return u8"l\u00f6rtsihood";
-        case 73:
-          return u8"tugev l\u00f6rtsihood";
-        case 81:
-          return u8"n\u00f5rk l\u00f6rtsisadu";
-        case 82:
-          return u8"l\u00f6rtsisadu";
-        case 83:
-          return u8"tugev l\u00f6rtsisadu";
-        case 91:
-          return u8"udu";
-        case 92:
-          return u8"uduvinet";
-      }
-    }
-    else
-    {
-      switch (boost::numeric_cast<int>(w))
-      {
-        case 1:
-          return u8"selke\u00e4\u00e4";
-        case 2:
-          return u8"puolipilvist\u00e4";
-        case 3:
-          return u8"pilvist\u00e4";
-        case 21:
-          return u8"heikkoja sadekuuroja";
-        case 22:
-          return u8"sadekuuroja";
-        case 23:
-          return u8"voimakkaita sadekuuroja";
-        case 31:
-          return u8"heikkoa vesisadetta";
-        case 32:
-          return u8"vesisadetta";
-        case 33:
-          return u8"voimakasta vesisadetta";
-        case 41:
-          return u8"heikkoja lumikuuroja";
-        case 42:
-          return u8"lumikuuroja";
-        case 43:
-          return u8"voimakkaita lumikuuroja";
-        case 51:
-          return u8"heikkoa lumisadetta";
-        case 52:
-          return u8"lumisadetta";
-        case 53:
-          return u8"voimakasta lumisadetta";
-        case 61:
-          return u8"ukkoskuuroja";
-        case 62:
-          return u8"voimakkaita ukkoskuuroja";
-        case 63:
-          return u8"ukkosta";
-        case 64:
-          return u8"voimakasta ukkosta";
-        case 71:
-          return u8"heikkoja r\u00e4nt\u00e4kuuroja";
-        case 72:
-          return u8"r\u00e4nt\u00e4kuuroja";
-        case 73:
-          return u8"voimakkaita r\u00e4nt\u00e4kuuroja";
-        case 81:
-          return u8"heikkoa r\u00e4nt\u00e4sadetta";
-        case 82:
-          return u8"r\u00e4nt\u00e4sadetta";
-        case 83:
-          return u8"voimakasta r\u00e4nt\u00e4sadetta";
-        case 91:
-          return u8"utua";
-        case 92:
-          return u8"sumua";
-      }
-    }
+    auto ret = translations.getTranslation("WeatherText", static_cast<int>(w), lang);
+    if (!ret)
+      return Spine::TimeSeries::None();
 
-    return Spine::TimeSeries::None();
+    return *ret;
   }
   catch (...)
   {
@@ -3616,7 +3378,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
           retval = ApparentTemperature(*this, loc, ldt);
 
         else if (pname == "weather")
-          retval = WeatherText(*this, loc, ldt, opt.language);
+          retval = WeatherText(*this, loc, ldt, opt.language, *itsParameterTranslations);
 
         else if (pname == "weathersymbol")
           retval = WeatherSymbol(*this, loc, ldt);

@@ -35,7 +35,7 @@ CXX_STD ?= c++11
 # Boost 1.69
 
 ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -I/usr/include/boost169
+  INCLUDES += -isystem /usr/include/boost169
   LIBS += -L/usr/lib64/boost169
 endif
 
@@ -58,7 +58,8 @@ ifeq ($(CXX), clang++)
  INCLUDES += \
 	-isystem $(includedir) \
 	-isystem $(includedir)/smartmet \
-	-isystem $(PREFIX)/gdal30/include
+	-isystem $(PREFIX)/gdal30/include \
+	`pkg-config --cflags jsoncpp`
 
 else
 
@@ -80,7 +81,8 @@ else
  INCLUDES += \
 	-I$(includedir) \
 	-I$(includedir)/smartmet \
-	-I$(PREFIX)/gdal30/include
+	-I$(PREFIX)/gdal30/include \
+	`pkg-config --cflags jsoncpp`
 
 endif
 
@@ -108,6 +110,7 @@ LIBS += -L$(libdir) \
 	-lsmartmet-macgyver \
 	-lsmartmet-newbase \
 	-L$(PREFIX)/gdal30/lib `pkg-config --libs gdal30` \
+	`pkg-config --libs jsoncpp` \
 	-lboost_date_time \
 	-lboost_regex \
 	-lboost_thread \
