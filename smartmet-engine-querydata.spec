@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.4.18
+Version: 20.4.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -23,6 +23,8 @@ BuildRequires: protobuf-devel
 BuildRequires: protobuf
 BuildRequires: gdal-devel
 BuildRequires: bzip2-devel
+BuildRequires: jsoncpp-devel
+Requires: jsoncpp
 Requires: boost169-filesystem
 Requires: boost169-date-time
 Requires: boost169-iostreams
@@ -73,6 +75,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Apr 20 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.20-1.fmi
+- Added reading of parameter translations from the configuration file
+
 * Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
 - Upgraded to Boost 1.69
 

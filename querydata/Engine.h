@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "ParameterTranslations.h"
 #include "Producer.h"
 #include "Repository.h"
 #include "Synchro.h"
@@ -73,6 +74,8 @@ class Engine : public Spine::SmartMetEngine
   mutable ValuesCache itsValuesCache;
 
   int itsActiveThreadCount;
+
+  boost::shared_ptr<ParameterTranslations> itsParameterTranslations;
 
  public:
   // constructor is available only with a libconfig configuration file
