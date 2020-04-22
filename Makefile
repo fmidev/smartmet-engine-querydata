@@ -32,11 +32,18 @@ DEFINES = -DUNIX -DWGS84 -D_REENTRANT
 GCC_DIAG_COLOR ?= always
 CXX_STD ?= c++11
 
-# Boost 1.69
+# Special external dependencies
 
 ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -isystem /usr/include/boost169
+  INCLUDES += -I/usr/include/boost169
   LIBS += -L/usr/lib64/boost169
+endif
+
+ifneq "$(wildcard /usr/gdal30/include)" ""
+  INCLUDES += -I/usr/gdal30/include
+  LIBS += -L/usr/gdal30/lib
+else
+  INCLUDES += -I/usr/include/gdal
 endif
 
 ifeq ($(CXX), clang++)
@@ -58,7 +65,6 @@ ifeq ($(CXX), clang++)
  INCLUDES += \
 	-isystem $(includedir) \
 	-isystem $(includedir)/smartmet \
-	-isystem $(PREFIX)/gdal30/include \
 	`pkg-config --cflags jsoncpp`
 
 else
@@ -81,7 +87,6 @@ else
  INCLUDES += \
 	-I$(includedir) \
 	-I$(includedir)/smartmet \
-	-I$(PREFIX)/gdal30/include \
 	`pkg-config --cflags jsoncpp`
 
 endif
@@ -109,7 +114,7 @@ LIBS += -L$(libdir) \
 	-lsmartmet-gis \
 	-lsmartmet-macgyver \
 	-lsmartmet-newbase \
-	-L$(PREFIX)/gdal30/lib `pkg-config --libs gdal30` \
+	-lgdal \
 	`pkg-config --libs jsoncpp` \
 	-lboost_date_time \
 	-lboost_regex \

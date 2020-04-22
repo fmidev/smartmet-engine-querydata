@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.4.20
+Version: 20.4.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,9 +15,9 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-gis-devel >= 20.4.18
+BuildRequires: smartmet-library-gis-devel >= 20.4.20
 BuildRequires: smartmet-library-spine-devel >= 20.4.18
-BuildRequires: smartmet-library-newbase-devel >= 20.4.18
+BuildRequires: smartmet-library-newbase-devel >= 20.4.20
 BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -33,7 +33,7 @@ Requires: boost169-iostreams
 Requires: boost169-thread
 Requires: boost169-serialization
 Requires: boost169-system
-Requires: smartmet-library-newbase >= 20.4.18
+Requires: smartmet-library-newbase >= 20.4.20
 Requires: smartmet-library-macgyver >= 20.4.18
 Requires: protobuf
 Requires: libconfig >= 1.4.9
@@ -77,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Apr 22 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.22-1.fmi
+- Improved gdal30/geos38 detection
+
 * Mon Apr 20 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.20-1.fmi
 - Added reading of parameter translations from the configuration file
 
