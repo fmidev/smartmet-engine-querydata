@@ -104,7 +104,9 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   const Fmi::SpatialReference& SpatialReference() const { return itsInfo->SpatialReference(); }
 
-  Fmi::CoordinateMatrix CoordinateMatrix() const { return itsInfo->CoordinateMatrix(); }
+  // Using different names to locate uses cases more easily
+  Fmi::CoordinateMatrix CoordinateMatrix() const { return itsInfo->CoordinateMatrix(false); }
+  Fmi::CoordinateMatrix FullCoordinateMatrix() const { return itsInfo->CoordinateMatrix(true); }
 
   FmiParameterName parameterName() const;  // Param().GetParamIdent()
 
@@ -297,7 +299,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   const WGS84Envelope& getWGS84Envelope();
 
-  bool needsWraparound() const;
+  bool needsGlobeWrap() const;
 
   void setParameterTranslations(boost::shared_ptr<ParameterTranslations> translations)
   {

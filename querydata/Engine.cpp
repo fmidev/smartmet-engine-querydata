@@ -991,7 +991,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const Fmi::SpatialRefe
 
 CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ) const
 {
-  return std::make_shared<Fmi::CoordinateMatrix>(theQ->CoordinateMatrix());
+  return std::make_shared<Fmi::CoordinateMatrix>(theQ->FullCoordinateMatrix());
 }
 
 // ----------------------------------------------------------------------
