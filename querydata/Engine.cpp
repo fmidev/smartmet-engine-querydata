@@ -844,7 +844,7 @@ NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
   try
   {
     if (!theQ->isGrid())
-      throw Spine::Exception(BCP, "Trying to contour non-gridded data");
+      throw Spine::Exception(BCP, "Requesting world XY grid cooridnates for non-gridded data");
 
     // For latlon data GridToWorldXY returns metric units even though we want geographic coordinates
     auto id = theQ->area().ClassId();
@@ -877,7 +877,7 @@ NFmiDataMatrix<NFmiPoint> get_latlons(const Q& theQ)
   try
   {
     if (!theQ->isGrid())
-      throw Spine::Exception(BCP, "Trying to contour non-gridded data");
+      throw Spine::Exception(BCP, "Requesting latlon grid cooridnates for non-gridded data");
 
     const auto& grid = theQ->grid();
 
