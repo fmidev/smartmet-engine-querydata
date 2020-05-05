@@ -194,20 +194,18 @@ Q Repository::get(const Producer& producer) const
 
     if (producer_model == itsProducers.end())
     {
-      Spine::Exception ex(BCP,
-                          "Repository get (1): No data available for producer '" + producer + "'!");
-      ex.disableStackTrace();
-      throw ex;
+      throw Spine::Exception(
+          BCP, "Repository get (1): No data available for producer '" + producer + "'!")
+          .disableStackTrace();
     }
 
     const SharedModels& time_model = producer_model->second;
 
     if (time_model.empty())
     {
-      Spine::Exception ex(BCP,
-                          "Repository get (2): No data available for producer '" + producer + "'!");
-      ex.disableStackTrace();
-      throw ex;
+      throw Spine::Exception(
+          BCP, "Repository get (2): No data available for producer '" + producer + "'!")
+          .disableStackTrace();
     }
 
     // newest origintime is at the end
@@ -235,17 +233,17 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
 
     if (producer_model == itsProducers.end())
     {
-      Spine::Exception ex(BCP,
-                          "Repository get (3): No data available for producer '" + producer + "'!");
-      ex.disableStackTrace();
-      throw ex;
+      throw Spine::Exception(
+          BCP, "Repository get (3): No data available for producer '" + producer + "'!")
+          .disableStackTrace();
     }
 
     const SharedModels& models = producer_model->second;
 
     if (models.empty())
       throw Spine::Exception(
-          BCP, "Repository get (4): No data available for producer '" + producer + "'!");
+          BCP, "Repository get (4): No data available for producer '" + producer + "'!")
+          .disableStackTrace();
 
     SharedModels::const_iterator time_model;
     if (origintime.is_pos_infinity())
@@ -279,7 +277,8 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
 
     throw Spine::Exception(BCP,
                            "Repository get: No data available for producer '" + producer +
-                               "' with origintime == " + to_simple_string(origintime));
+                               "' with origintime == " + to_simple_string(origintime))
+        .disableStackTrace();
   }
   catch (...)
   {
@@ -303,20 +302,18 @@ Q Repository::getAll(const Producer& producer) const
 
     if (producer_model == itsProducers.end())
     {
-      Spine::Exception ex(
-          BCP, "Repository getPeriod: No data available for producer '" + producer + "'");
-      ex.disableStackTrace();
-      throw ex;
+      throw Spine::Exception(
+          BCP, "Repository getPeriod: No data available for producer '" + producer + "'")
+          .disableStackTrace();
     }
 
     const SharedModels& models = producer_model->second;
 
     if (models.empty())
     {
-      Spine::Exception ex(
-          BCP, "Repository getPeriod: No data available for producer '" + producer + "'");
-      ex.disableStackTrace();
-      throw ex;
+      throw Spine::Exception(
+          BCP, "Repository getPeriod: No data available for producer '" + producer + "'")
+          .disableStackTrace();
     }
 
     // Construct a vector of datas with similar grids only
@@ -356,14 +353,16 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
     auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw Spine::Exception(
-          BCP, "Repository remove: No data available for producer '" + producer + "'");
+      throw Spine::Exception(BCP,
+                             "Repository remove: No data available for producer '" + producer + "'")
+          .disableStackTrace();
 
     SharedModels& models = producer_model->second;
 
     if (models.empty())
-      throw Spine::Exception(
-          BCP, "Repository remove: No data available for producer '" + producer + "'");
+      throw Spine::Exception(BCP,
+                             "Repository remove: No data available for producer '" + producer + "'")
+          .disableStackTrace();
 
     for (auto time_model = models.begin(), end = models.end(); time_model != end; ++time_model)
     {
@@ -397,8 +396,9 @@ void Repository::resize(const Producer& producer, std::size_t limit)
     auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw Spine::Exception(
-          BCP, "Repository resize: no data available for producer '" + producer + "'");
+      throw Spine::Exception(BCP,
+                             "Repository resize: no data available for producer '" + producer + "'")
+          .disableStackTrace();
 
     SharedModels& models = producer_model->second;
 
