@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.8.13
+Version: 20.8.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,9 +15,9 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-gis-devel >= 20.8.13
+BuildRequires: smartmet-library-gis-devel >= 20.8.17
 BuildRequires: smartmet-library-spine-devel >= 20.7.31
-BuildRequires: smartmet-library-newbase-devel >= 20.8.13
+BuildRequires: smartmet-library-newbase-devel >= 20.8.17
 BuildRequires: smartmet-library-macgyver-devel >= 20.7.31
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -33,7 +33,7 @@ Requires: boost169-iostreams
 Requires: boost169-thread
 Requires: boost169-serialization
 Requires: boost169-system
-Requires: smartmet-library-newbase >= 20.8.13
+Requires: smartmet-library-newbase >= 20.8.17
 Requires: smartmet-library-macgyver >= 20.7.31
 Requires: protobuf
 Requires: libconfig >= 1.4.9
@@ -77,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Aug 17 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.17-1.fmi
+- Repackaged due to OGRCoordinateTransformationFactory API changes
+
 * Thu Aug 13 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.13-1.fmi
 - GIS-library ABI changed
 
