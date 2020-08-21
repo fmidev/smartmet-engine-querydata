@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.5.13
+Version: 20.8.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,9 +15,9 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 20.5.12
-BuildRequires: smartmet-library-newbase-devel >= 20.4.18
-BuildRequires: smartmet-library-macgyver-devel >= 20.4.18
+BuildRequires: smartmet-library-spine-devel >= 20.8.21
+BuildRequires: smartmet-library-newbase-devel >= 20.8.21
+BuildRequires: smartmet-library-macgyver-devel >= 20.8.21
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -31,11 +31,11 @@ Requires: boost169-iostreams
 Requires: boost169-thread
 Requires: boost169-serialization
 Requires: boost169-system
-Requires: smartmet-library-newbase >= 20.4.18
-Requires: smartmet-library-macgyver >= 20.4.18
+Requires: smartmet-library-newbase >= 20.8.21
+Requires: smartmet-library-macgyver >= 20.8.21
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 20.5.12
+Requires: smartmet-library-spine >= 20.8.21
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -75,6 +75,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Aug 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.21-1.fmi
+- Upgrade to fmt 6.2
+
 * Wed May 13 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.5.13-1.fmi
 - Repackaged since Spine Parameter class ABI changed
 
