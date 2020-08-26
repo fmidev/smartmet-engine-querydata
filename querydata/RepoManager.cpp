@@ -139,8 +139,7 @@ RepoManager::RepoManager(const std::string& configfile)
     : itsVerbose(false),
       itsMaxThreadCount(10),  // default if not configured
       itsThreadCount(0),
-      itsShutdownRequested(false),
-      itsLatLonCache(500)  // TODO(mheiskan): hard coded 500 different grids
+      itsShutdownRequested(false)
 {
   boost::system::error_code ec;
 
@@ -598,15 +597,6 @@ void RepoManager::load(Producer producer,
 
         std::cout << msg.str() << std::flush;
       }
-
-      // Update latlon-cache if necessary. In any case make sure model cache is up to date
-
-      auto hash = model->gridHashValue();
-      auto latlons = itsLatLonCache.find(hash);  // cached coordinates, if any
-      if (!latlons)
-        itsLatLonCache.insert(hash, model->makeLatLonCache());  // request latlons and cache them
-      else
-        model->setLatLonCache(*latlons);  // set model cache from our cache
 
       {
         // update structures safely
