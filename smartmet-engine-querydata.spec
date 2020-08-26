@@ -15,9 +15,9 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-gis-devel >= 20.8.24
+BuildRequires: smartmet-library-gis-devel >= 20.8.26
 BuildRequires: smartmet-library-spine-devel >= 20.8.21
-BuildRequires: smartmet-library-newbase-devel >= 20.8.25
+BuildRequires: smartmet-library-newbase-devel >= 20.8.26
 BuildRequires: smartmet-library-macgyver-devel >= 20.8.21
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -33,7 +33,7 @@ Requires: boost169-iostreams
 Requires: boost169-thread
 Requires: boost169-serialization
 Requires: boost169-system
-Requires: smartmet-library-newbase >= 20.8.25
+Requires: smartmet-library-newbase >= 20.8.26
 Requires: smartmet-library-macgyver >= 20.8.21
 Requires: protobuf
 Requires: libconfig >= 1.4.9

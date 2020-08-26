@@ -1666,24 +1666,6 @@ NFmiDataMatrix<float> QImpl::heightValues(const NFmiGrid &theWantedGrid,
   }
 }
 
-// ----------------------------------------------------------------------
-/*!
- * \brief Return the lat lon cache
- */
-// ----------------------------------------------------------------------
-
-boost::shared_ptr<std::vector<NFmiPoint>> QImpl::latLonCache() const
-{
-  try
-  {
-    return itsInfo->RefQueryData()->LatLonCache();
-  }
-  catch (...)
-  {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
 //----------------------------------------------------------------------
 /*!
  * \brief Return status on whether a sub parameter is active
