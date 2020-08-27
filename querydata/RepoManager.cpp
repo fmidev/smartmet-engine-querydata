@@ -137,6 +137,7 @@ RepoManager::~RepoManager()
 
 RepoManager::RepoManager(const std::string& configfile)
     : itsVerbose(false),
+      updateTasks(new Fmi::AsyncTaskGroup),
       itsMaxThreadCount(10),  // default if not configured
       itsThreadCount(0),
       itsShutdownRequested(false),
@@ -206,6 +207,9 @@ RepoManager::RepoManager(const std::string& configfile)
       }
 
       this->configModTime = modtime;
+
+      updateTasks->on_task_error([this](const std::string&) {
+          Spine::Exception::Trace(BCP, "Operation failed").printError();});
     }
     catch (const libconfig::ParseException& e)
     {
@@ -337,11 +341,16 @@ void RepoManager::shutdown()
     std::cout << "  -- Shutdown requested (RepoManager)\n";
     itsMonitor.stop();
 
-    while (itsThreadCount > 0)
-    {
-      std::cout << "    - threads : " << itsThreadCount << "\n";
-      boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+    if (itsMonitorThread.joinable()) {
+        itsMonitorThread.join();
     }
+
+    if (itsExpirationThread.joinable()) {
+        itsExpirationThread.join();
+    }
+
+    updateTasks->stop();
+    updateTasks->wait();
   }
   catch (...)
   {
@@ -495,7 +504,8 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
 	std::cerr << ANSI_FG_GREEN << "Threads: " << itsThreadCount
 			  << " " << filename << ANSI_FG_DEFAULT << std::endl;
 #endif
-    boost::thread thrd(boost::bind(&RepoManager::load, this, producer, additions));
+    updateTasks->handle_finished();
+    updateTasks->add("RepoManager::load", std::bind(&RepoManager::load, this, producer, additions));
   }
   catch (...)
   {
