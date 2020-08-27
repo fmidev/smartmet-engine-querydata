@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.8.26
+Version: 20.8.27
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,9 +15,9 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-gis-devel >= 20.8.26
+BuildRequires: smartmet-library-gis-devel >= 20.8.27
 BuildRequires: smartmet-library-spine-devel >= 20.8.21
-BuildRequires: smartmet-library-newbase-devel >= 20.8.26
+BuildRequires: smartmet-library-newbase-devel >= 20.8.27
 BuildRequires: smartmet-library-macgyver-devel >= 20.8.21
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
@@ -33,7 +33,7 @@ Requires: boost169-iostreams
 Requires: boost169-thread
 Requires: boost169-serialization
 Requires: boost169-system
-Requires: smartmet-library-newbase >= 20.8.26
+Requires: smartmet-library-newbase >= 20.8.27
 Requires: smartmet-library-macgyver >= 20.8.21
 Requires: protobuf
 Requires: libconfig >= 1.4.9
@@ -77,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Aug 27 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.27-1.fmi
+- NFmiGrid API changed
+
 * Wed Aug 26 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.26-1.fmi
 - Repackaged due to NFmiGrid API changes
 
