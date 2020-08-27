@@ -54,7 +54,6 @@ struct RepoManager
   // data members
 
   mutable Spine::MutexType itsMutex;  // mutexes should always be mutable
-  const std::string itsConfigFile;
   libconfig::Config itsConfig;
   bool itsVerbose;
 
