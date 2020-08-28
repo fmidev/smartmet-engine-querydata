@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.8.27
+Version: 20.8.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -77,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Aug 28 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.28-1.fmi
+- Reimplemented fetching full grids of calculated values such as WindChill for better speed and accuracy
+
 * Thu Aug 27 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.27-1.fmi
 - NFmiGrid API changed
 

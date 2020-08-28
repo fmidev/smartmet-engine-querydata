@@ -1392,6 +1392,101 @@ bool QImpl::calcLatlonCachePoints(NFmiQueryInfo &theTargetInfo,
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Matrix calculation of derived values
+ */
+// ----------------------------------------------------------------------
+
+NFmiDataMatrix<float> QImpl::calculatedValues(const Spine::Parameter &theParam,
+                                              const boost::posix_time::ptime &theInterpolatedTime)
+{
+  try
+  {
+    const auto *grid = itsInfo->Grid();
+    if (grid == nullptr)
+      throw Spine::Exception(BCP, "Canno extract grid of values from point data");
+    const auto nx = grid->XNumber();
+    const auto ny = grid->YNumber();
+
+    NFmiDataMatrix<float> ret(nx, ny, kFloatMissing);
+
+    auto pname = boost::algorithm::to_lower_copy(theParam.name(), std::locale::classic());
+
+    // Note: Landscaping has no effect at grid points
+
+    if (pname == "windchill")
+    {
+      if (param(kFmiWindSpeedMS) && param(kFmiTemperature))
+      {
+        auto t2m = values(theInterpolatedTime);
+        param(kFmiWindSpeedMS);
+        auto wspd = values(theInterpolatedTime);
+        for (std::size_t j = 0; j < t2m.NY(); ++j)
+          for (std::size_t i = 0; i < t2m.NX(); ++i)
+            ret[i][j] = FmiWindChill(wspd[i][j], t2m[i][j]);
+      }
+    }
+
+    else if (pname == "summersimmerindex" || pname == "ssi")
+    {
+      if (param(kFmiHumidity) && param(kFmiTemperature))
+      {
+        auto t2m = values(theInterpolatedTime);
+        param(kFmiHumidity);
+        auto rh = values(theInterpolatedTime);
+        for (std::size_t j = 0; j < t2m.NY(); ++j)
+          for (std::size_t i = 0; i < t2m.NX(); ++i)
+            ret[i][j] = FmiSummerSimmerIndex(rh[i][j], t2m[i][j]);
+      }
+    }
+    else if (pname == "feelslike")
+    {
+      if (param(kFmiHumidity) && param(kFmiWindSpeedMS) && param(kFmiTemperature))
+      {
+        auto t2m = values(theInterpolatedTime);
+        param(kFmiHumidity);
+        auto rh = values(theInterpolatedTime);
+        param(kFmiWindSpeedMS);
+        auto wpsd = values(theInterpolatedTime);
+
+        bool has_radiation = param(kFmiRadiationGlobal);
+        if (has_radiation)
+          ret = values(theInterpolatedTime);  // Using ret as temporary storage for radiation
+        for (std::size_t j = 0; j < t2m.NY(); ++j)
+          for (std::size_t i = 0; i < t2m.NX(); ++i)
+            if (has_radiation)
+              ret[i][j] = FmiFeelsLikeTemperature(wpsd[i][j], rh[i][j], t2m[i][j], ret[i][j]);
+      }
+    }
+
+    else if (pname == "apparenttemperature")
+    {
+      if (param(kFmiHumidity) && param(kFmiWindSpeedMS) && param(kFmiTemperature))
+      {
+        auto t2m = values(theInterpolatedTime);
+        param(kFmiHumidity);
+        auto rh = values(theInterpolatedTime);
+        param(kFmiWindSpeedMS);
+        auto wpsd = values(theInterpolatedTime);
+        for (std::size_t j = 0; j < t2m.NY(); ++j)
+          for (std::size_t i = 0; i < t2m.NX(); ++i)
+            ret[i][j] = FmiApparentTemperature(wpsd[i][j], rh[i][j], t2m[i][j]);
+      }
+    }
+
+    else
+      throw Spine::Exception(BCP, "Unable to fetch parameter as a value matrix")
+          .addParameter("parameter", pname);
+
+    return ret;
+  }
+  catch (...)
+  {
+    throw Spine::Exception::Trace(BCP, "Failed to extract calculated values from querydata");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Extract values at grid points
  * \param theDemValues DEM values for landscaping (an empty matrix by default)
  * \param theWaterFlags Water flags for landscaping (an empty matrix by default)
@@ -1468,48 +1563,11 @@ NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
       }
       case Spine::Parameter::Type::DataDerived:
       case Spine::Parameter::Type::DataIndependent:
+      default:
       {
-        const auto nx = grid().XNumber();
-        const auto ny = grid().YNumber();
-        NFmiDataMatrix<float> values(nx, ny, kFloatMissing);
-
-        // Now we need all kinds of extra variables because of the damned API
-
-        NFmiPoint dummy;
-        boost::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
-        boost::local_time::time_zone_ptr utc(new boost::local_time::posix_time_zone("UTC"));
-        boost::local_time::local_date_time localdatetime(theInterpolatedTime, utc);
-
-        auto mylocale = std::locale::classic();
-
-        // we need to modify the coordinate for each point
-        for (std::size_t j = 0; j < ny; j++)
-          for (std::size_t i = 0; i < nx; i++)
-          {
-            auto coord = latLon(j * nx + i);
-            Spine::Location loc(coord.X(), coord.Y());
-            ParameterOptions opts(theParam,
-                                  Producer(),
-                                  loc,
-                                  "",
-                                  "",
-                                  *timeformatter,
-                                  "",
-                                  "",
-                                  mylocale,
-                                  "",
-                                  false,
-                                  NFmiPoint(),
-                                  dummy);
-            auto result = value(opts, localdatetime);
-
-            if (boost::get<double>(&result) != nullptr)
-              values[i][j] = *boost::get<double>(&result);
-          }
-        return values;
+        return calculatedValues(theParam, theInterpolatedTime);
       }
     }
-    return {};  // NOTREACHED
   }
   catch (...)
   {

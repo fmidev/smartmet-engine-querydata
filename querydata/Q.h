@@ -307,6 +307,9 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
  private:
   QImpl();
 
+  NFmiDataMatrix<float> calculatedValues(const Spine::Parameter& theParam,
+                                         const boost::posix_time::ptime& theInterpolatedTime);
+
   Spine::TimeSeries::Value dataIndependentValue(const ParameterOptions& opt,
                                                 const boost::local_time::local_date_time& ldt,
                                                 double levelResult);
