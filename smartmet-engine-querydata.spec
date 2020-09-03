@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.8.21
+Version: 20.9.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -75,6 +75,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Sep  3 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.03-1.fmi
+- Update engine shutdown support
+
 * Fri Aug 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.21-1.fmi
 - Upgrade to fmt 6.2
 
