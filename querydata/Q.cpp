@@ -4215,7 +4215,11 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     char *tmp;
     theCrs.exportToWkt(&tmp);
     boost::hash_combine(hash, tmp);
+#if GDAL_VERSION_MAJOR < 2    
     OGRFree(tmp);
+#else
+    CPLFree(tmp);
+#endif    
 
     auto model = boost::make_shared<Model>(*itsModels[0], data, hash);
     return boost::make_shared<QImpl>(model);

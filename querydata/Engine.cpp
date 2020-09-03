@@ -835,7 +835,11 @@ std::size_t hash_value(const OGRSpatialReference& theSR)
     char* wkt;
     theSR.exportToWkt(&wkt);
     std::string tmp(wkt);
+#if GDAL_VERSION_MAJOR < 2    
     OGRFree(wkt);
+#else
+    CPLFree(wkt);
+#endif    
     boost::hash<std::string> hasher;
     return hasher(tmp);
   }
