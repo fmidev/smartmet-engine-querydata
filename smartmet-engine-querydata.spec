@@ -21,7 +21,6 @@ BuildRequires: smartmet-library-macgyver-devel >= 20.8.21
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
-BuildRequires: gdal-devel
 BuildRequires: bzip2-devel
 BuildRequires: jsoncpp-devel
 Requires: jsoncpp
@@ -36,6 +35,11 @@ Requires: smartmet-library-macgyver >= 20.8.21
 Requires: protobuf
 Requires: libconfig >= 1.4.9
 Requires: smartmet-library-spine >= 20.8.21
+%if 0%{rhel} >= 8
+BuildRequires: gdal30-devel
+%else
+BuildRequires: gdal-devel
+%endif
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1

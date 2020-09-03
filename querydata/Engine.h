@@ -14,7 +14,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <gdal/ogr_spatialref.h>
+#include <ogr_spatialref.h>
 #include <macgyver/Cache.h>
 #include <spine/SmartMetEngine.h>
 #include <future>
