@@ -280,6 +280,12 @@ void Engine::shutdown()
   try
   {
     std::cout << "  -- Shutdown requested (qengine)\n";
+
+    if (configFileWatcher.joinable()) {
+        configFileWatcher.interrupt();
+        configFileWatcher.join();
+    }
+
     auto repomanager = boost::atomic_load(&itsRepoManager);
 
     if (repomanager != nullptr)
