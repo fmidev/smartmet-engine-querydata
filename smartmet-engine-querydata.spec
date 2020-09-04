@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.9.3
+Version: 20.9.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -85,6 +85,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Sep  4 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.4-1.fmi
+- Forward declare OGRSpatialReference in Engine.h to avoid dependency escalation
+
 * Thu Sep  3 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.03-1.fmi
 - Update engine shutdown support
 

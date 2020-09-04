@@ -22,6 +22,7 @@
 #include <chrono>
 #include <exception>
 #include <libconfig.h++>
+#include <ogr_spatialref.h>
 #include <system_error>
 
 namespace SmartMet
@@ -281,9 +282,10 @@ void Engine::shutdown()
   {
     std::cout << "  -- Shutdown requested (qengine)\n";
 
-    if (configFileWatcher.joinable()) {
-        configFileWatcher.interrupt();
-        configFileWatcher.join();
+    if (configFileWatcher.joinable())
+    {
+      configFileWatcher.interrupt();
+      configFileWatcher.join();
     }
 
     auto repomanager = boost::atomic_load(&itsRepoManager);
@@ -835,11 +837,11 @@ std::size_t hash_value(const OGRSpatialReference& theSR)
     char* wkt;
     theSR.exportToWkt(&wkt);
     std::string tmp(wkt);
-#if GDAL_VERSION_MAJOR < 2    
+#if GDAL_VERSION_MAJOR < 2
     OGRFree(wkt);
 #else
     CPLFree(wkt);
-#endif    
+#endif
     boost::hash<std::string> hasher;
     return hasher(tmp);
   }
