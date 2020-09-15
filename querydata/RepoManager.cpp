@@ -124,7 +124,10 @@ RepoManager::~RepoManager()
 {
   itsExpirationThread.interrupt();
   itsMonitorThread.interrupt();
+  itsExpirationThread.join();
+  itsMonitorThread.join();
 }
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Constructor
