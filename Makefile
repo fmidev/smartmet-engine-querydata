@@ -2,51 +2,14 @@ SUBNAME = querydata
 SPEC = smartmet-engine-$(SUBNAME)
 INCDIR = smartmet/engines/$(SUBNAME)
 
-# Installation directories
-
-processor := $(shell uname -p)
-
-ifeq ($(origin PREFIX), undefined)
-  PREFIX = /usr
-else
-  PREFIX = $(PREFIX)
-endif
-
-ifeq ($(processor), x86_64)
-  libdir = $(PREFIX)/lib64
-else
-  libdir = $(PREFIX)/lib
-endif
-
-bindir = $(PREFIX)/bin
-includedir = $(PREFIX)/include
-datadir = $(PREFIX)/share
 enginedir = $(datadir)/smartmet/engines
-objdir = obj
+include common.mk
 
 # Compiler options
 
 DEFINES = -DUNIX -D_REENTRANT
 
--include $(HOME)/.smartmet.mk
-GCC_DIAG_COLOR ?= always
-CXX_STD ?= c++11
-
-# Boost 1.69
-
-ifneq "$(wildcard /usr/include/boost169)" ""
-  INCLUDES += -isystem /usr/include/boost169
-  LIBS += -L/usr/lib64/boost169
-endif
-
-ifneq "$(wildcard /usr/gdal30/include)" ""
-  INCLUDES += -I/usr/gdal30/include
-  LIBS += -L$(PREFIX)/gdal30/lib
-else
-  INCLUDES += -I/usr/include/gdal
-endif
-
-ifeq ($(CXX), clang++)
+ifeq ($(USE_CLANG), yes)
 
  FLAGS = \
 	-std=$(CXX_STD) -fPIC -MD \

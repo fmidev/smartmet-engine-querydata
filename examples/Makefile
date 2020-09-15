@@ -1,6 +1,8 @@
 PROG = $(patsubst %.cpp,%,$(wildcard *Test.cpp))
 
-FLAGS = -std=c++11 -Wall -W -Wno-unused-parameter
+include ../common.mk
+
+FLAGS = -std=$(CXX_STD) -Wall -W -Wno-unused-parameter
 
 EXTRAFLAGS = -Werror -pedantic -Wpointer-arith -Wcast-qual \
 	-Wcast-align -Wwrite-strings -Wconversion -Winline \
@@ -17,7 +19,6 @@ ifeq ($(ASAN), yes)
   FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize-address-use-after-scope
 endif
 
-CC = g++
 CFLAGS = -pipe -DUNIX -O0 -g $(FLAGS)
 
 # Boost 1.69
@@ -58,4 +59,4 @@ test: $(PROG)
 	done
 
 $(PROG) : % : %.cpp ../querydata.so
-	$(CC) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
+	$(CXX) $(CFLAGS) -o $@ $@.cpp $(INCLUDES) $(LIBS)
