@@ -5,10 +5,12 @@
 // ======================================================================
 
 #include "Engine.h"
+
 #include "MetaQueryFilters.h"
 #include "RepoManager.h"
 #include "Repository.h"
 #include "Synchro.h"
+
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -19,6 +21,7 @@
 #include <newbase/NFmiLatLonArea.h>
 #include <spine/Convenience.h>
 #include <spine/Exception.h>
+
 #include <chrono>
 #include <exception>
 #include <libconfig.h++>
@@ -216,7 +219,8 @@ void Engine::configFileWatch()
         while (newfiletime != filetime && !itsShutdownRequested)
         {
           std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
-                           " updated, rereading\n";
+                           " updated, rereading"
+                    << std::endl;
           filetime = newfiletime;
           boost::this_thread::sleep_for(boost::chrono::seconds(3));
           newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
@@ -246,7 +250,8 @@ void Engine::configFileWatch()
             // Update current repomanager
             boost::atomic_store(&itsRepoManager, newrepomanager);
             std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
-                             " update done\n";
+                             " update done"
+                      << std::endl;
             lastConfigErrno = 0;
             // Before poll cycling again, wait to avoid constant reload if the file changes many
             // times
@@ -1066,9 +1071,9 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 
       if (datawkt == reqwkt)
       {
-        auto ftr = std::async(std::launch::async,
-                              [&] { return boost::make_shared<Coordinates>(get_world_xy(theQ)); })
-                       .share();
+        auto ftr = std::async(std::launch::async, [&] {
+                     return boost::make_shared<Coordinates>(get_world_xy(theQ));
+                   }).share();
         itsCoordinateCache.insert(projhash, ftr);
         return ftr.get();
       }
@@ -1087,9 +1092,9 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 
     if (!cached_coords)
     {
-      auto ftr = std::async(std::launch::async,
-                            [&] { return boost::make_shared<Coordinates>(get_latlons(theQ)); })
-                     .share();
+      auto ftr = std::async(std::launch::async, [&] {
+                   return boost::make_shared<Coordinates>(get_latlons(theQ));
+                 }).share();
       itsCoordinateCache.insert(qhash, ftr);
       ftr.get();
       cached_coords = itsCoordinateCache.find(qhash);
@@ -1104,9 +1109,9 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* t
 
     // Project the coordinates
 
-    auto ftr =
-        std::async(std::launch::async, [&] { return project_coordinates(coords, theQ, *theSR); })
-            .share();
+    auto ftr = std::async(std::launch::async, [&] {
+                 return project_coordinates(coords, theQ, *theSR);
+               }).share();
 
     itsCoordinateCache.insert(projhash, ftr);
     return ftr.get();
@@ -1140,13 +1145,11 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = std::async(std::launch::async,
-                          [&] {
-                            auto tmp = boost::make_shared<Values>();
-                            theQ->values(*tmp, theTime);
-                            return tmp;
-                          })
-                   .share();
+    auto ftr = std::async(std::launch::async, [&] {
+                 auto tmp = boost::make_shared<Values>();
+                 theQ->values(*tmp, theTime);
+                 return tmp;
+               }).share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);
@@ -1185,13 +1188,11 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = std::async(std::launch::async,
-                          [&] {
-                            auto tmp = boost::make_shared<Values>();
-                            theQ->values(*tmp, theParam, theTime);
-                            return tmp;
-                          })
-                   .share();
+    auto ftr = std::async(std::launch::async, [&] {
+                 auto tmp = boost::make_shared<Values>();
+                 theQ->values(*tmp, theParam, theTime);
+                 return tmp;
+               }).share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);

@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 20.9.15
-Release: 1%{?dist}.fmi
+Release: 3%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -85,7 +85,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
-* Tue Sep 15 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.15-1.fmi
+* Tue Sep 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.15-3.fmi
+- Flush messages on querydata config changes immediately for faster log updates
+
+* Tue Sep 15 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.15-2.fmi
 - Add missing joining threads in RepoManager destructor
 
 * Fri Sep  4 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.4-1.fmi
