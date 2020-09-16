@@ -13,7 +13,6 @@ ifeq ($(USE_CLANG), yes)
 
  FLAGS = \
 	-std=$(CXX_STD) -fPIC -MD \
-	-Weverything \
 	-Wno-c++98-compat \
 	-Wno-padded \
 	-Wno-missing-prototypes \
@@ -26,8 +25,7 @@ ifeq ($(USE_CLANG), yes)
 	-Wno-documentation-unknown-command
 
  INCLUDES += \
-	-isystem $(includedir) \
-	-isystem $(includedir)/smartmet \
+	-I$(includedir)/smartmet \
 	`pkg-config --cflags jsoncpp`
 
 else
@@ -48,7 +46,6 @@ else
  FLAGS_RELEASE = -Wuninitialized
 
  INCLUDES += \
-	-I$(includedir) \
 	-I$(includedir)/smartmet \
 	`pkg-config --cflags jsoncpp`
 
