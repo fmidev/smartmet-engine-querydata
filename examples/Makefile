@@ -37,6 +37,7 @@ LIBS += \
 	../querydata.so \
 	-lsmartmet-spine \
 	-lsmartmet-newbase \
+	-lsmartmet-macgyver \
 	-lsmartmet-gis \
 	`pkg-config --libs libconfig++` \
 	-lboost_date_time \

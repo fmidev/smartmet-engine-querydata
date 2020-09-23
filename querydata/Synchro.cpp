@@ -6,7 +6,7 @@
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 #include <macgyver/StringConversion.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 #include <spine/Reactor.h>
 
 #ifndef BROADCAST_TIMER_DELAY
@@ -59,7 +59,7 @@ void dumpProducerMap(const SmartMet::Engine::Querydata::ProducerMap& map)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 #endif
@@ -77,7 +77,7 @@ void printList(const T& theList)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -109,7 +109,7 @@ std::string makeRandomString(unsigned int length)
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 }  // namespace
@@ -161,7 +161,7 @@ Synchronizer::Synchronizer(SmartMet::Engine::Querydata::Engine* itsParent,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -179,7 +179,7 @@ void Synchronizer::launch(Spine::Reactor* theReactor)
     Spine::WriteLock lock(itsMutex);  // This lock may be unnecessary
     if (!isLaunchable)
     {
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "Unable to launch QEngine synchronization, reason: " + itsConfig.getFailedReason());
     }
     if (!hasLaunched)
@@ -202,7 +202,7 @@ void Synchronizer::launch(Spine::Reactor* theReactor)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -221,7 +221,7 @@ void Synchronizer::shutdown()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -233,7 +233,7 @@ void Synchronizer::shutdownRequestFlagSet()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -245,7 +245,7 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& syn
     if (!hasLaunched)
     {
       // Attempting to get synched data from a node which is not synching
-      throw Spine::Exception(BCP,
+      throw Fmi::Exception(BCP,
                              "Attempted to get synched metadata from a non-synching QEngine node");
     }
     auto it = itsSyncGroups.find(syncGroup);
@@ -255,7 +255,7 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& syn
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -277,7 +277,7 @@ boost::optional<std::vector<bp::ptime> > Synchronizer::getSynchedData(const std:
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -319,7 +319,7 @@ void Synchronizer::send_broadcast()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -405,7 +405,7 @@ void Synchronizer::update_consensus()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -428,7 +428,7 @@ void Synchronizer::fire_timer(const boost::system::error_code& err)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -454,7 +454,7 @@ void Synchronizer::start_receive()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -488,7 +488,7 @@ void Synchronizer::handle_receive(const boost::system::error_code& err,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -535,7 +535,7 @@ void Synchronizer::process_message(const QueryDataMessage& incomingMessage)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -595,7 +595,7 @@ void SyncGroup::update(const ProducerMap& theUpdate)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -612,7 +612,7 @@ bool SynchronizerConfig::parse()
     }
     catch (...)
     {
-      Spine::Exception exception(BCP, "Operation failed!", nullptr);
+      Fmi::Exception exception(BCP, "Operation failed!", nullptr);
       itsFailedReason = exception.what();
       return false;
     }
@@ -625,7 +625,7 @@ bool SynchronizerConfig::parse()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

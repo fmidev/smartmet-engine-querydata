@@ -24,7 +24,7 @@
 #include <newbase/NFmiQueryData.h>
 #include <newbase/NFmiQueryDataUtil.h>
 #include <newbase/NFmiTimeList.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 #include <spine/ParameterFactory.h>
 #include <cassert>
 #include <stdexcept>
@@ -95,13 +95,13 @@ const char *LevelName(FmiLevelType theLevel)
         return "NoLevel";
 #ifndef UNREACHABLE
       default:
-        throw SmartMet::Spine::Exception(BCP, "Internal error in deducing level names");
+        throw Fmi::Exception(BCP, "Internal error in deducing level names");
 #endif
     }
   }
   catch (...)
   {
-    throw SmartMet::Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 }  // namespace
@@ -132,7 +132,7 @@ bool iswater(const Spine::Location &theLocation)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -168,7 +168,7 @@ QImpl::QImpl(SharedModel theModel)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -184,7 +184,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
   try
   {
     if (theModels.empty())
-      throw Spine::Exception(BCP, "Cannot initialize any empty view over multiple models");
+      throw Fmi::Exception(BCP, "Cannot initialize any empty view over multiple models");
 
     for (auto &model : itsModels)
       itsInfos.push_back(model->info());
@@ -214,7 +214,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -361,7 +361,7 @@ MetaData QImpl::metaData()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -393,7 +393,7 @@ const NFmiMetTime &QImpl::originTime() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -416,7 +416,7 @@ boost::posix_time::ptime QImpl::modificationTime() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -439,7 +439,7 @@ boost::posix_time::ptime QImpl::expirationTime() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -468,7 +468,7 @@ const std::string &QImpl::levelName() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -486,7 +486,7 @@ FmiLevelType QImpl::levelType() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -504,7 +504,7 @@ bool QImpl::isClimatology() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -522,7 +522,7 @@ bool QImpl::isFullGrid() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -540,7 +540,7 @@ bool QImpl::isRelativeUV() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -558,7 +558,7 @@ NFmiPoint QImpl::validPoint(const NFmiPoint &theLatLon, double theMaxDist) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -576,7 +576,7 @@ void QImpl::resetTime()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -594,7 +594,7 @@ bool QImpl::firstTime()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -612,7 +612,7 @@ bool QImpl::lastTime()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -630,7 +630,7 @@ bool QImpl::nextTime()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -648,7 +648,7 @@ bool QImpl::previousTime()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -666,7 +666,7 @@ bool QImpl::isTimeUsable() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -684,7 +684,7 @@ const NFmiMetTime &QImpl::validTime() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -702,7 +702,7 @@ bool QImpl::time(const NFmiMetTime &theTime)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -720,7 +720,7 @@ bool QImpl::param(FmiParameterName theParam)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -738,7 +738,7 @@ void QImpl::resetParam()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -756,7 +756,7 @@ bool QImpl::nextParam(bool ignoreSubParams)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -774,7 +774,7 @@ bool QImpl::isArea() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -792,7 +792,7 @@ bool QImpl::isGrid() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -807,12 +807,12 @@ const NFmiArea &QImpl::area() const
   try
   {
     if (itsInfo->Area() == nullptr)
-      throw Spine::Exception(BCP, "Attempt to access unset area in querydata");
+      throw Fmi::Exception(BCP, "Attempt to access unset area in querydata");
     return *itsInfo->Area();
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -827,12 +827,12 @@ const NFmiGrid &QImpl::grid() const
   try
   {
     if (itsInfo->Grid() == nullptr)
-      throw Spine::Exception(BCP, "Attempt to access unset grid in querydata");
+      throw Fmi::Exception(BCP, "Attempt to access unset grid in querydata");
     return *itsInfo->Grid();
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -850,7 +850,7 @@ const NFmiDataIdent &QImpl::param() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -868,7 +868,7 @@ const NFmiLevel &QImpl::level() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -886,7 +886,7 @@ bool QImpl::isInside(double theLon, double theLat, double theMaxDist)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -904,7 +904,7 @@ FmiParameterName QImpl::parameterName() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -924,7 +924,7 @@ float QImpl::interpolate(const NFmiPoint &theLatLon,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -939,7 +939,7 @@ float QImpl::interpolateAtPressure(const NFmiPoint &theLatLon,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -954,7 +954,7 @@ float QImpl::interpolateAtHeight(const NFmiPoint &theLatLon,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -972,7 +972,7 @@ void QImpl::resetLevel()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -990,7 +990,7 @@ bool QImpl::firstLevel()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 // ----------------------------------------------------------------------
@@ -1007,7 +1007,7 @@ bool QImpl::nextLevel()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 // ----------------------------------------------------------------------
@@ -1024,7 +1024,7 @@ float QImpl::levelValue() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1042,7 +1042,7 @@ NFmiPoint QImpl::latLon(long theIndex) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1060,7 +1060,7 @@ double QImpl::infoVersion() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1078,7 +1078,7 @@ unsigned long QImpl::paramIndex() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 // ----------------------------------------------------------------------
@@ -1095,7 +1095,7 @@ bool QImpl::paramIndex(unsigned long theIndex)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 // ----------------------------------------------------------------------
@@ -1112,7 +1112,7 @@ unsigned long QImpl::levelIndex() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 // ----------------------------------------------------------------------
@@ -1129,7 +1129,7 @@ bool QImpl::levelIndex(unsigned long theIndex)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1147,7 +1147,7 @@ unsigned long QImpl::timeIndex() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1165,7 +1165,7 @@ bool QImpl::timeIndex(unsigned long theIndex)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1183,7 +1183,7 @@ unsigned long QImpl::locationIndex() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1201,7 +1201,7 @@ bool QImpl::locationIndex(unsigned long theIndex)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 // ----------------------------------------------------------------------
@@ -1218,7 +1218,7 @@ bool QImpl::calcTimeCache(NFmiQueryInfo &theTargetInfo, std::vector<NFmiTimeCach
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1236,7 +1236,7 @@ NFmiTimeCache QImpl::calcTimeCache(const NFmiMetTime &theTime)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1254,7 +1254,7 @@ float QImpl::cachedInterpolation(const NFmiTimeCache &theTimeCache)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1272,7 +1272,7 @@ float QImpl::cachedInterpolation(const NFmiLocationCache &theLocationCache)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1291,7 +1291,7 @@ float QImpl::cachedInterpolation(const NFmiLocationCache &theLocationCache,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1314,7 +1314,7 @@ void QImpl::landscapeCachedInterpolation(NFmiDataMatrix<float> &theMatrix,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1333,7 +1333,7 @@ bool QImpl::calcLatlonCachePoints(NFmiQueryInfo &theTargetInfo,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1358,7 +1358,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1385,7 +1385,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1412,7 +1412,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
       case Spine::Parameter::Type::Landscaped:
       {
         if (!param(theParam.number()))
-          throw Spine::Exception(BCP,
+          throw Fmi::Exception(BCP,
                                  "Parameter " + theParam.name() + " is not available in the data");
         return values(theMatrix, theInterpolatedTime, theDEMValues, theWaterFlags);
       }
@@ -1462,7 +1462,7 @@ void QImpl::values(NFmiDataMatrix<float> &theMatrix,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1484,7 +1484,7 @@ void QImpl::values(const NFmiDataMatrix<NFmiPoint> &theLatlonMatrix,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1515,7 +1515,7 @@ void QImpl::croppedValues(NFmiDataMatrix<float> &theMatrix,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1535,7 +1535,7 @@ void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1557,7 +1557,7 @@ void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1574,7 +1574,7 @@ void QImpl::pressureValues(NFmiDataMatrix<float> &theValues,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1595,7 +1595,7 @@ void QImpl::gridValues(NFmiDataMatrix<float> &theValues,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1618,7 +1618,7 @@ void QImpl::heightValues(NFmiDataMatrix<float> &theValues,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1636,7 +1636,7 @@ boost::shared_ptr<std::vector<NFmiPoint>> QImpl::latLonCache() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1654,7 +1654,7 @@ bool QImpl::isSubParamUsed() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 //----------------------------------------------------------------------
@@ -1671,7 +1671,7 @@ void QImpl::setIsSubParamUsed(bool theState)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1695,7 +1695,7 @@ std::string format_date(const boost::local_time::local_date_time &ldt,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1736,7 +1736,7 @@ ts::Value WindUMS(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1777,7 +1777,7 @@ ts::Value WindVMS(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1808,7 +1808,7 @@ ts::Value WindCompass8(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1854,7 +1854,7 @@ ts::Value WindCompass16(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1888,7 +1888,7 @@ ts::Value WindCompass32(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1919,7 +1919,7 @@ ts::Value Cloudiness8th(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1954,7 +1954,7 @@ ts::Value WindChill(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1989,7 +1989,7 @@ ts::Value SummerSimmerIndex(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2037,7 +2037,7 @@ ts::Value FeelsLike(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2080,7 +2080,7 @@ ts::Value ApparentTemperature(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2113,7 +2113,7 @@ ts::Value Snow1hLower(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2144,7 +2144,7 @@ ts::Value Snow1hUpper(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2186,7 +2186,7 @@ ts::Value Snow1h(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2217,7 +2217,7 @@ ts::Value WeatherSymbol(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2251,7 +2251,7 @@ ts::Value WeatherText(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, u8"Operation failed!");
+    throw Fmi::Exception::Trace(BCP, u8"Operation failed!");
   }
 }
 
@@ -2377,7 +2377,7 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2502,7 +2502,7 @@ boost::optional<int> calc_weather_number(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }  // namespace Querydata
 
@@ -2535,7 +2535,7 @@ ts::Value SmartSymbolNumber(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2562,7 +2562,7 @@ ts::Value WeatherNumber(QImpl &q,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2875,11 +2875,11 @@ ts::Value SmartSymbolText(QImpl &q,
           return u8"raekuuroja";
       }
     }
-    throw Spine::Exception(BCP, "Unknown symbol value : " + Fmi::to_string(*symbol));
+    throw Fmi::Exception(BCP, "Unknown symbol value : " + Fmi::to_string(*symbol));
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -2901,7 +2901,7 @@ ts::Value GridNorth(const QImpl &q, const Spine::Location &loc)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -3248,7 +3248,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       pname == "sensor_no" || pname == "stationname")
     return Spine::TimeSeries::None();
 
-  throw Spine::Exception(BCP, "Unknown DataIndependent special function '" + pname + "'!");
+  throw Fmi::Exception(BCP, "Unknown DataIndependent special function '" + pname + "'!");
 }
 
 // ======================================================================
@@ -3374,7 +3374,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
         }
 
         else
-          throw Spine::Exception(BCP, "Unknown DataDerived parameter '" + pname + "'!");
+          throw Fmi::Exception(BCP, "Unknown DataDerived parameter '" + pname + "'!");
 
         break;
       }
@@ -3395,7 +3395,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -3478,7 +3478,7 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -3561,7 +3561,7 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -3582,7 +3582,7 @@ ts::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 ts::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
@@ -3602,7 +3602,7 @@ ts::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 ts::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
@@ -3622,7 +3622,7 @@ ts::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -3678,7 +3678,7 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
@@ -3734,7 +3734,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
@@ -3789,7 +3789,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -3832,7 +3832,7 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
@@ -3872,7 +3872,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
@@ -3911,7 +3911,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -3936,20 +3936,20 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
   try
   {
     if (!isGrid())
-      throw Spine::Exception(BCP, "Can only be used for gridded data!");
+      throw Fmi::Exception(BCP, "Can only be used for gridded data!");
 
     // Resolution must be given with locations
 
     if (theResolution < 0)
-      throw Spine::Exception(BCP, "Resolution must be nonnegative!");
+      throw Fmi::Exception(BCP, "Resolution must be nonnegative!");
 
     if (theResolution < 0.01)
     {
       if (theResolution > 0)
-        throw Spine::Exception(BCP, "Resolutions below 10 meters are not supported!");
+        throw Fmi::Exception(BCP, "Resolutions below 10 meters are not supported!");
 
       if (theLocationCache.NX() > 0)
-        throw Spine::Exception(BCP, "Nonzero resolution must be given with locations!");
+        throw Fmi::Exception(BCP, "Nonzero resolution must be given with locations!");
     }
 
     const NFmiGrid &nativeGrid = grid();
@@ -4003,7 +4003,7 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
     {
       if (!((x1 >= 0) && (x1 < x2) && (y1 >= 0) && (y1 < y2) && (x2 < nativeGridSizeX) &&
             (y2 < nativeGridSizeY)))
-        throw Spine::Exception(BCP, "Cropping is invalid or outside the grid!");
+        throw Fmi::Exception(BCP, "Cropping is invalid or outside the grid!");
 
       if (x2 < (nativeGridSizeX - 1))
         x2++;
@@ -4046,7 +4046,7 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -4070,21 +4070,21 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
   try
   {
     if (!param(theParameter.number()))
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP,
           "Parameter " + theParameter.name() + " is not available for sampling in the querydata");
 
     if (theResolution <= 0)
-      throw Spine::Exception(BCP, "The sampling resolution must be nonnegative");
+      throw Fmi::Exception(BCP, "The sampling resolution must be nonnegative");
 
     if (theResolution < 0.01)
-      throw Spine::Exception(BCP, "Sampling resolutions below 10 meters are not supported");
+      throw Fmi::Exception(BCP, "Sampling resolutions below 10 meters are not supported");
 
     if (!itsInfo->TimeDescriptor().IsInside(theTime))
-      throw Spine::Exception(BCP, "Cannot sample data to a time outside the querydata");
+      throw Fmi::Exception(BCP, "Cannot sample data to a time outside the querydata");
 
     if (!itsInfo->IsGrid())
-      throw Spine::Exception(BCP, "Cannot sample point data to new resolution");
+      throw Fmi::Exception(BCP, "Cannot sample point data to new resolution");
 
     // Establish the new descriptors
 
@@ -4119,7 +4119,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     NFmiFastQueryInfo info(pdesc, tdesc, hdesc, vdesc);
     boost::shared_ptr<NFmiQueryData> data(NFmiQueryDataUtil::CreateEmptyData(info));
     if (data.get() == nullptr)
-      throw Spine::Exception(BCP, "Failed to create querydata by sampling");
+      throw Fmi::Exception(BCP, "Failed to create querydata by sampling");
 
     NFmiFastQueryInfo dstinfo(data.get());
     dstinfo.First();  // sets the only param and time active
@@ -4226,7 +4226,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -4244,7 +4244,7 @@ bool QImpl::selectLevel(double theLevel)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -4314,7 +4314,7 @@ std::size_t hash_value(const QImpl &theQ)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

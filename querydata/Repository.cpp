@@ -13,7 +13,7 @@
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 #include <spine/ParameterFactory.h>
 #include <spine/TableFormatter.h>
 #include <sstream>
@@ -39,7 +39,7 @@ void Repository::add(const ProducerConfig& config)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -65,7 +65,7 @@ void Repository::add(const Producer& producer, SharedModel model)
           itsProducers.insert(Producers::value_type(producer, SharedModels()));
 
       if (!ok)
-        throw Spine::Exception(BCP, "Failed to add new model for producer '" + producer + "'!");
+        throw Fmi::Exception(BCP, "Failed to add new model for producer '" + producer + "'!");
     }
 
     // And insert the model for the producer
@@ -102,7 +102,7 @@ void Repository::add(const Producer& producer, SharedModel model)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -132,7 +132,7 @@ OriginTimes Repository::originTimes(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -165,7 +165,7 @@ bool Repository::hasProducer(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -194,7 +194,7 @@ Q Repository::get(const Producer& producer) const
 
     if (producer_model == itsProducers.end())
     {
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "Repository get (1): No data available for producer '" + producer + "'!")
           .disableStackTrace();
     }
@@ -203,7 +203,7 @@ Q Repository::get(const Producer& producer) const
 
     if (time_model.empty())
     {
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "Repository get (2): No data available for producer '" + producer + "'!")
           .disableStackTrace();
     }
@@ -215,7 +215,7 @@ Q Repository::get(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -233,7 +233,7 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
 
     if (producer_model == itsProducers.end())
     {
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "Repository get (3): No data available for producer '" + producer + "'!")
           .disableStackTrace();
     }
@@ -241,7 +241,7 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
     const SharedModels& models = producer_model->second;
 
     if (models.empty())
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "Repository get (4): No data available for producer '" + producer + "'!")
           .disableStackTrace();
 
@@ -275,14 +275,14 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
 
 #endif
 
-    throw Spine::Exception(BCP,
+    throw Fmi::Exception(BCP,
                            "Repository get: No data available for producer '" + producer +
                                "' with origintime == " + to_simple_string(origintime))
         .disableStackTrace();
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -302,7 +302,7 @@ Q Repository::getAll(const Producer& producer) const
 
     if (producer_model == itsProducers.end())
     {
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "Repository getPeriod: No data available for producer '" + producer + "'")
           .disableStackTrace();
     }
@@ -311,7 +311,7 @@ Q Repository::getAll(const Producer& producer) const
 
     if (models.empty())
     {
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "Repository getPeriod: No data available for producer '" + producer + "'")
           .disableStackTrace();
     }
@@ -336,7 +336,7 @@ Q Repository::getAll(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -353,14 +353,14 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
     auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw Spine::Exception(BCP,
+      throw Fmi::Exception(BCP,
                              "Repository remove: No data available for producer '" + producer + "'")
           .disableStackTrace();
 
     SharedModels& models = producer_model->second;
 
     if (models.empty())
-      throw Spine::Exception(BCP,
+      throw Fmi::Exception(BCP,
                              "Repository remove: No data available for producer '" + producer + "'")
           .disableStackTrace();
 
@@ -379,7 +379,7 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -396,7 +396,7 @@ void Repository::resize(const Producer& producer, std::size_t limit)
     auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw Spine::Exception(BCP,
+      throw Fmi::Exception(BCP,
                              "Repository resize: no data available for producer '" + producer + "'")
           .disableStackTrace();
 
@@ -422,7 +422,7 @@ void Repository::resize(const Producer& producer, std::size_t limit)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -470,7 +470,7 @@ void Repository::expire(const Producer& producer, std::size_t max_age)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Expiring model failed!");
+    throw Fmi::Exception::Trace(BCP, "Expiring model failed!");
   }
 }
 
@@ -494,7 +494,7 @@ bool leveltype_ok(const std::string& modeltype, const std::string& wantedtype)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -529,7 +529,7 @@ bool Repository::contains(const Repository::SharedModels& models,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -600,7 +600,7 @@ Producer Repository::find(const ProducerList& producerlist,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -766,7 +766,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -849,7 +849,7 @@ std::list<MetaData> Repository::getRepoMetadata(const MetaQueryOptions& theOptio
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -874,7 +874,7 @@ std::list<MetaData> Repository::getRepoMetadata(const std::string& producer) con
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -902,7 +902,7 @@ std::list<MetaData> Repository::getRepoMetadata(const std::string& producer,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -927,7 +927,7 @@ std::list<MetaData> Repository::getRepoMetadata() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -959,7 +959,7 @@ Repository::MetaObject Repository::getSynchroInfos() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -986,7 +986,7 @@ SharedModel Repository::getModel(const Producer& producer,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1003,7 +1003,7 @@ Repository::SharedModels Repository::getAllModels(const Producer& producer) cons
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
