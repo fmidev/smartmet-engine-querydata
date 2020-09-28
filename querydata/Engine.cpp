@@ -5,10 +5,12 @@
 // ======================================================================
 
 #include "Engine.h"
+
 #include "MetaQueryFilters.h"
 #include "RepoManager.h"
 #include "Repository.h"
 #include "Synchro.h"
+
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -19,7 +21,8 @@
 #include <json/reader.h>
 #include <macgyver/StringConversion.h>
 #include <spine/Convenience.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
+
 #include <chrono>
 #include <exception>
 #include <libconfig.h++>
@@ -68,14 +71,14 @@ ParameterTranslations read_translations(const std::string& configfile)
     const libconfig::Setting& settings = config.lookup("translations");
 
     if (!settings.isGroup())
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "translations must be a group of parameter name to translations mappings");
 
     for (int i = 0; i < settings.getLength(); i++)
     {
       const auto& param_settings = settings[i];
       if (!param_settings.isList())
-        throw Spine::Exception(BCP,
+        throw Fmi::Exception(BCP,
                                "translations must be lists of groups consisting of parameter value "
                                "and its translations");
 
@@ -86,13 +89,13 @@ ParameterTranslations read_translations(const std::string& configfile)
         const auto& value_translations = param_settings[j];
 
         if (value_translations.isList())
-          throw Spine::Exception(BCP,
+          throw Fmi::Exception(BCP,
                                  "translations for parameter " + param_name +
                                      " must be a list of translations for individual values");
 
         int param_value;
         if (!value_translations.lookupValue("value", param_value))
-          throw Spine::Exception(BCP,
+          throw Fmi::Exception(BCP,
                                  "translation setting for " + param_name + " at position " +
                                      std::to_string(j) +
                                      " has no parameter value to be translated");
@@ -109,7 +112,7 @@ ParameterTranslations read_translations(const std::string& configfile)
           Json::Value json;
           bool ok = jsonreader.parse(text.c_str(), json);
           if (!ok || !json.isString())
-            throw Spine::Exception(BCP, "Failed to parse JSON string '" + text + "'");
+            throw Fmi::Exception(BCP, "Failed to parse JSON string '" + text + "'");
 
           translations.addTranslation(param_name, param_value, lang, json.asString());
         }
@@ -120,7 +123,7 @@ ParameterTranslations read_translations(const std::string& configfile)
   }
   catch (const libconfig::ParseException& e)
   {
-    throw Spine::Exception(BCP,
+    throw Fmi::Exception(BCP,
                            "Qengine configuration " + configfile + " error '" +
                                std::string(e.getError()) + "' on line " +
                                std::to_string(e.getLine()));
@@ -178,7 +181,7 @@ void Engine::init()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -225,7 +228,8 @@ void Engine::configFileWatch()
         while (newfiletime != filetime && !itsShutdownRequested)
         {
           std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
-                           " updated, rereading\n";
+                           " updated, rereading"
+                    << std::endl;
           filetime = newfiletime;
           boost::this_thread::sleep_for(boost::chrono::seconds(3));
           newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
@@ -255,7 +259,8 @@ void Engine::configFileWatch()
             // Update current repomanager
             boost::atomic_store(&itsRepoManager, newrepomanager);
             std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
-                             " update done\n";
+                             " update done"
+                      << std::endl;
             lastConfigErrno = 0;
             // Before poll cycling again, wait to avoid constant reload if the file changes many
             // times
@@ -290,6 +295,13 @@ void Engine::shutdown()
   try
   {
     std::cout << "  -- Shutdown requested (qengine)\n";
+
+    if (configFileWatcher.joinable())
+    {
+      configFileWatcher.interrupt();
+      configFileWatcher.join();
+    }
+
     auto repomanager = boost::atomic_load(&itsRepoManager);
 
     if (repomanager != nullptr)
@@ -300,7 +312,7 @@ void Engine::shutdown()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -318,7 +330,7 @@ void Engine::shutdownRequestFlagSet()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -356,7 +368,7 @@ const ProducerList& Engine::producers() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -377,7 +389,7 @@ bool Engine::hasProducer(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -398,7 +410,7 @@ OriginTimes Engine::origintimes(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -421,7 +433,7 @@ Q Engine::get(const Producer& producer) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -444,7 +456,7 @@ Q Engine::get(const Producer& producer, const boost::posix_time::ptime& originti
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -477,7 +489,7 @@ Producer Engine::find(double lon,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -511,7 +523,7 @@ Producer Engine::find(const ProducerList& producerlist,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -551,7 +563,7 @@ Repository::ContentTable Engine::getEngineContents(const std::string& timeFormat
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -577,7 +589,7 @@ Repository::ContentTable Engine::getEngineContents(const std::string& producer,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -616,7 +628,7 @@ boost::posix_time::time_period Engine::getProducerTimePeriod(const Producer& pro
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -632,7 +644,7 @@ std::list<MetaData> Engine::getEngineMetadata() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -648,7 +660,7 @@ std::list<MetaData> Engine::getEngineMetadata(const MetaQueryOptions& theOptions
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -698,7 +710,7 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup) 
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -747,7 +759,7 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -763,7 +775,7 @@ Repository::MetaObject Engine::getSynchroInfos() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -775,7 +787,7 @@ boost::optional<ProducerMap> Engine::getSyncProducers(const std::string& syncGro
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -787,7 +799,7 @@ void Engine::startSynchronize(Spine::Reactor* theReactor)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -828,7 +840,7 @@ const ProducerConfig& Engine::getProducerConfig(const std::string& producer) con
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -839,13 +851,17 @@ std::size_t hash_value(const Fmi::SpatialReference& theSR)
     char* wkt;
     theSR.get()->exportToWkt(&wkt);
     std::string tmp(wkt);
+#if GDAL_VERSION_MAJOR < 2
+    OGRFree(wkt);
+#else
     CPLFree(wkt);
+#endif
     boost::hash<std::string> hasher;
     return hasher(tmp);
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -878,7 +894,7 @@ void mark_cell_bad(Fmi::CoordinateMatrix& theCoords, const NFmiPoint& theCoord)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -938,7 +954,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -985,7 +1001,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const Fmi::SpatialRefe
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1029,7 +1045,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Failed to retrieve data")
+    throw Fmi::Exception::Trace(BCP, "Failed to retrieve data")
         .addParameter("time", Fmi::to_iso_extended_string(theTime));
   }
 }
@@ -1070,7 +1086,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Failed to retrieve data")
+    throw Fmi::Exception::Trace(BCP, "Failed to retrieve data")
         .addParameter("time", Fmi::to_iso_extended_string(theTime));
   }
 }

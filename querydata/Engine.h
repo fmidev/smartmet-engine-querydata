@@ -22,6 +22,7 @@
 #include <system_error>
 
 class NFmiPoint;
+class OGRSpatialReference;
 
 typedef std::shared_ptr<Fmi::CoordinateMatrix> CoordinatesPtr;
 

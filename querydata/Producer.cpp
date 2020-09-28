@@ -2,7 +2,7 @@
 
 #include "Producer.h"
 #include <macgyver/TimeParser.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 #include <stdexcept>
 
 namespace SmartMet
@@ -23,7 +23,7 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
   try
   {
     if (!setting.isGroup())
-      throw Spine::Exception(BCP, "Producer settings must be stored in groups delimited by {}!");
+      throw Fmi::Exception(BCP, "Producer settings must be stored in groups delimited by {}!");
 
     ProducerConfig pinfo;
     pinfo.producer = producer;
@@ -98,7 +98,7 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
         pinfo.leveltype = static_cast<const char *>(setting[i]);
 
       else
-        throw Spine::Exception(BCP,
+        throw Fmi::Exception(BCP,
                                std::string("QEngine: Unknown producer setting named ")
                                    .append(name)
                                    .append(" for producer ")
@@ -108,28 +108,28 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
     // Sanity checks
 
     if (pinfo.directory.empty())
-      throw Spine::Exception(BCP, "No directory specified for producer " + producer);
+      throw Fmi::Exception(BCP, "No directory specified for producer " + producer);
 
     if (pinfo.pattern_str.empty())
-      throw Spine::Exception(BCP, "No pattern specified for producer " + producer);
+      throw Fmi::Exception(BCP, "No pattern specified for producer " + producer);
 
     if (pinfo.refresh_interval_secs < 1)
-      throw Spine::Exception(BCP, "Refresh interval for producer " + producer + " must be > 0");
+      throw Fmi::Exception(BCP, "Refresh interval for producer " + producer + " must be > 0");
 
     if (pinfo.number_to_keep < 1)
-      throw Spine::Exception(BCP,
+      throw Fmi::Exception(BCP,
                              "Number of files to keep for producer " + producer + " must be > 0");
 
     if (pinfo.number_to_keep >= 1000000)
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "Number of files to keep for producer " + producer + " must be < 1,000,000");
 
     if (pinfo.maxdistance >= 10000)
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "Maximum search radius for producer " + producer + " must be < 10000 km");
 
     if (pinfo.update_interval < 60)
-      throw Spine::Exception(BCP,
+      throw Fmi::Exception(BCP,
                              "Minimum update interval for producer " + producer + " is 60 seconds");
 
     return pinfo;
@@ -139,7 +139,7 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
     std::string nm;
     if (name.length() > 0)
       nm = " element " + name;
-    throw Spine::Exception::Trace(BCP, "Operation failed for producer " + producer + nm);
+    throw Fmi::Exception::Trace(BCP, "Operation failed for producer " + producer + nm);
   }
 }
 

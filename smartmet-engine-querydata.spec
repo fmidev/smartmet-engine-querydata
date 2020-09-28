@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.8.28
+Version: 20.9.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,10 +15,10 @@ BuildRequires: gcc-c++
 BuildRequires: make
 BuildRequires: boost169-devel
 BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-gis-devel >= 20.8.27
-BuildRequires: smartmet-library-spine-devel >= 20.8.21
-BuildRequires: smartmet-library-newbase-devel >= 20.8.27
-BuildRequires: smartmet-library-macgyver-devel >= 20.8.21
+BuildRequires: smartmet-library-gis-devel >= 20.9.25
+BuildRequires: smartmet-library-spine-devel >= 20.9.23
+BuildRequires: smartmet-library-newbase-devel >= 20.9.25
+BuildRequires: smartmet-library-macgyver-devel >= 20.9.18
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -33,11 +33,13 @@ Requires: boost169-iostreams
 Requires: boost169-thread
 Requires: boost169-serialization
 Requires: boost169-system
-Requires: smartmet-library-newbase >= 20.8.27
-Requires: smartmet-library-macgyver >= 20.8.21
+Requires: smartmet-library-newbase >= 20.9.25
+Requires: smartmet-library-macgyver >= 20.9.18
 Requires: protobuf
 Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 20.8.21
+Requires: smartmet-library-spine >= 20.9.23
+BuildRequires: gdal30-devel
+Requires: gdal30-libs
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -77,6 +79,21 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Sep 23 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.23-1.fmi
+- Use Fmi::Exception instead of Spine::Exception
+
+* Tue Sep 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.15-3.fmi
+- Flush messages on querydata config changes immediately for faster log updates
+
+* Tue Sep 15 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.15-2.fmi
+- Add missing joining threads in RepoManager destructor
+
+* Fri Sep  4 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.9.4-1.fmi
+- Forward declare OGRSpatialReference in Engine.h to avoid dependency escalation
+
+* Thu Sep  3 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.3-1.fmi
+- Update engine shutdown support
+
 * Fri Aug 28 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.28-1.fmi
 - Reimplemented fetching full grids of calculated values such as WindChill for better speed and accuracy
 

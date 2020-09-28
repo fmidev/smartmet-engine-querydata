@@ -12,7 +12,7 @@
 #include <newbase/NFmiGeoTools.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 #include <spine/Hash.h>
 
 namespace SmartMet
@@ -56,7 +56,7 @@ Model::Model(const boost::filesystem::path& filename,
   try
   {
     if (!itsQueryData)
-      throw Spine::Exception(
+      throw Fmi::Exception(
           BCP, "Failed to initialize NFmiQueryData object from '" + filename.string() + "'!");
 
     itsOriginTime = itsQueryData->OriginTime();
@@ -104,7 +104,7 @@ Model::Model(const boost::filesystem::path& filename,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -172,7 +172,7 @@ Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -366,7 +366,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -406,7 +406,7 @@ SharedInfo Model::info() const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -419,7 +419,7 @@ void Model::release(boost::shared_ptr<NFmiFastQueryInfo> theInfo) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

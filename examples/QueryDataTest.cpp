@@ -289,10 +289,10 @@ int main(int argc, char* argv[])
   // Testing compiler support for atomic and shared pointers
   // Should output nothing, mainly test compiler and boost compatibility
   {
-    boost::shared_ptr<SmartMet::Spine::Exception> ptr1 =
-        boost::make_shared<SmartMet::Spine::Exception>();
+    boost::shared_ptr<Fmi::Exception> ptr1 =
+        boost::make_shared<Fmi::Exception>();
     //	  tmp.store(ptr1);
-    boost::shared_ptr<SmartMet::Spine::Exception> ptr2;
+    boost::shared_ptr<Fmi::Exception> ptr2;
     boost::atomic_store(&ptr2, ptr1);
     cout << boost::atomic_load(&ptr2)->what() << endl;
   }
@@ -525,7 +525,7 @@ int main(int argc, char* argv[])
               << e.getError() << "'" << std::endl;
     return 1;
   }
-  catch (const SmartMet::Spine::Exception& e)
+  catch (const Fmi::Exception& e)
   {
     cerr << "Stack trace: " << endl << e.getStackTrace();
     return 120;

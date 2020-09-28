@@ -12,7 +12,7 @@
 #include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <spine/Convenience.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 #include <fstream>
 
 namespace SmartMet
@@ -124,7 +124,7 @@ ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, 
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }  // namespace Querydata
 
@@ -144,7 +144,7 @@ bool ValidPoints::isvalid(std::size_t index) const
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 

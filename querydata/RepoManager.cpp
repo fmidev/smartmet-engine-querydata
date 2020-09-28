@@ -41,7 +41,7 @@
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
-#include <spine/Exception.h>
+#include <macgyver/Exception.h>
 #include <cassert>
 #include <set>
 #include <sstream>
@@ -108,7 +108,7 @@ bool lookupHostSetting(const libconfig::Config& theConfig,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Error trying to find setting value")
+    throw Fmi::Exception::Trace(BCP, "Error trying to find setting value")
         .addParameter("variable", theVariable);
   }
 }
@@ -124,7 +124,10 @@ RepoManager::~RepoManager()
 {
   itsExpirationThread.interrupt();
   itsMonitorThread.interrupt();
+  itsExpirationThread.join();
+  itsMonitorThread.join();
 }
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Constructor
@@ -137,6 +140,7 @@ RepoManager::~RepoManager()
 
 RepoManager::RepoManager(const std::string& configfile)
     : itsVerbose(false),
+      updateTasks(new Fmi::AsyncTaskGroup),
       itsMaxThreadCount(10),  // default if not configured
       itsThreadCount(0),
       itsShutdownRequested(false)
@@ -176,12 +180,12 @@ RepoManager::RepoManager(const std::string& configfile)
       // Phase 1: Establish producer setting
 
       if (!itsConfig.exists("producers"))
-        throw Spine::Exception(BCP, "Configuration file must specify the producers");
+        throw Fmi::Exception(BCP, "Configuration file must specify the producers");
 
       const libconfig::Setting& prods = itsConfig.lookup("producers");
 
       if (!prods.isArray())
-        throw Spine::Exception(BCP, "Configured value of 'producers' must be an array");
+        throw Fmi::Exception(BCP, "Configured value of 'producers' must be an array");
 
       // Phase 2: Parse individual producer settings
 
@@ -195,7 +199,7 @@ RepoManager::RepoManager(const std::string& configfile)
         Producer prod = prods[i];
 
         if (!itsConfig.exists(prod))
-          throw Spine::Exception(BCP, "Producer settings for " + prod + " are missing");
+          throw Fmi::Exception(BCP, "Producer settings for " + prod + " are missing");
 
         ProducerConfig pinfo = parse_producerinfo(prod, itsConfig.lookup(prod));
 
@@ -205,22 +209,25 @@ RepoManager::RepoManager(const std::string& configfile)
       }
 
       this->configModTime = modtime;
+
+      updateTasks->on_task_error([this](const std::string&) {
+          Fmi::Exception::Trace(BCP, "Operation failed").printError();});
     }
     catch (const libconfig::ParseException& e)
     {
-      throw Spine::Exception(BCP,
+      throw Fmi::Exception(BCP,
                              "Qengine configuration " + configfile + " error '" +
                                  std::string(e.getError()) + "' on line " +
                                  std::to_string(e.getLine()));
     }
     catch (const libconfig::ConfigException& e)
     {
-      throw Spine::Exception(BCP, configfile + ": " + std::strerror(ec.value()));
+      throw Fmi::Exception(BCP, configfile + ": " + std::strerror(ec.value()));
     }
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -267,7 +274,7 @@ void RepoManager::init()
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -336,15 +343,20 @@ void RepoManager::shutdown()
     std::cout << "  -- Shutdown requested (RepoManager)\n";
     itsMonitor.stop();
 
-    while (itsThreadCount > 0)
-    {
-      std::cout << "    - threads : " << itsThreadCount << "\n";
-      boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+    if (itsMonitorThread.joinable()) {
+        itsMonitorThread.join();
     }
+
+    if (itsExpirationThread.joinable()) {
+        itsExpirationThread.join();
+    }
+
+    updateTasks->stop();
+    updateTasks->wait();
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -371,11 +383,11 @@ Fmi::DirectoryMonitor::Watcher RepoManager::id(const Producer& producer) const
         return it.first;
     }
 
-    throw Spine::Exception(BCP, "Request for unknown producer!");
+    throw Fmi::Exception(BCP, "Request for unknown producer!");
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -401,7 +413,7 @@ void RepoManager::error(Fmi::DirectoryMonitor::Watcher /* id */,
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -494,11 +506,12 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
 	std::cerr << ANSI_FG_GREEN << "Threads: " << itsThreadCount
 			  << " " << filename << ANSI_FG_DEFAULT << std::endl;
 #endif
-    boost::thread thrd(boost::bind(&RepoManager::load, this, producer, additions));
+    updateTasks->handle_finished();
+    updateTasks->add("RepoManager::load", std::bind(&RepoManager::load, this, producer, additions));
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -609,7 +622,7 @@ void RepoManager::load(Producer producer,
     }
     catch (...)
     {
-      Spine::Exception exception(BCP, "QEngine failed to load the file!", nullptr);
+      Fmi::Exception exception(BCP, "QEngine failed to load the file!", nullptr);
       exception.addParameter("File", filename.c_str());
       std::cerr << exception.getStackTrace();
     }
@@ -649,11 +662,11 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
     }
 
     // NOT REACHED
-    throw Spine::Exception(BCP, "Unknown producer config '" + producer + "' requested");
+    throw Fmi::Exception(BCP, "Unknown producer config '" + producer + "' requested");
   }
   catch (...)
   {
-    throw Spine::Exception::Trace(BCP, "Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
