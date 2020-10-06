@@ -54,6 +54,12 @@ ParameterTranslations read_translations(const std::string& configfile)
     ParameterTranslations translations;
 
     libconfig::Config config;
+
+    // Enable sensible relative include paths
+    boost::filesystem::path p = configfile;
+    p.remove_filename();
+    config.setIncludeDir(p.c_str());
+    
     config.readFile(configfile.c_str());
 
     // Establish default language
