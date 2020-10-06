@@ -166,6 +166,12 @@ RepoManager::RepoManager(const std::string& configfile)
       // If config changes between these two calls, we actually have old timestamp
       // To minimize the effects, modification time is recorded before reading. May cause almost
       // immediate reread if config file is changing rapidly
+
+      // Enable sensible relative include paths
+      boost::filesystem::path p = configfile;
+      p.remove_filename();
+      itsConfig.setIncludeDir(p.c_str());
+      
       itsConfig.readFile(configfile.c_str());
 
       // Options
