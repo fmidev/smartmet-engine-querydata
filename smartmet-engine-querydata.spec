@@ -43,6 +43,8 @@ BuildRequires: gdal-devel
 Requires: gdal-libs
 %endif
 #TestRequires: smartmet-library-macgyver-devel >= 20.10.9
+#TestRequires: jsoncpp-devel
+#TestRequires: gdal30-devel
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
