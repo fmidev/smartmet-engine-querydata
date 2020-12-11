@@ -17,7 +17,7 @@ BuildRequires: boost169-devel
 BuildRequires: libconfig >= 1.4.9
 BuildRequires: smartmet-library-spine-devel >= 20.9.23
 BuildRequires: smartmet-library-newbase-devel >= 20.9.29
-BuildRequires: smartmet-library-macgyver-devel >= 20.10.5
+BuildRequires: smartmet-library-macgyver-devel >= 20.10.9
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: protobuf
@@ -31,7 +31,7 @@ Requires: boost169-thread
 Requires: boost169-serialization
 Requires: boost169-system
 Requires: smartmet-library-newbase >= 20.9.29
-Requires: smartmet-library-macgyver >= 20.10.5
+Requires: smartmet-library-macgyver >= 20.10.9
 Requires: protobuf
 Requires: libconfig >= 1.4.9
 Requires: smartmet-library-spine >= 20.9.23
@@ -42,6 +42,9 @@ Requires: gdal30-libs
 BuildRequires: gdal-devel
 Requires: gdal-libs
 %endif
+#TestRequires: smartmet-library-macgyver-devel >= 20.10.9
+#TestRequires: jsoncpp-devel
+#TestRequires: gdal30-devel
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1

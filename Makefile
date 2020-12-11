@@ -2,80 +2,23 @@ SUBNAME = querydata
 SPEC = smartmet-engine-$(SUBNAME)
 INCDIR = smartmet/engines/$(SUBNAME)
 
+REQUIRES = gdal jsoncpp
+
+include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
+
 enginedir = $(datadir)/smartmet/engines
-include common.mk
 
 # Compiler options
 
 DEFINES = -DUNIX -D_REENTRANT
 
-ifeq ($(USE_CLANG), yes)
-
- FLAGS = \
-	-std=$(CXX_STD) -fPIC -MD \
-	-Wno-c++98-compat \
-	-Wno-padded \
-	-Wno-missing-prototypes \
-	-Wno-float-equal \
-	-Wno-sign-conversion \
-	-Wno-missing-variable-declarations \
-	-Wno-global-constructors \
-	-Wno-shorten-64-to-32 \
-	-Wno-unused-macros \
-	-Wno-documentation-unknown-command
-
- INCLUDES += \
-	-I$(includedir)/smartmet \
-	`pkg-config --cflags jsoncpp`
-
-else
-
- FLAGS = -std=$(CXX_STD) -fPIC -MD -Wall -W -Wno-unused-parameter -fno-omit-frame-pointer -fdiagnostics-color=$(GCC_DIAG_COLOR)
-
- FLAGS_DEBUG = \
-	-Wcast-align \
-	-Winline \
-	-Wno-multichar \
-	-Wno-pmf-conversions \
-	-Wpointer-arith \
-	-Wcast-qual \
-	-Wwrite-strings \
-	-Wsign-promo \
-	-Wno-deprecated-declarations
-
- FLAGS_RELEASE = -Wuninitialized
-
- INCLUDES += \
-	-I$(includedir)/smartmet \
-	`pkg-config --cflags jsoncpp`
-
-
-endif
-
-ifeq ($(TSAN), yes)
-  FLAGS += -fsanitize=thread
-endif
-ifeq ($(ASAN), yes)
-  FLAGS += -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize-address-use-after-scope
-endif
-
-# Compile options in detault, debug and profile modes
-
-CFLAGS_RELEASE = $(DEFINES) $(FLAGS) $(FLAGS_RELEASE) -DNDEBUG -O2 -g
-CFLAGS_DEBUG   = $(DEFINES) $(FLAGS) $(FLAGS_DEBUG)   -Werror  -O0 -g
-
-ifneq (,$(findstring debug,$(MAKECMDGOALS)))
-  override CFLAGS += $(CFLAGS_DEBUG)
-else
-  override CFLAGS += $(CFLAGS_RELEASE)
-endif
 
 LIBS += -L$(libdir) \
 	-lsmartmet-spine \
 	-lsmartmet-gis \
 	-lsmartmet-macgyver \
 	-lsmartmet-newbase \
-	`pkg-config --libs jsoncpp` \
+	$(JSONCPP_LIBS) \
 	-lboost_date_time \
 	-lboost_regex \
 	-lboost_thread \
@@ -83,18 +26,13 @@ LIBS += -L$(libdir) \
 	-lboost_iostreams \
 	-lboost_serialization \
 	-lboost_system \
-	-lgdal \
+	$(GDAL_LIBS) \
 	-lprotobuf \
 	-lbz2 -lz
 
 # What to install
 
 LIBFILE = $(SUBNAME).so
-
-# How to install
-
-INSTALL_PROG = install -p -m 775
-INSTALL_DATA = install -p -m 664
 
 # Compilation directories
 
@@ -121,7 +59,12 @@ release: all
 profile: all
 
 $(LIBFILE): $(SRCS) $(OBJS)
-	$(CC) $(LDFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJS) $(LIBS)
+	$(CXX) $(LDFLAGS) -shared -rdynamic -o $(LIBFILE) $(OBJS) $(LIBS)
+	@echo Checking $(LIBFILE) for unresolved references
+	@if ldd -r $(LIBFILE) 2>&1 | c++filt | grep ^undefined\ symbol ; \
+		then rm -v $(LIBFILE); \
+		exit 1; \
+	fi
 
 clean:
 	rm -f $(LIBFILE) $(OBJS) *~ $(SUBNAME)/*~
