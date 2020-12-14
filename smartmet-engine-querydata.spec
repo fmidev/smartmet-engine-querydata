@@ -36,15 +36,16 @@ Requires: protobuf
 Requires: libconfig >= 1.4.9
 Requires: smartmet-library-spine >= 20.9.23
 %if 0%{rhel} >= 8
-BuildRequires: gdal30-devel
-Requires: gdal30-libs
+BuildRequires: gdal32-devel
+Requires: gdal32-libs
+#TestRequires: gdal32-devel
 %else
 BuildRequires: gdal-devel
 Requires: gdal-libs
+#TestRequires: gdal30-devel
 %endif
 #TestRequires: smartmet-library-macgyver-devel >= 20.10.9
 #TestRequires: jsoncpp-devel
-#TestRequires: gdal30-devel
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
