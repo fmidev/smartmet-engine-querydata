@@ -3,49 +3,43 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.10.6
+Version: 20.12.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: rpm-build
-BuildRequires: gcc-c++
-BuildRequires: make
 BuildRequires: boost169-devel
-BuildRequires: libconfig >= 1.4.9
-BuildRequires: smartmet-library-spine-devel >= 20.9.23
-BuildRequires: smartmet-library-newbase-devel >= 20.9.29
-BuildRequires: smartmet-library-macgyver-devel >= 20.10.9
+BuildRequires: bzip2-devel
+BuildRequires: gcc-c++
+BuildRequires: gdal32-devel
+BuildRequires: jsoncpp-devel
+BuildRequires: libconfig >= 1.7.2
+BuildRequires: make
+BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
-BuildRequires: protobuf
-BuildRequires: bzip2-devel
-BuildRequires: jsoncpp-devel
-Requires: jsoncpp
-Requires: boost169-filesystem
+BuildRequires: rpm-build
+BuildRequires: smartmet-library-macgyver-devel >= 20.12.15
+BuildRequires: smartmet-library-newbase-devel >= 20.12.15
+BuildRequires: smartmet-library-spine-devel >= 20.12.15
 Requires: boost169-date-time
+Requires: boost169-filesystem
 Requires: boost169-iostreams
-Requires: boost169-thread
 Requires: boost169-serialization
 Requires: boost169-system
-Requires: smartmet-library-newbase >= 20.9.29
-Requires: smartmet-library-macgyver >= 20.10.9
-Requires: protobuf
-Requires: libconfig >= 1.4.9
-Requires: smartmet-library-spine >= 20.9.23
-%if 0%{rhel} >= 8
-BuildRequires: gdal32-devel
+Requires: boost169-thread
 Requires: gdal32-libs
-#TestRequires: gdal32-devel
-%else
-BuildRequires: gdal-devel
-Requires: gdal-libs
-#TestRequires: gdal30-devel
-%endif
-#TestRequires: smartmet-library-macgyver-devel >= 20.10.9
+Requires: jsoncpp
+Requires: libconfig >= 1.7.2
+Requires: protobuf
+Requires: smartmet-library-macgyver >= 20.12.15
+Requires: smartmet-library-newbase >= 20.12.15
+Requires: smartmet-library-spine >= 20.12.15
+#TestRequires: smartmet-library-macgyver-devel >= 20.12.15
 #TestRequires: jsoncpp-devel
+#TestRequires: gdal32-devel
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1
@@ -57,11 +51,8 @@ SmartMet querydata engine
 Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
-%if 0%{rhel} >= 8
-Requires: gdal30-devel
-%else
-Requires: gdal-devel
-%endif
+Requires: gdal32-devel
+
 Obsoletes: smartmet-brainstorm-qengine-devel < 16.11.1
 %description -n %{SPECNAME}-devel
 SmartMet %{SPECNAME} development headers.
@@ -89,6 +80,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Dec 15 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.12.15-1.fmi
+- Upgrade to pgdg12
+
 * Tue Oct  6 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.10.6-1.fmi
 - Enable sensible relative libconfig include paths
 
