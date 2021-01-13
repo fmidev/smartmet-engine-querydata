@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 20.12.30
+Version: 21.1.13
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -21,9 +21,9 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 20.12.15
-BuildRequires: smartmet-library-newbase-devel >= 20.12.15
-BuildRequires: smartmet-library-spine-devel >= 20.12.30
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.5
+BuildRequires: smartmet-library-newbase-devel >= 21.1.5
+BuildRequires: smartmet-library-spine-devel >= 21.1.5
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -34,10 +34,10 @@ Requires: gdal32-libs
 Requires: jsoncpp >= 1.8.4
 Requires: libconfig >= 1.7.2
 Requires: protobuf
-Requires: smartmet-library-macgyver >= 20.12.15
-Requires: smartmet-library-newbase >= 20.12.15
-Requires: smartmet-library-spine >= 20.12.30
-#TestRequires: smartmet-library-macgyver-devel >= 20.12.15
+Requires: smartmet-library-macgyver >= 21.1.5
+Requires: smartmet-library-newbase >= 21.1.5
+Requires: smartmet-library-spine >= 21.1.5
+#TestRequires: smartmet-library-macgyver-devel >= 21.1.5
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal32-devel
 Provides: %{LIBNAME}
@@ -80,6 +80,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Jan 13 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.13-1.fmi
+- Repackaged with latest dependencies
+
 * Wed Dec 30 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.12.30-1.fmi
 - Rebuild due to jsoncpp upgrade for RHEL7
 
