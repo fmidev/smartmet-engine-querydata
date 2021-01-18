@@ -60,6 +60,7 @@ Model::Model(const boost::filesystem::path& filename,
           BCP, "Failed to initialize NFmiQueryData object from '" + filename.string() + "'!");
 
     itsOriginTime = itsQueryData->OriginTime();
+    itsLoadTime = boost::posix_time::second_clock::universal_time();
 
     // May throw if file is gone
     itsModificationTime =
@@ -185,6 +186,17 @@ Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
 const boost::posix_time::ptime& Model::originTime() const
 {
   return itsOriginTime;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Load time accessor
+ */
+// ----------------------------------------------------------------------
+
+const boost::posix_time::ptime& Model::loadTime() const
+{
+  return itsLoadTime;
 }
 
 // ----------------------------------------------------------------------

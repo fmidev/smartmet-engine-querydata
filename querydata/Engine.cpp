@@ -543,6 +543,60 @@ Producer Engine::find(const ProducerList& producerlist,
 
 // ----------------------------------------------------------------------
 /*!
+ *\ brief Return info of producers as table
+ */
+// ----------------------------------------------------------------------
+
+Repository::ContentTable Engine::getProducerInfo(const std::string& timeFormat, boost::optional<std::string> producer) const
+{
+  try
+  {
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+	
+	ProducerList producerList;
+	if(producer)
+	  producerList.push_back(*producer);
+	
+    return repomanager->itsRepo.getProducerInfo(producer ? producerList : repomanager->itsProducerList, timeFormat);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+
+}
+
+// ----------------------------------------------------------------------
+/*!
+ *\ brief Return info of parameters as table
+ */
+// ----------------------------------------------------------------------
+
+Repository::ContentTable Engine::getParameterInfo(boost::optional<std::string> producer) const
+{
+  try
+  {
+    auto repomanager = boost::atomic_load(&itsRepoManager);
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+
+	ProducerList producerList;
+	if(producer)
+	  producerList.push_back(*producer);
+
+    return repomanager->itsRepo.getParameterInfo(producer ? producerList : repomanager->itsProducerList);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+
+}
+
+// ----------------------------------------------------------------------
+/*!
  *\ brief Return currently mapped files as table
  */
 // ----------------------------------------------------------------------
