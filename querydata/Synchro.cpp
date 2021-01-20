@@ -1,10 +1,9 @@
 #include "Synchro.h"
 #include "Engine.h"
 #include "QueryDataMessage.pb.h"
+#include <random>
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int_distribution.hpp>
 #include <macgyver/StringConversion.h>
 #include <macgyver/Exception.h>
 #include <spine/Reactor.h>
@@ -94,8 +93,8 @@ std::string makeRandomString(unsigned int length)
     static std::string& charset =
         *new std::string("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
     static int setSize = boost::numeric_cast<int>(charset.size());
-    static boost::random::mt19937 generator(boost::numeric_cast<unsigned int>(std::time(nullptr)));
-    static boost::random::uniform_int_distribution<> dist(0, setSize);
+    static std::mt19937 generator(boost::numeric_cast<unsigned int>(std::time(nullptr)));
+    static std::uniform_int_distribution<> dist(0, setSize);
 
     std::string result;
     result.resize(length);
