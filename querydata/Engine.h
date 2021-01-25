@@ -109,7 +109,12 @@ class Engine : public Spine::SmartMetEngine
 
   Q get(const Producer& producer, const OriginTime& origintime) const;
 
-  // get current engine contents
+  // Get detailed info of current producers
+  Repository::ContentTable getProducerInfo(const std::string& timeFormat, boost::optional<std::string> producer) const;
+  // Get info of parameters of each producer
+  Repository::ContentTable getParameterInfo(boost::optional<std::string> producer) const;
+
+  // Get current engine contents
   Repository::ContentTable getEngineContents(const std::string& timeFormat,
                                              const std::string& projectionFormat) const;
   Repository::ContentTable getEngineContents(const std::string& producer,

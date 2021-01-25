@@ -57,6 +57,7 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   friend std::size_t hash_value(const Model& theModel);
 
   const boost::posix_time::ptime& originTime() const;
+  const boost::posix_time::ptime& loadTime() const;
   const boost::posix_time::ptime& modificationTime() const;
   boost::posix_time::ptime expirationTime() const;
 
@@ -91,6 +92,7 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
 
   std::size_t itsHashValue;
   boost::posix_time::ptime itsOriginTime;
+  boost::posix_time::ptime itsLoadTime;
   boost::filesystem::path itsPath;
   boost::posix_time::ptime itsModificationTime;
   Producer itsProducer;

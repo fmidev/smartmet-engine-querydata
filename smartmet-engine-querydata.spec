@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.1.14
+Version: 21.1.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -21,7 +21,7 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.14
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.18
 BuildRequires: smartmet-library-newbase-devel >= 21.1.14
 BuildRequires: smartmet-library-spine-devel >= 21.1.14
 Requires: boost169-date-time
@@ -34,7 +34,7 @@ Requires: gdal32-libs
 Requires: jsoncpp >= 1.8.4
 Requires: libconfig >= 1.7.2
 Requires: protobuf
-Requires: smartmet-library-macgyver >= 21.1.14
+Requires: smartmet-library-macgyver >= 21.1.18
 Requires: smartmet-library-newbase >= 21.1.14
 Requires: smartmet-library-spine >= 21.1.14
 #TestRequires: smartmet-library-macgyver-devel >= 21.1.14
@@ -80,6 +80,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+
+* Mon Jan 18 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.1.18-1.fmi
+- Report more info about producers, data, parameters (BRAINSTORM-1981)
+
 * Thu Jan 14 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.1.14-1.fmi
 - Repackaged smartmet to resolve debuginfo issues
 
