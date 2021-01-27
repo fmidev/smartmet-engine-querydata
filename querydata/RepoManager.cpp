@@ -266,7 +266,7 @@ void RepoManager::init()
                                  boost::bind(&RepoManager::update, this, _1, _2, _3, _4),
                                  boost::bind(&RepoManager::error, this, _1, _2, _3, _4),
                                  pinfo.refresh_interval_secs,
-                                 Fmi::DirectoryMonitor::CREATE | Fmi::DirectoryMonitor::DELETE);
+                                 Fmi::DirectoryMonitor::CREATE | Fmi::DirectoryMonitor::DELETE | Fmi::DirectoryMonitor::SCAN);
 
       // Save the info
 
@@ -449,25 +449,39 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
   try
   {
     const Producer& producer = itsProducerMap.find(id)->second;
-
+	
     // Collect names of files to be unloaded or loaded
 
     Files removals;
     Files additions;
     for (const auto& file_status : *status)
     {
-      if (file_status.second == Fmi::DirectoryMonitor::DELETE ||
+      if (file_status.second == Fmi::DirectoryMonitor::SCAN)
+		{
+		  const ProducerConfig& conf = producerConfig(producer);
+		  auto scan_time = boost::posix_time::second_clock::universal_time();
+		  auto next_scan_time = (scan_time + boost::posix_time::seconds(conf.refresh_interval_secs));
+		  itsRepo.updateProducerStatus(producer, scan_time, next_scan_time);
+		}
+	  
+	  if (file_status.second == Fmi::DirectoryMonitor::DELETE ||
           file_status.second == Fmi::DirectoryMonitor::MODIFY)
-      {
-        removals.push_back(file_status.first);
-      }
-
-      if (file_status.second == Fmi::DirectoryMonitor::CREATE ||
-          file_status.second == Fmi::DirectoryMonitor::MODIFY)
-      {
-        additions.push_back(file_status.first);
-      }
+		{
+		  removals.push_back(file_status.first);
+		}
+	  
+	  if (file_status.second == Fmi::DirectoryMonitor::CREATE ||
+		 file_status.second == Fmi::DirectoryMonitor::MODIFY)
+		{
+		  additions.push_back(file_status.first);
+		}
     }
+
+	if(removals.empty() && additions.empty())
+	  {
+		// Nothing to update
+		return;
+	  }
 
     // Handle deleted files
 
@@ -476,7 +490,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
       // Take the lock only when needed
       Spine::WriteLock lock(itsMutex);
       for (const auto& file : removals)
-        itsRepo.remove(producer, file);
+		itsRepo.remove(producer, file);
     }
 
     // Done if there are no additions
@@ -496,6 +510,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
       if (!ok)
         boost::this_thread::sleep(boost::posix_time::milliseconds(50));
     }
+
 
     // Abort if there is a shut down request
     if (itsShutdownRequested)
@@ -560,6 +575,7 @@ void RepoManager::load(Producer producer,
   const bool try_old_repo = (oldconf && *oldconf == conf);
 
   unsigned int successful_loads = 0;
+  boost::posix_time::ptime data_load_time(boost::posix_time::not_a_date_time);
 
   for (const auto& filename : files)
   {
@@ -606,6 +622,9 @@ void RepoManager::load(Producer producer,
                                           conf.update_interval,
                                           conf.minimum_expires,
                                           conf.mmap);
+
+		data_load_time = boost::posix_time::second_clock::universal_time();
+
       }
 
       if (itsVerbose && load_new_data)
@@ -631,8 +650,10 @@ void RepoManager::load(Producer producer,
       Fmi::Exception exception(BCP, "QEngine failed to load the file!", nullptr);
       exception.addParameter("File", filename.c_str());
       std::cerr << exception.getStackTrace();
-    }
+    }	
   }  // for all files
+
+  itsRepo.updateProducerStatus(producer, data_load_time, itsRepo.getAllModels(producer).size());
 
   --itsThreadCount;
 }
