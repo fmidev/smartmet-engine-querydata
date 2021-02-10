@@ -9,12 +9,13 @@
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <boost/timer/timer.hpp>
-#include <ogr_spatialref.h>
 #include <gis/Box.h>
 #include <gis/DEM.h>
 #include <gis/LandCover.h>
+#include <gis/SpatialReference.h>
 #include <macgyver/Astronomy.h>
 #include <macgyver/CharsetTools.h>
+#include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/TimeFormatter.h>
 #include <macgyver/TimeZoneFactory.h>
@@ -23,11 +24,14 @@
 #include <newbase/NFmiQueryData.h>
 #include <newbase/NFmiQueryDataUtil.h>
 #include <newbase/NFmiTimeList.h>
-#include <macgyver/Exception.h>
 #include <spine/ParameterFactory.h>
 #include <cassert>
 #include <ogr_spatialref.h>
 #include <stdexcept>
+
+#ifndef NEW_NFMIAREA
+#include <newbase/NFmiGdalArea.h>
+#endif
 
 namespace ts = SmartMet::Spine::TimeSeries;
 
@@ -165,6 +169,13 @@ QImpl::QImpl(SharedModel theModel)
     itsValidTimes = theModel->validTimes();
 
     itsHashValue = hash_value(theModel);
+
+#ifndef NEW_NFMIAREA
+    if (itsInfo->Area() == nullptr)
+      itsSpatialReference.reset(new Fmi::SpatialReference("+proj=longlat +R=6371229"));
+    else
+      itsSpatialReference.reset(new Fmi::SpatialReference(itsInfo->Area()->WKT()));
+#endif
   }
   catch (...)
   {
@@ -200,6 +211,13 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
     {
       boost::hash_combine(itsHashValue, model);
     }
+
+#ifndef NEW_NFMIAREA
+    if (itsInfo->Area() == nullptr)
+      itsSpatialReference.reset(new Fmi::SpatialReference("+proj=longlat +R=6371229"));
+    else
+      itsSpatialReference.reset(new Fmi::SpatialReference(itsInfo->Area()->WKT()));
+#endif
 
     // Establish unique valid times
     std::set<boost::posix_time::ptime> uniquetimes;
@@ -834,6 +852,43 @@ NFmiPoint QImpl::latLon() const
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Return the spatial reference
+ */
+// ----------------------------------------------------------------------
+
+const Fmi::SpatialReference &QImpl::SpatialReference() const
+{
+#ifdef NEW_NFMIAREA
+  return itsInfo->SpatialReference();
+#else
+  return *itsSpatialReference;
+#endif
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Return data coordinates
+ */
+// ----------------------------------------------------------------------
+
+Fmi::CoordinateMatrix QImpl::CoordinateMatrix() const
+{
+  return itsInfo->CoordinateMatrix(false);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Return data coordinates with possible wraparound column for global data
+ */
+// ----------------------------------------------------------------------
+
+Fmi::CoordinateMatrix QImpl::FullCoordinateMatrix() const
+{
+  return itsInfo->CoordinateMatrix(true);
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Return true if the data is gridded
  */
 // ----------------------------------------------------------------------
@@ -1363,8 +1418,15 @@ NFmiDataMatrix<float> QImpl::landscapeCachedInterpolation(
 {
   try
   {
+#ifdef NEW_NFMIAREA
     return itsInfo->LandscapeCachedInterpolation(
         theLocationCache, theTimeCache, theDEMValues, theWaterFlags);
+#else
+    NFmiDataMatrix<float> tmp;
+    itsInfo->LandscapeCachedInterpolation(
+        tmp, theLocationCache, theTimeCache, theDEMValues, theWaterFlags);
+    return tmp;
+#endif
   }
   catch (...)
   {
@@ -1499,10 +1561,19 @@ NFmiDataMatrix<float> QImpl::values(const NFmiDataMatrix<float> &theDEMValues,
 {
   try
   {
+#ifdef NEW_NFMIAREA
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeValues(theDEMValues, theWaterFlags);
     else
       return itsInfo->Values();
+#else
+    NFmiDataMatrix<float> tmp;
+    if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
+      itsInfo->LandscapeValues(tmp, theDEMValues, theWaterFlags);
+    else
+      itsInfo->Values(tmp);
+    return tmp;
+#endif
   }
   catch (...)
   {
@@ -1525,10 +1596,19 @@ NFmiDataMatrix<float> QImpl::values(const NFmiMetTime &theInterpolatedTime,
 {
   try
   {
+#ifdef NEW_NFMIAREA
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeValues(theInterpolatedTime, theDEMValues, theWaterFlags);
     else
       return itsInfo->Values(theInterpolatedTime);
+#else
+    NFmiDataMatrix<float> tmp;
+    if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
+      itsInfo->LandscapeValues(tmp, theInterpolatedTime, theDEMValues, theWaterFlags);
+    else
+      itsInfo->Values(tmp, theInterpolatedTime);
+    return tmp;
+#endif
   }
   catch (...)
   {
@@ -1559,7 +1639,7 @@ NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
       {
         if (!param(theParam.number()))
           throw Fmi::Exception(BCP,
-                                 "Parameter " + theParam.name() + " is not available in the data");
+                               "Parameter " + theParam.name() + " is not available in the data");
         return values(theInterpolatedTime, theDEMValues, theWaterFlags);
       }
       case Spine::Parameter::Type::DataDerived:
@@ -1582,6 +1662,7 @@ NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
  */
 // ----------------------------------------------------------------------
 
+#ifdef NEW_NFMIAREA
 NFmiDataMatrix<float> QImpl::values(const Fmi::CoordinateMatrix &theLatlonMatrix,
                                     const NFmiMetTime &theTime,
                                     float P,
@@ -1596,6 +1677,7 @@ NFmiDataMatrix<float> QImpl::values(const Fmi::CoordinateMatrix &theLatlonMatrix
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+#endif
 
 // ----------------------------------------------------------------------
 /*!
@@ -1612,15 +1694,24 @@ NFmiDataMatrix<float> QImpl::croppedValues(
                                                 // (an empty matrix by
                                                 // default)
     const NFmiDataMatrix<bool> &theWaterFlags   // Water flags for landscaping
-    // (an empty matrix by default)
-    ) const
+                                                // (an empty matrix by default)
+) const
 {
   try
   {
+#ifdef NEW_NFMIAREA
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeCroppedValues(x1, y1, x2, y2, theDEMValues, theWaterFlags);
     else
       return itsInfo->CroppedValues(x1, y1, x2, y2);
+#else
+    NFmiDataMatrix<float> tmp;
+    if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
+      itsInfo->LandscapeCroppedValues(tmp, x1, y1, x2, y2, theDEMValues, theWaterFlags);
+    else
+      itsInfo->CroppedValues(tmp, x1, y1, x2, y2);
+    return tmp;
+#endif
   }
   catch (...)
   {
@@ -1639,7 +1730,13 @@ NFmiDataMatrix<float> QImpl::pressureValues(const NFmiMetTime &theInterpolatedTi
 {
   try
   {
+#ifdef NEW_NFMIAREA
     return itsInfo->PressureValues(theInterpolatedTime, wantedPressureLevel);
+#else
+    NFmiDataMatrix<float> tmp;
+    itsInfo->PressureValues(tmp, theInterpolatedTime, wantedPressureLevel);
+    return tmp;
+#endif
   }
   catch (...)
   {
@@ -1659,7 +1756,13 @@ NFmiDataMatrix<float> QImpl::pressureValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
+#ifdef NEW_NFMIAREA
     return itsInfo->PressureValues(theWantedGrid, theInterpolatedTime, wantedPressureLevel);
+#else
+    NFmiDataMatrix<float> tmp;
+    itsInfo->PressureValues(tmp, theWantedGrid, theInterpolatedTime, wantedPressureLevel);
+    return tmp;
+#endif
   }
   catch (...)
   {
@@ -1674,8 +1777,15 @@ NFmiDataMatrix<float> QImpl::pressureValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
+#ifdef NEW_NFMIAREA
     return itsInfo->PressureValues(
         theWantedGrid, theInterpolatedTime, wantedPressureLevel, relative_uv);
+#else
+    NFmiDataMatrix<float> tmp;
+    itsInfo->PressureValues(
+        tmp, theWantedGrid, theInterpolatedTime, wantedPressureLevel, relative_uv);
+    return tmp;
+#endif
   }
   catch (...)
   {
@@ -1695,7 +1805,13 @@ NFmiDataMatrix<float> QImpl::gridValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
+#ifdef NEW_NFMIAREA
     return itsInfo->GridValues(theWantedGrid, theInterpolatedTime, relative_uv);
+#else
+    NFmiDataMatrix<float> tmp;
+    itsInfo->GridValues(tmp, theWantedGrid, theInterpolatedTime, relative_uv);
+    return tmp;
+#endif
   }
   catch (...)
   {
@@ -1716,8 +1832,14 @@ NFmiDataMatrix<float> QImpl::heightValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
+#ifdef NEW_NFMIAREA
     return itsInfo->HeightValues(
         theWantedGrid, theInterpolatedTime, wantedHeightLevel, relative_uv);
+#else
+    NFmiDataMatrix<float> tmp;
+    itsInfo->HeightValues(tmp, theWantedGrid, theInterpolatedTime, wantedHeightLevel, relative_uv);
+    return tmp;
+#endif
   }
   catch (...)
   {
@@ -4185,8 +4307,13 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
     // Establish new projection and the required grid size of the desired resolution
 
+#ifdef NEW_NFMIAREA
     boost::shared_ptr<NFmiArea> newarea(
         NFmiArea::CreateFromBBox(theCrs, NFmiPoint(theXmin, theYmin), NFmiPoint(theXmax, theYmax)));
+#else
+    auto newarea =
+        boost::make_shared<NFmiGdalArea>("FMI", theCrs, theXmin, theYmin, theXmax, theYmax);
+#endif
 
     double datawidth = newarea->WorldXYWidth() / 1000.0;  // view extent in kilometers
     double dataheight = newarea->WorldXYHeight() / 1000.0;
@@ -4302,11 +4429,11 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     char *tmp;
     theCrs.get()->exportToWkt(&tmp);
     boost::hash_combine(hash, tmp);
-#if GDAL_VERSION_MAJOR < 2    
+#if GDAL_VERSION_MAJOR < 2
     OGRFree(tmp);
 #else
     CPLFree(tmp);
-#endif    
+#endif
 
     auto model = boost::make_shared<Model>(*itsModels[0], data, hash);
     return boost::make_shared<QImpl>(model);
