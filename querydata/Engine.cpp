@@ -5,12 +5,10 @@
 // ======================================================================
 
 #include "Engine.h"
-
 #include "MetaQueryFilters.h"
 #include "RepoManager.h"
 #include "Repository.h"
 #include "Synchro.h"
-
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -18,18 +16,17 @@
 #include <fmt/format.h>
 #include <gis/CoordinateTransformation.h>
 #include <gis/OGR.h>
+#include <gis/SpatialReference.h>
 #include <json/reader.h>
+#include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <spine/Convenience.h>
-#include <macgyver/Exception.h>
-
 #include <chrono>
 #include <exception>
+#include <iomanip>
 #include <libconfig.h++>
 #include <ogr_spatialref.h>
 #include <system_error>
-
-#include <iomanip>
 
 namespace
 {
@@ -59,7 +56,7 @@ ParameterTranslations read_translations(const std::string& configfile)
     boost::filesystem::path p = configfile;
     p.remove_filename();
     config.setIncludeDir(p.c_str());
-    
+
     config.readFile(configfile.c_str());
 
     // Establish default language
@@ -85,8 +82,8 @@ ParameterTranslations read_translations(const std::string& configfile)
       const auto& param_settings = settings[i];
       if (!param_settings.isList())
         throw Fmi::Exception(BCP,
-                               "translations must be lists of groups consisting of parameter value "
-                               "and its translations");
+                             "translations must be lists of groups consisting of parameter value "
+                             "and its translations");
 
       std::string param_name = param_settings.getName();
 
@@ -96,15 +93,14 @@ ParameterTranslations read_translations(const std::string& configfile)
 
         if (value_translations.isList())
           throw Fmi::Exception(BCP,
-                                 "translations for parameter " + param_name +
-                                     " must be a list of translations for individual values");
+                               "translations for parameter " + param_name +
+                                   " must be a list of translations for individual values");
 
         int param_value;
         if (!value_translations.lookupValue("value", param_value))
           throw Fmi::Exception(BCP,
-                                 "translation setting for " + param_name + " at position " +
-                                     std::to_string(j) +
-                                     " has no parameter value to be translated");
+                               "translation setting for " + param_name + " at position " +
+                                   std::to_string(j) + " has no parameter value to be translated");
 
         for (int k = 0; k < value_translations.getLength(); k++)
         {
@@ -130,9 +126,9 @@ ParameterTranslations read_translations(const std::string& configfile)
   catch (const libconfig::ParseException& e)
   {
     throw Fmi::Exception(BCP,
-                           "Qengine configuration " + configfile + " error '" +
-                               std::string(e.getError()) + "' on line " +
-                               std::to_string(e.getLine()));
+                         "Qengine configuration " + configfile + " error '" +
+                             std::string(e.getError()) + "' on line " +
+                             std::to_string(e.getLine()));
   }
 }
 
@@ -556,25 +552,26 @@ Producer Engine::find(const ProducerList& producerlist,
  */
 // ----------------------------------------------------------------------
 
-Repository::ContentTable Engine::getProducerInfo(const std::string& timeFormat, boost::optional<std::string> producer) const
+Repository::ContentTable Engine::getProducerInfo(const std::string& timeFormat,
+                                                 boost::optional<std::string> producer) const
 {
   try
   {
     auto repomanager = boost::atomic_load(&itsRepoManager);
 
     Spine::ReadLock lock(repomanager->itsMutex);
-	
-	ProducerList producerList;
-	if(producer)
-	  producerList.push_back(*producer);
-	
-    return repomanager->itsRepo.getProducerInfo(producer ? producerList : repomanager->itsProducerList, timeFormat);
+
+    ProducerList producerList;
+    if (producer)
+      producerList.push_back(*producer);
+
+    return repomanager->itsRepo.getProducerInfo(
+        producer ? producerList : repomanager->itsProducerList, timeFormat);
   }
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-
 }
 
 // ----------------------------------------------------------------------
@@ -591,17 +588,17 @@ Repository::ContentTable Engine::getParameterInfo(boost::optional<std::string> p
 
     Spine::ReadLock lock(repomanager->itsMutex);
 
-	ProducerList producerList;
-	if(producer)
-	  producerList.push_back(*producer);
+    ProducerList producerList;
+    if (producer)
+      producerList.push_back(*producer);
 
-    return repomanager->itsRepo.getParameterInfo(producer ? producerList : repomanager->itsProducerList);
+    return repomanager->itsRepo.getParameterInfo(producer ? producerList
+                                                          : repomanager->itsProducerList);
   }
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-
 }
 
 // ----------------------------------------------------------------------
@@ -972,8 +969,13 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   {
     // Copy the original coordinates for projection
 
+#ifdef NEW_NFMIAREA
     Fmi::CoordinateTransformation transformation(theQ->SpatialReference(), theSR);
+#else
+    Fmi::CoordinateTransformation transformation(theQ->area().WKT(), theSR);
+#endif
     auto coords = std::make_shared<Fmi::CoordinateMatrix>(*theCoords);
+
     coords->transform(transformation);
 
     // If the target SR is geographic, we must discard the grid cells containing
@@ -987,6 +989,9 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     // If the target SR is no geographic, we discard all very elongated cells
     // since they are likely spanning the world
 
+    // TODO: Should probably be removed in favour of the grid analyzer
+
+#if 0    
     if (theSR.isGeographic() != 0)
     {
       auto& c = *coords;
@@ -1009,6 +1014,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
             c.set(i, j, badcoord);
         }
     }
+#endif
 
     return coords;
   }
@@ -1093,9 +1099,9 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = std::async(std::launch::async,
-                          [&] { return std::make_shared<Values>(theQ->values(theTime)); })
-                   .share();
+    auto ftr = std::async(std::launch::async, [&] {
+                 return std::make_shared<Values>(theQ->values(theTime));
+               }).share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);
@@ -1134,9 +1140,9 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = std::async(std::launch::async,
-                          [&] { return std::make_shared<Values>(theQ->values(theParam, theTime)); })
-                   .share();
+    auto ftr = std::async(std::launch::async, [&] {
+                 return std::make_shared<Values>(theQ->values(theParam, theTime));
+               }).share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);

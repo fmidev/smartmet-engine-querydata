@@ -9,11 +9,11 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/tuple/tuple.hpp>
+#include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
-#include <macgyver/Exception.h>
 #include <spine/ParameterFactory.h>
 #include <spine/TableFormatter.h>
 #include <sstream>
@@ -185,9 +185,9 @@ Q Repository::get(const Producer& producer) const
     if (prod_config != itsProducerConfigs.end())
     {
       if (prod_config->second.ismultifile)
-		{
-		  return getAll(producer);
-		}
+      {
+        return getAll(producer);
+      }
     }
 
     // Return the latest model only
@@ -196,8 +196,8 @@ Q Repository::get(const Producer& producer) const
 
     if (producer_model == itsProducers.end())
     {
-      throw Fmi::Exception(
-          BCP, "Repository get (1): No data available for producer '" + producer + "'!")
+      throw Fmi::Exception(BCP,
+                           "Repository get (1): No data available for producer '" + producer + "'!")
           .disableStackTrace();
     }
 
@@ -205,8 +205,8 @@ Q Repository::get(const Producer& producer) const
 
     if (time_model.empty())
     {
-      throw Fmi::Exception(
-          BCP, "Repository get (2): No data available for producer '" + producer + "'!")
+      throw Fmi::Exception(BCP,
+                           "Repository get (2): No data available for producer '" + producer + "'!")
           .disableStackTrace();
     }
 
@@ -235,16 +235,16 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
 
     if (producer_model == itsProducers.end())
     {
-      throw Fmi::Exception(
-          BCP, "Repository get (3): No data available for producer '" + producer + "'!")
+      throw Fmi::Exception(BCP,
+                           "Repository get (3): No data available for producer '" + producer + "'!")
           .disableStackTrace();
     }
 
     const SharedModels& models = producer_model->second;
 
     if (models.empty())
-      throw Fmi::Exception(
-          BCP, "Repository get (4): No data available for producer '" + producer + "'!")
+      throw Fmi::Exception(BCP,
+                           "Repository get (4): No data available for producer '" + producer + "'!")
           .disableStackTrace();
 
     SharedModels::const_iterator time_model;
@@ -278,8 +278,8 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
 #endif
 
     throw Fmi::Exception(BCP,
-                           "Repository get: No data available for producer '" + producer +
-                               "' with origintime == " + to_simple_string(origintime))
+                         "Repository get: No data available for producer '" + producer +
+                             "' with origintime == " + to_simple_string(origintime))
         .disableStackTrace();
   }
   catch (...)
@@ -355,14 +355,14 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
 
     if (producer_model == itsProducers.end())
       throw Fmi::Exception(BCP,
-                             "Repository remove: No data available for producer '" + producer + "'")
+                           "Repository remove: No data available for producer '" + producer + "'")
           .disableStackTrace();
 
     SharedModels& models = producer_model->second;
 
     if (models.empty())
       throw Fmi::Exception(BCP,
-                             "Repository remove: No data available for producer '" + producer + "'")
+                           "Repository remove: No data available for producer '" + producer + "'")
           .disableStackTrace();
 
     for (auto time_model = models.begin(), end = models.end(); time_model != end; ++time_model)
@@ -398,7 +398,7 @@ void Repository::resize(const Producer& producer, std::size_t limit)
 
     if (producer_model == itsProducers.end())
       throw Fmi::Exception(BCP,
-                             "Repository resize: no data available for producer '" + producer + "'")
+                           "Repository resize: no data available for producer '" + producer + "'")
           .disableStackTrace();
 
     SharedModels& models = producer_model->second;
@@ -606,189 +606,208 @@ Producer Repository::find(const ProducerList& producerlist,
 }
 
 Repository::ContentTable Repository::getProducerInfo(const ProducerList& producerlist,
-													 const std::string& timeFormat) const
+                                                     const std::string& timeFormat) const
 {
   try
-	{
-	  boost::shared_ptr<Spine::Table> resultTable(new Spine::Table);
-	  
-	  static Spine::TableFormatter::Names headers{"#","Producer","LastScanTime","NextScanTime","DataLoadTime","NumberOfLoadedFiles","aliases","directory","pattern","forecast","climatology","fullgrid","mmap","type","leveltype","relative_uv","refresh_interval_secs","number_to_keep","update_interval","minimum_expires","max_age","maxdistance"};
-	  
-	  std::unique_ptr<Fmi::TimeFormatter> timeFormatter(Fmi::TimeFormatter::create(timeFormat));
-	  
-	  unsigned int row = 0;
-	  for (const auto& producer : producerlist)
-		{
-		  if (producer.empty() || itsProducerConfigs.find(producer) == itsProducerConfigs.end())
-			continue;
+  {
+    boost::shared_ptr<Spine::Table> resultTable(new Spine::Table);
 
-		  const ProducerConfig thisConfig = itsProducerConfigs.find(producer)->second;
-		  
-		  int column = 0;
-		  
-		  // Row number
-		  resultTable->set(column, row, Fmi::to_string(row+1));
-		  ++column;
-		  
-		  // Producer
-		  resultTable->set(column, row, producer);
-		  ++column;
-		  
-		  if(itsProducerStatus.find(producer) != itsProducerStatus.end())
-			{
-			  const ProducerStatus& status = itsProducerStatus.at(producer);
-			  
-			  // Latest scan time
-			  resultTable->set(column, row, timeFormatter->format(status.latest_scan_time));
-			  ++column;
-			  
-			  // Next scan time
-			  resultTable->set(column, row, timeFormatter->format(status.next_scan_time));
-			  ++column;
-			  			  
-			  // Latest data load time
-			  resultTable->set(column, row, timeFormatter->format(status.latest_data_load_time));
-			  ++column;
-			  
-			  // Number of loaded files
-			  resultTable->set(column, row, Fmi::to_string(status.number_of_loaded_files));
-			  ++column;
-			}
-		  else
-			{
-			  // Latest scan time
-			  resultTable->set(column, row, "");
-			  ++column;
-			  
-			  // Next scan time
-			  resultTable->set(column, row, "");
-			  ++column;
-			  
-			  // Latest data load time
-			  resultTable->set(column, row, "");
-			  ++column;
-			  
-			  // Number of loaded files
-			  resultTable->set(column, row, "");
-			  ++column;
-			}
-		  
-		  // Configuration
-		  resultTable->set(column, row,  boost::algorithm::join(thisConfig.aliases, ", "));
-		  ++column;
-		  resultTable->set(column, row, std::string(thisConfig.directory.c_str()));
-		  ++column;
-		  resultTable->set(column, row, thisConfig.pattern_str);
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.isforecast));
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.isclimatology));
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.isfullgrid));
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.mmap));
-		  ++column;
-		  resultTable->set(column, row, thisConfig.type);
-		  ++column;
-		  resultTable->set(column, row, thisConfig.type);
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.isrelativeuv));
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.refresh_interval_secs));
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.number_to_keep));
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.update_interval));
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.minimum_expires));
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.max_age));
-		  ++column;
-		  resultTable->set(column, row, Fmi::to_string(thisConfig.maxdistance));
-		  
-		  row++;	  
-		}
-	  
-	  return std::make_pair(resultTable, headers);
-	}
+    static Spine::TableFormatter::Names headers{"#",
+                                                "Producer",
+                                                "LastScanTime",
+                                                "NextScanTime",
+                                                "DataLoadTime",
+                                                "NumberOfLoadedFiles",
+                                                "aliases",
+                                                "directory",
+                                                "pattern",
+                                                "forecast",
+                                                "climatology",
+                                                "fullgrid",
+                                                "mmap",
+                                                "type",
+                                                "leveltype",
+                                                "relative_uv",
+                                                "refresh_interval_secs",
+                                                "number_to_keep",
+                                                "update_interval",
+                                                "minimum_expires",
+                                                "max_age",
+                                                "maxdistance"};
+
+    std::unique_ptr<Fmi::TimeFormatter> timeFormatter(Fmi::TimeFormatter::create(timeFormat));
+
+    unsigned int row = 0;
+    for (const auto& producer : producerlist)
+    {
+      if (producer.empty() || itsProducerConfigs.find(producer) == itsProducerConfigs.end())
+        continue;
+
+      const ProducerConfig thisConfig = itsProducerConfigs.find(producer)->second;
+
+      int column = 0;
+
+      // Row number
+      resultTable->set(column, row, Fmi::to_string(row + 1));
+      ++column;
+
+      // Producer
+      resultTable->set(column, row, producer);
+      ++column;
+
+      if (itsProducerStatus.find(producer) != itsProducerStatus.end())
+      {
+        const ProducerStatus& status = itsProducerStatus.at(producer);
+
+        // Latest scan time
+        resultTable->set(column, row, timeFormatter->format(status.latest_scan_time));
+        ++column;
+
+        // Next scan time
+        resultTable->set(column, row, timeFormatter->format(status.next_scan_time));
+        ++column;
+
+        // Latest data load time
+        resultTable->set(column, row, timeFormatter->format(status.latest_data_load_time));
+        ++column;
+
+        // Number of loaded files
+        resultTable->set(column, row, Fmi::to_string(status.number_of_loaded_files));
+        ++column;
+      }
+      else
+      {
+        // Latest scan time
+        resultTable->set(column, row, "");
+        ++column;
+
+        // Next scan time
+        resultTable->set(column, row, "");
+        ++column;
+
+        // Latest data load time
+        resultTable->set(column, row, "");
+        ++column;
+
+        // Number of loaded files
+        resultTable->set(column, row, "");
+        ++column;
+      }
+
+      // Configuration
+      resultTable->set(column, row, boost::algorithm::join(thisConfig.aliases, ", "));
+      ++column;
+      resultTable->set(column, row, std::string(thisConfig.directory.c_str()));
+      ++column;
+      resultTable->set(column, row, thisConfig.pattern_str);
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.isforecast));
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.isclimatology));
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.isfullgrid));
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.mmap));
+      ++column;
+      resultTable->set(column, row, thisConfig.type);
+      ++column;
+      resultTable->set(column, row, thisConfig.type);
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.isrelativeuv));
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.refresh_interval_secs));
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.number_to_keep));
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.update_interval));
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.minimum_expires));
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.max_age));
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.maxdistance));
+
+      row++;
+    }
+
+    return std::make_pair(resultTable, headers);
+  }
   catch (...)
-	{
+  {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
-	}
+  }
 }
-  
+
 Repository::ContentTable Repository::getParameterInfo(const ProducerList& producerlist) const
 {
   try
-	{
-	  boost::shared_ptr<Spine::Table> resultTable(new Spine::Table);
-	  
-	  static Spine::TableFormatter::Names headers{"#","ParamId","ParamName","Producers"};
-	  
-	  NFmiEnumConverter converter;
-	  using ParameterIdProducers = std::map<FmiParameterName, std::vector<std::string>>;
-	  
-	  ParameterIdProducers pip;
-	  for (const auto& producer : producerlist)
-		{
-		  const auto producer_model = itsProducers.find(producer);
-		  if (producer_model == itsProducers.end() || producer_model->second.empty())
-			continue;
+  {
+    boost::shared_ptr<Spine::Table> resultTable(new Spine::Table);
 
-		  Q q = get(producer);
-		  q->resetParam();
-		  while(q->nextParam())
-			pip[q->parameterName()].push_back(producer);
-		}
-	  
+    static Spine::TableFormatter::Names headers{"#", "ParamId", "ParamName", "Producers"};
 
-	  unsigned int row = 0;
-	  unsigned int parameter_no = 1;
-	  for(const auto& info : pip)
-		{
-		  int column = 0;
-		  // Parameter number
-		  resultTable->set(column, row, Fmi::to_string(parameter_no));
-		  ++column;
-		  
-		  FmiParameterName param_id = info.first;
-		  
-		  // ParameterId
-		  resultTable->set(column, row, Fmi::to_string(param_id));
-		  ++column;
-		  
-		  // ParameterName
-		  resultTable->set(column, row, converter.ToString(param_id));
-		  ++column;
-		  
-		  // Producers
-		  //	  resultTable->set(column, row, boost::algorithm::join(info.second, ", "));
-		  unsigned int subrow = row; 
-		  for(const auto& producer : info.second)
-			{
-			  resultTable->set(column, subrow, producer);
-			  subrow++;
-			}
-		  row++;
-		  while(row < subrow)
-			{
-			  // Parameter id
-			  resultTable->set(0, row, "-");
-			  resultTable->set(1, row, "-");
-			  resultTable->set(2, row, "-");
-			  row++;
-			}
-		  parameter_no++;
-		}
-	  
-	  return std::make_pair(resultTable, headers);
-	}
+    NFmiEnumConverter converter;
+    using ParameterIdProducers = std::map<FmiParameterName, std::vector<std::string>>;
+
+    ParameterIdProducers pip;
+    for (const auto& producer : producerlist)
+    {
+      const auto producer_model = itsProducers.find(producer);
+      if (producer_model == itsProducers.end() || producer_model->second.empty())
+        continue;
+
+      Q q = get(producer);
+      q->resetParam();
+      while (q->nextParam())
+        pip[q->parameterName()].push_back(producer);
+    }
+
+    unsigned int row = 0;
+    unsigned int parameter_no = 1;
+    for (const auto& info : pip)
+    {
+      int column = 0;
+      // Parameter number
+      resultTable->set(column, row, Fmi::to_string(parameter_no));
+      ++column;
+
+      FmiParameterName param_id = info.first;
+
+      // ParameterId
+      resultTable->set(column, row, Fmi::to_string(param_id));
+      ++column;
+
+      // ParameterName
+      resultTable->set(column, row, converter.ToString(param_id));
+      ++column;
+
+      // Producers
+      //	  resultTable->set(column, row, boost::algorithm::join(info.second, ", "));
+      unsigned int subrow = row;
+      for (const auto& producer : info.second)
+      {
+        resultTable->set(column, subrow, producer);
+        subrow++;
+      }
+      row++;
+      while (row < subrow)
+      {
+        // Parameter id
+        resultTable->set(0, row, "-");
+        resultTable->set(1, row, "-");
+        resultTable->set(2, row, "-");
+        row++;
+      }
+      parameter_no++;
+    }
+
+    return std::make_pair(resultTable, headers);
+  }
   catch (...)
-	{
-	  throw Fmi::Exception::Trace(BCP, "Operation failed!");
-	}
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
-
 
 Repository::ContentTable Repository::getRepoContents(const std::string& timeFormat,
                                                      const std::string& projectionFormat) const
@@ -843,7 +862,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
         boost::posix_time::ptime time1 = qi->ValidTime();
         qi->LastTime();
         boost::posix_time::ptime time2 = qi->ValidTime();
-		// File load time
+        // File load time
         boost::posix_time::ptime time3 = model->loadTime();
 
         // Get the parameter list from querydatainfo
@@ -876,12 +895,16 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
         std::string projectionText;
         if (qi->Area() == nullptr)
           projectionText = "nan";
+#ifdef NEW_NFMIAREA
         else if (projectionFormat == "wkt")
           projectionText = qi->Area()->WKT();
         // Defaults to newbase form
         else
           projectionText = qi->Area()->ProjStr();
-
+#else
+        else
+          projectionText = qi->Area()->WKT();
+#endif
         // For nicer output in browsers we replace for example ",PROJCS" with ", PROJCS"
         boost::regex rex(",([A-Z])");
         projectionText = boost::regex_replace(projectionText, rex, ", $1");
@@ -1200,14 +1223,18 @@ Repository::SharedModels Repository::getAllModels(const Producer& producer) cons
   }
 }
 
-void Repository::updateProducerStatus(const std::string& producer, const boost::posix_time::ptime& scanTime, const boost::posix_time::ptime& nextScanTime)
+void Repository::updateProducerStatus(const std::string& producer,
+                                      const boost::posix_time::ptime& scanTime,
+                                      const boost::posix_time::ptime& nextScanTime)
 {
   ProducerStatus& ps = itsProducerStatus[producer];
   ps.latest_scan_time = scanTime;
   ps.next_scan_time = nextScanTime;
 }
 
-void Repository::updateProducerStatus(const std::string& producer,  const boost::posix_time::ptime& dataLoadTime, unsigned int nFiles)
+void Repository::updateProducerStatus(const std::string& producer,
+                                      const boost::posix_time::ptime& dataLoadTime,
+                                      unsigned int nFiles)
 {
   ProducerStatus& ps = itsProducerStatus[producer];
   ps.latest_data_load_time = dataLoadTime;
