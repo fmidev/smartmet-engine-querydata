@@ -5,28 +5,34 @@
 // ======================================================================
 
 #include "Engine.h"
-
 #include "MetaQueryFilters.h"
 #include "RepoManager.h"
 #include "Repository.h"
 #include "Synchro.h"
-
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
+#include <fmt/format.h>
+#include <gis/CoordinateTransformation.h>
 #include <gis/OGR.h>
+#include <gis/SpatialReference.h>
 #include <json/reader.h>
-#include <macgyver/StringConversion.h>
-#include <newbase/NFmiLatLonArea.h>
-#include <spine/Convenience.h>
 #include <macgyver/Exception.h>
-
+#include <macgyver/StringConversion.h>
+#include <spine/Convenience.h>
 #include <chrono>
 #include <exception>
+#include <iomanip>
 #include <libconfig.h++>
 #include <ogr_spatialref.h>
 #include <system_error>
+
+namespace
+{
+auto badcoord = std::make_pair(std::numeric_limits<double>::quiet_NaN(),
+                               std::numeric_limits<double>::quiet_NaN());
+}
 
 namespace SmartMet
 {
@@ -50,7 +56,7 @@ ParameterTranslations read_translations(const std::string& configfile)
     boost::filesystem::path p = configfile;
     p.remove_filename();
     config.setIncludeDir(p.c_str());
-    
+
     config.readFile(configfile.c_str());
 
     // Establish default language
@@ -76,8 +82,8 @@ ParameterTranslations read_translations(const std::string& configfile)
       const auto& param_settings = settings[i];
       if (!param_settings.isList())
         throw Fmi::Exception(BCP,
-                               "translations must be lists of groups consisting of parameter value "
-                               "and its translations");
+                             "translations must be lists of groups consisting of parameter value "
+                             "and its translations");
 
       std::string param_name = param_settings.getName();
 
@@ -87,15 +93,14 @@ ParameterTranslations read_translations(const std::string& configfile)
 
         if (value_translations.isList())
           throw Fmi::Exception(BCP,
-                                 "translations for parameter " + param_name +
-                                     " must be a list of translations for individual values");
+                               "translations for parameter " + param_name +
+                                   " must be a list of translations for individual values");
 
         int param_value;
         if (!value_translations.lookupValue("value", param_value))
           throw Fmi::Exception(BCP,
-                                 "translation setting for " + param_name + " at position " +
-                                     std::to_string(j) +
-                                     " has no parameter value to be translated");
+                               "translation setting for " + param_name + " at position " +
+                                   std::to_string(j) + " has no parameter value to be translated");
 
         for (int k = 0; k < value_translations.getLength(); k++)
         {
@@ -121,9 +126,9 @@ ParameterTranslations read_translations(const std::string& configfile)
   catch (const libconfig::ParseException& e)
   {
     throw Fmi::Exception(BCP,
-                           "Qengine configuration " + configfile + " error '" +
-                               std::string(e.getError()) + "' on line " +
-                               std::to_string(e.getLine()));
+                         "Qengine configuration " + configfile + " error '" +
+                             std::string(e.getError()) + "' on line " +
+                             std::to_string(e.getLine()));
   }
 }
 
@@ -547,25 +552,26 @@ Producer Engine::find(const ProducerList& producerlist,
  */
 // ----------------------------------------------------------------------
 
-Repository::ContentTable Engine::getProducerInfo(const std::string& timeFormat, boost::optional<std::string> producer) const
+Repository::ContentTable Engine::getProducerInfo(const std::string& timeFormat,
+                                                 boost::optional<std::string> producer) const
 {
   try
   {
     auto repomanager = boost::atomic_load(&itsRepoManager);
 
     Spine::ReadLock lock(repomanager->itsMutex);
-	
-	ProducerList producerList;
-	if(producer)
-	  producerList.push_back(*producer);
-	
-    return repomanager->itsRepo.getProducerInfo(producer ? producerList : repomanager->itsProducerList, timeFormat);
+
+    ProducerList producerList;
+    if (producer)
+      producerList.push_back(*producer);
+
+    return repomanager->itsRepo.getProducerInfo(
+        producer ? producerList : repomanager->itsProducerList, timeFormat);
   }
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-
 }
 
 // ----------------------------------------------------------------------
@@ -582,17 +588,17 @@ Repository::ContentTable Engine::getParameterInfo(boost::optional<std::string> p
 
     Spine::ReadLock lock(repomanager->itsMutex);
 
-	ProducerList producerList;
-	if(producer)
-	  producerList.push_back(*producer);
+    ProducerList producerList;
+    if (producer)
+      producerList.push_back(*producer);
 
-    return repomanager->itsRepo.getParameterInfo(producer ? producerList : repomanager->itsProducerList);
+    return repomanager->itsRepo.getParameterInfo(producer ? producerList
+                                                          : repomanager->itsProducerList);
   }
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-
 }
 
 // ----------------------------------------------------------------------
@@ -895,12 +901,12 @@ const ProducerConfig& Engine::getProducerConfig(const std::string& producer) con
   }
 }
 
-std::size_t hash_value(const OGRSpatialReference& theSR)
+std::size_t hash_value(const Fmi::SpatialReference& theSR)
 {
   try
   {
     char* wkt;
-    theSR.exportToWkt(&wkt);
+    theSR.get()->exportToWkt(&wkt);
     std::string tmp(wkt);
 #if GDAL_VERSION_MAJOR < 2
     OGRFree(wkt);
@@ -916,72 +922,13 @@ std::size_t hash_value(const OGRSpatialReference& theSR)
   }
 }
 
-NFmiDataMatrix<NFmiPoint> get_world_xy(const Q& theQ)
-{
-  try
-  {
-    if (!theQ->isGrid())
-      throw Fmi::Exception(BCP, "Requesting world XY grid cooridnates for non-gridded data");
-
-    // For latlon data GridToWorldXY returns metric units even though we want geographic coordinates
-    auto id = theQ->area().ClassId();
-    bool islatlon = (id == kNFmiLatLonArea || id == kNFmiRotatedLatLonArea);
-
-    const auto& grid = theQ->grid();
-
-    const auto nx = grid.XNumber();
-    const auto ny = grid.YNumber();
-
-    NFmiDataMatrix<NFmiPoint> coords(nx, ny);
-
-    for (std::size_t j = 0; j < ny; j++)
-      for (std::size_t i = 0; i < nx; i++)
-        if (islatlon)
-          coords[i][j] = grid.GridToLatLon(i, j);
-        else
-          coords[i][j] = grid.GridToWorldXY(i, j);
-
-    return coords;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-NFmiDataMatrix<NFmiPoint> get_latlons(const Q& theQ)
-{
-  try
-  {
-    if (!theQ->isGrid())
-      throw Fmi::Exception(BCP, "Requesting latlon grid cooridnates for non-gridded data");
-
-    const auto& grid = theQ->grid();
-
-    const auto nx = grid.XNumber();
-    const auto ny = grid.YNumber();
-
-    NFmiDataMatrix<NFmiPoint> coords(nx, ny);
-
-    for (std::size_t j = 0; j < ny; j++)
-      for (std::size_t i = 0; i < nx; i++)
-        coords[i][j] = grid.GridToLatLon(i, j);
-
-    return coords;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
 // ----------------------------------------------------------------------
 /*!
  * \brief Mark the given coordinate cell as bad
  */
 // ----------------------------------------------------------------------
 
-void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
+void mark_cell_bad(Fmi::CoordinateMatrix& theCoords, const NFmiPoint& theCoord)
 {
   try
   {
@@ -990,18 +937,16 @@ void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
 
       return;
 
-    if (theCoord.X() >= 0 && theCoord.X() < theCoords.NX() - 1 && theCoord.Y() >= 0 &&
-        theCoord.Y() < theCoords.NY() - 1)
+    if (theCoord.X() >= 0 && theCoord.X() < theCoords.width() - 1 && theCoord.Y() >= 0 &&
+        theCoord.Y() < theCoords.height() - 1)
     {
       auto i = static_cast<std::size_t>(theCoord.X());
       auto j = static_cast<std::size_t>(theCoord.Y());
-      NFmiPoint badcoord(std::numeric_limits<float>::quiet_NaN(),
-                         std::numeric_limits<float>::quiet_NaN());
-      theCoords[i + 0][j + 0] = badcoord;
-      theCoords[i + 1][j + 0] = badcoord;
+      theCoords(i + 0, j + 0) = badcoord;
+      theCoords(i + 1, j + 0) = badcoord;
       // Marking two vertices bad is enough to invalidate the cell
-      // theCoords[i+0][j+1] = badcoord;
-      // theCoords[i+1][j+1] = badcoord;
+      // theCoords(i+0,j+1])= badcoord;
+      // theCoords(i+1],+1])= badcoord;
     }
   }
   catch (...)
@@ -1018,53 +963,20 @@ void mark_cell_bad(Coordinates& theCoords, const NFmiPoint& theCoord)
 
 CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
                                    const Q& theQ,
-                                   OGRSpatialReference& theSR)
+                                   const Fmi::SpatialReference& theSR)
 {
   try
   {
     // Copy the original coordinates for projection
-    auto coords = boost::make_shared<Coordinates>(*theCoords);
 
-    // Create the coordinate transformation
+#ifdef NEW_NFMIAREA
+    Fmi::CoordinateTransformation transformation(theQ->SpatialReference(), theSR);
+#else
+    Fmi::CoordinateTransformation transformation(theQ->area().WKT(), theSR);
+#endif
+    auto coords = std::make_shared<Fmi::CoordinateMatrix>(*theCoords);
 
-    std::unique_ptr<OGRSpatialReference> src(new OGRSpatialReference);
-
-    // The input data is here always newbase NFmiLatLon coordinates
-
-    NFmiLatLonArea tmp;
-    OGRErr err = src->SetFromUserInput(tmp.WKT().c_str());
-    if (err != OGRERR_NONE)
-      throw Fmi::Exception(BCP, "Unable to set WKT: '" + tmp.WKT());
-
-    // Clones the spatial reference object
-    std::unique_ptr<OGRCoordinateTransformation> transformation(
-        OGRCreateCoordinateTransformation(src.get(), &theSR));
-
-    if (!transformation)
-      throw Fmi::Exception(
-          BCP, "Failed to create the requested coordinate transformation during contouring");
-
-    // Project the coordinates one at a time
-
-    auto& c = *coords;  // avoid dereferencing the shared pointed all the time for speed
-    auto nx = c.NX();
-    auto ny = c.NY();
-
-    double nan = std::numeric_limits<double>::quiet_NaN();
-
-    for (std::size_t j = 0; j < ny; j++)
-      for (std::size_t i = 0; i < nx; i++)
-      {
-        double x = c[i][j].X();
-        double y = c[i][j].Y();
-        if (transformation->Transform(1, &x, &y) == 0)
-        {
-          x = nan;
-          y = nan;
-        }
-
-        c[i][j] = NFmiPoint(x, y);
-      }
+    coords->transform(transformation);
 
     // If the target SR is geographic, we must discard the grid cells containing
     // the north or south poles since the cell vertex coordinates wrap around
@@ -1074,25 +986,35 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
     // We also have to check whether some grid cells cross the 180th meridian
     // and discard them
 
-    if (theSR.IsGeographic() != 0)
+    // If the target SR is no geographic, we discard all very elongated cells
+    // since they are likely spanning the world
+
+    // TODO: Should probably be removed in favour of the grid analyzer
+
+#if 0    
+    if (theSR.isGeographic() != 0)
     {
+      auto& c = *coords;
+
       const auto& grid = theQ->grid();
       auto northpole = grid.LatLonToGrid(0, 90);
       mark_cell_bad(c, northpole);
       auto southpole = grid.LatLonToGrid(0, -90);
       mark_cell_bad(c, southpole);
 
-      NFmiPoint badcoord(std::numeric_limits<double>::quiet_NaN(),
-                         std::numeric_limits<double>::quiet_NaN());
+      const auto nx = c.width();
+      const auto ny = c.height();
+
       for (std::size_t j = 0; j < ny; j++)
         for (std::size_t i = 0; i + 1 < nx; i++)
         {
-          double lon1 = c[i][j].X();
-          double lon2 = c[i + 1][j].X();
+          double lon1 = c.x(i, j);
+          double lon2 = c.x(i + 1, j);
           if (lon1 != kFloatMissing && lon2 != kFloatMissing && std::abs(lon1 - lon2) > 180)
-            c[i][j] = badcoord;
+            c.set(i, j, badcoord);
         }
     }
+#endif
 
     return coords;
   }
@@ -1102,84 +1024,56 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   }
 }
 
-CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, OGRSpatialReference* theSR) const
+CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const Fmi::SpatialReference& theSR) const
 {
   try
   {
-    // Hash value of latlon coordinates and projected coordinates
+    // Hash value of original WorldXY coordinates
     auto qhash = theQ->gridHashValue();
+
+    // Hash value of projected coordinates
     auto projhash = qhash;
-
-    if (theSR != nullptr)
-    {
-      boost::hash_combine(projhash, hash_value(*theSR));
-
-      auto cached_coords = itsCoordinateCache.find(projhash);
-      if (cached_coords)
-        return cached_coords->get();
-    }
 
     // Return original world XY directly with get_world_xy if spatial
     // references match This is absolutely necessary to avoid gaps in
     // WMS tiles since with proj(invproj(p)) may differ significantly
     // from p outside the valid area of the projection.
 
-    if (theSR != nullptr)
-    {
-      auto datawkt = theQ->info()->Area()->WKT();
-      auto reqwkt = Fmi::OGR::exportToWkt(*theSR);
+    auto datawkt = theQ->info()->Area()->WKT();
+    auto reqwkt = Fmi::OGR::exportToWkt(theSR);
 
-      if (datawkt == reqwkt)
-      {
-        auto ftr = std::async(std::launch::async, [&] {
-                     return boost::make_shared<Coordinates>(get_world_xy(theQ));
-                   }).share();
-        itsCoordinateCache.insert(projhash, ftr);
-        return ftr.get();
-      }
-    }
+    if (datawkt != reqwkt)
+      boost::hash_combine(projhash, hash_value(*theSR));
 
-    // Now we need either the latlon coordinates as is or need to project them. It would
-    // also be possible to request native world XY coordinates and project from them
-    // directly to the requested CRS. In general it is safe to assume the original
-    // coordinates will be projected to latlons before being converted to the target
-    // spatial reference, hence caching the intermediate latlon values should in general
-    // be result in twice as fast conversions.
+    if (qhash == projhash)
+      return getWorldCoordinates(theQ);
 
-    auto cached_coords = itsCoordinateCache.find(qhash);
-    if (cached_coords && theSR == nullptr)
+    // Search cache for the projected coordinates
+    auto cached_coords = itsCoordinateCache.find(projhash);
+    if (cached_coords)
       return cached_coords->get();
 
-    if (!cached_coords)
-    {
-      auto ftr = std::async(std::launch::async, [&] {
-                   return boost::make_shared<Coordinates>(get_latlons(theQ));
-                 }).share();
-      itsCoordinateCache.insert(qhash, ftr);
-      ftr.get();
-      cached_coords = itsCoordinateCache.find(qhash);
-    }
+    // Now we need to to get WorldXY coordinates - this is fast
+    auto worldxy = getWorldCoordinates(theQ);
 
-    // g++ 4.8.5 does not allow get to be called inside the lambda below, had to place it here
+    // Project to target SR. Do NOT use intermediate latlons in any datum, or the Z value will not
+    // be included in all stages of the projection, and large errors will occur if the datums
+    // differ significantly (e.g. sphere vs ellipsoid)
 
-    auto coords = cached_coords->get();
+    auto ftr2 = std::async([&] { return project_coordinates(worldxy, theQ, theSR); }).share();
 
-    if (theSR == nullptr)
-      return coords;
-
-    // Project the coordinates
-
-    auto ftr = std::async(std::launch::async, [&] {
-                 return project_coordinates(coords, theQ, *theSR);
-               }).share();
-
-    itsCoordinateCache.insert(projhash, ftr);
-    return ftr.get();
+    itsCoordinateCache.insert(projhash, ftr2);
+    return ftr2.get();
   }
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
+}
+
+CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ) const
+{
+  return std::make_shared<Fmi::CoordinateMatrix>(theQ->FullCoordinateMatrix());
 }
 
 // ----------------------------------------------------------------------
@@ -1206,9 +1100,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
 
     // Else create a shared future for calculating the values
     auto ftr = std::async(std::launch::async, [&] {
-                 auto tmp = boost::make_shared<Values>();
-                 theQ->values(*tmp, theTime);
-                 return tmp;
+                 return std::make_shared<Values>(theQ->values(theTime));
                }).share();
 
     // Store the shared future into the cache for other threads to see too
@@ -1249,9 +1141,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
 
     // Else create a shared future for calculating the values
     auto ftr = std::async(std::launch::async, [&] {
-                 auto tmp = boost::make_shared<Values>();
-                 theQ->values(*tmp, theParam, theTime);
-                 return tmp;
+                 return std::make_shared<Values>(theQ->values(theParam, theTime));
                }).share();
 
     // Store the shared future into the cache for other threads to see too

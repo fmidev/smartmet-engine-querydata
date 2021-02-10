@@ -10,15 +10,14 @@ enginedir = $(datadir)/smartmet/engines
 
 # Compiler options
 
-DEFINES = -DUNIX -D_REENTRANT
-
+DEFINES = -DUNIX -DWGS84 -D_REENTRANT
 
 LIBS += -L$(libdir) \
+	$(REQUIRED_LIBS) \
 	-lsmartmet-spine \
 	-lsmartmet-gis \
 	-lsmartmet-macgyver \
 	-lsmartmet-newbase \
-	$(JSONCPP_LIBS) \
 	-lboost_date_time \
 	-lboost_regex \
 	-lboost_thread \
@@ -26,7 +25,6 @@ LIBS += -L$(libdir) \
 	-lboost_iostreams \
 	-lboost_serialization \
 	-lboost_system \
-	$(GDAL_LIBS) \
 	-lprotobuf \
 	-lbz2 -lz
 

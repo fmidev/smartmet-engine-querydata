@@ -22,6 +22,7 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
+#include <gis/CoordinateMatrix.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/Thread.h>
 #include <spine/TimeSeries.h>
@@ -33,12 +34,11 @@ class NFmiMetTime;
 class NFmiPoint;
 class NFmiFastQueryInfo;
 
-class OGRSpatialReference;
-
 namespace Fmi
 {
 class DEM;
 class LandCover;
+class SpatialReference;
 }  // namespace Fmi
 
 namespace SmartMet
@@ -96,6 +96,18 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   bool nextLevel();
   float levelValue() const;
 
+  void resetLocation();
+  bool firstLocation();
+  bool nextLocation();
+  NFmiPoint worldXY() const;
+  NFmiPoint latLon() const;
+
+  const Fmi::SpatialReference& SpatialReference() const;
+
+  // Using different names to locate uses cases more easily
+  Fmi::CoordinateMatrix CoordinateMatrix() const;
+  Fmi::CoordinateMatrix FullCoordinateMatrix() const;
+
   FmiParameterName parameterName() const;  // Param().GetParamIdent()
 
   bool isGrid() const;
@@ -141,75 +153,66 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   float cachedInterpolation(const NFmiLocationCache& theLocationCache);
   float cachedInterpolation(const NFmiLocationCache& theLocationCache,
                             const NFmiTimeCache& theTimeCache);
-  void landscapeCachedInterpolation(NFmiDataMatrix<float>& theMatrix,
-                                    const NFmiDataMatrix<NFmiLocationCache>& theLocationCache,
-                                    const NFmiTimeCache& theTimeCache,  // Unset value (NoValue())
-                                                                        // for native (currently
-                                                                        // active) time
-                                    const NFmiDataMatrix<float>& theDEMValues,
-                                    const NFmiDataMatrix<bool>& theWaterFlags);
+  NFmiDataMatrix<float> landscapeCachedInterpolation(
+      const NFmiDataMatrix<NFmiLocationCache>& theLocationCache,
+      const NFmiTimeCache& theTimeCache,  // Unset value (NoValue())
+                                          // for native (currently
+                                          // active) time
+      const NFmiDataMatrix<float>& theDEMValues,
+      const NFmiDataMatrix<bool>& theWaterFlags);
   bool calcLatlonCachePoints(NFmiQueryInfo& theTargetInfo,
                              NFmiDataMatrix<NFmiLocationCache>& theLocationCache);
 
   // Generic access to grid values:
-  void values(NFmiDataMatrix<float>& theMatrix,
-              const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
-              const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
+  NFmiDataMatrix<float> values(const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
+                               const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
 
-  void values(NFmiDataMatrix<float>& theMatrix,
-              const NFmiMetTime& theInterpolatedTime,
-              const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
-              const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
+  NFmiDataMatrix<float> values(const NFmiMetTime& theInterpolatedTime,
+                               const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
+                               const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
 
   // Needed for metaparameters:
-  void values(NFmiDataMatrix<float>& theMatrix,
-              const Spine::Parameter& theParam,
-              const boost::posix_time::ptime& theInterpolatedTime,
-              const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
-              const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
+  NFmiDataMatrix<float> values(const Spine::Parameter& theParam,
+                               const boost::posix_time::ptime& theInterpolatedTime,
+                               const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
+                               const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
 
   // For arbitrary coordinates:
-  void values(const NFmiDataMatrix<NFmiPoint>& theLatlonMatrix,
-              NFmiDataMatrix<float>& theValues,
-              const NFmiMetTime& theTime,
-              float P = kFloatMissing,
-              float H = kFloatMissing);
+#ifdef NEW_NFMIAREA
+  NFmiDataMatrix<float> values(const Fmi::CoordinateMatrix& theLatlonMatrix,
+                               const NFmiMetTime& theTime,
+                               float P = kFloatMissing,
+                               float H = kFloatMissing);
+#endif
 
-  void croppedValues(NFmiDataMatrix<float>& theMatrix,
-                     int x1,
-                     int y1,
-                     int x2,
-                     int y2,
-                     const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
-                     const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>()) const;
+  NFmiDataMatrix<float> croppedValues(
+      int x1,
+      int y1,
+      int x2,
+      int y2,
+      const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
+      const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>()) const;
 
-  void pressureValues(NFmiDataMatrix<float>& theValues,
-                      const NFmiMetTime& theInterpolatedTime,
-                      float wantedPressureLevel);
+  NFmiDataMatrix<float> pressureValues(const NFmiMetTime& theInterpolatedTime,
+                                       float wantedPressureLevel);
 
-  void pressureValues(NFmiDataMatrix<float>& theValues,
-                      const NFmiGrid& theWantedGrid,
-                      const NFmiMetTime& theInterpolatedTime,
-                      float wantedPressureLevel);
+  NFmiDataMatrix<float> pressureValues(const NFmiGrid& theWantedGrid,
+                                       const NFmiMetTime& theInterpolatedTime,
+                                       float wantedPressureLevel);
 
-  void pressureValues(NFmiDataMatrix<float>& theValues,
-                      const NFmiGrid& theWantedGrid,
-                      const NFmiMetTime& theInterpolatedTime,
-                      float wantedPressureLevel,
-                      bool relative_uv);
+  NFmiDataMatrix<float> pressureValues(const NFmiGrid& theWantedGrid,
+                                       const NFmiMetTime& theInterpolatedTime,
+                                       float wantedPressureLevel,
+                                       bool relative_uv);
 
-  void gridValues(NFmiDataMatrix<float>& theValues,
-                  const NFmiGrid& theWantedGrid,
-                  const NFmiMetTime& theInterpolatedTime,
-                  bool relative_uv);
+  NFmiDataMatrix<float> gridValues(const NFmiGrid& theWantedGrid,
+                                   const NFmiMetTime& theInterpolatedTime,
+                                   bool relative_uv);
 
-  void heightValues(NFmiDataMatrix<float>& theValues,
-                    const NFmiGrid& theWantedGrid,
-                    const NFmiMetTime& theInterpolatedTime,
-                    float wantedHeightLevel,
-                    bool relative_uv);
-
-  boost::shared_ptr<std::vector<NFmiPoint>> latLonCache() const;
+  NFmiDataMatrix<float> heightValues(const NFmiGrid& theWantedGrid,
+                                     const NFmiMetTime& theInterpolatedTime,
+                                     float wantedHeightLevel,
+                                     bool relative_uv);
 
   // Gridded landscaping; Load dem values and water flags for native (sub)grid or for given
   // locations
@@ -229,7 +232,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   boost::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
                                   const boost::posix_time::ptime& theTime,
-                                  const OGRSpatialReference& theCrs,
+                                  const Fmi::SpatialReference& theCrs,
                                   double theXmin,
                                   double theYmin,
                                   double theXmax,
@@ -296,7 +299,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   const WGS84Envelope& getWGS84Envelope();
 
-  bool needsWraparound() const;
+  bool needsGlobeWrap() const;
 
   void setParameterTranslations(boost::shared_ptr<ParameterTranslations> translations)
   {
@@ -305,6 +308,9 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
  private:
   QImpl();
+
+  NFmiDataMatrix<float> calculatedValues(const Spine::Parameter& theParam,
+                                         const boost::posix_time::ptime& theInterpolatedTime);
 
   Spine::TimeSeries::Value dataIndependentValue(const ParameterOptions& opt,
                                                 const boost::local_time::local_date_time& ldt,
@@ -324,6 +330,10 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   WGS84Envelope::Unique itsWGS84Envelope;
 
   boost::shared_ptr<ParameterTranslations> itsParameterTranslations;
+
+#ifndef NEW_NFMIAREA
+  std::unique_ptr<Fmi::SpatialReference> itsSpatialReference;
+#endif
 
 };  // class QImpl
 

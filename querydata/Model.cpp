@@ -448,28 +448,6 @@ std::size_t Model::gridHashValue() const
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Set the LatLonCache for the querydata from external cache
- */
-// ----------------------------------------------------------------------
-
-void Model::setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache)
-{
-  itsQueryData->SetLatLonCache(std::move(theCache));
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Make querydata latlon cache and return it
- */
-// ----------------------------------------------------------------------
-
-boost::shared_ptr<std::vector<NFmiPoint>> Model::makeLatLonCache()
-{
-  return itsQueryData->LatLonCache();
-}
-
-// ----------------------------------------------------------------------
-/*!
  * \brief Uncache related data
  */
 // ----------------------------------------------------------------------

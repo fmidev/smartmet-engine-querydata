@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.1.25
+Version: 21.2.10
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -22,7 +22,7 @@ BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-macgyver-devel >= 21.1.25
-BuildRequires: smartmet-library-newbase-devel >= 21.1.22
+BuildRequires: smartmet-library-newbase-devel >= 21.2.8
 BuildRequires: smartmet-library-spine-devel >= 21.1.14
 Requires: boost169-date-time
 Requires: boost169-filesystem
@@ -35,7 +35,7 @@ Requires: jsoncpp >= 1.8.4
 Requires: libconfig >= 1.7.2
 Requires: protobuf
 Requires: smartmet-library-macgyver >= 21.1.25
-Requires: smartmet-library-newbase >= 21.1.22
+Requires: smartmet-library-newbase >= 21.2.8
 Requires: smartmet-library-spine >= 21.1.14
 #TestRequires: smartmet-library-macgyver-devel >= 21.1.14
 #TestRequires: jsoncpp-devel >= 1.8.4
@@ -81,6 +81,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Feb 10 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.10-1.fmi
+- Use CoordinateMatrix APIs
+
 * Mon Jan 25 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.1.25-1.fmi
 - Report more info about producers, data, parameters (BRAINSTORM-1981)
 
@@ -114,8 +117,26 @@ rm -rf $RPM_BUILD_ROOT
 * Thu Sep  3 2020 Andris Pavenis <andris.pavenis@fmi.fi> - 20.9.3-1.fmi
 - Update engine shutdown support
 
+* Fri Aug 28 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.28-1.fmi
+- Reimplemented fetching full grids of calculated values such as WindChill for better speed and accuracy
+
+* Thu Aug 27 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.27-1.fmi
+- NFmiGrid API changed
+
+* Wed Aug 26 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.26-1.fmi
+- Repackaged due to NFmiGrid API changes
+
 * Fri Aug 21 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.21-1.fmi
 - Upgrade to fmt 6.2
+
+* Mon Aug 17 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.17-1.fmi
+- Repackaged due to OGRCoordinateTransformationFactory API changes
+
+* Thu Aug 13 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.8.13-1.fmi
+- GIS-library ABI changed
+
+* Thu Jul  2 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.7.2-1.fmi
+- SpatialReference API changed
 
 * Wed May 13 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.5.13-1.fmi
 - Repackaged since Spine Parameter class ABI changed
@@ -123,17 +144,59 @@ rm -rf $RPM_BUILD_ROOT
 * Tue May  5 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.5.5-1.fmi
 - Disable stack traces for user input errors
 
+* Thu Apr 23 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.23-1.fmi
+- Use newbase globe wrapping code for coordinates
+
+* Wed Apr 22 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.22-1.fmi
+- Improved gdal30/geos38 detection
+
 * Mon Apr 20 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.20-1.fmi
 - Added reading of parameter translations from the configuration file
 
 * Sat Apr 18 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.18-1.fmi
 - Upgraded to Boost 1.69
 
+* Tue Apr 14 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.14-1.fmi
+- Use Fmi::CoordinateMatrix instead of NFmiCoordinateMatrix
+
+* Wed Apr  8 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.8-1.fmi
+- Added checking of projected metric coordinates for very elongated cells
+
+* Mon Apr  6 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.6-1.fmi
+- Using Fmi::CoordinateTransformation and Fmi::SpatialReference from now on
+
+* Fri Apr  3 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.3-1.fmi
+- Q::SpatialReference now returns a reference instead of a pointer
+
+* Thu Apr  2 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.4.2-1.fmi
+- Refactored API to use NFmiDataMatrix return values
+
+* Mon Mar 30 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.3.30-1.fmi
+- Use NFmiSpatialReference and NFmiCoordinateTransformation
+
 * Thu Mar 19 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.3.19-1.fmi
 - Added possibility to filter repo contents based on the producer name
 
+* Thu Feb 13 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.2.13-1.fmi
+- Forward declare GDAL classes in headers to avoid dependency escalation
+
+* Fri Feb  7 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.2.7-1.fmi
+- Repackaged due to newbase ABI changes
+
 * Thu Jan 30 2020 Mika Heiskanen <mika.heiskanen@fmi.fi> - 20.1.30-1.fmi
 - hasProducer now recognizes aliases too
+
+* Fri Dec 13 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.12.13-1.fmi
+- Repackaged due to NFmiArea API changes
+
+* Wed Dec 11 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.12.11-1.fmi
+- Upgdare to GDAL 3.0 and GEOS 3.8
+
+* Mon Nov 25 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.11.25-1.fmi
+- Added Q::worldXY and Q location iteration methods
+
+* Fri Nov 22 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.11.22-1.fmi
+- Use std::vector instead of checkedVector
 
 * Wed Nov 20 2019 Mika Heiskanen <mika.heiskanen@fmi.fi> - 19.11.20-1.fmi
 - Rebuilt due to newbase API changes

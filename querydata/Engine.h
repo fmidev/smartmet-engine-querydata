@@ -14,6 +14,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
+#include <gis/CoordinateMatrix.h>
 #include <macgyver/Cache.h>
 #include <spine/SmartMetEngine.h>
 #include <future>
@@ -23,11 +24,15 @@
 class NFmiPoint;
 class OGRSpatialReference;
 
-typedef NFmiDataMatrix<NFmiPoint> Coordinates;
-typedef boost::shared_ptr<Coordinates> CoordinatesPtr;
+typedef std::shared_ptr<Fmi::CoordinateMatrix> CoordinatesPtr;
 
 typedef NFmiDataMatrix<float> Values;
-typedef boost::shared_ptr<Values> ValuesPtr;
+typedef std::shared_ptr<Values> ValuesPtr;
+
+namespace Fmi
+{
+class SpatialReference;
+}
 
 namespace SmartMet
 {
@@ -146,7 +151,8 @@ class Engine : public Spine::SmartMetEngine
   // get producer's configuration
   const ProducerConfig& getProducerConfig(const std::string& producer) const;
 
-  CoordinatesPtr getWorldCoordinates(const Q& theQ, OGRSpatialReference* theSR) const;
+  CoordinatesPtr getWorldCoordinates(const Q& theQ) const;
+  CoordinatesPtr getWorldCoordinates(const Q& theQ, const Fmi::SpatialReference& theSR) const;
 
   ValuesPtr getValues(const Q& theQ,
                       std::size_t theValuesHash,
