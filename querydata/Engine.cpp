@@ -13,7 +13,6 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
-#include <fmt/format.h>
 #include <gis/CoordinateTransformation.h>
 #include <gis/OGR.h>
 #include <gis/SpatialReference.h>
