@@ -178,12 +178,10 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                                const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
 
   // For arbitrary coordinates:
-#ifdef NEW_NFMIAREA
   NFmiDataMatrix<float> values(const Fmi::CoordinateMatrix& theLatlonMatrix,
                                const NFmiMetTime& theTime,
                                float P = kFloatMissing,
                                float H = kFloatMissing);
-#endif
 
   NFmiDataMatrix<float> croppedValues(
       int x1,

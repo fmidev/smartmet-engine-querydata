@@ -1662,7 +1662,6 @@ NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
  */
 // ----------------------------------------------------------------------
 
-#ifdef NEW_NFMIAREA
 NFmiDataMatrix<float> QImpl::values(const Fmi::CoordinateMatrix &theLatlonMatrix,
                                     const NFmiMetTime &theTime,
                                     float P,
@@ -1677,7 +1676,6 @@ NFmiDataMatrix<float> QImpl::values(const Fmi::CoordinateMatrix &theLatlonMatrix
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-#endif
 
 // ----------------------------------------------------------------------
 /*!
