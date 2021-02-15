@@ -1418,15 +1418,8 @@ NFmiDataMatrix<float> QImpl::landscapeCachedInterpolation(
 {
   try
   {
-#ifdef NEW_NFMIAREA
     return itsInfo->LandscapeCachedInterpolation(
         theLocationCache, theTimeCache, theDEMValues, theWaterFlags);
-#else
-    NFmiDataMatrix<float> tmp;
-    itsInfo->LandscapeCachedInterpolation(
-        tmp, theLocationCache, theTimeCache, theDEMValues, theWaterFlags);
-    return tmp;
-#endif
   }
   catch (...)
   {
@@ -1561,19 +1554,10 @@ NFmiDataMatrix<float> QImpl::values(const NFmiDataMatrix<float> &theDEMValues,
 {
   try
   {
-#ifdef NEW_NFMIAREA
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeValues(theDEMValues, theWaterFlags);
     else
       return itsInfo->Values();
-#else
-    NFmiDataMatrix<float> tmp;
-    if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
-      itsInfo->LandscapeValues(tmp, theDEMValues, theWaterFlags);
-    else
-      itsInfo->Values(tmp);
-    return tmp;
-#endif
   }
   catch (...)
   {
@@ -1596,19 +1580,10 @@ NFmiDataMatrix<float> QImpl::values(const NFmiMetTime &theInterpolatedTime,
 {
   try
   {
-#ifdef NEW_NFMIAREA
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeValues(theInterpolatedTime, theDEMValues, theWaterFlags);
     else
       return itsInfo->Values(theInterpolatedTime);
-#else
-    NFmiDataMatrix<float> tmp;
-    if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
-      itsInfo->LandscapeValues(tmp, theInterpolatedTime, theDEMValues, theWaterFlags);
-    else
-      itsInfo->Values(tmp, theInterpolatedTime);
-    return tmp;
-#endif
   }
   catch (...)
   {
@@ -1697,19 +1672,10 @@ NFmiDataMatrix<float> QImpl::croppedValues(
 {
   try
   {
-#ifdef NEW_NFMIAREA
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeCroppedValues(x1, y1, x2, y2, theDEMValues, theWaterFlags);
     else
       return itsInfo->CroppedValues(x1, y1, x2, y2);
-#else
-    NFmiDataMatrix<float> tmp;
-    if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
-      itsInfo->LandscapeCroppedValues(tmp, x1, y1, x2, y2, theDEMValues, theWaterFlags);
-    else
-      itsInfo->CroppedValues(tmp, x1, y1, x2, y2);
-    return tmp;
-#endif
   }
   catch (...)
   {
@@ -1728,13 +1694,7 @@ NFmiDataMatrix<float> QImpl::pressureValues(const NFmiMetTime &theInterpolatedTi
 {
   try
   {
-#ifdef NEW_NFMIAREA
     return itsInfo->PressureValues(theInterpolatedTime, wantedPressureLevel);
-#else
-    NFmiDataMatrix<float> tmp;
-    itsInfo->PressureValues(tmp, theInterpolatedTime, wantedPressureLevel);
-    return tmp;
-#endif
   }
   catch (...)
   {
@@ -1754,13 +1714,7 @@ NFmiDataMatrix<float> QImpl::pressureValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
-#ifdef NEW_NFMIAREA
     return itsInfo->PressureValues(theWantedGrid, theInterpolatedTime, wantedPressureLevel);
-#else
-    NFmiDataMatrix<float> tmp;
-    itsInfo->PressureValues(tmp, theWantedGrid, theInterpolatedTime, wantedPressureLevel);
-    return tmp;
-#endif
   }
   catch (...)
   {
@@ -1775,15 +1729,8 @@ NFmiDataMatrix<float> QImpl::pressureValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
-#ifdef NEW_NFMIAREA
     return itsInfo->PressureValues(
         theWantedGrid, theInterpolatedTime, wantedPressureLevel, relative_uv);
-#else
-    NFmiDataMatrix<float> tmp;
-    itsInfo->PressureValues(
-        tmp, theWantedGrid, theInterpolatedTime, wantedPressureLevel, relative_uv);
-    return tmp;
-#endif
   }
   catch (...)
   {
@@ -1803,13 +1750,7 @@ NFmiDataMatrix<float> QImpl::gridValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
-#ifdef NEW_NFMIAREA
     return itsInfo->GridValues(theWantedGrid, theInterpolatedTime, relative_uv);
-#else
-    NFmiDataMatrix<float> tmp;
-    itsInfo->GridValues(tmp, theWantedGrid, theInterpolatedTime, relative_uv);
-    return tmp;
-#endif
   }
   catch (...)
   {
@@ -1830,14 +1771,8 @@ NFmiDataMatrix<float> QImpl::heightValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
-#ifdef NEW_NFMIAREA
     return itsInfo->HeightValues(
         theWantedGrid, theInterpolatedTime, wantedHeightLevel, relative_uv);
-#else
-    NFmiDataMatrix<float> tmp;
-    itsInfo->HeightValues(tmp, theWantedGrid, theInterpolatedTime, wantedHeightLevel, relative_uv);
-    return tmp;
-#endif
   }
   catch (...)
   {
