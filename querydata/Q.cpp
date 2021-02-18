@@ -169,13 +169,6 @@ QImpl::QImpl(SharedModel theModel)
     itsValidTimes = theModel->validTimes();
 
     itsHashValue = hash_value(theModel);
-
-#ifndef NEW_NFMIAREA
-    if (itsInfo->Area() == nullptr)
-      itsSpatialReference.reset(new Fmi::SpatialReference("+proj=longlat +R=6371229"));
-    else
-      itsSpatialReference.reset(new Fmi::SpatialReference(itsInfo->Area()->WKT()));
-#endif
   }
   catch (...)
   {
@@ -211,13 +204,6 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
     {
       boost::hash_combine(itsHashValue, model);
     }
-
-#ifndef NEW_NFMIAREA
-    if (itsInfo->Area() == nullptr)
-      itsSpatialReference.reset(new Fmi::SpatialReference("+proj=longlat +R=6371229"));
-    else
-      itsSpatialReference.reset(new Fmi::SpatialReference(itsInfo->Area()->WKT()));
-#endif
 
     // Establish unique valid times
     std::set<boost::posix_time::ptime> uniquetimes;
@@ -858,11 +844,7 @@ NFmiPoint QImpl::latLon() const
 
 const Fmi::SpatialReference &QImpl::SpatialReference() const
 {
-#ifdef NEW_NFMIAREA
   return itsInfo->SpatialReference();
-#else
-  return *itsSpatialReference;
-#endif
 }
 
 // ----------------------------------------------------------------------
@@ -4241,11 +4223,11 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     // Establish new projection and the required grid size of the desired resolution
 
 #ifdef NEW_NFMIAREA
-    boost::shared_ptr<NFmiArea> newarea(
+    std::shared_ptr<NFmiArea> newarea(
         NFmiArea::CreateFromBBox(theCrs, NFmiPoint(theXmin, theYmin), NFmiPoint(theXmax, theYmax)));
 #else
     auto newarea =
-        boost::make_shared<NFmiGdalArea>("FMI", theCrs, theXmin, theYmin, theXmax, theYmax);
+        std::make_shared<NFmiGdalArea>("FMI", theCrs, theXmin, theYmin, theXmax, theYmax);
 #endif
 
     double datawidth = newarea->WorldXYWidth() / 1000.0;  // view extent in kilometers

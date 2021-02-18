@@ -968,11 +968,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   {
     // Copy the original coordinates for projection
 
-#ifdef NEW_NFMIAREA
     Fmi::CoordinateTransformation transformation(theQ->SpatialReference(), theSR);
-#else
-    Fmi::CoordinateTransformation transformation(theQ->area().WKT(), theSR);
-#endif
     auto coords = std::make_shared<Fmi::CoordinateMatrix>(*theCoords);
 
     coords->transform(transformation);

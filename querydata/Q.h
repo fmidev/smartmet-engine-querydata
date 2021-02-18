@@ -329,10 +329,6 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   boost::shared_ptr<ParameterTranslations> itsParameterTranslations;
 
-#ifndef NEW_NFMIAREA
-  std::unique_ptr<Fmi::SpatialReference> itsSpatialReference;
-#endif
-
 };  // class QImpl
 
 typedef boost::shared_ptr<QImpl> Q;
