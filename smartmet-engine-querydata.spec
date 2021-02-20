@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.2.18
+Version: 21.2.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -81,6 +81,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sat Feb 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.20-1.fmi
+- Use OGR::gridNorth instead of querydata TrueNorthAzimuth
+
 * Thu Feb 18 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.18-1.fmi
 - Use NFmiArea::SpatialReference
 

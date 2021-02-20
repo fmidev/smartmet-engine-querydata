@@ -4,14 +4,17 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/time_facet.hpp>
 #include <boost/functional/hash.hpp>
+#include <boost/math/constants/constants.hpp>
 #include <boost/optional.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
 #include <boost/timer/timer.hpp>
 #include <gis/Box.h>
+#include <gis/CoordinateTransformation.h>
 #include <gis/DEM.h>
 #include <gis/LandCover.h>
+#include <gis/OGR.h>
 #include <gis/SpatialReference.h>
 #include <macgyver/Astronomy.h>
 #include <macgyver/CharsetTools.h>
@@ -1833,8 +1836,16 @@ ts::Value WindUMS(QImpl &q,
 {
   try
   {
+    Fmi::CoordinateTransformation transformation("WGS84", q.SpatialReference());
+    auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
+
+    if (!opt_angle)
+      return Spine::TimeSeries::None();
+
+    auto angle = *opt_angle * boost::math::double_constants::degree;
+
     NFmiPoint latlon(loc.longitude, loc.latitude);
-    auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
+    // auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
 
     if (!q.param(kFmiWindUMS))
       return Spine::TimeSeries::None();
@@ -1874,8 +1885,16 @@ ts::Value WindVMS(QImpl &q,
 {
   try
   {
+    Fmi::CoordinateTransformation transformation("WGS84", q.SpatialReference());
+    auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
+
+    if (!opt_angle)
+      return Spine::TimeSeries::None();
+
+    auto angle = *opt_angle * boost::math::double_constants::degree;
+
     NFmiPoint latlon(loc.longitude, loc.latitude);
-    auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
+    // auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
 
     if (!q.param(kFmiWindVMS))
       return Spine::TimeSeries::None();
@@ -3015,11 +3034,11 @@ ts::Value GridNorth(const QImpl &q, const Spine::Location &loc)
 {
   try
   {
-    if (!q.isArea())
+    Fmi::CoordinateTransformation transformation("WGS84", q.SpatialReference());
+    auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
+    if (!opt_angle)
       return Spine::TimeSeries::None();
-
-    NFmiPoint latlon(loc.longitude, loc.latitude);
-    return q.area().TrueNorthAzimuth(latlon).Value();
+    return *opt_angle;
   }
   catch (...)
   {
