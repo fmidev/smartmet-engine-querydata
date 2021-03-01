@@ -379,10 +379,11 @@ const WGS84Envelope &QImpl::getWGS84Envelope()
   if (itsWGS84Envelope != nullptr)
     return *itsWGS84Envelope;
 
+  auto *ptr = new WGS84Envelope(itsInfo);
+
   Spine::UpgradeWriteLock writelock(readlock);
 
-  if (itsWGS84Envelope == nullptr)
-    itsWGS84Envelope = boost::movelib::make_unique<WGS84Envelope>(itsInfo);
+  itsWGS84Envelope.reset(ptr);
   return *itsWGS84Envelope;
 }
 
@@ -3357,7 +3358,9 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
   if (pname.substr(0, 5) == "date(" && pname[pname.size() - 1] == ')')
     return format_date(ldt, opt.outlocale, pname.substr(5, pname.size() - 6));
 
-  throw Fmi::Exception(BCP, "Unknown DataIndependent special function '" + pname + "'!");
+  throw Fmi::Exception(BCP,
+                       "Unknown DataIndependent special function '" + pname + "' with number " +
+                           Fmi::to_string(opt.par.number()));
 }
 
 // ======================================================================
