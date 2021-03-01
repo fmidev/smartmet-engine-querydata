@@ -1444,80 +1444,83 @@ NFmiDataMatrix<float> QImpl::calculatedValues(const Spine::Parameter &theParam,
   {
     const auto *grid = itsInfo->Grid();
     if (grid == nullptr)
-      throw Fmi::Exception(BCP, "Canno extract grid of values from point data");
+      throw Fmi::Exception(BCP, "Cannot extract grid of values from point data");
     const auto nx = grid->XNumber();
     const auto ny = grid->YNumber();
 
     NFmiDataMatrix<float> ret(nx, ny, kFloatMissing);
 
-    auto pname = boost::algorithm::to_lower_copy(theParam.name(), std::locale::classic());
-
     // Note: Landscaping has no effect at grid points
 
-    if (pname == "windchill")
+    switch (theParam.number())
     {
-      if (param(kFmiWindSpeedMS) && param(kFmiTemperature))
+      case kFmiWindChill:
       {
-        auto t2m = values(theInterpolatedTime);
-        param(kFmiWindSpeedMS);
-        auto wspd = values(theInterpolatedTime);
-        for (std::size_t j = 0; j < t2m.NY(); ++j)
-          for (std::size_t i = 0; i < t2m.NX(); ++i)
-            ret[i][j] = FmiWindChill(wspd[i][j], t2m[i][j]);
+        if (param(kFmiWindSpeedMS) && param(kFmiTemperature))
+        {
+          auto t2m = values(theInterpolatedTime);
+          param(kFmiWindSpeedMS);
+          auto wspd = values(theInterpolatedTime);
+          for (std::size_t j = 0; j < t2m.NY(); ++j)
+            for (std::size_t i = 0; i < t2m.NX(); ++i)
+              ret[i][j] = FmiWindChill(wspd[i][j], t2m[i][j]);
+        }
+        break;
+      }
+      case kFmiSummerSimmerIndex:
+      {
+        if (param(kFmiHumidity) && param(kFmiTemperature))
+        {
+          auto t2m = values(theInterpolatedTime);
+          param(kFmiHumidity);
+          auto rh = values(theInterpolatedTime);
+          for (std::size_t j = 0; j < t2m.NY(); ++j)
+            for (std::size_t i = 0; i < t2m.NX(); ++i)
+              ret[i][j] = FmiSummerSimmerIndex(rh[i][j], t2m[i][j]);
+        }
+        break;
+      }
+      case kFmiFeelsLike:
+      {
+        if (param(kFmiHumidity) && param(kFmiWindSpeedMS) && param(kFmiTemperature))
+        {
+          auto t2m = values(theInterpolatedTime);
+          param(kFmiHumidity);
+          auto rh = values(theInterpolatedTime);
+          param(kFmiWindSpeedMS);
+          auto wpsd = values(theInterpolatedTime);
+
+          bool has_radiation = param(kFmiRadiationGlobal);
+          if (has_radiation)
+            ret = values(theInterpolatedTime);  // Using ret as temporary storage for radiation
+          for (std::size_t j = 0; j < t2m.NY(); ++j)
+            for (std::size_t i = 0; i < t2m.NX(); ++i)
+              if (has_radiation)
+                ret[i][j] = FmiFeelsLikeTemperature(wpsd[i][j], rh[i][j], t2m[i][j], ret[i][j]);
+        }
+        break;
+      }
+      case kFmiApparentTemperature:
+      {
+        if (param(kFmiHumidity) && param(kFmiWindSpeedMS) && param(kFmiTemperature))
+        {
+          auto t2m = values(theInterpolatedTime);
+          param(kFmiHumidity);
+          auto rh = values(theInterpolatedTime);
+          param(kFmiWindSpeedMS);
+          auto wpsd = values(theInterpolatedTime);
+          for (std::size_t j = 0; j < t2m.NY(); ++j)
+            for (std::size_t i = 0; i < t2m.NX(); ++i)
+              ret[i][j] = FmiApparentTemperature(wpsd[i][j], rh[i][j], t2m[i][j]);
+        }
+        break;
+      }
+      default:
+      {
+        throw Fmi::Exception(BCP, "Unable to fetch parameter as a value matrix")
+            .addParameter("parameter", theParam.name());
       }
     }
-
-    else if (pname == "summersimmerindex" || pname == "ssi")
-    {
-      if (param(kFmiHumidity) && param(kFmiTemperature))
-      {
-        auto t2m = values(theInterpolatedTime);
-        param(kFmiHumidity);
-        auto rh = values(theInterpolatedTime);
-        for (std::size_t j = 0; j < t2m.NY(); ++j)
-          for (std::size_t i = 0; i < t2m.NX(); ++i)
-            ret[i][j] = FmiSummerSimmerIndex(rh[i][j], t2m[i][j]);
-      }
-    }
-    else if (pname == "feelslike")
-    {
-      if (param(kFmiHumidity) && param(kFmiWindSpeedMS) && param(kFmiTemperature))
-      {
-        auto t2m = values(theInterpolatedTime);
-        param(kFmiHumidity);
-        auto rh = values(theInterpolatedTime);
-        param(kFmiWindSpeedMS);
-        auto wpsd = values(theInterpolatedTime);
-
-        bool has_radiation = param(kFmiRadiationGlobal);
-        if (has_radiation)
-          ret = values(theInterpolatedTime);  // Using ret as temporary storage for radiation
-        for (std::size_t j = 0; j < t2m.NY(); ++j)
-          for (std::size_t i = 0; i < t2m.NX(); ++i)
-            if (has_radiation)
-              ret[i][j] = FmiFeelsLikeTemperature(wpsd[i][j], rh[i][j], t2m[i][j], ret[i][j]);
-      }
-    }
-
-    else if (pname == "apparenttemperature")
-    {
-      if (param(kFmiHumidity) && param(kFmiWindSpeedMS) && param(kFmiTemperature))
-      {
-        auto t2m = values(theInterpolatedTime);
-        param(kFmiHumidity);
-        auto rh = values(theInterpolatedTime);
-        param(kFmiWindSpeedMS);
-        auto wpsd = values(theInterpolatedTime);
-        for (std::size_t j = 0; j < t2m.NY(); ++j)
-          for (std::size_t i = 0; i < t2m.NX(); ++i)
-            ret[i][j] = FmiApparentTemperature(wpsd[i][j], rh[i][j], t2m[i][j]);
-      }
-    }
-
-    else
-      throw Fmi::Exception(BCP, "Unable to fetch parameter as a value matrix")
-          .addParameter("parameter", pname);
-
     return ret;
   }
   catch (...)
@@ -1934,7 +1937,7 @@ ts::Value WindCompass8(QImpl &q,
 {
   try
   {
-    static std::vector<std::string> names{"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+    std::vector<std::string> names{"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
 
     if (!q.param(kFmiWindDirection))
       return Spine::TimeSeries::None();
@@ -1965,22 +1968,22 @@ ts::Value WindCompass16(QImpl &q,
 {
   try
   {
-    static std::vector<std::string> names{"N",
-                                          "NNE",
-                                          "NE",
-                                          "ENE",
-                                          "E",
-                                          "ESE",
-                                          "SE",
-                                          "SSE",
-                                          "S",
-                                          "SSW",
-                                          "SW",
-                                          "WSW",
-                                          "W",
-                                          "WNW",
-                                          "NW",
-                                          "NNW"};
+    std::vector<std::string> names{"N",
+                                   "NNE",
+                                   "NE",
+                                   "ENE",
+                                   "E",
+                                   "ESE",
+                                   "SE",
+                                   "SSE",
+                                   "S",
+                                   "SSW",
+                                   "SW",
+                                   "WSW",
+                                   "W",
+                                   "WNW",
+                                   "NW",
+                                   "NNW"};
 
     if (!q.param(kFmiWindDirection))
       return Spine::TimeSeries::None();
@@ -2011,10 +2014,10 @@ ts::Value WindCompass32(QImpl &q,
 {
   try
   {
-    static std::vector<std::string> names{"N", "NbE", "NNE", "NEbN", "NE", "NEbE", "ENE", "EbN",
-                                          "E", "EbS", "ESE", "SEbE", "SE", "SEbS", "SSE", "SbE",
-                                          "S", "SbW", "SSW", "SWbS", "SW", "SWbW", "WSW", "WbS",
-                                          "W", "WbN", "WNW", "NWbW", "NW", "NWbN", "NNW", "NbW"};
+    std::vector<std::string> names{"N", "NbE", "NNE", "NEbN", "NE", "NEbE", "ENE", "EbN",
+                                   "E", "EbS", "ESE", "SEbE", "SE", "SEbS", "SSE", "SbE",
+                                   "S", "SbW", "SSW", "SWbS", "SW", "SWbW", "WSW", "WbS",
+                                   "W", "WbN", "WNW", "NWbW", "NW", "NWbN", "NNW", "NbW"};
 
     if (!q.param(kFmiWindDirection))
       return Spine::TimeSeries::None();
@@ -3098,296 +3101,261 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
   const std::string &pname = opt.par.name();
   const Spine::Location &loc = opt.loc;
 
-  if (pname == "place")
-    return opt.place;
-
-  if (pname == "name")
-    return loc.name;
-
-  if (pname == "iso2")
-    return loc.iso2;
-
-  if (pname == "geoid")
+  switch (opt.par.number())
   {
-    if (loc.geoid == 0)  // not sure why this is still here
-      return Spine::TimeSeries::None();
-    return Fmi::to_string(loc.geoid);
-  }
-
-  // We allow coordinates to be both DataIndependent and DataDerived depending
-  // on the needs of plugins
-  if (pname == "latitude" || pname == "lat")
-    return loc.latitude;
-
-  if (pname == "longitude" || pname == "lon")
-    return loc.longitude;
-
-  if (pname == "latlon" || pname == "lonlat")
-    return ts::LonLat(loc.longitude, loc.latitude);
-
-  if (pname == "region")
-  {
-    // This reintroduces an older bug/feature where
-    // the name of the location is given as a region
-    // if it doesn't belong to any administrative region.
-    // (i.e. Helsinki doesn't have region, Kumpula has.)
-    //
-    // Also checking whether the loc.name has valid data,
-    // if it's empty as well - which shoudn't occur - we return nan
-
-    if (!loc.area.empty())
-      return loc.area;  // Administrative region known.
-
-    if (loc.name.empty())
-      // No area (administrative region) nor name known.
-      return Spine::TimeSeries::None();
-
-    // Place name known, administrative region unknown.
-    return loc.name;
-  }
-
-  if (pname == "country")
-    return opt.country;
-
-  if (pname == "feature")
-    return loc.feature;
-
-  if (pname == "tz")
-  {
-    if (ldt.zone())
-      return ldt.zone()->std_zone_name();
-    return Spine::TimeSeries::None();
-  }
-
-  if (pname == "localtz")
-    return loc.timezone;
-
-  if (pname == "level")
-    return levelResult;
-
-  if (pname == "nearlatitude")
-    return opt.lastpoint.Y();
-
-  if (pname == "nearlongitude")
-    return opt.lastpoint.X();
-
-  if (pname == "nearlatlon" || pname == "nearlonlat")
-    return ts::LonLat(opt.lastpoint.X(), opt.lastpoint.Y());
-
-  if (pname == "population")
-    return Fmi::to_string(loc.population);
-
-  if (pname == "elevation")
-    return Fmi::to_string(loc.elevation);
-
-  if (pname == "dem")
-    return Fmi::to_string(loc.dem);
-
-  if (pname == "covertype")
-    return Fmi::to_string(static_cast<int>(loc.covertype));
-
-  if (pname == "model")
-    return opt.producer;
-
-  if (pname == "time")
-    return opt.timeformatter.format(ldt);
-
-  if (pname == "isotime")
-    return Fmi::to_iso_string(ldt.local_time());
-
-  if (pname == "xmltime")
-    return Fmi::to_iso_extended_string(ldt.local_time());
-
-  if (pname == "localtime")
-  {
-    auto localtz = Fmi::TimeZoneFactory::instance().time_zone_from_string(loc.timezone);
-    boost::posix_time::ptime utc = ldt.utc_time();
-    boost::local_time::local_date_time localt(utc, localtz);
-    return opt.timeformatter.format(localt);
-  }
-
-  if (pname == "utctime")
-    return opt.timeformatter.format(ldt.utc_time());
-
-  if (pname == "epochtime")
-  {
-    boost::posix_time::ptime time_t_epoch(boost::gregorian::date(1970, 1, 1));
-    boost::posix_time::time_duration diff = ldt.utc_time() - time_t_epoch;
-    return Fmi::to_string(diff.total_seconds());
-  }
-
-  if (pname == "origintime")
-  {
-    if (!time(ldt.utc_time()))
+    case kFmiPlace:
+      return opt.place;
+    case kFmiName:
+      return loc.name;
+    case kFmiISO2:
+      return loc.iso2;
+    case kFmiGEOID:
     {
-      // Search first valid time after the desired time, and choose that origintime
-      bool ok = false;
-      for (resetTime(); !ok && nextTime();)
-        ok = (validTime() > ldt.utc_time());
-      if (!ok)
+      if (loc.geoid == 0)  // not sure why this is still here
         return Spine::TimeSeries::None();
+      return Fmi::to_string(loc.geoid);
     }
+    case kFmiLatitude:
+      return loc.latitude;
+    case kFmiLongitude:
+      return loc.longitude;
+    case kFmiLatLon:
+    case kFmiLonLat:
+      return ts::LonLat(loc.longitude, loc.latitude);
+    case kFmiRegion:
+    {
+      // This reintroduces an older bug/feature where the name of the location is given as a
+      // region if it doesn't belong to any administrative region. (i.e. Helsinki doesn't have
+      // region, Kumpula has.) Also checking whether the loc.name has valid data, if it's empty as
+      // well - which shoudn't occur - we return nan
 
-    boost::posix_time::ptime utc = originTime();
-    boost::local_time::local_date_time localt(utc, ldt.zone());
-    return opt.timeformatter.format(localt);
-  }
+      if (!loc.area.empty())
+        return loc.area;  // Administrative region known.
 
-  if (pname == "modtime" || pname == "mtime")
-  {
-    boost::posix_time::ptime utc = modificationTime();
-    boost::local_time::local_date_time localt(utc, ldt.zone());
-    return opt.timeformatter.format(localt);
-  }
+      if (loc.name.empty())
+        // No area (administrative region) nor name known.
+        return Spine::TimeSeries::None();
 
-  if (pname == "dark")
-  {
-    auto pos = Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_string(static_cast<int>(pos.dark()));
-  }
+      // Place name known, administrative region unknown.
+      return loc.name;
+    }
+    case kFmiCountry:
+      return opt.country;
+    case kFmiFeature:
+      return loc.feature;
+    case kFmiTZ:
+    {
+      if (ldt.zone())
+        return ldt.zone()->std_zone_name();
+      return Spine::TimeSeries::None();
+    }
+    case kFmiLocalTZ:
+      return loc.timezone;
+    case kFmiLevel:
+      return levelResult;
+    case kFmiNearLatitude:
+      return opt.lastpoint.Y();
+    case kFmiNearLongitude:
+      return opt.lastpoint.X();
+    case kFmiNearLatLon:
+    case kFmiNearLonLat:
+      return ts::LonLat(opt.lastpoint.X(), opt.lastpoint.Y());
+    case kFmiPopulation:
+      return Fmi::to_string(loc.population);
+    case kFmiElevation:
+      return Fmi::to_string(loc.elevation);
+    case kFmiDEM:
+      return Fmi::to_string(loc.dem);
+    case kFmiCoverType:
+      return Fmi::to_string(static_cast<int>(loc.covertype));
+    case kFmiModel:
+      return opt.producer;
+    case kFmiTime:
+      return opt.timeformatter.format(ldt);
+    case kFmiISOTime:
+      return Fmi::to_iso_string(ldt.local_time());
+    case kFmiXMLTime:
+      return Fmi::to_iso_extended_string(ldt.local_time());
+    case kFmiLocalTime:
+    {
+      auto localtz = Fmi::TimeZoneFactory::instance().time_zone_from_string(loc.timezone);
+      boost::posix_time::ptime utc = ldt.utc_time();
+      boost::local_time::local_date_time localt(utc, localtz);
+      return opt.timeformatter.format(localt);
+    }
+    case kFmiUTCTime:
+      return opt.timeformatter.format(ldt.utc_time());
+    case kFmiEpochTime:
+    {
+      boost::posix_time::ptime time_t_epoch(boost::gregorian::date(1970, 1, 1));
+      boost::posix_time::time_duration diff = ldt.utc_time() - time_t_epoch;
+      return Fmi::to_string(diff.total_seconds());
+    }
+    case kFmiOriginTime:
+    {
+      if (!time(ldt.utc_time()))
+      {
+        // Search first valid time after the desired time, and choose that origintime
+        bool ok = false;
+        for (resetTime(); !ok && nextTime();)
+          ok = (validTime() > ldt.utc_time());
+        if (!ok)
+          return Spine::TimeSeries::None();
+      }
+      boost::posix_time::ptime utc = originTime();
+      boost::local_time::local_date_time localt(utc, ldt.zone());
+      return opt.timeformatter.format(localt);
+    }
+    case kFmiModTime:
+    {
+      boost::posix_time::ptime utc = modificationTime();
+      boost::local_time::local_date_time localt(utc, ldt.zone());
+      return opt.timeformatter.format(localt);
+    }
+    case kFmiDark:
+    {
+      auto pos = Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_string(static_cast<int>(pos.dark()));
+    }
+    case kFmiMoonPhase:
+      return Fmi::Astronomy::moonphase(ldt.utc_time());
+    case kFmiMoonrise:
+    {
+      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_iso_string(ltime.moonrise.local_time());
+    }
+    case kFmiMoonrise2:
+    {
+      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
 
-  if (pname == "moonphase")
-    return Fmi::Astronomy::moonphase(ldt.utc_time());
+      if (ltime.moonrise2_today())
+        return Fmi::to_iso_string(ltime.moonrise2.local_time());
 
-  if (pname == "moonrise")
-  {
-    auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_iso_string(ltime.moonrise.local_time());
+      return std::string("");
+    }
+    case kFmiMoonset:
+    {
+      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_iso_string(ltime.moonset.local_time());
+    }
+    case kFmiMoonset2:
+    {
+      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+      if (ltime.moonset2_today())
+        return Fmi::to_iso_string(ltime.moonset2.local_time());
+      return std::string("");
+    }
+    case kFmiMoonriseToday:
+    {
+      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_string(static_cast<int>(ltime.moonrise_today()));
+    }
+    case kFmiMoonrise2Today:
+    {
+      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_string(static_cast<int>(ltime.moonrise2_today()));
+    }
+    case kFmiMoonsetToday:
+    {
+      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_string(static_cast<int>(ltime.moonset_today()));
+    }
+    case kFmiMoonset2Today:
+    {
+      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_string(static_cast<int>(ltime.moonset2_today()));
+    }
+    case kFmiMoonUp24h:
+    {
+      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_string(static_cast<int>(ltime.above_horizont_24h()));
+    }
+    case kFmiMoonDown24h:
+    {
+      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_string(static_cast<int>(!ltime.moonrise_today() && !ltime.moonset_today() &&
+                                             !ltime.above_horizont_24h()));
+    }
+    case kFmiSunrise:
+    {
+      auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_iso_string(stime.sunrise.local_time());
+    }
+    case kFmiSunset:
+    {
+      auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_iso_string(stime.sunset.local_time());
+    }
+    case kFmiNoon:
+    {
+      auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_iso_string(stime.noon.local_time());
+    }
+    case kFmiSunriseToday:
+    {
+      auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_string(static_cast<int>(stime.sunrise_today()));
+    }
+    case kFmiSunsetToday:
+    {
+      auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+      return Fmi::to_string(static_cast<int>(stime.sunset_today()));
+    }
+    case kFmiDayLength:
+    {
+      auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
+      auto seconds = stime.daylength().total_seconds();
+      auto minutes = lround(seconds / 60.0);
+      return Fmi::to_string(minutes);
+    }
+    case kFmiTimeString:
+      return format_date(ldt, opt.outlocale, opt.timestring);
+    case kFmiWDay:
+      return format_date(ldt, opt.outlocale, "%a");
+    case kFmiWeekday:
+      return format_date(ldt, opt.outlocale, "%A");
+    case kFmiMon:
+      return format_date(ldt, opt.outlocale, "%b");
+    case kFmiMonth:
+      return format_date(ldt, opt.outlocale, "%B");
+    case kFmiSunElevation:
+    {
+      auto pos = Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+      return pos.elevation;
+    }
+    case kFmiSunDeclination:
+    {
+      auto pos = Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+      return pos.declination;
+    }
+    case kFmiSunAzimuth:
+    {
+      auto pos = Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+      return pos.azimuth;
+    }
+    case kFmiGridNorth:
+      return GridNorth(*this, loc);
+    case kFmiHour:
+      return Fmi::to_string(ldt.local_time().time_of_day().hours());
+      // The following parameters are added for for obsengine compability reasons
+      // so that we can have e.g. fmisid identifier for observations in query which
+      // has both observations and forecasts
+    case kFmiFMISID:
+    case kFmiWmoStationNumber:
+    case kFmiLPNN:
+    case kFmiRWSID:
+    case kFmiStationary:
+    case kFmiDistance:
+    case kFmiDirection:
+    case kFmiSensorNo:
+    case kFmiStationName:
+      return Spine::TimeSeries::None();
+    default:
+      break;
   }
-  if (pname == "moonrise2")
-  {
-    auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-
-    if (ltime.moonrise2_today())
-      return Fmi::to_iso_string(ltime.moonrise2.local_time());
-
-    return std::string("");
-  }
-  if (pname == "moonset")
-  {
-    auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_iso_string(ltime.moonset.local_time());
-  }
-  if (pname == "moonset2")
-  {
-    auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-    if (ltime.moonset2_today())
-      return Fmi::to_iso_string(ltime.moonset2.local_time());
-    return std::string("");
-  }
-  if (pname == "moonrisetoday")
-  {
-    auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_string(static_cast<int>(ltime.moonrise_today()));
-  }
-  if (pname == "moonrise2today")
-  {
-    auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_string(static_cast<int>(ltime.moonrise2_today()));
-  }
-  if (pname == "moonsettoday")
-  {
-    auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_string(static_cast<int>(ltime.moonset_today()));
-  }
-  if (pname == "moonset2today")
-  {
-    auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_string(static_cast<int>(ltime.moonset2_today()));
-  }
-  if (pname == "moonup24h")
-  {
-    auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_string(static_cast<int>(ltime.above_horizont_24h()));
-  }
-  if (pname == "moondown24h")
-  {
-    auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_string(static_cast<int>(!ltime.moonrise_today() && !ltime.moonset_today() &&
-                                           !ltime.above_horizont_24h()));
-  }
-
-  if (pname == "sunrise")
-  {
-    auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_iso_string(stime.sunrise.local_time());
-  }
-  if (pname == "sunset")
-  {
-    auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_iso_string(stime.sunset.local_time());
-  }
-  if (pname == "noon")
-  {
-    auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_iso_string(stime.noon.local_time());
-  }
-  if (pname == "sunrisetoday")
-  {
-    auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_string(static_cast<int>(stime.sunrise_today()));
-  }
-  if (pname == "sunsettoday")
-  {
-    auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
-    return Fmi::to_string(static_cast<int>(stime.sunset_today()));
-  }
-  if (pname == "daylength")
-  {
-    auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
-    auto seconds = stime.daylength().total_seconds();
-    auto minutes = lround(seconds / 60.0);
-    return Fmi::to_string(minutes);
-  }
-  if (pname == "timestring")
-    return format_date(ldt, opt.outlocale, opt.timestring);
-
-  if (pname == "wday")
-    return format_date(ldt, opt.outlocale, "%a");
-
-  if (pname == "weekday")
-    return format_date(ldt, opt.outlocale, "%A");
-
-  if (pname == "mon")
-    return format_date(ldt, opt.outlocale, "%b");
-
-  if (pname == "month")
-    return format_date(ldt, opt.outlocale, "%B");
-
-  if (pname == "hour")
-    return Fmi::to_string(ldt.local_time().time_of_day().hours());
 
   if (pname.substr(0, 5) == "date(" && pname[pname.size() - 1] == ')')
     return format_date(ldt, opt.outlocale, pname.substr(5, pname.size() - 6));
-
-  if (pname == "sunelevation")
-  {
-    auto pos = Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
-    return pos.elevation;
-  }
-
-  if (pname == "sundeclination")
-  {
-    auto pos = Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
-    return pos.declination;
-  }
-
-  if (pname == "sunazimuth")
-  {
-    auto pos = Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
-    return pos.azimuth;
-  }
-
-  if (pname == "gridnorth")
-    return GridNorth(*this, loc);
-
-  // The following parameters are added for for obsengine compability reasons
-  // so that we can have e.g. fmisid identifier for observations in query which
-  // has both observations and forecasts
-  if (pname == "fmisid" || pname == "wmo" || pname == "lpnn" || pname == "rwsid" ||
-      pname == "stationary" || pname == "distance" || pname == "direction" ||
-      pname == "sensor_no" || pname == "stationname")
-    return Spine::TimeSeries::None();
 
   throw Fmi::Exception(BCP, "Unknown DataIndependent special function '" + pname + "'!");
 }
@@ -3441,82 +3409,123 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
       }
       case Spine::Parameter::Type::DataDerived:
       {
-        if (pname == "latitude" || pname == "lat")
-          retval = loc.latitude;
-
-        else if (pname == "longitude" || pname == "lon")
-          retval = loc.longitude;
-
-        else if (pname == "latlon" || pname == "lonlat")
-          retval = ts::LonLat(loc.longitude, loc.latitude);
-
-        else if (pname == "windcompass8")
-          retval = WindCompass8(*this, loc, ldt);
-
-        else if (pname == "windcompass16")
-          retval = WindCompass16(*this, loc, ldt);
-
-        else if (pname == "windcompass32")
-          retval = WindCompass32(*this, loc, ldt);
-
-        else if (pname == "cloudiness8th")
-          retval = Cloudiness8th(*this, loc, ldt);
-
-        else if (pname == "windchill")
-          retval = WindChill(*this, loc, ldt);
-
-        else if (pname == "summersimmerindex" || pname == "ssi")
-          retval = SummerSimmerIndex(*this, loc, ldt);
-
-        else if (pname == "feelslike")
-          retval = FeelsLike(*this, loc, ldt);
-
-        else if (pname == "apparenttemperature")
-          retval = ApparentTemperature(*this, loc, ldt);
-
-        else if (pname == "weather")
-          retval = WeatherText(*this, loc, ldt, opt.language, *itsParameterTranslations);
-
-        else if (pname == "weathersymbol")
-          retval = WeatherSymbol(*this, loc, ldt);
-
-        else if (pname == "smartsymbol")
-          retval = SmartSymbolNumber(*this, loc, ldt);
-
-        else if (pname == "smartsymboltext")
-          retval = SmartSymbolText(*this, loc, ldt, opt.language);
-
-        else if (pname == "weathernumber")
-          retval = WeatherNumber(*this, loc, ldt);
-
-        else if (pname == "snow1hlower")
-          retval = Snow1hLower(*this, loc, ldt);
-
-        else if (pname == "snow1hupper")
-          retval = Snow1hUpper(*this, loc, ldt);
-
-        else if (pname == "snow1h")
-          retval = Snow1h(*this, loc, ldt);
-
-        else if (pname == "windums")
+        switch (opt.par.number())
         {
-          if (isRelativeUV())
-            retval = WindUMS(*this, loc, ldt);
-          else if (param(kFmiWindUMS))
-            retval = dataValue(opt, latlon, ldt);
+          case kFmiLatitude:
+          {
+            retval = loc.latitude;
+            break;
+          }
+          case kFmiLongitude:
+          {
+            retval = loc.longitude;
+            break;
+          }
+          case kFmiLatLon:
+          case kFmiLonLat:
+          {
+            retval = ts::LonLat(loc.longitude, loc.latitude);
+            break;
+          }
+          case kFmiWindCompass8:
+          {
+            retval = WindCompass8(*this, loc, ldt);
+            break;
+          }
+          case kFmiWindCompass16:
+          {
+            retval = WindCompass16(*this, loc, ldt);
+            break;
+          }
+          case kFmiWindCompass32:
+          {
+            retval = WindCompass32(*this, loc, ldt);
+            break;
+          }
+          case kFmiCloudiness8th:
+          {
+            retval = Cloudiness8th(*this, loc, ldt);
+            break;
+          }
+          case kFmiWindChill:
+          {
+            retval = WindChill(*this, loc, ldt);
+            break;
+          }
+          case kFmiSummerSimmerIndex:
+          {
+            retval = SummerSimmerIndex(*this, loc, ldt);
+            break;
+          }
+          case kFmiFeelsLike:
+          {
+            retval = FeelsLike(*this, loc, ldt);
+            break;
+          }
+          case kFmiApparentTemperature:
+          {
+            retval = ApparentTemperature(*this, loc, ldt);
+            break;
+          }
+          case kFmiWeather:
+          {
+            retval = WeatherText(*this, loc, ldt, opt.language, *itsParameterTranslations);
+            break;
+          }
+          case kFmiWeatherSymbol:
+          {
+            retval = WeatherSymbol(*this, loc, ldt);
+            break;
+          }
+          case kFmiSmartSymbol:
+          {
+            retval = SmartSymbolNumber(*this, loc, ldt);
+            break;
+          }
+          case kFmiSmartSymbolText:
+          {
+            retval = SmartSymbolText(*this, loc, ldt, opt.language);
+            break;
+          }
+          case kFmiWeatherNumber:
+          {
+            retval = WeatherNumber(*this, loc, ldt);
+            break;
+          }
+          case kFmiSnow1hLower:
+          {
+            retval = Snow1hLower(*this, loc, ldt);
+            break;
+          }
+          case kFmiSnow1hUpper:
+          {
+            retval = Snow1hUpper(*this, loc, ldt);
+            break;
+          }
+          case kFmiSnow1h:
+          {
+            retval = Snow1h(*this, loc, ldt);
+            break;
+          }
+          case kFmiWindUMS:
+          {
+            if (isRelativeUV())
+              retval = WindUMS(*this, loc, ldt);
+            else if (param(kFmiWindUMS))
+              retval = dataValue(opt, latlon, ldt);
+            break;
+          }
+          case kFmiWindVMS:
+          {
+            if (isRelativeUV())
+              retval = WindVMS(*this, loc, ldt);
+            else if (param(kFmiWindVMS))
+              retval = dataValue(opt, latlon, ldt);
+            break;
+          }
+          default:
+            throw Fmi::Exception(BCP, "Unknown DataDerived parameter '" + pname + "'!");
         }
-
-        else if (pname == "windvms")
-        {
-          if (isRelativeUV())
-            retval = WindVMS(*this, loc, ldt);
-          else if (param(kFmiWindVMS))
-            retval = dataValue(opt, latlon, ldt);
-        }
-
-        else
-          throw Fmi::Exception(BCP, "Unknown DataDerived parameter '" + pname + "'!");
-
         break;
       }
       case Spine::Parameter::Type::DataIndependent:
@@ -3591,13 +3600,12 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
       }
       case Spine::Parameter::Type::DataDerived:
       {
-        if (pname == "latitude" || pname == "lat")
+        auto num = opt.par.number();
+        if (num == kFmiLatitude)
           retval = loc.latitude;
-
-        else if (pname == "longitude" || pname == "lon")
+        else if (num == kFmiLongitude)
           retval = loc.longitude;
-
-        else if (pname == "latlon" || pname == "lonlat")
+        else if (num == kFmiLatLon || num == kFmiLonLat)
           retval = ts::LonLat(loc.longitude, loc.latitude);
 
         break;
@@ -3674,13 +3682,12 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
       }
       case Spine::Parameter::Type::DataDerived:
       {
-        if (pname == "latitude" || pname == "lat")
+        auto num = opt.par.number();
+        if (num == kFmiLatitude)
           retval = loc.latitude;
-
-        else if (pname == "longitude" || pname == "lon")
+        else if (num == kFmiLongitude)
           retval = loc.longitude;
-
-        else if (pname == "latlon" || pname == "lonlat")
+        else if (num == kFmiLatLon || num == kFmiLonLat)
           retval = ts::LonLat(loc.longitude, loc.latitude);
 
         break;
