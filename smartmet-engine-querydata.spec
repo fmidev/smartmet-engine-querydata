@@ -84,6 +84,7 @@ rm -rf $RPM_BUILD_ROOT
 * Tue Mar  2 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.2-1.fmi
 - Removed redundant to_lower_copy calls
 - Reduce the number of local_date_time to NFmiMetTime conversions
+- Prefer emplace_back when possible
 
 * Mon Mar  1 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.1-1.fmi
 - Improved WGS84Envelope locking

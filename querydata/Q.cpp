@@ -3750,7 +3750,7 @@ ts::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
 
     for (const boost::local_time::local_date_time &ldt : tlist)
     {
-      ret->push_back(ts::TimedValue(ldt, value(param, ldt)));
+      ret->emplace_back(ts::TimedValue(ldt, value(param, ldt)));
     }
 
     return ret;
@@ -3770,7 +3770,7 @@ ts::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
 
     for (const boost::local_time::local_date_time &ldt : tlist)
     {
-      ret->push_back(ts::TimedValue(ldt, valueAtPressure(param, ldt, pressure)));
+      ret->emplace_back(ts::TimedValue(ldt, valueAtPressure(param, ldt, pressure)));
     }
 
     return ret;
@@ -3790,7 +3790,7 @@ ts::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 
     for (const boost::local_time::local_date_time &ldt : tlist)
     {
-      ret->push_back(ts::TimedValue(ldt, valueAtHeight(param, ldt, height)));
+      ret->emplace_back(ts::TimedValue(ldt, valueAtHeight(param, ldt, height)));
     }
 
     return ret;
@@ -3846,7 +3846,7 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
       ts::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       ts::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -3902,7 +3902,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
       ts::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       ts::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -3957,7 +3957,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
       ts::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       ts::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -4000,7 +4000,7 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
       ts::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       ts::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -4040,7 +4040,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
       ts::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       ts::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -4079,7 +4079,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
       ts::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       ts::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->push_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
