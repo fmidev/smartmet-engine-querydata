@@ -3372,8 +3372,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
     // Default return value
     ts::Value retval = Spine::TimeSeries::None();
 
-    // Some shorthand variables
-    std::string pname = boost::algorithm::to_lower_copy(opt.par.name(), std::locale::classic());
+    // Shorthand variables
     const Spine::Location &loc = opt.loc;
 
     // Update last accessed point.
@@ -3527,7 +3526,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
             break;
           }
           default:
-            throw Fmi::Exception(BCP, "Unknown DataDerived parameter '" + pname + "'!");
+            throw Fmi::Exception(BCP, "Unknown DataDerived parameter '" + opt.par.name() + "'!");
         }
         break;
       }
@@ -3563,7 +3562,6 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
 
     // Some shorthand variables
     const Spine::Location &loc = opt.loc;
-    std::string pname = boost::algorithm::to_lower_copy(opt.par.name(), std::locale::classic());
 
     // Update last accessed point.
 
@@ -3645,7 +3643,6 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
 
     // Some shorthand variables
     const Spine::Location &loc = opt.loc;
-    std::string pname = boost::algorithm::to_lower_copy(opt.par.name(), std::locale::classic());
 
     // Update last accessed point.
 

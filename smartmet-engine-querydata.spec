@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.3.1
+Version: 21.3.2
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -81,6 +81,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Mar  2 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.2-1.fmi
+- Removed redundant to_lower_copy calls
+
 * Mon Mar  1 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.1-1.fmi
 - Improved WGS84Envelope locking
 
