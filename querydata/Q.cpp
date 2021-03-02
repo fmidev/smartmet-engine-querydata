@@ -1903,7 +1903,9 @@ ts::Value WindVMS(QImpl &q,
     if (!q.param(kFmiWindVMS))
       return Spine::TimeSeries::None();
 
-    auto v = q.interpolate(latlon, ldt, maxgap);
+    NFmiMetTime t(ldt);
+
+    auto v = q.interpolate(latlon, t, maxgap);
 
     if (angle == 0)
       return v;
@@ -1911,7 +1913,7 @@ ts::Value WindVMS(QImpl &q,
     if (!q.param(kFmiWindUMS))
       return Spine::TimeSeries::None();
 
-    auto u = q.interpolate(latlon, ldt, maxgap);
+    auto u = q.interpolate(latlon, t, maxgap);
 
     if (u == kFloatMissing || v == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -1943,7 +1945,8 @@ ts::Value WindCompass8(QImpl &q,
     if (!q.param(kFmiWindDirection))
       return Spine::TimeSeries::None();
 
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (value == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -1989,7 +1992,8 @@ ts::Value WindCompass16(QImpl &q,
     if (!q.param(kFmiWindDirection))
       return Spine::TimeSeries::None();
 
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (value == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -2023,7 +2027,8 @@ ts::Value WindCompass32(QImpl &q,
     if (!q.param(kFmiWindDirection))
       return Spine::TimeSeries::None();
 
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (value == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -2052,7 +2057,8 @@ ts::Value Cloudiness8th(QImpl &q,
     if (!q.param(kFmiTotalCloudCover))
       return Spine::TimeSeries::None();
 
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (value == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -2083,13 +2089,14 @@ ts::Value WindChill(QImpl &q,
     if (!q.param(kFmiWindSpeedMS))
       return Spine::TimeSeries::None();
 
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiTemperature))
       return Spine::TimeSeries::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
-        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), ldt);
+        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
 
     if (wspd == kFloatMissing || t2m == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -2118,13 +2125,15 @@ ts::Value SummerSimmerIndex(QImpl &q,
     if (!q.param(kFmiHumidity))
       return Spine::TimeSeries::None();
 
-    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+
+    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiTemperature))
       return Spine::TimeSeries::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
-        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), ldt);
+        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
 
     if (rh == kFloatMissing || t2m == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -2153,18 +2162,20 @@ ts::Value FeelsLike(QImpl &q,
     if (!q.param(kFmiHumidity))
       return Spine::TimeSeries::None();
 
-    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+
+    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
       return Spine::TimeSeries::None();
 
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiTemperature))
       return Spine::TimeSeries::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
-        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), ldt);
+        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
 
     if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -2172,7 +2183,7 @@ ts::Value FeelsLike(QImpl &q,
     // We permit radiation to be missing
     float rad = kFloatMissing;
     if (q.param(kFmiRadiationGlobal))
-      rad = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+      rad = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     float ret = FmiFeelsLikeTemperature(wspd, rh, t2m, rad);
 
@@ -2201,18 +2212,20 @@ ts::Value ApparentTemperature(QImpl &q,
     if (!q.param(kFmiHumidity))
       return Spine::TimeSeries::None();
 
-    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+
+    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
       return Spine::TimeSeries::None();
 
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiTemperature))
       return Spine::TimeSeries::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
-        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), ldt);
+        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
 
     if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -2243,7 +2256,9 @@ ts::Value Snow1hLower(QImpl &q,
     if (!q.param(kFmiPrecipitation1h))
       return Spine::TimeSeries::None();
 
-    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+
+    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     // FmiSnowLowerLimit fails if input is 'nan', check here.
 
@@ -2276,7 +2291,9 @@ ts::Value Snow1hUpper(QImpl &q,
     if (!q.param(kFmiPrecipitation1h))
       return Spine::TimeSeries::None();
 
-    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+
+    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     // FmiSnowUpperLimit fails if input is 'nan', check here.
     if (prec1h == kFloatMissing)
@@ -2311,22 +2328,24 @@ ts::Value Snow1h(QImpl &q,
     if (!q.param(kFmiTemperature))
       return Spine::TimeSeries::None();
 
-    float t = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
       return Spine::TimeSeries::None();
 
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiPrecipitation1h))
       return Spine::TimeSeries::None();
 
-    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
-    if (t == kFloatMissing || wspd == kFloatMissing || prec1h == kFloatMissing)
+    if (t2m == kFloatMissing || wspd == kFloatMissing || prec1h == kFloatMissing)
       return Spine::TimeSeries::None();
 
-    float snow1h = prec1h * FmiSnowWaterRatio(t, wspd);  // Can this be kFLoatMissing???
+    float snow1h = prec1h * FmiSnowWaterRatio(t2m, wspd);  // Can this be kFLoatMissing???
     return snow1h;
   }
   catch (...)
@@ -2350,12 +2369,14 @@ ts::Value WeatherSymbol(QImpl &q,
     if (!q.param(kFmiWeatherSymbol3))
       return Spine::TimeSeries::None();
 
-    float symbol = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+
+    float symbol = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
     if (symbol == kFloatMissing)
       return kFloatMissing;
 
     Fmi::Astronomy::solar_position_t sp =
-        Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+        Fmi::Astronomy::solar_position(t, loc.longitude, loc.latitude);
     if (sp.dark())
       return 100 + symbol;
     return symbol;
@@ -2383,7 +2404,9 @@ ts::Value WeatherText(QImpl &q,
     if (!q.param(kFmiWeatherSymbol3))
       return Spine::TimeSeries::None();
 
-    float w = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), ldt, maxgap);
+    NFmiMetTime t(ldt);
+
+    float w = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (w == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -2417,7 +2440,9 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
     if (!q.param(kFmiTotalCloudCover))
       return {};
 
-    const auto n = q.interpolate(latlon, ldt, maxgap);
+    NFmiMetTime t(ldt);
+
+    const auto n = q.interpolate(latlon, t, maxgap);
 
     if (n == kFloatMissing)
       return {};
@@ -2426,7 +2451,7 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
 
     if (q.param(kFmiProbabilityThunderstorm))
     {
-      const auto thunder = q.interpolate(latlon, ldt, maxgap);
+      const auto thunder = q.interpolate(latlon, t, maxgap);
 
       if (thunder >= thunder_limit1 && thunder != kFloatMissing)
       {
@@ -2440,7 +2465,7 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
     if (!q.param(kFmiPrecipitation1h))
       return {};
 
-    const auto rain = q.interpolate(latlon, ldt, maxgap);
+    const auto rain = q.interpolate(latlon, t, maxgap);
 
     if (rain == kFloatMissing)
       return {};
@@ -2451,7 +2476,7 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
 
       if (q.param(kFmiFogIntensity))
       {
-        const auto fog = q.interpolate(latlon, ldt, maxgap);
+        const auto fog = q.interpolate(latlon, t, maxgap);
         if (fog > 0 && fog != kFloatMissing)
           return 9;  // fog
       }
@@ -2471,9 +2496,9 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
     // Since we have precipitation, we always need precipitation form
     int rform = static_cast<int>(kFloatMissing);
     if (q.param(kFmiPotentialPrecipitationForm))
-      rform = static_cast<int>(q.interpolate(latlon, ldt, maxgap));
+      rform = static_cast<int>(q.interpolate(latlon, t, maxgap));
     else if (q.param(kFmiPrecipitationForm))
-      rform = static_cast<int>(q.interpolate(latlon, ldt, maxgap));
+      rform = static_cast<int>(q.interpolate(latlon, t, maxgap));
 
     if (rform == static_cast<int>(kFloatMissing))
       return {};
@@ -2503,9 +2528,9 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
       // Now we need precipitation type too
       int rtype = 1;  // large scale by default
       if (q.param(kFmiPotentialPrecipitationType))
-        rtype = static_cast<int>(q.interpolate(latlon, ldt, maxgap));
+        rtype = static_cast<int>(q.interpolate(latlon, t, maxgap));
       else if (q.param(kFmiPrecipitationType))
-        rtype = static_cast<int>(q.interpolate(latlon, ldt, maxgap));
+        rtype = static_cast<int>(q.interpolate(latlon, t, maxgap));
 
       if (rtype == 2)            // convective
         return 21 + 3 * nclass;  // 21, 24, 27 for showers
@@ -2538,10 +2563,12 @@ boost::optional<int> calc_weather_number(QImpl &q,
 {
   try
   {
+    NFmiMetTime t(ldt);
+
     // Cloudiness is optional
     float n = kFloatMissing;
     if (q.param(kFmiTotalCloudCover))
-      n = q.interpolate(latlon, ldt, maxgap);
+      n = q.interpolate(latlon, t, maxgap);
 
     int n_class = 9;  // missing
     if (n == kFloatMissing)
@@ -2568,7 +2595,7 @@ boost::optional<int> calc_weather_number(QImpl &q,
     // Precipitation is optional
     float rain = kFloatMissing;
     if (q.param(kFmiPrecipitation1h))
-      rain = q.interpolate(latlon, ldt, maxgap);
+      rain = q.interpolate(latlon, t, maxgap);
 
     int rain_class = 9;  // missing
     if (rain == kFloatMissing)
@@ -2593,25 +2620,25 @@ boost::optional<int> calc_weather_number(QImpl &q,
     // Precipitation form is optional
     float rform = kFloatMissing;
     if (q.param(kFmiPotentialPrecipitationForm))
-      rform = q.interpolate(latlon, ldt, maxgap);
+      rform = q.interpolate(latlon, t, maxgap);
     else if (q.param(kFmiPrecipitationForm))
-      rform = q.interpolate(latlon, ldt, maxgap);
+      rform = q.interpolate(latlon, t, maxgap);
 
     int rform_class = (rform == kFloatMissing ? 9 : static_cast<int>(rform));
 
     // Precipitation type is optional
     float rtype = kFloatMissing;
     if (q.param(kFmiPotentialPrecipitationType))
-      rtype = q.interpolate(latlon, ldt, maxgap);
+      rtype = q.interpolate(latlon, t, maxgap);
     else if (q.param(kFmiPrecipitationType))
-      rtype = q.interpolate(latlon, ldt, maxgap);
+      rtype = q.interpolate(latlon, t, maxgap);
 
     int rtype_class = (rtype == kFloatMissing ? 9 : static_cast<int>(rtype));
 
     // Thunder is optional
     float thunder = kFloatMissing;
     if (q.param(kFmiProbabilityThunderstorm))
-      thunder = q.interpolate(latlon, ldt, maxgap);
+      thunder = q.interpolate(latlon, t, maxgap);
 
     int thunder_class = 9;
     if (thunder == kFloatMissing)
@@ -2626,7 +2653,7 @@ boost::optional<int> calc_weather_number(QImpl &q,
     // Fog is optional
     float fog = kFloatMissing;
     if (q.param(kFmiFogIntensity))
-      fog = q.interpolate(latlon, ldt, maxgap);
+      fog = q.interpolate(latlon, t, maxgap);
 
     int fog_class = (fog == kFloatMissing ? 9 : static_cast<int>(fog));
 
