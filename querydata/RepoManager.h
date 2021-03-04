@@ -98,6 +98,9 @@ struct RepoManager
   boost::atomic<int> itsThreadCount;
   boost::atomic<bool> itsShutdownRequested{false};
 
+  using LatLonCache = Fmi::Cache::Cache<std::size_t, boost::shared_ptr<std::vector<NFmiPoint>>>;
+  LatLonCache itsLatLonCache;
+
   std::string itsValidPointsCacheDir = "/var/smartmet/querydata/validpoints";
 
   boost::shared_ptr<RepoManager> itsOldRepoManager;

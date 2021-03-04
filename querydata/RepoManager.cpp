@@ -36,12 +36,12 @@
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 #include <macgyver/AnsiEscapeCodes.h>
+#include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/TypeName.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
-#include <macgyver/Exception.h>
 #include <cassert>
 #include <set>
 #include <sstream>
@@ -143,7 +143,8 @@ RepoManager::RepoManager(const std::string& configfile)
       updateTasks(new Fmi::AsyncTaskGroup),
       itsMaxThreadCount(10),  // default if not configured
       itsThreadCount(0),
-      itsShutdownRequested(false)
+      itsShutdownRequested(false),
+      itsLatLonCache(500)
 {
   boost::system::error_code ec;
 
@@ -170,7 +171,7 @@ RepoManager::RepoManager(const std::string& configfile)
       boost::filesystem::path p = configfile;
       p.remove_filename();
       itsConfig.setIncludeDir(p.c_str());
-      
+
       itsConfig.readFile(configfile.c_str());
 
       // Options
@@ -217,14 +218,15 @@ RepoManager::RepoManager(const std::string& configfile)
       this->configModTime = modtime;
 
       updateTasks->on_task_error([this](const std::string&) {
-          Fmi::Exception::Trace(BCP, "Operation failed").printError();});
+        Fmi::Exception::Trace(BCP, "Operation failed").printError();
+      });
     }
     catch (const libconfig::ParseException& e)
     {
       throw Fmi::Exception(BCP,
-                             "Qengine configuration " + configfile + " error '" +
-                                 std::string(e.getError()) + "' on line " +
-                                 std::to_string(e.getLine()));
+                           "Qengine configuration " + configfile + " error '" +
+                               std::string(e.getError()) + "' on line " +
+                               std::to_string(e.getLine()));
     }
     catch (const libconfig::ConfigException& e)
     {
@@ -266,7 +268,8 @@ void RepoManager::init()
                                  boost::bind(&RepoManager::update, this, _1, _2, _3, _4),
                                  boost::bind(&RepoManager::error, this, _1, _2, _3, _4),
                                  pinfo.refresh_interval_secs,
-                                 Fmi::DirectoryMonitor::CREATE | Fmi::DirectoryMonitor::DELETE | Fmi::DirectoryMonitor::SCAN);
+                                 Fmi::DirectoryMonitor::CREATE | Fmi::DirectoryMonitor::DELETE |
+                                     Fmi::DirectoryMonitor::SCAN);
 
       // Save the info
 
@@ -349,12 +352,14 @@ void RepoManager::shutdown()
     std::cout << "  -- Shutdown requested (RepoManager)\n";
     itsMonitor.stop();
 
-    if (itsMonitorThread.joinable()) {
-        itsMonitorThread.join();
+    if (itsMonitorThread.joinable())
+    {
+      itsMonitorThread.join();
     }
 
-    if (itsExpirationThread.joinable()) {
-        itsExpirationThread.join();
+    if (itsExpirationThread.joinable())
+    {
+      itsExpirationThread.join();
     }
 
     updateTasks->stop();
@@ -449,7 +454,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
   try
   {
     const Producer& producer = itsProducerMap.find(id)->second;
-	
+
     // Collect names of files to be unloaded or loaded
 
     Files removals;
@@ -457,31 +462,31 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     for (const auto& file_status : *status)
     {
       if (file_status.second == Fmi::DirectoryMonitor::SCAN)
-		{
-		  const ProducerConfig& conf = producerConfig(producer);
-		  auto scan_time = boost::posix_time::second_clock::universal_time();
-		  auto next_scan_time = (scan_time + boost::posix_time::seconds(conf.refresh_interval_secs));
-		  itsRepo.updateProducerStatus(producer, scan_time, next_scan_time);
-		}
-	  
-	  if (file_status.second == Fmi::DirectoryMonitor::DELETE ||
+      {
+        const ProducerConfig& conf = producerConfig(producer);
+        auto scan_time = boost::posix_time::second_clock::universal_time();
+        auto next_scan_time = (scan_time + boost::posix_time::seconds(conf.refresh_interval_secs));
+        itsRepo.updateProducerStatus(producer, scan_time, next_scan_time);
+      }
+
+      if (file_status.second == Fmi::DirectoryMonitor::DELETE ||
           file_status.second == Fmi::DirectoryMonitor::MODIFY)
-		{
-		  removals.push_back(file_status.first);
-		}
-	  
-	  if (file_status.second == Fmi::DirectoryMonitor::CREATE ||
-		 file_status.second == Fmi::DirectoryMonitor::MODIFY)
-		{
-		  additions.push_back(file_status.first);
-		}
+      {
+        removals.push_back(file_status.first);
+      }
+
+      if (file_status.second == Fmi::DirectoryMonitor::CREATE ||
+          file_status.second == Fmi::DirectoryMonitor::MODIFY)
+      {
+        additions.push_back(file_status.first);
+      }
     }
 
-	if(removals.empty() && additions.empty())
-	  {
-		// Nothing to update
-		return;
-	  }
+    if (removals.empty() && additions.empty())
+    {
+      // Nothing to update
+      return;
+    }
 
     // Handle deleted files
 
@@ -490,7 +495,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
       // Take the lock only when needed
       Spine::WriteLock lock(itsMutex);
       for (const auto& file : removals)
-		itsRepo.remove(producer, file);
+        itsRepo.remove(producer, file);
     }
 
     // Done if there are no additions
@@ -510,7 +515,6 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
       if (!ok)
         boost::this_thread::sleep(boost::posix_time::milliseconds(50));
     }
-
 
     // Abort if there is a shut down request
     if (itsShutdownRequested)
@@ -623,8 +627,7 @@ void RepoManager::load(Producer producer,
                                           conf.minimum_expires,
                                           conf.mmap);
 
-		data_load_time = boost::posix_time::second_clock::universal_time();
-
+        data_load_time = boost::posix_time::second_clock::universal_time();
       }
 
       if (itsVerbose && load_new_data)
@@ -635,6 +638,15 @@ void RepoManager::load(Producer producer,
 
         std::cout << msg.str() << std::flush;
       }
+
+      // Update latlon-cache if necessary. In any case make sure model cache is up to date
+
+      auto hash = model->gridHashValue();
+      auto latlons = itsLatLonCache.find(hash);  // cached coordinates, if any
+      if (!latlons)
+        itsLatLonCache.insert(hash, model->makeLatLonCache());  // request latlons and cache them
+      else
+        model->setLatLonCache(*latlons);  // set model cache from our cache
 
       {
         // update structures safely
@@ -650,7 +662,7 @@ void RepoManager::load(Producer producer,
       Fmi::Exception exception(BCP, "QEngine failed to load the file!", nullptr);
       exception.addParameter("File", filename.c_str());
       std::cerr << exception.getStackTrace();
-    }	
+    }
   }  // for all files
 
   itsRepo.updateProducerStatus(producer, data_load_time, itsRepo.getAllModels(producer).size());

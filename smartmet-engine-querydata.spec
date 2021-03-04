@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.3.2
+Version: 21.3.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -22,8 +22,8 @@ BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-macgyver-devel >= 21.2.25
-BuildRequires: smartmet-library-newbase-devel >= 21.3.1
-BuildRequires: smartmet-library-spine-devel >= 21.2.27
+BuildRequires: smartmet-library-newbase-devel >= 21.3.2
+BuildRequires: smartmet-library-spine-devel >= 21.3.1
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -35,8 +35,8 @@ Requires: jsoncpp >= 1.8.4
 Requires: libconfig >= 1.7.2
 Requires: protobuf
 Requires: smartmet-library-macgyver >= 21.2.25
-Requires: smartmet-library-newbase >= 21.3.1
-Requires: smartmet-library-spine >= 21.2.27
+Requires: smartmet-library-newbase >= 21.3.2
+Requires: smartmet-library-spine >= 21.3.1
 #TestRequires: smartmet-library-macgyver-devel >= 21.1.14
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal32-devel
@@ -81,6 +81,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Mar  4 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.4-1.fmi
+- Restored LatLonCache, it is not needed only in the WGS84 branch
+
 * Tue Mar  2 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.2-1.fmi
 - Removed redundant to_lower_copy calls
 - Reduce the number of local_date_time to NFmiMetTime conversions

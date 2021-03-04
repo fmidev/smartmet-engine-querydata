@@ -8,11 +8,11 @@
 #include "ValidPoints.h"
 #include <boost/filesystem/operations.hpp>
 #include <boost/functional/hash.hpp>
+#include <macgyver/Exception.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiGeoTools.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
-#include <macgyver/Exception.h>
 #include <spine/Hash.h>
 
 namespace SmartMet
@@ -467,6 +467,28 @@ void Model::uncache() const
 std::size_t hash_value(const Model& theModel)
 {
   return theModel.itsHashValue;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Set the LatLonCache for the querydata from external cache
+ */
+// ----------------------------------------------------------------------
+
+void Model::setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache)
+{
+  itsQueryData->SetLatLonCache(theCache);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Make querydata latlon cache and return it
+ */
+// ----------------------------------------------------------------------
+
+boost::shared_ptr<std::vector<NFmiPoint>> Model::makeLatLonCache()
+{
+  return itsQueryData->LatLonCache();
 }
 
 }  // namespace Querydata
