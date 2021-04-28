@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.3.4
+Version: 21.4.28
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -81,6 +81,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Apr 28 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.4.28-1.fmi
+- Caching WGS84Envelopes (BRAINSTORM-1911)
+
 * Thu Mar  4 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.4-1.fmi
 - Restored LatLonCache, it is not needed only in the WGS84 branch
 

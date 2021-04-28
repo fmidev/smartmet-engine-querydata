@@ -26,6 +26,7 @@
 #include <newbase/NFmiParameterName.h>
 #include <spine/Thread.h>
 #include <spine/TimeSeries.h>
+#include <macgyver/Cache.h>
 
 #include <list>
 
@@ -47,11 +48,13 @@ namespace Engine
 {
 namespace Querydata
 {
+typedef Fmi::Cache::Cache<std::size_t, WGS84Envelope::Shared> WGS84EnvelopeCache;
+
 class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<QImpl>
 {
  public:
-  QImpl(SharedModel theModel);
-  QImpl(const std::vector<SharedModel>& theModels);
+  QImpl(SharedModel theModel, WGS84EnvelopeCache& theWGS84EnvelopeCache);
+  QImpl(const std::vector<SharedModel>& theModels, WGS84EnvelopeCache& theWGS84EnvelopeCache);
 
   ~QImpl();
 
@@ -295,8 +298,6 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   bool selectLevel(double theLevel);
 
-  const WGS84Envelope& getWGS84Envelope();
-
   bool needsGlobeWrap() const;
 
   void setParameterTranslations(boost::shared_ptr<ParameterTranslations> translations)
@@ -324,11 +325,8 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   boost::shared_ptr<ValidTimeList> itsValidTimes;  // collective over all datas
   std::size_t itsHashValue;
 
-  Spine::MutexType itsWGS84EnvelopeMutex;
-  WGS84Envelope::Unique itsWGS84Envelope;
-
   boost::shared_ptr<ParameterTranslations> itsParameterTranslations;
-
+  WGS84EnvelopeCache& itsWGS84EnvelopeCache;
 };  // class QImpl
 
 typedef boost::shared_ptr<QImpl> Q;

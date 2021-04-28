@@ -22,6 +22,7 @@
 #include <macgyver/TimeFormatter.h>
 #include <spine/Table.h>
 #include <spine/TableFormatter.h>
+#include <macgyver/Cache.h>
 
 namespace SmartMet
 {
@@ -42,7 +43,7 @@ struct ProducerStatus
 class Repository
 {
  public:
-  Repository() = default;
+  Repository();
 
   void add(const ProducerConfig& config);
   void add(const Producer& producer, SharedModel model);
@@ -118,6 +119,9 @@ class Repository
   ProducerConfigs itsProducerConfigs;
   bool itsVerbose = false;
   std::map<std::string, ProducerStatus> itsProducerStatus;
+
+  // Envelope cache
+  mutable WGS84EnvelopeCache itsWGS84EnvelopeCache;
 };  // class Repository
 
 }  // namespace Querydata

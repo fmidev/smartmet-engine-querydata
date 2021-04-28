@@ -25,6 +25,12 @@ namespace Engine
 {
 namespace Querydata
 {
+
+Repository::Repository()
+{
+    itsWGS84EnvelopeCache.resize(512);
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Add a new producer configuration
@@ -75,6 +81,14 @@ void Repository::add(const Producer& producer, SharedModel model)
     SharedModels::iterator iter;
 
     boost::tie(iter, ok) = models.insert(std::make_pair(model->originTime(), model));
+
+	std::size_t grid_hash = model->info()->GridHashValue();
+	if(!itsWGS84EnvelopeCache.find(grid_hash))
+	  {
+		// Add Envelope to cache
+		WGS84Envelope::Shared new_envelope = std::make_shared<WGS84Envelope>(model->info());
+		itsWGS84EnvelopeCache.insert(grid_hash, new_envelope);
+	  }
 
     if (!ok)
     {
@@ -213,7 +227,7 @@ Q Repository::get(const Producer& producer) const
     // newest origintime is at the end
     auto last = --time_model.end();
 
-    return boost::make_shared<QImpl>(last->second);
+    return boost::make_shared<QImpl>(last->second, itsWGS84EnvelopeCache);
   }
   catch (...)
   {
@@ -252,19 +266,19 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
     {
       // newest origintime is at the end
       auto time_model = --models.end();
-      return boost::make_shared<QImpl>(time_model->second);
+      return boost::make_shared<QImpl>(time_model->second, itsWGS84EnvelopeCache);
     }
     if (origintime.is_neg_infinity())
     {
       // oldest origintime is at the beginning
       auto time_model = models.begin();
-      return boost::make_shared<QImpl>(time_model->second);
+      return boost::make_shared<QImpl>(time_model->second, itsWGS84EnvelopeCache);
     }
 
 #if 1
     auto iter = models.find(origintime);
     if (iter != models.end())
-      return boost::make_shared<QImpl>(iter->second);
+      return boost::make_shared<QImpl>(iter->second, itsWGS84EnvelopeCache);
 #else
     // This was deprecated 27.4.2015 in favour of exact origintime requests
 
@@ -273,7 +287,7 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
     // one should use the radar data as a multifile instead
     for (auto iter = models.crbegin(); iter != models.crend(); ++iter)
       if (iter->first <= origintime)
-        return boost::make_shared<QImpl>(iter->second);
+        return boost::make_shared<QImpl>(iter->second, itsWGS84EnvelopeCache);
 
 #endif
 
@@ -333,7 +347,7 @@ Q Repository::getAll(const Producer& producer) const
 
     // Construct a view of the data
 
-    return boost::make_shared<QImpl>(okmodels);
+    return boost::make_shared<QImpl>(okmodels, itsWGS84EnvelopeCache);
   }
   catch (...)
   {
@@ -1066,7 +1080,7 @@ std::list<MetaData> Repository::getRepoMetadata(const std::string& producer) con
 
     for (const auto& origintime_model : models)
     {
-      QImpl q(origintime_model.second);
+      QImpl q(origintime_model.second, itsWGS84EnvelopeCache);
       props.push_back(q.metaData());
     }
     return props;
@@ -1094,7 +1108,7 @@ std::list<MetaData> Repository::getRepoMetadata(const std::string& producer,
     if (modelpos == models.end())
       return props;
 
-    QImpl q(modelpos->second);
+    QImpl q(modelpos->second, itsWGS84EnvelopeCache);
     props.push_back(q.metaData());
 
     return props;
@@ -1117,7 +1131,7 @@ std::list<MetaData> Repository::getRepoMetadata() const
 
       for (const auto& origintime_model : models)
       {
-        QImpl q(origintime_model.second);
+        QImpl q(origintime_model.second, itsWGS84EnvelopeCache);
         props.push_back(q.metaData());
       }
     }

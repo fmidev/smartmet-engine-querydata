@@ -161,7 +161,7 @@ QImpl::~QImpl()
  */
 // ----------------------------------------------------------------------
 
-QImpl::QImpl(SharedModel theModel)
+QImpl::QImpl(SharedModel theModel, WGS84EnvelopeCache& theWGS84EnvelopeCache) : itsWGS84EnvelopeCache(theWGS84EnvelopeCache)
 {
   try
   {
@@ -185,8 +185,8 @@ QImpl::QImpl(SharedModel theModel)
  */
 // ----------------------------------------------------------------------
 
-QImpl::QImpl(const std::vector<SharedModel> &theModels)
-    : itsModels(theModels), itsValidTimes(new ValidTimeList)
+QImpl::QImpl(const std::vector<SharedModel> &theModels, WGS84EnvelopeCache& theWGS84EnvelopeCache)
+  : itsModels(theModels), itsValidTimes(new ValidTimeList), itsWGS84EnvelopeCache(theWGS84EnvelopeCache)
 {
   try
   {
@@ -362,7 +362,12 @@ MetaData QImpl::metaData()
 
     meta.aspectRatio = area->WorldXYAspectRatio();
 
-    meta.wgs84Envelope = getWGS84Envelope();
+	// Envelope from cache
+	std::size_t grid_hash = itsInfo->GridHashValue();
+	auto cached_envelope = itsWGS84EnvelopeCache.find(grid_hash);
+	if(!cached_envelope)
+	  throw Fmi::Exception::Trace(BCP, ("Error! No envelope found for producer " + itsModels[0]->producer()));
+	meta.wgs84Envelope = *(*cached_envelope);
 
     return meta;
   }
@@ -370,21 +375,6 @@ MetaData QImpl::metaData()
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-}
-
-const WGS84Envelope &QImpl::getWGS84Envelope()
-{
-  Spine::UpgradeReadLock readlock(itsWGS84EnvelopeMutex);
-
-  if (itsWGS84Envelope != nullptr)
-    return *itsWGS84Envelope;
-
-  auto *ptr = new WGS84Envelope(itsInfo);
-
-  Spine::UpgradeWriteLock writelock(readlock);
-
-  itsWGS84Envelope.reset(ptr);
-  return *itsWGS84Envelope;
 }
 
 // ----------------------------------------------------------------------
@@ -4404,7 +4394,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 #endif
 
     auto model = boost::make_shared<Model>(*itsModels[0], data, hash);
-    return boost::make_shared<QImpl>(model);
+    return boost::make_shared<QImpl>(model, itsWGS84EnvelopeCache);
   }
   catch (...)
   {
