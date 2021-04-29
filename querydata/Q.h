@@ -295,8 +295,6 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   bool selectLevel(double theLevel);
 
-  const WGS84Envelope& getWGS84Envelope();
-
   bool needsGlobeWrap() const;
 
   void setParameterTranslations(boost::shared_ptr<ParameterTranslations> translations)
@@ -323,9 +321,6 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   boost::shared_ptr<NFmiFastQueryInfo> itsInfo;    // or NFmiMultiQueryInfo
   boost::shared_ptr<ValidTimeList> itsValidTimes;  // collective over all datas
   std::size_t itsHashValue;
-
-  Spine::MutexType itsWGS84EnvelopeMutex;
-  WGS84Envelope::Unique itsWGS84Envelope;
 
   boost::shared_ptr<ParameterTranslations> itsParameterTranslations;
 
