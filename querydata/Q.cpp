@@ -1,5 +1,6 @@
 #include "Q.h"
 #include "Model.h"
+#include "WGS84EnvelopeFactory.h"
 #include <boost/date_time/local_time/local_time_io.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/time_facet.hpp>
@@ -362,7 +363,7 @@ MetaData QImpl::metaData()
 
     meta.aspectRatio = area->WorldXYAspectRatio();
 
-    meta.wgs84Envelope = getWGS84Envelope();
+	meta.wgs84Envelope = *(WGS84EnvelopeFactory::Get(itsModels[0]->info()));
 
     return meta;
   }
@@ -370,21 +371,6 @@ MetaData QImpl::metaData()
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-}
-
-const WGS84Envelope &QImpl::getWGS84Envelope()
-{
-  Spine::UpgradeReadLock readlock(itsWGS84EnvelopeMutex);
-
-  if (itsWGS84Envelope != nullptr)
-    return *itsWGS84Envelope;
-
-  auto *ptr = new WGS84Envelope(itsInfo);
-
-  Spine::UpgradeWriteLock writelock(readlock);
-
-  itsWGS84Envelope.reset(ptr);
-  return *itsWGS84Envelope;
 }
 
 // ----------------------------------------------------------------------
