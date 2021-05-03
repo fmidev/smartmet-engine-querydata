@@ -289,8 +289,7 @@ int main(int argc, char* argv[])
   // Testing compiler support for atomic and shared pointers
   // Should output nothing, mainly test compiler and boost compatibility
   {
-    boost::shared_ptr<Fmi::Exception> ptr1 =
-        boost::make_shared<Fmi::Exception>();
+    boost::shared_ptr<Fmi::Exception> ptr1 = boost::make_shared<Fmi::Exception>();
     //	  tmp.store(ptr1);
     boost::shared_ptr<Fmi::Exception> ptr2;
     boost::atomic_store(&ptr2, ptr1);

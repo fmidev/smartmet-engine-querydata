@@ -8,7 +8,7 @@ namespace Engine
 {
 namespace Querydata
 {
-  //class NFmiFastQueryInfo;
+// class NFmiFastQueryInfo;
 class WGS84Envelope;
 
 namespace WGS84EnvelopeFactory
@@ -20,5 +20,4 @@ void SetCacheSize(std::size_t newMaxSize);
 }  // namespace WGS84EnvelopeFactory
 }  // namespace Querydata
 }  // namespace Engine
-}  // namespace Smartmet
-
+}  // namespace SmartMet

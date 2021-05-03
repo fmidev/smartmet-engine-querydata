@@ -1,8 +1,8 @@
 // ======================================================================
 
 #include "Producer.h"
-#include <macgyver/TimeParser.h>
 #include <macgyver/Exception.h>
+#include <macgyver/TimeParser.h>
 #include <stdexcept>
 
 namespace SmartMet
@@ -50,10 +50,10 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
         pinfo.directory = boost::filesystem::path(static_cast<const char *>(setting[i]));
 
       else if (name == "pattern")
-	{
-	  pinfo.pattern = setting[i];
-	  pinfo.pattern_str = setting[i].c_str();
-	}
+      {
+        pinfo.pattern = setting[i];
+        pinfo.pattern_str = setting[i].c_str();
+      }
 
       else if (name == "multifile")
         pinfo.ismultifile = setting[i];
@@ -99,10 +99,10 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
 
       else
         throw Fmi::Exception(BCP,
-                               std::string("QEngine: Unknown producer setting named ")
-                                   .append(name)
-                                   .append(" for producer ")
-                                   .append(producer));
+                             std::string("QEngine: Unknown producer setting named ")
+                                 .append(name)
+                                 .append(" for producer ")
+                                 .append(producer));
     }
 
     // Sanity checks
@@ -118,7 +118,7 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
 
     if (pinfo.number_to_keep < 1)
       throw Fmi::Exception(BCP,
-                             "Number of files to keep for producer " + producer + " must be > 0");
+                           "Number of files to keep for producer " + producer + " must be > 0");
 
     if (pinfo.number_to_keep >= 1000000)
       throw Fmi::Exception(
@@ -130,7 +130,7 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
 
     if (pinfo.update_interval < 60)
       throw Fmi::Exception(BCP,
-                             "Minimum update interval for producer " + producer + " is 60 seconds");
+                           "Minimum update interval for producer " + producer + " is 60 seconds");
 
     return pinfo;
   }

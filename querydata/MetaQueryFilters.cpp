@@ -1,8 +1,8 @@
 
 #include "MetaQueryFilters.h"
 #include <boost/geometry/geometry.hpp>
-#include <spine/Convenience.h>
 #include <macgyver/Exception.h>
+#include <spine/Convenience.h>
 
 namespace SmartMet
 {

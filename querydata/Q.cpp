@@ -363,7 +363,7 @@ MetaData QImpl::metaData()
 
     meta.aspectRatio = area->WorldXYAspectRatio();
 
-	meta.wgs84Envelope = *(WGS84EnvelopeFactory::Get(itsModels[0]->info()));
+    meta.wgs84Envelope = *(WGS84EnvelopeFactory::Get(itsModels[0]->info()));
 
     return meta;
   }

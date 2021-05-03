@@ -1,12 +1,12 @@
 #include "Synchro.h"
 #include "Engine.h"
 #include "QueryDataMessage.pb.h"
-#include <random>
 #include <boost/bind.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
-#include <macgyver/StringConversion.h>
 #include <macgyver/Exception.h>
+#include <macgyver/StringConversion.h>
 #include <spine/Reactor.h>
+#include <random>
 
 #ifndef BROADCAST_TIMER_DELAY
 #define BROADCAST_TIMER_DELAY 10
@@ -40,7 +40,7 @@ namespace
   }
 #endif
 
-#ifndef NDEBUG  
+#ifndef NDEBUG
 void dumpProducerMap(const SmartMet::Engine::Querydata::ProducerMap& map)
 {
   try
@@ -245,7 +245,7 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& syn
     {
       // Attempting to get synched data from a node which is not synching
       throw Fmi::Exception(BCP,
-                             "Attempted to get synched metadata from a non-synching QEngine node");
+                           "Attempted to get synched metadata from a non-synching QEngine node");
     }
     auto it = itsSyncGroups.find(syncGroup);
     if (it == itsSyncGroups.end())
