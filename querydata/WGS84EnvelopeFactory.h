@@ -13,7 +13,7 @@ class WGS84Envelope;
 
 namespace WGS84EnvelopeFactory
 {
-std::shared_ptr<WGS84Envelope> Get(boost::shared_ptr<NFmiFastQueryInfo> theInfo);
+std::shared_ptr<WGS84Envelope> Get(const boost::shared_ptr<NFmiFastQueryInfo>& theInfo);
 
 void SetCacheSize(std::size_t newMaxSize);
 

@@ -21,7 +21,7 @@ WGS84EnvelopeCache g_WGS84GlobalEnvelopeCache{default_cache_size};
 namespace WGS84EnvelopeFactory
 {
 // Return cached matrix or empty shared_ptr
-std::shared_ptr<WGS84Envelope> Get(boost::shared_ptr<NFmiFastQueryInfo> theInfo)
+std::shared_ptr<WGS84Envelope> Get(const boost::shared_ptr<NFmiFastQueryInfo>& theInfo)
 {
   std::size_t grid_hash = theInfo->GridHashValue();
   const auto& envelope = g_WGS84GlobalEnvelopeCache.find(grid_hash);
