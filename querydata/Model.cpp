@@ -7,8 +7,8 @@
 #include "Model.h"
 #include "ValidPoints.h"
 #include <boost/filesystem/operations.hpp>
-#include <boost/functional/hash.hpp>
 #include <macgyver/Exception.h>
+#include <macgyver/Hash.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiGeoTools.h>
 #include <newbase/NFmiQueryData.h>
@@ -69,13 +69,13 @@ Model::Model(const boost::filesystem::path& filename,
     // Unique hash value for this model
 
     itsHashValue = 0;
-    boost::hash_combine(itsHashValue, itsPath);
-    boost::hash_combine(itsHashValue, itsModificationTime);
+    Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsPath.string()));
+    Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsModificationTime));
 
     // querydata.conf changes may alter essential model properties
-    boost::hash_combine(itsHashValue, itsClimatology);
-    boost::hash_combine(itsHashValue, itsFullGrid);
-    boost::hash_combine(itsHashValue, itsRelativeUV);
+    Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsClimatology));
+    Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsFullGrid));
+    Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsRelativeUV));
 
     // We need an info object to intialize some data members
 

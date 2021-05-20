@@ -4,7 +4,6 @@
 #include <boost/date_time/local_time/local_time_io.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <boost/date_time/time_facet.hpp>
-#include <boost/functional/hash.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/optional.hpp>
 #include <boost/range/algorithm/sort.hpp>
@@ -20,6 +19,7 @@
 #include <macgyver/Astronomy.h>
 #include <macgyver/CharsetTools.h>
 #include <macgyver/Exception.h>
+#include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/TimeFormatter.h>
 #include <macgyver/TimeZoneFactory.h>
@@ -206,7 +206,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
     itsHashValue = 0;
     for (const auto &model : itsModels)
     {
-      boost::hash_combine(itsHashValue, model);
+      Fmi::hash_combine(itsHashValue, Fmi::hash_value(model));
     }
 
     // Establish unique valid times
@@ -4373,21 +4373,13 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     // Return the new Q but with a new hash value
 
     std::size_t hash = itsHashValue;
-    boost::hash_combine(hash, theResolution);
-    boost::hash_combine(hash, to_simple_string(theTime));
-    boost::hash_combine(hash, theXmin);
-    boost::hash_combine(hash, theYmin);
-    boost::hash_combine(hash, theXmax);
-    boost::hash_combine(hash, theYmax);
-
-    char *tmp;
-    theCrs.get()->exportToWkt(&tmp);
-    boost::hash_combine(hash, tmp);
-#if GDAL_VERSION_MAJOR < 2
-    OGRFree(tmp);
-#else
-    CPLFree(tmp);
-#endif
+    Fmi::hash_combine(hash, Fmi::hash_value(theResolution));
+    Fmi::hash_combine(hash, Fmi::hash_value(theTime));
+    Fmi::hash_combine(hash, Fmi::hash_value(theXmin));
+    Fmi::hash_combine(hash, Fmi::hash_value(theYmin));
+    Fmi::hash_combine(hash, Fmi::hash_value(theXmax));
+    Fmi::hash_combine(hash, Fmi::hash_value(theYmax));
+    Fmi::hash_combine(hash, theCrs.hashValue());
 
     auto model = boost::make_shared<Model>(*itsModels[0], data, hash);
     return boost::make_shared<QImpl>(model);
