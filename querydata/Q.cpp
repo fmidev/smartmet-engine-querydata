@@ -4410,6 +4410,17 @@ bool QImpl::selectLevel(double theLevel)
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Return the data hash value
+ */
+// ----------------------------------------------------------------------
+
+std::size_t QImpl::hashValue() const
+{
+  return itsHashValue;
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Return the grid hash value
  *
  * Note: All models are required to have the same grid
@@ -4430,24 +4441,6 @@ std::size_t QImpl::gridHashValue() const
 bool QImpl::needsGlobeWrap() const
 {
   return itsInfo->NeedsGlobeWrap();
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Calculate a hash for the object
- */
-// ----------------------------------------------------------------------
-
-std::size_t hash_value(const QImpl &theQ)
-{
-  try
-  {
-    return theQ.itsHashValue;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
 }
 
 }  // namespace Querydata

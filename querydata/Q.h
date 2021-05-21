@@ -66,7 +66,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   bool isFullGrid() const;
   bool isRelativeUV() const;
 
-  friend std::size_t hash_value(const QImpl& theQ);
+  std::size_t hashValue() const;
   std::size_t gridHashValue() const;
 
   NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist) const;
@@ -331,7 +331,7 @@ typedef std::list<Q> QList;
 
 inline std::size_t hash_value(const Q& theQ)
 {
-  return hash_value(*theQ);
+  return theQ->hashValue();
 }
 
 }  // namespace Querydata
