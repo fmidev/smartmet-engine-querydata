@@ -13,7 +13,6 @@
 #include <newbase/NFmiGeoTools.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
-#include <spine/Hash.h>
 
 namespace SmartMet
 {
