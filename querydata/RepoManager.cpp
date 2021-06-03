@@ -582,6 +582,9 @@ void RepoManager::load(Producer producer,
 
   for (const auto& filename : files)
   {
+    if (itsShutdownRequested)
+      break;
+
     // Done if the remaining files would not be accepted for being older
     if (successful_loads >= conf.number_to_keep)
       break;
@@ -658,13 +661,17 @@ void RepoManager::load(Producer producer,
     }
     catch (...)
     {
+      if (itsShutdownRequested)
+        break;
+
       Fmi::Exception exception(BCP, "QEngine failed to load the file!", nullptr);
       exception.addParameter("File", filename.c_str());
       std::cerr << exception.getStackTrace();
     }
   }  // for all files
 
-  itsRepo.updateProducerStatus(producer, data_load_time, itsRepo.getAllModels(producer).size());
+  if (!itsShutdownRequested)
+    itsRepo.updateProducerStatus(producer, data_load_time, itsRepo.getAllModels(producer).size());
 
   --itsThreadCount;
 }
