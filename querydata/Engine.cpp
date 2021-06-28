@@ -13,12 +13,12 @@
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
-#include <fmt/format.h>
 #include <gis/CoordinateTransformation.h>
 #include <gis/OGR.h>
 #include <gis/SpatialReference.h>
 #include <json/reader.h>
 #include <macgyver/Exception.h>
+#include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
 #include <spine/Convenience.h>
 #include <chrono>
@@ -901,27 +901,6 @@ const ProducerConfig& Engine::getProducerConfig(const std::string& producer) con
   }
 }
 
-std::size_t hash_value(const Fmi::SpatialReference& theSR)
-{
-  try
-  {
-    char* wkt;
-    theSR.get()->exportToWkt(&wkt);
-    std::string tmp(wkt);
-#if GDAL_VERSION_MAJOR < 2
-    OGRFree(wkt);
-#else
-    CPLFree(wkt);
-#endif
-    boost::hash<std::string> hasher;
-    return hasher(tmp);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
 // ----------------------------------------------------------------------
 /*!
  * \brief Mark the given coordinate cell as bad
@@ -969,11 +948,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   {
     // Copy the original coordinates for projection
 
-#ifdef WGS84
     Fmi::CoordinateTransformation transformation(theQ->SpatialReference(), theSR);
-#else
-    Fmi::CoordinateTransformation transformation(theQ->area().WKT(), theSR);
-#endif
     auto coords = std::make_shared<Fmi::CoordinateMatrix>(*theCoords);
 
     coords->transform(transformation);
@@ -1043,7 +1018,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const Fmi::SpatialRefe
     auto reqwkt = Fmi::OGR::exportToWkt(theSR);
 
     if (datawkt != reqwkt)
-      boost::hash_combine(projhash, hash_value(*theSR));
+      Fmi::hash_combine(projhash, theSR.hashValue());
 
     if (qhash == projhash)
       return getWorldCoordinates(theQ);

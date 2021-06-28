@@ -29,7 +29,6 @@ namespace Engine
 {
 namespace Querydata
 {
-
 struct ProducerStatus
 {
   boost::posix_time::ptime latest_scan_time{boost::posix_time::not_a_date_time};
@@ -37,7 +36,6 @@ struct ProducerStatus
   boost::posix_time::ptime latest_data_load_time{boost::posix_time::not_a_date_time};
   unsigned int number_of_loaded_files{0};
 };
-
 
 class Repository
 {
@@ -73,8 +71,8 @@ class Repository
   typedef std::map<OriginTime, SharedModel> SharedModels;
   typedef std::map<std::string, std::vector<boost::posix_time::ptime> > MetaObject;
 
-  
-  ContentTable getProducerInfo(const ProducerList& producerlist, const std::string& timeFormat) const;
+  ContentTable getProducerInfo(const ProducerList& producerlist,
+                               const std::string& timeFormat) const;
   ContentTable getParameterInfo(const ProducerList& producerlist) const;
   ContentTable getRepoContents(const std::string& timeFormat,
                                const std::string& projectionFormat) const;
@@ -97,8 +95,12 @@ class Repository
   SharedModel getModel(const Producer& producer, const boost::filesystem::path& path) const;
   SharedModels getAllModels(const Producer& producer) const;
 
-  void updateProducerStatus(const std::string& producer, const boost::posix_time::ptime& scanTime, const boost::posix_time::ptime& nextScanTime);
-  void updateProducerStatus(const std::string& producer,  const boost::posix_time::ptime& dataLoadTime, unsigned int nFiles);
+  void updateProducerStatus(const std::string& producer,
+                            const boost::posix_time::ptime& scanTime,
+                            const boost::posix_time::ptime& nextScanTime);
+  void updateProducerStatus(const std::string& producer,
+                            const boost::posix_time::ptime& dataLoadTime,
+                            unsigned int nFiles);
 
   void verbose(bool flag);
 

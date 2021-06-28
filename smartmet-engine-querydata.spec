@@ -21,9 +21,9 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.25
-BuildRequires: smartmet-library-newbase-devel >= 21.2.8
-BuildRequires: smartmet-library-spine-devel >= 21.1.14
+BuildRequires: smartmet-library-macgyver-devel >= 21.5.31
+BuildRequires: smartmet-library-newbase-devel >= 21.5.6
+BuildRequires: smartmet-library-spine-devel >= 21.5.31
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -34,9 +34,9 @@ Requires: gdal32-libs
 Requires: jsoncpp >= 1.8.4
 Requires: libconfig >= 1.7.2
 Requires: protobuf
-Requires: smartmet-library-macgyver >= 21.1.25
-Requires: smartmet-library-newbase >= 21.2.8
-Requires: smartmet-library-spine >= 21.1.14
+Requires: smartmet-library-macgyver >= 21.5.31
+Requires: smartmet-library-newbase >= 21.5.6
+Requires: smartmet-library-spine >= 21.5.31
 #TestRequires: smartmet-library-macgyver-devel >= 21.1.14
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal32-devel
@@ -83,6 +83,53 @@ rm -rf $RPM_BUILD_ROOT
 %changelog
 * Mon Jun 28 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.28-1.fmi
 - Use newbase WGS84 define
+
+* Thu Jun  3 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.6.3-1.fmi
+- Cleaner shutdown
+
+* Mon May 31 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.31-1.fmi
+- Use only macgyver Hash.h
+
+* Fri May 21 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.21-1.fmi
+- Added QImpl::hashValue()
+
+* Thu May 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.20-2.fmi
+- Repackaged with improved hashing functions
+
+* Thu May 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.20-1.fmi
+- Use Fmi hash functions, boost::hash_combine produces too many collisions
+
+* Thu May  6 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.5.6-1.fmi
+- Repackaged due to ABI changes in NFmiAzimuthalArea
+
+* Mon May  3 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.5.3-1.fmi
+- Caching WGS84Envelopes (BRAINSTORM-1911)
+
+* Thu Mar  4 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.4-1.fmi
+- Restored LatLonCache, it is not needed only in the WGS84 branch
+
+* Tue Mar  2 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.2-1.fmi
+- Removed redundant to_lower_copy calls
+- Reduce the number of local_date_time to NFmiMetTime conversions
+- Prefer emplace_back when possible
+
+* Mon Mar  1 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.3.1-1.fmi
+- Improved WGS84Envelope locking
+
+* Sat Feb 27 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.27-1.fmi
+- Use FmiParameterName for metaparameters for speed
+
+* Thu Feb 25 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.25-1.fmi
+- Produce parameter info into a table in more suitable form for column sorting and searching
+
+* Sat Feb 20 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.20-1.fmi
+- Use OGR::gridNorth instead of querydata TrueNorthAzimuth
+
+* Thu Feb 18 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.18-1.fmi
+- Use NFmiArea::SpatialReference
+
+* Mon Feb 15 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.15-1.fmi
+- Added values() method needed by Download-plugin
 
 * Wed Feb 10 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.2.10-1.fmi
 - Use CoordinateMatrix APIs

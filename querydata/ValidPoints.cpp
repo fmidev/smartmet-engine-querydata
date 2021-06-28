@@ -9,10 +9,10 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/serialization/vector.hpp>
+#include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <spine/Convenience.h>
-#include <macgyver/Exception.h>
 #include <fstream>
 
 namespace SmartMet

@@ -66,7 +66,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   bool isFullGrid() const;
   bool isRelativeUV() const;
 
-  friend std::size_t hash_value(const QImpl& theQ);
+  std::size_t hashValue() const;
   std::size_t gridHashValue() const;
 
   NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist) const;
@@ -178,12 +178,11 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                                const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
 
   // For arbitrary coordinates:
-#ifdef WGS84
+
   NFmiDataMatrix<float> values(const Fmi::CoordinateMatrix& theLatlonMatrix,
                                const NFmiMetTime& theTime,
                                float P = kFloatMissing,
                                float H = kFloatMissing);
-#endif
 
   NFmiDataMatrix<float> croppedValues(
       int x1,
@@ -297,8 +296,6 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
   bool selectLevel(double theLevel);
 
-  const WGS84Envelope& getWGS84Envelope();
-
   bool needsGlobeWrap() const;
 
   void setParameterTranslations(boost::shared_ptr<ParameterTranslations> translations)
@@ -326,14 +323,7 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   boost::shared_ptr<ValidTimeList> itsValidTimes;  // collective over all datas
   std::size_t itsHashValue;
 
-  Spine::MutexType itsWGS84EnvelopeMutex;
-  WGS84Envelope::Unique itsWGS84Envelope;
-
   boost::shared_ptr<ParameterTranslations> itsParameterTranslations;
-
-#ifndef NEW_NFMIAREA
-  std::unique_ptr<Fmi::SpatialReference> itsSpatialReference;
-#endif
 
 };  // class QImpl
 
@@ -342,7 +332,7 @@ typedef std::list<Q> QList;
 
 inline std::size_t hash_value(const Q& theQ)
 {
-  return hash_value(*theQ);
+  return theQ->hashValue();
 }
 
 }  // namespace Querydata

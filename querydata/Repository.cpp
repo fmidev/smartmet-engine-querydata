@@ -766,36 +766,19 @@ Repository::ContentTable Repository::getParameterInfo(const ProducerList& produc
     unsigned int parameter_no = 1;
     for (const auto& info : pip)
     {
-      int column = 0;
-      // Parameter number
-      resultTable->set(column, row, Fmi::to_string(parameter_no));
-      ++column;
-
       FmiParameterName param_id = info.first;
 
-      // ParameterId
-      resultTable->set(column, row, Fmi::to_string(param_id));
-      ++column;
+      auto parameter_no_str = Fmi::to_string(parameter_no);
+      auto param_id_str = Fmi::to_string(param_id);
+      auto param_name_str = converter.ToString(param_id);
 
-      // ParameterName
-      resultTable->set(column, row, converter.ToString(param_id));
-      ++column;
-
-      // Producers
-      //	  resultTable->set(column, row, boost::algorithm::join(info.second, ", "));
-      unsigned int subrow = row;
       for (const auto& producer : info.second)
       {
-        resultTable->set(column, subrow, producer);
-        subrow++;
-      }
-      row++;
-      while (row < subrow)
-      {
-        // Parameter id
-        resultTable->set(0, row, "-");
-        resultTable->set(1, row, "-");
-        resultTable->set(2, row, "-");
+        int column = 0;
+        resultTable->set(column++, row, parameter_no_str);
+        resultTable->set(column++, row, param_id_str);
+        resultTable->set(column++, row, param_name_str);
+        resultTable->set(column, row, producer);
         row++;
       }
       parameter_no++;
