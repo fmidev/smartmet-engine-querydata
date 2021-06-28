@@ -641,6 +641,7 @@ void RepoManager::load(Producer producer,
         std::cout << msg.str() << std::flush;
       }
 
+#ifndef WGS84
       // Update latlon-cache if necessary. In any case make sure model cache is up to date
 
       auto hash = model->gridHashValue();
@@ -649,6 +650,7 @@ void RepoManager::load(Producer producer,
         itsLatLonCache.insert(hash, model->makeLatLonCache());  // request latlons and cache them
       else
         model->setLatLonCache(*latlons);  // set model cache from our cache
+#endif
 
       {
         // update structures safely

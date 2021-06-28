@@ -33,7 +33,7 @@
 #include <ogr_spatialref.h>
 #include <stdexcept>
 
-#ifndef NEW_NFMIAREA
+#ifndef WGS84
 #include <newbase/NFmiGdalArea.h>
 #endif
 
@@ -1605,6 +1605,12 @@ NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Interpolate values
+ */
+// ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 /*!
@@ -4261,7 +4267,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
     // Establish new projection and the required grid size of the desired resolution
 
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     std::shared_ptr<NFmiArea> newarea(
         NFmiArea::CreateFromBBox(theCrs, NFmiPoint(theXmin, theYmin), NFmiPoint(theXmax, theYmax)));
 #else

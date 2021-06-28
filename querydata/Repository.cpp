@@ -878,7 +878,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
         std::string projectionText;
         if (qi->Area() == nullptr)
           projectionText = "nan";
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
         else if (projectionFormat == "wkt")
           projectionText = qi->Area()->WKT();
         // Defaults to newbase form
