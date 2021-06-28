@@ -969,7 +969,7 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   {
     // Copy the original coordinates for projection
 
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     Fmi::CoordinateTransformation transformation(theQ->SpatialReference(), theSR);
 #else
     Fmi::CoordinateTransformation transformation(theQ->area().WKT(), theSR);
@@ -1099,9 +1099,9 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = std::async(std::launch::async, [&] {
-                 return std::make_shared<Values>(theQ->values(theTime));
-               }).share();
+    auto ftr = std::async(std::launch::async,
+                          [&] { return std::make_shared<Values>(theQ->values(theTime)); })
+                   .share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);
@@ -1140,9 +1140,9 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = std::async(std::launch::async, [&] {
-                 return std::make_shared<Values>(theQ->values(theParam, theTime));
-               }).share();
+    auto ftr = std::async(std::launch::async,
+                          [&] { return std::make_shared<Values>(theQ->values(theParam, theTime)); })
+                   .share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);

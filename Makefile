@@ -10,7 +10,7 @@ enginedir = $(datadir)/smartmet/engines
 
 # Compiler options
 
-DEFINES = -DUNIX -DWGS84 -D_REENTRANT
+DEFINES = -DUNIX -D_REENTRANT
 
 LIBS += -L$(libdir) \
 	$(REQUIRED_LIBS) \

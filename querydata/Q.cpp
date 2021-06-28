@@ -29,7 +29,7 @@
 #include <ogr_spatialref.h>
 #include <stdexcept>
 
-#ifndef NEW_NFMIAREA
+#ifndef WGS84
 #include <newbase/NFmiGdalArea.h>
 #endif
 
@@ -170,7 +170,7 @@ QImpl::QImpl(SharedModel theModel)
 
     itsHashValue = hash_value(theModel);
 
-#ifndef NEW_NFMIAREA
+#ifndef WGS84
     if (itsInfo->Area() == nullptr)
       itsSpatialReference.reset(new Fmi::SpatialReference("+proj=longlat +R=6371229"));
     else
@@ -212,7 +212,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
       boost::hash_combine(itsHashValue, model);
     }
 
-#ifndef NEW_NFMIAREA
+#ifndef WGS84
     if (itsInfo->Area() == nullptr)
       itsSpatialReference.reset(new Fmi::SpatialReference("+proj=longlat +R=6371229"));
     else
@@ -858,7 +858,7 @@ NFmiPoint QImpl::latLon() const
 
 const Fmi::SpatialReference &QImpl::SpatialReference() const
 {
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
   return itsInfo->SpatialReference();
 #else
   return *itsSpatialReference;
@@ -1418,7 +1418,7 @@ NFmiDataMatrix<float> QImpl::landscapeCachedInterpolation(
 {
   try
   {
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     return itsInfo->LandscapeCachedInterpolation(
         theLocationCache, theTimeCache, theDEMValues, theWaterFlags);
 #else
@@ -1561,7 +1561,7 @@ NFmiDataMatrix<float> QImpl::values(const NFmiDataMatrix<float> &theDEMValues,
 {
   try
   {
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeValues(theDEMValues, theWaterFlags);
     else
@@ -1596,7 +1596,7 @@ NFmiDataMatrix<float> QImpl::values(const NFmiMetTime &theInterpolatedTime,
 {
   try
   {
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeValues(theInterpolatedTime, theDEMValues, theWaterFlags);
     else
@@ -1662,7 +1662,7 @@ NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
  */
 // ----------------------------------------------------------------------
 
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
 NFmiDataMatrix<float> QImpl::values(const Fmi::CoordinateMatrix &theLatlonMatrix,
                                     const NFmiMetTime &theTime,
                                     float P,
@@ -1699,7 +1699,7 @@ NFmiDataMatrix<float> QImpl::croppedValues(
 {
   try
   {
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeCroppedValues(x1, y1, x2, y2, theDEMValues, theWaterFlags);
     else
@@ -1730,7 +1730,7 @@ NFmiDataMatrix<float> QImpl::pressureValues(const NFmiMetTime &theInterpolatedTi
 {
   try
   {
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     return itsInfo->PressureValues(theInterpolatedTime, wantedPressureLevel);
 #else
     NFmiDataMatrix<float> tmp;
@@ -1756,7 +1756,7 @@ NFmiDataMatrix<float> QImpl::pressureValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     return itsInfo->PressureValues(theWantedGrid, theInterpolatedTime, wantedPressureLevel);
 #else
     NFmiDataMatrix<float> tmp;
@@ -1777,7 +1777,7 @@ NFmiDataMatrix<float> QImpl::pressureValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     return itsInfo->PressureValues(
         theWantedGrid, theInterpolatedTime, wantedPressureLevel, relative_uv);
 #else
@@ -1805,7 +1805,7 @@ NFmiDataMatrix<float> QImpl::gridValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     return itsInfo->GridValues(theWantedGrid, theInterpolatedTime, relative_uv);
 #else
     NFmiDataMatrix<float> tmp;
@@ -1832,7 +1832,7 @@ NFmiDataMatrix<float> QImpl::heightValues(const NFmiGrid &theWantedGrid,
 {
   try
   {
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     return itsInfo->HeightValues(
         theWantedGrid, theInterpolatedTime, wantedHeightLevel, relative_uv);
 #else
@@ -4307,7 +4307,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
     // Establish new projection and the required grid size of the desired resolution
 
-#ifdef NEW_NFMIAREA
+#ifdef WGS84
     boost::shared_ptr<NFmiArea> newarea(
         NFmiArea::CreateFromBBox(theCrs, NFmiPoint(theXmin, theYmin), NFmiPoint(theXmax, theYmax)));
 #else
