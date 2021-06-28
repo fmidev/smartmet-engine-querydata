@@ -173,13 +173,6 @@ QImpl::QImpl(SharedModel theModel)
     itsValidTimes = theModel->validTimes();
 
     itsHashValue = hash_value(theModel);
-
-#ifndef WGS84
-    if (itsInfo->Area() == nullptr)
-      itsSpatialReference.reset(new Fmi::SpatialReference("+proj=longlat +R=6371229"));
-    else
-      itsSpatialReference.reset(new Fmi::SpatialReference(itsInfo->Area()->WKT()));
-#endif
   }
   catch (...)
   {
@@ -215,13 +208,6 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
     {
       Fmi::hash_combine(itsHashValue, Fmi::hash_value(model));
     }
-
-#ifndef WGS84
-    if (itsInfo->Area() == nullptr)
-      itsSpatialReference.reset(new Fmi::SpatialReference("+proj=longlat +R=6371229"));
-    else
-      itsSpatialReference.reset(new Fmi::SpatialReference(itsInfo->Area()->WKT()));
-#endif
 
     // Establish unique valid times
     std::set<boost::posix_time::ptime> uniquetimes;
@@ -848,11 +834,7 @@ NFmiPoint QImpl::latLon() const
 
 const Fmi::SpatialReference &QImpl::SpatialReference() const
 {
-#ifdef WGS84
-  return *itsSpatialReference;
-#else
   return itsInfo->SpatialReference();
-#endif
 }
 
 // ----------------------------------------------------------------------

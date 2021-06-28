@@ -474,10 +474,12 @@ std::size_t hash_value(const Model& theModel)
  */
 // ----------------------------------------------------------------------
 
+#ifndef WGS84
 void Model::setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache)
 {
   itsQueryData->SetLatLonCache(theCache);
 }
+#endif
 
 // ----------------------------------------------------------------------
 /*!
@@ -485,10 +487,12 @@ void Model::setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache)
  */
 // ----------------------------------------------------------------------
 
+#ifndef WGS84
 boost::shared_ptr<std::vector<NFmiPoint>> Model::makeLatLonCache()
 {
   return itsQueryData->LatLonCache();
 }
+#endif
 
 }  // namespace Querydata
 }  // namespace Engine
