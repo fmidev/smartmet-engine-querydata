@@ -557,7 +557,7 @@ void SyncGroup::update(const ProducerMap& theUpdate)
   {
     for (const auto& update : theUpdate)
     {
-      auto& producerName = update.first;
+      const auto& producerName = update.first;
 
       auto myProducerIt = itsConsensus.find(producerName);
 
@@ -582,7 +582,7 @@ void SyncGroup::update(const ProducerMap& theUpdate)
     // consensus)
     for (auto it = itsConsensus.begin(); it != itsConsensus.end();)
     {
-      auto& producerName = it->first;
+      const auto& producerName = it->first;
       auto foreignProducerIt = theUpdate.find(producerName);
       if (foreignProducerIt == theUpdate.end())
       {

@@ -316,8 +316,8 @@ MetaData QImpl::metaData()
     {
       const NFmiLevel &level = *qi.Level();
 
-      auto type = ::LevelName(level.LevelType());
-      auto name = level.GetName().CharPtr();
+      const auto *type = ::LevelName(level.LevelType());
+      const auto *name = level.GetName().CharPtr();
       auto value = level.LevelValue();
       levels.emplace_back(type, name, value);
     }

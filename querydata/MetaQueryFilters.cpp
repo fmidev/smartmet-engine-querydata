@@ -87,7 +87,7 @@ bool filterParameters(const MetaData& prop, const MetaQueryOptions& options)
     for (auto& param : params)
     {
       bool found = false;
-      for (auto& fparam : prop.parameters)
+      for (const auto& fparam : prop.parameters)
       {
         if (str_iequal(fparam.name, param))
         {
@@ -119,7 +119,7 @@ bool filterLevelTypes(const MetaData& prop, const MetaQueryOptions& options)
     for (auto& type : types)
     {
       bool found = false;
-      for (auto& flevel : prop.levels)
+      for (const auto& flevel : prop.levels)
       {
         if (str_iequal(flevel.type, type))
         {
@@ -152,7 +152,7 @@ bool filterLevelValues(const MetaData& prop, const MetaQueryOptions& options)
     for (auto& value : values)
     {
       bool found = false;
-      for (auto& flevel : prop.levels)
+      for (const auto& flevel : prop.levels)
       {
         if (flevel.value == value)
         {
@@ -178,7 +178,7 @@ bool filterSynchro(const MetaData& prop, const std::vector<bp::ptime>& originTim
 {
   try
   {
-    for (auto& time : originTimes)
+    for (const auto& time : originTimes)
     {
       if (prop.originTime == time)
         return true;  // Time is in synchronized origin times
