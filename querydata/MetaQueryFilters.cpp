@@ -178,14 +178,9 @@ bool filterSynchro(const MetaData& prop, const std::vector<bp::ptime>& originTim
 {
   try
   {
-    for (const auto& time : originTimes)
-    {
-      if (prop.originTime == time)
-        return true;  // Time is in synchronized origin times
-    }
-
-    // If we are here, there were no matches
-    return false;
+    return std::any_of(originTimes.cbegin(),
+                       originTimes.cend(),
+                       [&prop](const bp::ptime& t) { return (t == prop.originTime); });
   }
   catch (...)
   {

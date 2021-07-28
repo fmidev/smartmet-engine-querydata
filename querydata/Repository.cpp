@@ -152,16 +152,13 @@ bool Repository::hasProducer(const Producer& producer) const
 
     // Check aliases
 
-    for (const auto& prod_config : itsProducerConfigs)
-    {
-      const auto& config = prod_config.second;
-      const auto& aliases = config.aliases;
-
-      if (aliases.find(producer) != aliases.end())
-        return true;
-    }
-
-    return false;
+    return std::any_of(itsProducerConfigs.cbegin(),
+                       itsProducerConfigs.cend(),
+                       [&producer](const ProducerConfigs::value_type& prod_config)
+                       {
+                         const auto& aliases = prod_config.second.aliases;
+                         return (aliases.find(producer) != aliases.end());
+                       });
   }
   catch (...)
   {
