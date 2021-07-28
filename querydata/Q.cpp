@@ -1531,8 +1531,8 @@ NFmiDataMatrix<float> QImpl::values(const NFmiDataMatrix<float> &theDEMValues,
   {
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeValues(theDEMValues, theWaterFlags);
-    else
-      return itsInfo->Values();
+
+    return itsInfo->Values();
   }
   catch (...)
   {
@@ -1557,8 +1557,8 @@ NFmiDataMatrix<float> QImpl::values(const NFmiMetTime &theInterpolatedTime,
   {
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeValues(theInterpolatedTime, theDEMValues, theWaterFlags);
-    else
-      return itsInfo->Values(theInterpolatedTime);
+
+    return itsInfo->Values(theInterpolatedTime);
   }
   catch (...)
   {
@@ -1655,8 +1655,8 @@ NFmiDataMatrix<float> QImpl::croppedValues(
   {
     if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
       return itsInfo->LandscapeCroppedValues(x1, y1, x2, y2, theDEMValues, theWaterFlags);
-    else
-      return itsInfo->CroppedValues(x1, y1, x2, y2);
+
+    return itsInfo->CroppedValues(x1, y1, x2, y2);
   }
   catch (...)
   {
