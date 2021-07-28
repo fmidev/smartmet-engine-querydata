@@ -50,10 +50,11 @@ namespace Querydata
 class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<QImpl>
 {
  public:
+  ~QImpl();
+
+  QImpl() = delete;
   QImpl(SharedModel theModel);
   QImpl(const std::vector<SharedModel>& theModels);
-
-  ~QImpl();
 
   // Avoid using this as much as possible
   boost::shared_ptr<NFmiFastQueryInfo> info();
@@ -304,8 +305,6 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   }
 
  private:
-  QImpl();
-
   NFmiDataMatrix<float> calculatedValues(const Spine::Parameter& theParam,
                                          const boost::posix_time::ptime& theInterpolatedTime);
 

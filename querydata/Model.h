@@ -54,6 +54,10 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
 
   Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
 
+  Model() = delete;
+  Model(const Model& theModel) = delete;
+  Model& operator=(const Model& theModel) = delete;
+
   friend std::size_t hash_value(const Model& theModel);
 
   const boost::posix_time::ptime& originTime() const;
@@ -82,10 +86,6 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   void uncache() const;
 
  private:
-  Model();
-  Model(const Model& theModel);
-  Model& operator=(const Model& theModel);
-
   // These need to be able to return the info object back:
   friend class QImpl;
   friend class Repository;

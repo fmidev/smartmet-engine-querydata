@@ -60,7 +60,6 @@ class Engine : public Spine::SmartMetEngine
  private:
   friend class Synchronizer;
 
-  Engine();
   boost::shared_ptr<RepoManager> itsRepoManager;
 
   boost::shared_ptr<Synchronizer> itsSynchro;
@@ -86,6 +85,7 @@ class Engine : public Spine::SmartMetEngine
   // constructor is available only with a libconfig configuration file
   // will also start a background thread to monitor querydata directories
   Engine(const std::string& configfile);
+  Engine() = delete;
 
   // request available information
   const ProducerList& producers() const;                    // available producers

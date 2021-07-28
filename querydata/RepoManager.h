@@ -29,6 +29,7 @@ struct RepoManager
   // construction & destruction
 
   ~RepoManager();
+  RepoManager() = delete;
   RepoManager(const std::string& configfile);
 
   // generic API
@@ -92,7 +93,6 @@ struct RepoManager
   void expirationLoop();
 
   Fmi::DirectoryMonitor::Watcher id(const Producer& producer) const;
-  RepoManager();
 
   int itsMaxThreadCount;
   boost::atomic<int> itsThreadCount;

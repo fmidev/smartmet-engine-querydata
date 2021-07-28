@@ -29,14 +29,13 @@ namespace Querydata
 class ValidPoints
 {
  public:
+  ValidPoints() = delete;
   ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, std::size_t hash);
   bool isvalid(std::size_t index) const;
 
   void uncache() const;
 
  private:
-  ValidPoints();
-
   std::vector<bool> itsMask;
   std::string itsCacheFile = "";
 };
