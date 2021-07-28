@@ -165,9 +165,9 @@ class Engine : public Spine::SmartMetEngine
                       boost::posix_time::ptime theTime) const;
 
  protected:
-  void init();
-  void shutdown();
-  void shutdownRequestFlagSet();
+  void init() override;
+  void shutdown() override;
+  void shutdownRequestFlagSet() override;
   std::time_t getConfigModTime();
   boost::atomic<int> lastConfigErrno;
   int getLastConfigErrno();

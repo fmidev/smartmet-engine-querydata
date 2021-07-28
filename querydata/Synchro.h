@@ -64,7 +64,7 @@ class SyncGroup
 class SynchronizerConfig : public Spine::ConfigBase
 {
  public:
-  ~SynchronizerConfig() = default;
+  ~SynchronizerConfig() override = default;
 
   SynchronizerConfig(const std::string& configFile);
 
