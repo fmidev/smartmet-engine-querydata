@@ -138,13 +138,13 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
   bool isSubParamUsed() const;
   void setIsSubParamUsed(bool theState);
 
-  unsigned long paramIndex(void) const;
+  unsigned long paramIndex() const;
   bool paramIndex(unsigned long theIndex);
-  unsigned long levelIndex(void) const;
+  unsigned long levelIndex() const;
   bool levelIndex(unsigned long theIndex);
-  unsigned long timeIndex(void) const;
+  unsigned long timeIndex() const;
   bool timeIndex(unsigned long theIndex);
-  unsigned long locationIndex(void) const;
+  unsigned long locationIndex() const;
   bool locationIndex(unsigned long theIndex);
 
   bool calcTimeCache(NFmiQueryInfo& theTargetInfo, std::vector<NFmiTimeCache>& theTimeCache);
