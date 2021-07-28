@@ -2487,9 +2487,7 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
 
     // Since we have precipitation, we always need precipitation form
     int rform = static_cast<int>(kFloatMissing);
-    if (q.param(kFmiPotentialPrecipitationForm))
-      rform = static_cast<int>(q.interpolate(latlon, t, maxgap));
-    else if (q.param(kFmiPrecipitationForm))
+    if (q.param(kFmiPotentialPrecipitationForm) || q.param(kFmiPrecipitationForm))
       rform = static_cast<int>(q.interpolate(latlon, t, maxgap));
 
     if (rform == static_cast<int>(kFloatMissing))
@@ -2519,9 +2517,7 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
     {
       // Now we need precipitation type too
       int rtype = 1;  // large scale by default
-      if (q.param(kFmiPotentialPrecipitationType))
-        rtype = static_cast<int>(q.interpolate(latlon, t, maxgap));
-      else if (q.param(kFmiPrecipitationType))
+      if (q.param(kFmiPotentialPrecipitationType) || q.param(kFmiPrecipitationType))
         rtype = static_cast<int>(q.interpolate(latlon, t, maxgap));
 
       if (rtype == 2)            // convective
@@ -2620,9 +2616,7 @@ boost::optional<int> calc_weather_number(QImpl &q,
 
     // Precipitation type is optional
     float rtype = kFloatMissing;
-    if (q.param(kFmiPotentialPrecipitationType))
-      rtype = q.interpolate(latlon, t, maxgap);
-    else if (q.param(kFmiPrecipitationType))
+    if (q.param(kFmiPotentialPrecipitationType) || q.param(kFmiPrecipitationType))
       rtype = q.interpolate(latlon, t, maxgap);
 
     int rtype_class = (rtype == kFloatMissing ? 9 : static_cast<int>(rtype));
@@ -2785,19 +2779,16 @@ ts::Value SmartSymbolText(QImpl &q,
         case 17:
           return "freezing rain";
         case 31:
-          return "periods of light rain";
         case 34:
           return "periods of light rain";
         case 37:
           return "light rain";
         case 32:
-          return "periods of moderate rain";
         case 35:
           return "periods of moderate rain";
         case 38:
           return "moderate rain";
         case 33:
-          return "periods of heavy rain";
         case 36:
           return "periods of heavy rain";
         case 39:
@@ -2882,55 +2873,46 @@ ts::Value SmartSymbolText(QImpl &q,
         case 17:
           return u8"underkylt regn";
         case 31:
-          return u8"tidvis l\u00e4tt regn";
         case 34:
           return u8"tidvis l\u00e4tt regn";
         case 37:
           return u8"l\u00e4tt regn";
         case 32:
-          return u8"tidvis m\00e5ttligt regn";
         case 35:
           return u8"tidvis m\00e5ttligt regn";
         case 38:
           return u8"m\00e5ttligt regn";
         case 33:
-          return u8"tidvis kraftigt regn";
         case 36:
           return u8"tidvis kraftigt regn";
         case 39:
           return u8"kraftigt regn";
         case 41:
-          return u8"tidvis l\u00e4tta byar ov sn\u00f6blandat regn";
         case 44:
-          return u8"tidvis l\u00e4tta byar avd sn\u00e4blandat regn";
+          return u8"tidvis l\u00e4tta byar av sn\u00f6blandat regn";
         case 47:
           return u8"l\u00e4tt sn\u00f6blandat regn";
         case 42:
-          return u8"tidvis m\00e5ttliga byar av sn\u00f6blandat regn";
         case 45:
           return u8"tidvis m\00e5ttliga byar av sn\u00f6blandat regn";
         case 48:
           return u8"m\00e5ttligt sn\u00f6blandat regn";
         case 43:
-          return u8"tidvis kraftiga byar av sn\u00f6blandat regn";
         case 46:
           return u8"tidvis kraftiga byar av sn\u00f6blandat regn";
         case 49:
           return u8"kraftigt sn\u00f6blandat regn";
         case 51:
-          return u8"tidvis l\u00e4tta sn\u00f6byar";
         case 54:
           return u8"tidvis l\u00e4tta sn\u00f6byar";
         case 57:
           return u8"tidvis l\u00e4tt sn\u00f6fall";
         case 52:
-          return u8"tidvis m\00e5ttliga sn\u00f6byar";
         case 55:
           return u8"tidvis m\00e5ttliga sn\u00f6byar";
         case 58:
           return u8"m\00e5ttligt sn\u00f6fall";
         case 53:
-          return u8"tidvis ymniga sn\u00f6byar";
         case 56:
           return u8"tidvis ymniga sn\u00f6byar";
         case 59:
@@ -2978,55 +2960,48 @@ ts::Value SmartSymbolText(QImpl &q,
         case 17:
           return u8"j\u00e4\u00e4t\u00e4v\u00e4\u00e4 sadetta";
         case 31:
-          return u8"ajoittain heikkoa vesisadetta";
         case 34:
           return u8"ajoittain heikkoa vesisadetta";
         case 37:
           return u8"heikkoa vesisadetta";
         case 32:
-          return u8"ajoittain kohtalaista vesisadetta";
         case 35:
           return u8"ajoittain kohtalaista vesisadetta";
         case 38:
           return u8"kohtalaista vesisadetta";
         case 33:
-          return u8"ajoittain voimakasta vesisadetta";
         case 36:
           return u8"ajoittain voimakasta vesisadetta";
         case 39:
           return u8"voimakasta vesisadetta";
         case 41:
-          return u8"ajoittain heikkoja r\u00e4nt\u00e4kuuroja";
         case 44:
           return u8"ajoittain heikkoja r\u00e4nt\u00e4kuuroja";
         case 47:
           return u8"heikkoa r\u00e4nt\u00e4sadetta";
         case 42:
-          return u8"ajoittain kohtalaisia r\u00e4nt\u00e4kuuroja";
         case 45:
           return u8"ajoittain kohtalaisia r\u00e4nt\u00e4kuuroja";
         case 48:
           return u8"kohtalaista r\u00e4nt\u00e4sadetta";
         case 43:
-          return u8"ajoittain voimakkaita r\u00e4nt\u00e4kuuroja";
         case 46:
           return u8"ajoittain voimakkaita r\u00e4nt\u00e4kuuroja";
         case 49:
           return u8"voimakasta r\u00e4nt\u00e4sadetta";
         case 51:
-          return u8"ajoittain heikkoja lumikuuroja";
         case 54:
+          return u8"ajoittain heikkoja lumikuuroja";
           return u8"ajoittain heikkoja lumikuuroja";
         case 57:
           return u8"heikkoa lumisadetta";
         case 52:
-          return u8"ajoittain kohtalaisia lumikuuroja";
         case 55:
+          return u8"ajoittain kohtalaisia lumikuuroja";
           return u8"ajoittain kohtalaisia lumikuuroja";
         case 58:
           return u8"kohtalaista lumisadetta";
         case 53:
-          return u8"ajoittain sakeita lumikuuroja";
         case 56:
           return u8"ajoittain sakeita lumikuuroja";
         case 59:
