@@ -112,7 +112,7 @@ ParameterTranslations read_translations(const std::string& configfile)
 
           auto text = std::string("\"") + translation.c_str() + "\"";
           Json::Value json;
-          bool ok = jsonreader.parse(text.c_str(), json);
+          bool ok = jsonreader.parse(text, json);
           if (!ok || !json.isString())
             throw Fmi::Exception(BCP, "Failed to parse JSON string '" + text + "'");
 
