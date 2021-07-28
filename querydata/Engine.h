@@ -24,10 +24,10 @@
 class NFmiPoint;
 class OGRSpatialReference;
 
-typedef std::shared_ptr<Fmi::CoordinateMatrix> CoordinatesPtr;
+using CoordinatesPtr = std::shared_ptr<Fmi::CoordinateMatrix>;
 
-typedef NFmiDataMatrix<float> Values;
-typedef std::shared_ptr<Values> ValuesPtr;
+using Values = NFmiDataMatrix<float>;
+using ValuesPtr = std::shared_ptr<Values>;
 
 namespace Fmi
 {
@@ -70,11 +70,11 @@ class Engine : public Spine::SmartMetEngine
   const std::string itsConfigFile;
 
   // Cached querydata coordinates.
-  typedef Fmi::Cache::Cache<std::size_t, std::shared_future<CoordinatesPtr>> CoordinateCache;
+  using CoordinateCache = Fmi::Cache::Cache<std::size_t, std::shared_future<CoordinatesPtr>>;
   mutable CoordinateCache itsCoordinateCache;
 
   // Cached querydata values
-  typedef Fmi::Cache::Cache<std::size_t, std::shared_future<ValuesPtr>> ValuesCache;
+  using ValuesCache = Fmi::Cache::Cache<std::size_t, std::shared_future<ValuesPtr>>;
   mutable ValuesCache itsValuesCache;
 
   int itsActiveThreadCount;

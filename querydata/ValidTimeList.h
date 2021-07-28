@@ -10,7 +10,7 @@ namespace Engine
 {
 namespace Querydata
 {
-typedef std::list<boost::posix_time::ptime> ValidTimeList;
+using ValidTimeList = std::list<boost::posix_time::ptime>;
 }  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet

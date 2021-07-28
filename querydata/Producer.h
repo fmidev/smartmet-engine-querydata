@@ -15,11 +15,11 @@ namespace Querydata
 {
 // A producer is identified by its name
 
-typedef std::string Producer;
+using Producer = std::string;
 
 // A list of producers
 
-typedef std::list<std::string> ProducerList;
+using ProducerList = std::list<std::string>;
 
 // ----------------------------------------------------------------------
 /*!

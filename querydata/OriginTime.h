@@ -15,9 +15,9 @@ namespace Engine
 {
 namespace Querydata
 {
-typedef boost::posix_time::ptime OriginTime;
-typedef std::set<OriginTime> OriginTimes;
-typedef boost::posix_time::time_period OriginTimePeriod;
+using OriginTime = boost::posix_time::ptime;
+using OriginTimes = std::set<OriginTime>;
+using OriginTimePeriod = boost::posix_time::time_period;
 
 }  // namespace Querydata
 }  // namespace Engine

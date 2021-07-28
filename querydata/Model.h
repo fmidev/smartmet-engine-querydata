@@ -26,7 +26,7 @@
 class NFmiPoint;
 class NFmiQueryData;
 
-typedef boost::shared_ptr<NFmiFastQueryInfo> SharedInfo;
+using SharedInfo = boost::shared_ptr<NFmiFastQueryInfo>;
 
 namespace SmartMet
 {
@@ -121,9 +121,9 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   boost::shared_ptr<NFmiQueryData> itsQueryData;
 };
 
-typedef boost::shared_ptr<Model> SharedModel;
-typedef std::list<SharedModel> SharedModelList;
-typedef std::list<std::pair<SharedModel, ValidTimeList>> SharedModelTimeList;
+using SharedModel = boost::shared_ptr<Model>;
+using SharedModelList = std::list<SharedModel>;
+using SharedModelTimeList = std::list<std::pair<SharedModel, ValidTimeList>>;
 
 inline std::size_t hash_value(const SharedModel& theModel)
 {

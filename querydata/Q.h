@@ -326,8 +326,8 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
 
 };  // class QImpl
 
-typedef boost::shared_ptr<QImpl> Q;
-typedef std::list<Q> QList;
+using Q = boost::shared_ptr<QImpl>;
+using QList = std::list<Q>;
 
 inline std::size_t hash_value(const Q& theQ)
 {

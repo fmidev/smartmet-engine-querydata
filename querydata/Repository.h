@@ -67,9 +67,9 @@ class Repository
 
   Q getAll(const Producer& producer) const;
 
-  typedef std::pair<boost::shared_ptr<Spine::Table>, Spine::TableFormatter::Names> ContentTable;
-  typedef std::map<OriginTime, SharedModel> SharedModels;
-  typedef std::map<std::string, std::vector<boost::posix_time::ptime> > MetaObject;
+  using ContentTable = std::pair<boost::shared_ptr<Spine::Table>, Spine::TableFormatter::Names>;
+  using SharedModels = std::map<OriginTime, SharedModel>;
+  using MetaObject = std::map<std::string, std::vector<boost::posix_time::ptime> >;
 
   ContentTable getProducerInfo(const ProducerList& producerlist,
                                const std::string& timeFormat) const;
@@ -114,8 +114,8 @@ class Repository
   // Each uniquely named producer has a number
   // of models, which are sorted by their origin times
 
-  typedef std::map<Producer, SharedModels> Producers;
-  typedef std::map<Producer, ProducerConfig> ProducerConfigs;
+  using Producers = std::map<Producer, SharedModels>;
+  using ProducerConfigs = std::map<Producer, ProducerConfig>;
   Producers itsProducers;
   ProducerConfigs itsProducerConfigs;
   bool itsVerbose = false;
