@@ -15,8 +15,11 @@ Range::Range(const Range& other) : mMin(other.getMin()), mMax(other.getMax()) {}
 
 Range& Range::operator=(const Range& other)
 {
-  mMin = other.getMin();
-  mMax = other.getMax();
+  if (this != &other)
+  {
+    mMin = other.getMin();
+    mMax = other.getMax();
+  }
   return *this;
 }
 

@@ -44,8 +44,11 @@ WGS84Envelope::WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo>& info)
 
 WGS84Envelope& WGS84Envelope::operator=(const WGS84Envelope& other)
 {
-  mRangeLon = other.getRangeLon();
-  mRangeLat = other.getRangeLat();
+  if (this != &other)
+  {
+    mRangeLon = other.getRangeLon();
+    mRangeLat = other.getRangeLat();
+  }
   return *this;
 }
 
