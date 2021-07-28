@@ -37,7 +37,7 @@ class ValidPoints
 
  private:
   std::vector<bool> itsMask;
-  std::string itsCacheFile = "";
+  std::string itsCacheFile;
 };
 
 }  // namespace Querydata

@@ -795,7 +795,7 @@ Repository::ContentTable Repository::getParameterInfo(const ProducerList& produc
 Repository::ContentTable Repository::getRepoContents(const std::string& timeFormat,
                                                      const std::string& projectionFormat) const
 {
-  std::string producer = "";
+  std::string producer;
   return getRepoContents(producer, timeFormat, projectionFormat);
 }
 
