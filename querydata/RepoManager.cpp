@@ -229,7 +229,8 @@ RepoManager::RepoManager(const std::string& configfile)
     }
     catch (const libconfig::ConfigException& e)
     {
-      throw Fmi::Exception(BCP, configfile + ": " + std::strerror(ec.value()));
+      throw Fmi::Exception(
+          BCP, configfile + ": " + std::strerror(ec.value()));  // NOLINT not thread safe
     }
   }
   catch (...)
