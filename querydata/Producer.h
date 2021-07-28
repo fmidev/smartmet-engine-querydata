@@ -79,7 +79,7 @@ struct ProducerConfig
   // status query might see a new file in some backends and an older one in others. There
   // would be no common content, which may mess up production.
 
-  inline bool operator==(const ProducerConfig& c)
+  inline bool operator==(const ProducerConfig& c) const
   {
     return c.isfullgrid == isfullgrid && c.isclimatology == isclimatology &&
            c.isforecast == isforecast && c.ismultifile == ismultifile &&
@@ -90,7 +90,7 @@ struct ProducerConfig
            c.directory == directory && c.aliases == aliases && c.producer == producer &&
            c.max_age == max_age && c.isrelativeuv == isrelativeuv && c.mmap == mmap;
   }
-  inline bool operator!=(const ProducerConfig& c) { return !operator==(c); }
+  inline bool operator!=(const ProducerConfig& c) const { return !operator==(c); }
 
   // Monitor index:
 };
