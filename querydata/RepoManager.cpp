@@ -217,7 +217,7 @@ RepoManager::RepoManager(const std::string& configfile)
 
       this->configModTime = modtime;
 
-      updateTasks->on_task_error([](const std::string&)
+      updateTasks->on_task_error([](const std::string& /* unused */)
                                  { Fmi::Exception::Trace(BCP, "Operation failed").printError(); });
     }
     catch (const libconfig::ParseException& e)
