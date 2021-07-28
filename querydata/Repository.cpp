@@ -799,9 +799,16 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
   return getRepoContents(producer, timeFormat, projectionFormat);
 }
 
+#ifdef WGS84
 Repository::ContentTable Repository::getRepoContents(const std::string& producer,
                                                      const std::string& timeFormat,
                                                      const std::string& projectionFormat) const
+#else
+Repository::ContentTable Repository::getRepoContents(
+    const std::string& producer,
+    const std::string& timeFormat,
+    const std::string& /* projectionFormat */) const
+#endif
 {
   try
   {
