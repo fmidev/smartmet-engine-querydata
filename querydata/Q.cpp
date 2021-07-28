@@ -4101,7 +4101,8 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
       // Load dem values and waterflags for given locations (target grid)
       //
       bool intersectsGrid = false;
-      int nx = theLocationCache.NX(), ny = theLocationCache.NY();
+      int nx = theLocationCache.NX();
+      int ny = theLocationCache.NY();
 
       theDemMatrix.Resize(nx, ny);
       theWaterFlagMatrix.Resize(nx, ny);
@@ -4139,7 +4140,10 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
     // column and row
     // (landscaping requires neighbour gridpoints to be available)
 
-    int nativeGridSizeX = nativeGrid.XNumber(), nativeGridSizeY = nativeGrid.YNumber(), nx, ny;
+    int nativeGridSizeX = nativeGrid.XNumber();
+    int nativeGridSizeY = nativeGrid.YNumber();
+    int nx;
+    int ny;
 
     if ((x1 != 0) || (y1 != 0) || (x2 != 0) || (y2 != 0))
     {
@@ -4279,7 +4283,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
       //
       NFmiDataMatrix<NFmiLocationCache> locCache;
       NFmiTimeCache timeCache = itsInfo->CalcTimeCache(NFmiMetTime(theTime));
-      NFmiDataMatrix<float> valueMatrix, demMatrix;
+      NFmiDataMatrix<float> valueMatrix;
+      NFmiDataMatrix<float> demMatrix;
       NFmiDataMatrix<bool> waterFlagMatrix;
 
       calcLatlonCachePoints(dstinfo, locCache);
