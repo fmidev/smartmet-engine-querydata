@@ -121,21 +121,21 @@ class MetaQueryOptions
 
   std::list<float> itsLevelValues;
 
-  bool itsHasProducer;
+  bool itsHasProducer = false;
 
-  bool itsHasOriginTime;
+  bool itsHasOriginTime = false;
 
-  bool itsHasFirstTime;
+  bool itsHasFirstTime = false;
 
-  bool itsHasLastTime;
+  bool itsHasLastTime = false;
 
-  bool itsHasParameters;
+  bool itsHasParameters = false;
 
-  bool itsHasBoundingBox;
+  bool itsHasBoundingBox = false;
 
-  bool itsHasLevelTypes;
+  bool itsHasLevelTypes = false;
 
-  bool itsHasLevelValues;
+  bool itsHasLevelValues = false;
 };
 
 }  // namespace Querydata

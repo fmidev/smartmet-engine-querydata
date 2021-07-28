@@ -8,17 +8,7 @@ namespace Engine
 {
 namespace Querydata
 {
-MetaQueryOptions::MetaQueryOptions()
-    : itsHasProducer(false),
-      itsHasOriginTime(false),
-      itsHasFirstTime(false),
-      itsHasLastTime(false),
-      itsHasParameters(false),
-      itsHasBoundingBox(false),
-      itsHasLevelTypes(false),
-      itsHasLevelValues(false)
-{
-}
+MetaQueryOptions::MetaQueryOptions() = default;
 
 void MetaQueryOptions::setProducer(const std::string& producer)
 {
