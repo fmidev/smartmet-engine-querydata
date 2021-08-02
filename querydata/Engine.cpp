@@ -144,7 +144,7 @@ Engine::Engine(const std::string& configfile)
     : itsRepoManager(boost::make_shared<RepoManager>(configfile)),
       itsConfigFile(configfile),
       itsActiveThreadCount(0),
-      itsParameterTranslations(new ParameterTranslations),
+      itsParameterTranslations(boost::make_shared<ParameterTranslations>()),
       lastConfigErrno(EINPROGRESS)
 {
 }
@@ -164,7 +164,7 @@ void Engine::init()
     itsParameterTranslations =
         boost::make_shared<ParameterTranslations>(read_translations(itsConfigFile));
 
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
     repomanager->init();
 
     itsSynchro = boost::make_shared<Synchronizer>(this, itsConfigFile);
@@ -244,7 +244,7 @@ void Engine::configFileWatch()
               boost::make_shared<RepoManager>(itsConfigFile);
 
           // The old manager can be used to initialize common data faster
-          auto oldrepomanager = boost::atomic_load(&itsRepoManager);
+          auto oldrepomanager = itsRepoManager.load();
           newrepomanager->setOldManager(oldrepomanager);
           newrepomanager->init();
 
@@ -259,7 +259,7 @@ void Engine::configFileWatch()
           if (!itsShutdownRequested)
           {
             // Update current repomanager
-            boost::atomic_store(&itsRepoManager, newrepomanager);
+            itsRepoManager.store(newrepomanager);
             std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
                              " update done"
                       << std::endl;
@@ -304,7 +304,7 @@ void Engine::shutdown()
       configFileWatcher.join();
     }
 
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     if (repomanager != nullptr)
       repomanager->shutdown();
@@ -322,7 +322,7 @@ void Engine::shutdownRequestFlagSet()
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     if (repomanager != nullptr)
       repomanager->shutdownRequestFlagSet();
@@ -363,7 +363,7 @@ const ProducerList& Engine::producers() const
     // We didn't bother to add a producers() method for the Impl,
     // hence we take an explicit lock here instead of inside the Impl.
     // The other public methods call the Impl to do the job.
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsProducerList;
@@ -384,7 +384,7 @@ bool Engine::hasProducer(const Producer& producer) const
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsRepo.hasProducer(producer);
@@ -405,7 +405,7 @@ OriginTimes Engine::origintimes(const Producer& producer) const
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsRepo.originTimes(producer);
@@ -426,11 +426,11 @@ Q Engine::get(const Producer& producer) const
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
     auto q = repomanager->itsRepo.get(producer);
-    q->setParameterTranslations(boost::atomic_load(&itsParameterTranslations));
+    q->setParameterTranslations(itsParameterTranslations.load());
     return q;
   }
   catch (...)
@@ -449,11 +449,11 @@ Q Engine::get(const Producer& producer, const boost::posix_time::ptime& originti
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
     auto q = repomanager->itsRepo.get(producer, origintime);
-    q->setParameterTranslations(boost::atomic_load(&itsParameterTranslations));
+    q->setParameterTranslations(itsParameterTranslations.load());
     return q;
   }
   catch (...)
@@ -478,7 +478,7 @@ Producer Engine::find(double lon,
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsRepo.find(repomanager->itsProducerList,
@@ -512,7 +512,7 @@ Producer Engine::find(const ProducerList& producerlist,
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsRepo.find(producerlist,
@@ -531,23 +531,6 @@ Producer Engine::find(const ProducerList& producerlist,
 
 // ----------------------------------------------------------------------
 /*!
- *\ brief Return available valid times for the latest model
- */
-// ----------------------------------------------------------------------
-
-#if 0
-	std::list<boost::posix_time::ptime>
-	Engine::validtimes(const Producer & producer) const
-	{
-	    auto repomanager=boost::atomic_load(&itsRepoManager);
-
-	  Spine::ReadLock lock(repomanager->itsMutex);
-	  return repomanager->validtimes(producer);
-	}
-#endif
-
-// ----------------------------------------------------------------------
-/*!
  *\ brief Return info of producers as table
  */
 // ----------------------------------------------------------------------
@@ -557,7 +540,7 @@ Repository::ContentTable Engine::getProducerInfo(const std::string& timeFormat,
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
 
@@ -584,7 +567,7 @@ Repository::ContentTable Engine::getParameterInfo(boost::optional<std::string> p
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
 
@@ -612,7 +595,7 @@ Repository::ContentTable Engine::getEngineContents(const std::string& timeFormat
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
 
@@ -636,7 +619,7 @@ Repository::ContentTable Engine::getEngineContents(const std::string& producer,
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
 
@@ -693,7 +676,7 @@ std::list<MetaData> Engine::getEngineMetadata() const
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
 
@@ -709,7 +692,7 @@ std::list<MetaData> Engine::getEngineMetadata(const MetaQueryOptions& theOptions
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
 
@@ -730,7 +713,7 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup) 
     if (!syncProducers)
       return std::list<MetaData>();  // Unknown sync group
 
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     std::list<MetaData> repocontent;
     {
@@ -777,7 +760,7 @@ std::list<MetaData> Engine::getEngineSyncMetadata(const std::string& syncGroup,
   try
   {
     auto syncProducers = itsSynchro->getSynchedData(syncGroup);
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     if (!syncProducers)
       return std::list<MetaData>();  // Unknown sync group
@@ -824,7 +807,7 @@ Repository::MetaObject Engine::getSynchroInfos() const
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
 
     Spine::ReadLock lock(repomanager->itsMutex);
 
@@ -862,28 +845,6 @@ void Engine::startSynchronize(Spine::Reactor* theReactor)
 
 // ----------------------------------------------------------------------
 /*!
- *\ brief Get data for given producer and optional origintime inside given
- *\		  validtime range
- */
-// ----------------------------------------------------------------------
-
-#if 0
-	SharedModelTimeList Engine::get(const Producer & producer,
-									const boost::posix_time::ptime & starttime,
-									const boost::posix_time::ptime & endtime,
-									unsigned int timestep,
-									const OriginTime & origintime,
-									bool & timeinterpolation) const
-	{
-	    auto repomanager=boost::atomic_load(&itsRepoManager);
-
-	  Spine::ReadLock lock(repomanager->itsMutex);
-	  return repomanager->itsRepo.get(producer,starttime,endtime,timestep,origintime,timeinterpolation);
-	}
-#endif
-
-// ----------------------------------------------------------------------
-/*!
  *\ brief Get producer's configuration
  */
 // ----------------------------------------------------------------------
@@ -892,7 +853,7 @@ const ProducerConfig& Engine::getProducerConfig(const std::string& producer) con
 {
   try
   {
-    auto repomanager = boost::atomic_load(&itsRepoManager);
+    auto repomanager = itsRepoManager.load();
     return repomanager->producerConfig(producer);
   }
   catch (...)
@@ -1134,7 +1095,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
 
 std::time_t Engine::getConfigModTime()
 {
-  auto repomanager = boost::atomic_load(&itsRepoManager);
+  auto repomanager = itsRepoManager.load();
   return repomanager->getConfigModTime();
 }
 

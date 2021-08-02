@@ -14,6 +14,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/smart_ptr/atomic_shared_ptr.hpp>
 #include <gis/CoordinateMatrix.h>
 #include <macgyver/Cache.h>
 #include <spine/SmartMetEngine.h>
@@ -60,7 +61,7 @@ class Engine : public Spine::SmartMetEngine
  private:
   friend class Synchronizer;
 
-  boost::shared_ptr<RepoManager> itsRepoManager;
+  boost::atomic_shared_ptr<RepoManager> itsRepoManager;
 
   boost::shared_ptr<Synchronizer> itsSynchro;
 
@@ -79,7 +80,7 @@ class Engine : public Spine::SmartMetEngine
 
   int itsActiveThreadCount;
 
-  boost::shared_ptr<ParameterTranslations> itsParameterTranslations;
+  boost::atomic_shared_ptr<ParameterTranslations> itsParameterTranslations;
 
  public:
   // constructor is available only with a libconfig configuration file
