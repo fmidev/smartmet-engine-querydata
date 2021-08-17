@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.8.2
+Version: 21.8.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -21,9 +21,9 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.7.28
+BuildRequires: smartmet-library-macgyver-devel >= 21.8.5
 BuildRequires: smartmet-library-newbase-devel >= 21.6.16
-BuildRequires: smartmet-library-spine-devel >= 21.7.28
+BuildRequires: smartmet-library-spine-devel >= 21.8.17
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -34,9 +34,9 @@ Requires: gdal32-libs
 Requires: jsoncpp >= 1.8.4
 Requires: libconfig >= 1.7.2
 Requires: protobuf
-Requires: smartmet-library-macgyver >= 21.7.28
+Requires: smartmet-library-macgyver >= 21.8.5
 Requires: smartmet-library-newbase >= 21.6.16
-Requires: smartmet-library-spine >= 21.7.28
+Requires: smartmet-library-spine >= 21.8.17
 #TestRequires: smartmet-library-macgyver-devel >= 21.1.14
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal32-devel
@@ -81,6 +81,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Aug 17 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.8.17-1.fmi
+- Use new shutdown API
+
 * Mon Aug  2 2021 Mika Heiskanen <mika.heiskanen@fmi.fi> - 21.8.2-1.fmi
 - Use atomic_shared_ptr instead of atomic_load/store
 
