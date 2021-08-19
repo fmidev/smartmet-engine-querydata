@@ -42,6 +42,7 @@
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
+#include <spine/Reactor.h>
 #include <cassert>
 #include <set>
 #include <sstream>
@@ -143,7 +144,6 @@ RepoManager::RepoManager(const std::string& configfile)
       updateTasks(new Fmi::AsyncTaskGroup),
       itsMaxThreadCount(10),  // default if not configured
       itsThreadCount(0),
-      itsShutdownRequested(false),
       itsLatLonCache(500)
 {
   boost::system::error_code ec;
@@ -295,13 +295,13 @@ void RepoManager::init()
 
 void RepoManager::expirationLoop()
 {
-  while (!itsShutdownRequested)
+  while (!Spine::Reactor::isShuttingDown())
   {
     // Wait 30 seconds. TODO: use condition variable
-    for (int i = 0; i < 10 * 30 && !itsShutdownRequested; i++)
+    for (int i = 0; i < 10 * 30 && !Spine::Reactor::isShuttingDown(); i++)
       boost::this_thread::sleep(boost::posix_time::milliseconds(100));
 
-    if (itsShutdownRequested)
+    if (Spine::Reactor::isShuttingDown())
       break;
 
     for (const ProducerConfig& config : itsConfigList)
@@ -347,20 +347,14 @@ void RepoManager::shutdown()
 {
   try
   {
-    itsShutdownRequested = true;
-
     std::cout << "  -- Shutdown requested (RepoManager)\n";
     itsMonitor.stop();
 
     if (itsMonitorThread.joinable())
-    {
       itsMonitorThread.join();
-    }
 
     if (itsExpirationThread.joinable())
-    {
       itsExpirationThread.join();
-    }
 
     updateTasks->stop();
     updateTasks->wait();
@@ -369,11 +363,6 @@ void RepoManager::shutdown()
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
-}
-
-void RepoManager::shutdownRequestFlagSet()
-{
-  itsShutdownRequested = true;
 }
 
 // ----------------------------------------------------------------------
@@ -506,7 +495,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     // We limit the number of threads to avoid exhausting the system
 
     bool ok = false;
-    while (!ok && !itsShutdownRequested)
+    while (!ok && !Spine::Reactor::isShuttingDown())
     {
       {
         if (itsThreadCount <= itsMaxThreadCount)
@@ -517,7 +506,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
     }
 
     // Abort if there is a shut down request
-    if (itsShutdownRequested)
+    if (Spine::Reactor::isShuttingDown())
       return;
 
     // Note: We are really counting scheduled threads, not
@@ -552,7 +541,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
 void RepoManager::load(Producer producer,
                        Files files)  // NOLINT(performance-unnecessary-value-param)
 {
-  if (itsShutdownRequested)
+  if (Spine::Reactor::isShuttingDown())
   {
     --itsThreadCount;
     return;
@@ -583,7 +572,7 @@ void RepoManager::load(Producer producer,
 
   for (const auto& filename : files)
   {
-    if (itsShutdownRequested)
+    if (Spine::Reactor::isShuttingDown())
       break;
 
     // Done if the remaining files would not be accepted for being older
@@ -664,7 +653,7 @@ void RepoManager::load(Producer producer,
     }
     catch (...)
     {
-      if (itsShutdownRequested)
+      if (Spine::Reactor::isShuttingDown())
         break;
 
       Fmi::Exception exception(BCP, "QEngine failed to load the file!", nullptr);
@@ -673,7 +662,7 @@ void RepoManager::load(Producer producer,
     }
   }  // for all files
 
-  if (!itsShutdownRequested)
+  if (!Spine::Reactor::isShuttingDown())
     itsRepo.updateProducerStatus(producer, data_load_time, itsRepo.getAllModels(producer).size());
 
   --itsThreadCount;

@@ -51,7 +51,6 @@ struct RepoManager
   void init();
   bool ready() const;
   void shutdown();
-  void shutdownRequestFlagSet();
 
   // data members
 
@@ -96,7 +95,6 @@ struct RepoManager
 
   int itsMaxThreadCount;
   boost::atomic<int> itsThreadCount;
-  boost::atomic<bool> itsShutdownRequested{false};
 
   using LatLonCache = Fmi::Cache::Cache<std::size_t, boost::shared_ptr<std::vector<NFmiPoint>>>;
   LatLonCache itsLatLonCache;

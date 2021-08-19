@@ -21,6 +21,7 @@
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
 #include <spine/Convenience.h>
+#include <spine/Reactor.h>
 #include <chrono>
 #include <exception>
 #include <iomanip>
@@ -170,7 +171,7 @@ void Engine::init()
     itsSynchro = boost::make_shared<Synchronizer>(this, itsConfigFile);
 
     // Wait until all initial data has been loaded
-    while (!repomanager->ready() && !itsShutdownRequested)
+    while (!repomanager->ready() && !Spine::Reactor::isShuttingDown())
     {
       boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
@@ -198,7 +199,7 @@ void Engine::configFileWatch()
   boost::system::error_code ec;
   std::time_t filetime = getConfigModTime();
 
-  while (!itsShutdownRequested)
+  while (!Spine::Reactor::isShuttingDown())
   {
     boost::this_thread::sleep_for(boost::chrono::seconds(1));
 
@@ -218,7 +219,7 @@ void Engine::configFileWatch()
     std::time_t newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
 
     // Was the file modified?
-    if (newfiletime != filetime && !itsShutdownRequested)
+    if (newfiletime != filetime && !Spine::Reactor::isShuttingDown())
     {
       // File changed
       // Go into cooling period of waiting a few seconds and checking again
@@ -227,7 +228,7 @@ void Engine::configFileWatch()
 
       try
       {
-        while (newfiletime != filetime && !itsShutdownRequested)
+        while (newfiletime != filetime && !Spine::Reactor::isShuttingDown())
         {
           std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
                            " updated, rereading"
@@ -237,7 +238,7 @@ void Engine::configFileWatch()
           newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
         }
 
-        if (!itsShutdownRequested)
+        if (!Spine::Reactor::isShuttingDown())
         {
           // Generate new repomanager according to new configs
           boost::shared_ptr<RepoManager> newrepomanager =
@@ -249,14 +250,14 @@ void Engine::configFileWatch()
           newrepomanager->init();
 
           // Wait until all initial data has been loaded
-          while (!newrepomanager->ready() && !itsShutdownRequested)
+          while (!newrepomanager->ready() && !Spine::Reactor::isShuttingDown())
           {
             boost::this_thread::sleep(boost::posix_time::milliseconds(100));
           }
 
           newrepomanager->removeOldManager();
 
-          if (!itsShutdownRequested)
+          if (!Spine::Reactor::isShuttingDown())
           {
             // Update current repomanager
             itsRepoManager.store(newrepomanager);
@@ -311,24 +312,6 @@ void Engine::shutdown()
 
     if (itsSynchro)
       itsSynchro->shutdown();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-void Engine::shutdownRequestFlagSet()
-{
-  try
-  {
-    auto repomanager = itsRepoManager.load();
-
-    if (repomanager != nullptr)
-      repomanager->shutdownRequestFlagSet();
-
-    if (itsSynchro)
-      itsSynchro->shutdownRequestFlagSet();
   }
   catch (...)
   {

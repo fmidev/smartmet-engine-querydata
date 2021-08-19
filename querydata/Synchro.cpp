@@ -224,18 +224,6 @@ void Synchronizer::shutdown()
   }
 }
 
-void Synchronizer::shutdownRequestFlagSet()
-{
-  try
-  {
-    itsIoService.stop();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
 boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& syncGroup)
 {
   try
