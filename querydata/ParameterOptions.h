@@ -10,6 +10,7 @@
 #include <spine/Location.h>
 #include <spine/Parameter.h>
 #include <spine/TimeSeriesGenerator.h>
+#include <spine/TimeSeries.h>
 
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiIndexMask.h>
@@ -41,7 +42,8 @@ struct ParameterOptions
                    const std::string& theZone,
                    const bool& theNearestPointFlag,
                    const NFmiPoint& theNearestPoint,
-                   NFmiPoint& theLastPoint);
+                   NFmiPoint& theLastPoint,
+				   Spine::TimeSeries::LocalTimePoolPtr theLocalTimePool);
 
   const Spine::Parameter& par;
   const Producer& producer;
@@ -56,6 +58,7 @@ struct ParameterOptions
   const bool& findnearestvalidpoint;
   const NFmiPoint& nearestpoint;
   NFmiPoint& lastpoint;
+  Spine::TimeSeries::LocalTimePoolPtr localTimePool; 
 };
 
 }  // namespace Querydata

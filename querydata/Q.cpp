@@ -120,6 +120,14 @@ namespace Engine
 {
 namespace Querydata
 {
+void check_local_time_pool(const ParameterOptions& options)
+{
+  // LocalTimePool must be created by client plugin, because references to localtimes in the pool 
+  // are used in the result set and they must be valid as log as result set is processed
+  if(options.localTimePool == nullptr)
+	throw Fmi::Exception::Trace(BCP, "Querydata::ParameterOptions::localTimePool can not be null!!!");
+}
+
 // Max interpolation gap
 const int maxgap = 6 * 60;
 
@@ -3713,7 +3721,9 @@ ts::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
 {
   try
   {
-    ts::TimeSeriesPtr ret(new ts::TimeSeries);
+	check_local_time_pool(param);
+
+    ts::TimeSeriesPtr ret(new ts::TimeSeries(param.localTimePool));
 
     for (const boost::local_time::local_date_time &ldt : tlist)
     {
@@ -3733,7 +3743,9 @@ ts::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
 {
   try
   {
-    ts::TimeSeriesPtr ret(new ts::TimeSeries);
+	check_local_time_pool(param);
+
+    ts::TimeSeriesPtr ret(new ts::TimeSeries(param.localTimePool));
 
     for (const boost::local_time::local_date_time &ldt : tlist)
     {
@@ -3753,7 +3765,9 @@ ts::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 {
   try
   {
-    ts::TimeSeriesPtr ret(new ts::TimeSeries);
+	check_local_time_pool(param);
+
+    ts::TimeSeriesPtr ret(new ts::TimeSeries(param.localTimePool));
 
     for (const boost::local_time::local_date_time &ldt : tlist)
     {
@@ -3775,6 +3789,8 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
 {
   try
   {
+	check_local_time_pool(param);
+
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
     for (const auto &mask : indexmask)
@@ -3808,7 +3824,8 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                     param.outzone,
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
-                                    param.lastpoint);
+                                    param.lastpoint,
+									param.localTimePool);
 
       ts::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       ts::LonLat lonlat(latlon.X(), latlon.Y());
@@ -3831,6 +3848,8 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
 {
   try
   {
+	check_local_time_pool(param);
+
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
     for (const auto &mask : indexmask)
@@ -3864,7 +3883,8 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
                                     param.outzone,
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
-                                    param.lastpoint);
+                                    param.lastpoint,
+									param.localTimePool);
 
       ts::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       ts::LonLat lonlat(latlon.X(), latlon.Y());
@@ -3886,6 +3906,8 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 {
   try
   {
+	check_local_time_pool(param);
+
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
     for (const auto &mask : indexmask)
@@ -3919,7 +3941,8 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                     param.outzone,
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
-                                    param.lastpoint);
+                                    param.lastpoint,
+									param.localTimePool);
 
       ts::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       ts::LonLat lonlat(latlon.X(), latlon.Y());
@@ -3946,6 +3969,8 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
 {
   try
   {
+	check_local_time_pool(param);
+
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
     for (const Spine::LocationPtr &loc : llist)
@@ -3962,7 +3987,8 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                     param.outzone,
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
-                                    param.lastpoint);
+                                    param.lastpoint,
+									param.localTimePool);
 
       ts::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       ts::LonLat lonlat(loc->longitude, loc->latitude);
@@ -3986,6 +4012,8 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
 {
   try
   {
+	check_local_time_pool(param);
+
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
     for (const Spine::LocationPtr &loc : llist)
@@ -4002,7 +4030,8 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
                                     param.outzone,
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
-                                    param.lastpoint);
+                                    param.lastpoint,
+									param.localTimePool);
 
       ts::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       ts::LonLat lonlat(loc->longitude, loc->latitude);
@@ -4025,6 +4054,8 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 {
   try
   {
+	check_local_time_pool(param);
+
     ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
 
     for (const Spine::LocationPtr &loc : llist)
@@ -4041,7 +4072,8 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                     param.outzone,
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
-                                    param.lastpoint);
+                                    param.lastpoint,
+									param.localTimePool);
 
       ts::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       ts::LonLat lonlat(loc->longitude, loc->latitude);
@@ -4316,6 +4348,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
       boost::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
       boost::local_time::time_zone_ptr utc(new boost::local_time::posix_time_zone("UTC"));
       boost::local_time::local_date_time localdatetime(theTime, utc);
+	  SmartMet::Spine::TimeSeries::LocalTimePoolPtr localTimePool = nullptr;
 
       auto mylocale = std::locale::classic();
 
@@ -4346,7 +4379,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                                      "",
                                      false,
                                      NFmiPoint(),
-                                     dummy);
+                                     dummy,
+									 localTimePool);
 
             auto result = value(options, localdatetime);
             if (boost::get<double>(&result) != nullptr)

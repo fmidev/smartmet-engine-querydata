@@ -19,20 +19,22 @@ ParameterOptions::ParameterOptions(const Spine::Parameter& theParam,
                                    const std::string& theZone,
                                    const bool& theNearestPointFlag,
                                    const NFmiPoint& theNearestPoint,
-                                   NFmiPoint& theLastPoint)
-    : par(theParam),
-      producer(theProducer),
-      loc(theLocation),
-      country(theCountry),
-      place(thePlace),
-      timeformatter(theTimeFormatter),
-      timestring(theTimeString),
-      language(theLang),
-      outlocale(theLocale),
-      outzone(theZone),
-      findnearestvalidpoint(theNearestPointFlag),
-      nearestpoint(theNearestPoint),
-      lastpoint(theLastPoint)
+                                   NFmiPoint& theLastPoint,
+								   Spine::TimeSeries::LocalTimePoolPtr theLocalTimePool)
+: par(theParam),
+  producer(theProducer),
+  loc(theLocation),
+  country(theCountry),
+  place(thePlace),
+  timeformatter(theTimeFormatter),
+  timestring(theTimeString),
+  language(theLang),
+  outlocale(theLocale),
+  outzone(theZone),
+  findnearestvalidpoint(theNearestPointFlag),
+  nearestpoint(theNearestPoint),
+  lastpoint(theLastPoint),
+  localTimePool(theLocalTimePool)
 {
 }
 
