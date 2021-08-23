@@ -168,7 +168,6 @@ class Engine : public Spine::SmartMetEngine
  protected:
   void init() override;
   void shutdown() override;
-  void shutdownRequestFlagSet() override;
   std::time_t getConfigModTime();
   boost::atomic<int> lastConfigErrno;
   int getLastConfigErrno();

@@ -99,7 +99,6 @@ class Synchronizer
   void launch(Spine::Reactor* theReactor);
 
   void shutdown();
-  void shutdownRequestFlagSet();
 
  private:
   void start_receive();
