@@ -175,6 +175,7 @@ class Engine : public Spine::SmartMetEngine
  private:
   boost::thread configFileWatcher;  // A thread watching for config file changes
   void configFileWatch();           // A function in separate thread checking the config file
+  Fmi::Cache::CacheStatistics getCacheStats() const override; // Get cache statistics
 
 };  // class Engine
 
