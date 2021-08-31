@@ -9,6 +9,7 @@
 #include "RepoManager.h"
 #include "Repository.h"
 #include "Synchro.h"
+#include "WGS84EnvelopeFactory.h"
 #include <boost/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -1085,6 +1086,17 @@ std::time_t Engine::getConfigModTime()
 int Engine::getLastConfigErrno()
 {
   return lastConfigErrno;
+}
+
+Fmi::Cache::CacheStatistics Engine::getCacheStats() const
+{
+  Fmi::Cache::CacheStatistics ret;
+  
+  auto repomanager = itsRepoManager.load();
+  ret.insert(std::make_pair("Querydata::lat_lon_cache", repomanager->getCacheStats()));
+  ret.insert(std::make_pair("Querydata::wgs84_envelope_cache", WGS84EnvelopeFactory::getCacheStats()));
+
+  return ret;  
 }
 
 }  // namespace Querydata

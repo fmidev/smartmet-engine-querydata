@@ -87,6 +87,8 @@ struct RepoManager
   void setOldManager(boost::shared_ptr<RepoManager> oldmanager);
   void removeOldManager();
 
+  const Fmi::Cache::CacheStats& getCacheStats() const { return itsLatLonCache.statistics(); }
+
  private:
   void load(Producer producer, Files files);
   void expirationLoop();
