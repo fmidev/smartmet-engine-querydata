@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.8.30
+Version: 21.9.7
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -15,7 +15,6 @@ BuildRequires: bzip2-devel
 BuildRequires: gcc-c++
 BuildRequires: gdal32-devel
 BuildRequires: jsoncpp-devel >= 1.8.4
-BuildRequires: libconfig >= 1.7.2
 BuildRequires: make
 BuildRequires: protobuf
 BuildRequires: protobuf-compiler
@@ -23,7 +22,7 @@ BuildRequires: protobuf-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-macgyver-devel >= 21.8.30
 BuildRequires: smartmet-library-newbase-devel >= 21.6.16
-BuildRequires: smartmet-library-spine-devel >= 21.8.30
+BuildRequires: smartmet-library-spine-devel >= 21.9.7
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -32,11 +31,10 @@ Requires: boost169-system
 Requires: boost169-thread
 Requires: gdal32-libs
 Requires: jsoncpp >= 1.8.4
-Requires: libconfig >= 1.7.2
 Requires: protobuf
 Requires: smartmet-library-macgyver >= 21.8.30
 Requires: smartmet-library-newbase >= 21.6.16
-Requires: smartmet-library-spine >= 21.8.30
+Requires: smartmet-library-spine >= 21.9.7
 #TestRequires: smartmet-library-macgyver-devel >= 21.1.14
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal32-devel
@@ -81,6 +79,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Sep  7 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.9.7-1.fmi
+- Rebuild due to dependency changes
+
 * Mon Aug 30 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.8.30-1.fmi
 - Cache counters added (BRAINSTORM-1005)
 
