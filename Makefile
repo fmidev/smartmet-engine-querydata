@@ -2,7 +2,7 @@ SUBNAME = querydata
 SPEC = smartmet-engine-$(SUBNAME)
 INCDIR = smartmet/engines/$(SUBNAME)
 
-REQUIRES = gdal jsoncpp
+REQUIRES = gdal jsoncpp configpp
 
 include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
 
