@@ -176,6 +176,8 @@ void Engine::init()
     {
       boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
+	
+	repomanager->cleanValidPointsCache();
 
     // We got this far, assume config file must be valid
     lastConfigErrno = 0;

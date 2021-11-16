@@ -12,6 +12,7 @@
 #include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>
+#include <macgyver/AnsiEscapeCodes.h>
 #include <spine/Convenience.h>
 #include <fstream>
 
@@ -55,7 +56,12 @@ ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, 
   itsCacheFile = cachedir + "/" + Fmi::to_string(hash);
 
   if (!boost::filesystem::is_directory(cachedir))
-    boost::filesystem::create_directories(cachedir);
+	{
+	  std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA + " [querydata] Creating valid points cache directory '" + cachedir + "'" +
+					ANSI_FG_DEFAULT)
+				<< std::endl;
+	  boost::filesystem::create_directories(cachedir);
+	}
 
   // Try using a cached file first
   try

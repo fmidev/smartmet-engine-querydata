@@ -89,6 +89,8 @@ struct RepoManager
 
   const Fmi::Cache::CacheStats& getCacheStats() const { return itsLatLonCache.statistics(); }
 
+  void cleanValidPointsCache();
+
  private:
   void load(Producer producer, Files files);
   void expirationLoop();
@@ -102,6 +104,7 @@ struct RepoManager
   LatLonCache itsLatLonCache;
 
   std::string itsValidPointsCacheDir = "/var/smartmet/querydata/validpoints";
+  bool itsCleanValidPointsCacheDir{false};
 
   boost::shared_ptr<RepoManager> itsOldRepoManager;
 };

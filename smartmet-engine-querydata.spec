@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.9.28
+Version: 21.11.16
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -79,6 +79,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+
+* Tue Nov 11 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.11.16-1.fmi
+- Make it possible to clean validpoints directory at startup (BRAINSTORM-2186)
+- clean_valid_points_cache_dir configuration parameter tells if directory is cleand at startup
+
 * Tue Sep 28 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.9.28-1.fmi
 - Repackage due to dependency change: moving libconfig files to differentr directory
 

@@ -34,6 +34,7 @@ class ValidPoints
   bool isvalid(std::size_t index) const;
 
   void uncache() const;
+  const std::string& cacheFile() const { return itsCacheFile; }
 
  private:
   std::vector<bool> itsMask;
