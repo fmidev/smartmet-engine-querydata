@@ -20,9 +20,9 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.9.13
-BuildRequires: smartmet-library-newbase-devel >= 21.6.16
-BuildRequires: smartmet-library-spine-devel >= 21.9.13
+BuildRequires: smartmet-library-macgyver-devel >= 21.10.4
+BuildRequires: smartmet-library-newbase-devel >= 21.11.15
+BuildRequires: smartmet-library-spine-devel >= 21.11.10
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -32,9 +32,9 @@ Requires: boost169-thread
 Requires: gdal32-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
-Requires: smartmet-library-macgyver >= 21.9.13
-Requires: smartmet-library-newbase >= 21.6.16
-Requires: smartmet-library-spine >= 21.9.13
+Requires: smartmet-library-macgyver >= 21.10.4
+Requires: smartmet-library-newbase >= 21.11.15
+Requires: smartmet-library-spine >= 21.11.10
 #TestRequires: smartmet-library-macgyver-devel >= 21.1.14
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal32-devel
