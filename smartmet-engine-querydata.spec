@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.11.16
+Version: 21.11.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -80,7 +80,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
-* Tue Nov 11 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.11.16-1.fmi
+* Wed Nov 17 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.11.17-1.fmi
 - Make it possible to clean validpoints directory at startup (BRAINSTORM-2186)
 - clean_valid_points_cache_dir configuration parameter tells if directory is cleand at startup
 
