@@ -89,6 +89,7 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   // These need to be able to return the info object back:
   friend class QImpl;
   friend class Repository;
+  friend class RepoManager;
   SharedInfo info() const;
   void release(boost::shared_ptr<NFmiFastQueryInfo> theInfo) const;
 

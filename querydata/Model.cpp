@@ -89,7 +89,7 @@ Model::Model(const boost::filesystem::path& filename,
     // hence we configure separately whether this initialization
     // needs to be done or not. findvalidpoint acts accordingly.
 
-    if (!itsFullGrid)
+    if (!itsFullGrid && !validpointscachedir.empty())
       itsValidPoints = boost::make_shared<ValidPoints>(*qinfo, validpointscachedir, itsHashValue);
 
     // Requesting the valid times repeatedly is slow if we have to do
@@ -360,7 +360,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
         if (distance > bestdistance)
           break;
 
-        if (itsValidPoints->isvalid(qi.PeekLocationIndex(i, j)))
+        if (itsValidPoints && itsValidPoints->isvalid(qi.PeekLocationIndex(i, j)))
         {
           ok = true;
           bestpoint = p;
