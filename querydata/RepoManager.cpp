@@ -733,7 +733,7 @@ void RepoManager::cleanValidPointsCache()
   if(cachefiles.empty())
 	return;
 
-  boost::system::error_code ec;
+  //boost::system::error_code ec;
   boost::filesystem::directory_iterator end_itr;
   for (boost::filesystem::directory_iterator itr(itsValidPointsCacheDir); itr != end_itr; ++itr)
 	{

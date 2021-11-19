@@ -96,6 +96,8 @@ rpm: clean protoc $(SPEC).spec
 obj/%.o: %.cpp
 	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
 
+obj/Engine.o: CFLAGS += -Wno-deprecated-declarations
+
 protoc: $(COMPILED_PB_SRCS)
 
 querydata/%.pb.cpp: %.proto; mkdir -p tmp
