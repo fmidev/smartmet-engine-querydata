@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.11.16
+Version: 21.12.2
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -20,9 +20,9 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.9.13
-BuildRequires: smartmet-library-newbase-devel >= 21.6.16
-BuildRequires: smartmet-library-spine-devel >= 21.9.13
+BuildRequires: smartmet-library-macgyver-devel >= 21.12.1
+BuildRequires: smartmet-library-newbase-devel >= 21.12.1
+BuildRequires: smartmet-library-spine-devel >= 21.12.2
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -32,10 +32,10 @@ Requires: boost169-thread
 Requires: gdal33-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
-Requires: smartmet-library-macgyver >= 21.9.13
-Requires: smartmet-library-newbase >= 21.6.16
-Requires: smartmet-library-spine >= 21.9.13
-#TestRequires: smartmet-library-macgyver-devel >= 21.1.14
+Requires: smartmet-library-macgyver >= 21.12.1
+Requires: smartmet-library-newbase >= 21.12.1
+Requires: smartmet-library-spine >= 21.12.2
+#TestRequires: smartmet-library-macgyver-devel >= 21.12.1
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal33-devel
 #TestRequires: gcc-c++
