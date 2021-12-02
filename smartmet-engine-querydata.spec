@@ -51,6 +51,7 @@ Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
 Requires: gdal33-devel
+Requires: %{SPECNAME} = %{version}-%{release}
 
 Obsoletes: smartmet-brainstorm-qengine-devel < 16.11.1
 %description -n %{SPECNAME}-devel
