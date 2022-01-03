@@ -30,6 +30,8 @@
 #include <ogr_spatialref.h>
 #include <system_error>
 
+#define CHECK_LATEST_MODEL_AGE true
+
 namespace
 {
 auto badcoord = std::make_pair(std::numeric_limits<double>::quiet_NaN(),
@@ -473,7 +475,8 @@ Producer Engine::find(double lon,
                                      lat,
                                      maxdist,
                                      usedatamaxdistance,
-                                     leveltype);
+                                     leveltype,
+									 CHECK_LATEST_MODEL_AGE);
   }
   catch (...)
   {
