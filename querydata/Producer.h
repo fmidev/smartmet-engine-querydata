@@ -67,6 +67,7 @@ struct ProducerConfig
   unsigned int update_interval = 3600;      // once per hour
   unsigned int minimum_expires = 600;       // 10 minutes
   unsigned int max_age = 0;                 // do not remove old models by default based on age
+  unsigned int max_latest_age = 0;          // do not check age of latest model by default
   double maxdistance = -1;
   bool ismultifile = false;
   bool isforecast = true;

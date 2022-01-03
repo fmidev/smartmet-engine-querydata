@@ -55,7 +55,8 @@ class Repository
                 double lat,
                 double maxdist,
                 bool usedatamaxdist,
-                const std::string& leveltype) const;
+                const std::string& leveltype,
+				bool checkLatestModelAge = false) const;
 
   OriginTimes originTimes(const Producer& producer) const;
 

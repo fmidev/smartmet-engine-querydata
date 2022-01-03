@@ -79,6 +79,9 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
       else if (name == "max_age")
         pinfo.max_age = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
 
+      else if (name == "max_latest_age")
+        pinfo.max_latest_age = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
+
       else if (name == "update_interval")
         pinfo.update_interval = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
 

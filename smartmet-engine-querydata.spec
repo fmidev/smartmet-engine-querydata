@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 21.12.7
+Version: 22.1.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -80,9 +80,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Jan 3 2022 Anssi Reponen <anssi.reponen@fmi.fi> - 22.1.3-1.fmi
+- Added support for new parameter max_latest_age (BRAINSTORM-2225)
+- The new parameter the maximum age of the latest querydata file, so that
+old files are not used if the latest file is missing
+
 * Tue Dec  7 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.12.7-1.fmi
 - Update to postgresql 13 and gdal 3.3
-
 
 * Wed Nov 17 2021 Anssi Reponen <anssi.reponen@fmi.fi> - 21.11.17-1.fmi
 - Make it possible to clean validpoints directory at startup (BRAINSTORM-2186)

@@ -25,6 +25,30 @@ namespace Engine
 {
 namespace Querydata
 {
+namespace
+{
+bool latest_model_age_ok(const Repository::SharedModels& time_models, unsigned int max_latest_age)
+{
+  if (time_models.empty())
+	return false;
+  if(max_latest_age == 0)
+	return true;
+  
+  auto now = boost::posix_time::second_clock::universal_time();
+  
+  auto time_limit = now - boost::posix_time::seconds(max_latest_age);
+  
+  for (auto time_model = time_models.begin(), end = time_models.end(); time_model != end;)
+    {
+      if (time_model->second->modificationTime() >= time_limit)
+		return true;
+	  time_model++;
+	}
+  
+  return false;
+}
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Add a new producer configuration
@@ -543,7 +567,8 @@ Producer Repository::find(const ProducerList& producerlist,
                           double lat,
                           double maxdist,
                           bool usedatamaxdist,
-                          const std::string& leveltype) const
+                          const std::string& leveltype,
+						  bool checkLatestModelAge/* = false*/) const
 {
   try
   {
@@ -559,6 +584,9 @@ Producer Repository::find(const ProducerList& producerlist,
         double chosenmaxdist =
             (usedatamaxdist && prod_config->second.maxdistance > 0 ? prod_config->second.maxdistance
                                                                    : maxdist);
+
+		if(checkLatestModelAge && !latest_model_age_ok(producer_model->second, prod_config->second.max_latest_age))
+		  continue;
 
         if (contains(producer_model->second, lon, lat, chosenmaxdist, leveltype))
           return producer;
@@ -587,6 +615,9 @@ Producer Repository::find(const ProducerList& producerlist,
           const auto producer_model = itsProducers.find(producer);
           if (producer_model != itsProducers.end())
           {
+			if(checkLatestModelAge && !latest_model_age_ok(producer_model->second, prod_config->second.max_latest_age))
+			  continue;
+
             if (contains(producer_model->second, lon, lat, chosenmaxdist, leveltype))
               return producer;
           }
