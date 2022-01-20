@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.1.3
+Version: 22.1.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -80,9 +80,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Jan 20 2022 Anssi Reponen <anssi.reponen@fmi.fi> - 22.1.20-1.fmi
+- Fixed WindUMS/WindVMS parameter pressure/height-query (BRAINSTORM-2236)
+
 * Mon Jan 3 2022 Anssi Reponen <anssi.reponen@fmi.fi> - 22.1.3-1.fmi
 - Added support for new parameter max_latest_age (BRAINSTORM-2225)
-- The new parameter the maximum age of the latest querydata file, so that
+- The new parameter tells the maximum age of the latest querydata file, so that
 old files are not used if the latest file is missing
 
 * Tue Dec  7 2021 Andris Pavēnis <andris.pavenis@fmi.fi> 21.12.7-1.fmi
