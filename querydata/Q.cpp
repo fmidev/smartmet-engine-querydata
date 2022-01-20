@@ -63,6 +63,8 @@ const int cloud_limit6 = 72;
 const int cloud_limit7 = 85;
 const int cloud_limit8 = 93;
 
+enum class InterpolationMethod{PRESSURE,HEIGHT,SURFACE};
+
 const char *LevelName(FmiLevelType theLevel)
 {
   try
@@ -1836,7 +1838,9 @@ std::string format_date(const boost::local_time::local_date_time &ldt,
 
 ts::Value WindUMS(QImpl &q,
                   const Spine::Location &loc,
-                  const boost::local_time::local_date_time &ldt)
+                  const boost::local_time::local_date_time &ldt,
+				  boost::optional<float> level = boost::none,
+				  InterpolationMethod method = InterpolationMethod::SURFACE)
 {
   try
   {
@@ -1854,7 +1858,7 @@ ts::Value WindUMS(QImpl &q,
     if (!q.param(kFmiWindUMS))
       return Spine::TimeSeries::None();
 
-    auto u = q.interpolate(latlon, ldt, maxgap);
+    auto u = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
 
     if (angle == 0)
       return u;
@@ -1862,7 +1866,7 @@ ts::Value WindUMS(QImpl &q,
     if (!q.param(kFmiWindVMS))
       return Spine::TimeSeries::None();
 
-    auto v = q.interpolate(latlon, ldt, maxgap);
+    auto v = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
 
     if (u == kFloatMissing || v == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -1885,7 +1889,9 @@ ts::Value WindUMS(QImpl &q,
 
 ts::Value WindVMS(QImpl &q,
                   const Spine::Location &loc,
-                  const boost::local_time::local_date_time &ldt)
+                  const boost::local_time::local_date_time &ldt,
+				  boost::optional<float> level = boost::none,
+				  InterpolationMethod method = InterpolationMethod::SURFACE)
 {
   try
   {
@@ -1905,7 +1911,7 @@ ts::Value WindVMS(QImpl &q,
 
     NFmiMetTime t(ldt);
 
-    auto v = q.interpolate(latlon, t, maxgap);
+    auto v = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
 
     if (angle == 0)
       return v;
@@ -1913,7 +1919,7 @@ ts::Value WindVMS(QImpl &q,
     if (!q.param(kFmiWindUMS))
       return Spine::TimeSeries::None();
 
-    auto u = q.interpolate(latlon, t, maxgap);
+    auto u = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
 
     if (u == kFloatMissing || v == kFloatMissing)
       return Spine::TimeSeries::None();
@@ -3090,6 +3096,54 @@ ts::Value QImpl::dataValue(const ParameterOptions &opt,
   return interpolatedValue;
 }
 
+ts::Value QImpl::dataValueAtPressure(const ParameterOptions &opt,
+									 const NFmiPoint &latlon,
+									 const boost::local_time::local_date_time &ldt,
+									 float pressure)
+{
+  ts::Value retval = Spine::TimeSeries::None();
+
+  NFmiMetTime t = ldt;
+  
+  float interpolatedValue = interpolateAtPressure(latlon, t, pressure, maxgap);
+  
+  // If we got no value and the proper flag is on,
+  // find the nearest point with valid values and use
+  // the values from that point
+  
+  if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
+	interpolatedValue = interpolateAtPressure(opt.nearestpoint, t, pressure, maxgap);
+  
+  if (interpolatedValue != kFloatMissing)
+	retval = interpolatedValue;
+
+  return retval;
+}
+
+ts::Value QImpl::dataValueAtHeight(const ParameterOptions &opt,
+								   const NFmiPoint &latlon,
+								   const boost::local_time::local_date_time &ldt,
+								   float height)
+{
+  ts::Value retval = Spine::TimeSeries::None();
+
+  NFmiMetTime t = ldt;
+  
+  float interpolatedValue = interpolateAtHeight(latlon, t, height, maxgap);
+  
+  // If we got no value and the proper flag is on,
+  // find the nearest point with valid values and use
+  // the values from that point
+  
+  if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
+	interpolatedValue = interpolateAtHeight(opt.nearestpoint, t, height, maxgap);
+  
+  if (interpolatedValue != kFloatMissing)
+	retval = interpolatedValue;
+
+  return retval;
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Extract data independent parameter value
@@ -3610,7 +3664,16 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
           retval = loc.longitude;
         else if (num == kFmiLatLon || num == kFmiLonLat)
           retval = ts::LonLat(loc.longitude, loc.latitude);
-
+		else if(num == kFmiWindUMS || num == kFmiWindVMS)
+		  {
+			if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
+			  {
+				if (isRelativeUV())
+				  retval = (num == kFmiWindUMS ? WindUMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE) : WindVMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE));
+				else
+				  retval = dataValueAtPressure(opt, latlon, ldt, pressure);
+			  }
+		  }
         break;
       }
       case Spine::Parameter::Type::DataIndependent:
@@ -3691,6 +3754,16 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
           retval = loc.longitude;
         else if (num == kFmiLatLon || num == kFmiLonLat)
           retval = ts::LonLat(loc.longitude, loc.latitude);
+		else if(num == kFmiWindUMS || num == kFmiWindVMS)
+		  {
+			if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
+			  {
+				if (isRelativeUV())
+				  retval = (num == kFmiWindUMS ? WindUMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT) : WindVMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT));
+				else
+				  retval = dataValueAtHeight(opt, latlon, ldt, height);
+			  }
+		  }
 
         break;
       }
