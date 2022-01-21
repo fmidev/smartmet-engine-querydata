@@ -13,31 +13,31 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: boost169-devel
 BuildRequires: bzip2-devel
 BuildRequires: gcc-c++
-BuildRequires: gdal33-devel
+BuildRequires: gdal34-devel
 BuildRequires: jsoncpp-devel >= 1.8.4
 BuildRequires: make
 BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 22.1.18
-BuildRequires: smartmet-library-newbase-devel >= 21.12.7
-BuildRequires: smartmet-library-spine-devel >= 22.1.5
+BuildRequires: smartmet-library-macgyver-devel >= 21.1.21
+BuildRequires: smartmet-library-newbase-devel >= 21.1.21
+BuildRequires: smartmet-library-spine-devel >= 21.1.21
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
 Requires: boost169-serialization
 Requires: boost169-system
 Requires: boost169-thread
-Requires: gdal33-libs
+Requires: gdal34-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
-Requires: smartmet-library-macgyver >= 22.1.18
-Requires: smartmet-library-newbase >= 21.12.7
-Requires: smartmet-library-spine >= 22.1.5
-#TestRequires: smartmet-library-macgyver-devel >= 22.1.18
+Requires: smartmet-library-macgyver >= 21.1.21
+Requires: smartmet-library-newbase >= 21.1.21
+Requires: smartmet-library-spine >= 21.1.21
+#TestRequires: smartmet-library-macgyver-devel >= 21.1.21
 #TestRequires: jsoncpp-devel >= 1.8.4
-#TestRequires: gdal33-devel
+#TestRequires: gdal34-devel
 #TestRequires: gcc-c++
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
@@ -50,7 +50,7 @@ SmartMet querydata engine
 Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
-Requires: gdal33-devel
+Requires: gdal34-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 
 Obsoletes: smartmet-brainstorm-qengine-devel < 16.11.1
