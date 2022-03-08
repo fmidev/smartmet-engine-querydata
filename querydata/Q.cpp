@@ -37,8 +37,6 @@
 #include <newbase/NFmiGdalArea.h>
 #endif
 
-namespace ts = SmartMet::Spine::TimeSeries;
-
 namespace
 {
 // SmartSymbol / WeatherNumber calculation limits
@@ -1836,7 +1834,7 @@ std::string format_date(const boost::local_time::local_date_time &ldt,
  */
 // ----------------------------------------------------------------------
 
-ts::Value WindUMS(QImpl &q,
+TS::Value WindUMS(QImpl &q,
                   const Spine::Location &loc,
                   const boost::local_time::local_date_time &ldt,
 				  boost::optional<float> level = boost::none,
@@ -1848,7 +1846,7 @@ ts::Value WindUMS(QImpl &q,
     auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
 
     if (!opt_angle)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     auto angle = *opt_angle * boost::math::double_constants::degree;
 
@@ -1856,7 +1854,7 @@ ts::Value WindUMS(QImpl &q,
     // auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
 
     if (!q.param(kFmiWindUMS))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     auto u = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
 
@@ -1864,12 +1862,12 @@ ts::Value WindUMS(QImpl &q,
       return u;
 
     if (!q.param(kFmiWindVMS))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     auto v = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
 
     if (u == kFloatMissing || v == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     // Unrotate U by the given angle
 
@@ -1887,7 +1885,7 @@ ts::Value WindUMS(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value WindVMS(QImpl &q,
+TS::Value WindVMS(QImpl &q,
                   const Spine::Location &loc,
                   const boost::local_time::local_date_time &ldt,
 				  boost::optional<float> level = boost::none,
@@ -1899,7 +1897,7 @@ ts::Value WindVMS(QImpl &q,
     auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
 
     if (!opt_angle)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     auto angle = *opt_angle * boost::math::double_constants::degree;
 
@@ -1907,7 +1905,7 @@ ts::Value WindVMS(QImpl &q,
     // auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
 
     if (!q.param(kFmiWindVMS))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
 
@@ -1917,12 +1915,12 @@ ts::Value WindVMS(QImpl &q,
       return v;
 
     if (!q.param(kFmiWindUMS))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     auto u = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
 
     if (u == kFloatMissing || v == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     // Unrotate V by the given angle
 
@@ -1940,7 +1938,7 @@ ts::Value WindVMS(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value WindCompass8(QImpl &q,
+TS::Value WindCompass8(QImpl &q,
                        const Spine::Location &loc,
                        const boost::local_time::local_date_time &ldt)
 {
@@ -1949,13 +1947,13 @@ ts::Value WindCompass8(QImpl &q,
     std::vector<std::string> names{"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
 
     if (!q.param(kFmiWindDirection))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
     float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (value == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     int i = static_cast<int>((value + 22.5) / 45) % 8;
     return names.at(i);
@@ -1972,7 +1970,7 @@ ts::Value WindCompass8(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value WindCompass16(QImpl &q,
+TS::Value WindCompass16(QImpl &q,
                         const Spine::Location &loc,
                         const boost::local_time::local_date_time &ldt)
 {
@@ -1996,13 +1994,13 @@ ts::Value WindCompass16(QImpl &q,
                                    "NNW"};
 
     if (!q.param(kFmiWindDirection))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
     float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (value == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     int i = static_cast<int>((value + 11.25) / 22.5) % 16;
     return names.at(i);
@@ -2019,7 +2017,7 @@ ts::Value WindCompass16(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value WindCompass32(QImpl &q,
+TS::Value WindCompass32(QImpl &q,
                         const Spine::Location &loc,
                         const boost::local_time::local_date_time &ldt)
 {
@@ -2031,13 +2029,13 @@ ts::Value WindCompass32(QImpl &q,
                                    "W", "WbN", "WNW", "NWbW", "NW", "NWbN", "NNW", "NbW"};
 
     if (!q.param(kFmiWindDirection))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
     float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (value == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     int i = static_cast<int>((value + 5.625) / 11.25) % 32;
     return names.at(i);
@@ -2054,20 +2052,20 @@ ts::Value WindCompass32(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value Cloudiness8th(QImpl &q,
+TS::Value Cloudiness8th(QImpl &q,
                         const Spine::Location &loc,
                         const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiTotalCloudCover))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
     float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (value == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     // This is the synoptic interpretation of 8s
 
@@ -2086,26 +2084,26 @@ ts::Value Cloudiness8th(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value WindChill(QImpl &q,
+TS::Value WindChill(QImpl &q,
                     const Spine::Location &loc,
                     const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiWindSpeedMS))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
     float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiTemperature))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
         loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
 
     if (wspd == kFloatMissing || t2m == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float chill = FmiWindChill(wspd, t2m);
     return chill;
@@ -2122,27 +2120,27 @@ ts::Value WindChill(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value SummerSimmerIndex(QImpl &q,
+TS::Value SummerSimmerIndex(QImpl &q,
                             const Spine::Location &loc,
                             const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiHumidity))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
 
     float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiTemperature))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
         loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
 
     if (rh == kFloatMissing || t2m == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float ssi = FmiSummerSimmerIndex(rh, t2m);
     return ssi;
@@ -2159,32 +2157,32 @@ ts::Value SummerSimmerIndex(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value FeelsLike(QImpl &q,
+TS::Value FeelsLike(QImpl &q,
                     const Spine::Location &loc,
                     const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiHumidity))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
 
     float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiTemperature))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
         loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
 
     if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     // We permit radiation to be missing
     float rad = kFloatMissing;
@@ -2194,7 +2192,7 @@ ts::Value FeelsLike(QImpl &q,
     float ret = FmiFeelsLikeTemperature(wspd, rh, t2m, rad);
 
     if (ret == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
     return ret;
   }
   catch (...)
@@ -2209,37 +2207,37 @@ ts::Value FeelsLike(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value ApparentTemperature(QImpl &q,
+TS::Value ApparentTemperature(QImpl &q,
                               const Spine::Location &loc,
                               const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiHumidity))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
 
     float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiTemperature))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float t2m = q.info()->LandscapeInterpolatedValue(
         loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
 
     if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float ret = FmiApparentTemperature(wspd, rh, t2m);
 
     if (ret == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
     return ret;
   }
   catch (...)
@@ -2253,14 +2251,14 @@ ts::Value ApparentTemperature(QImpl &q,
  * \brief Lower limit of water to snow conversion
  */
 // ----------------------------------------------------------------------
-ts::Value Snow1hLower(QImpl &q,
+TS::Value Snow1hLower(QImpl &q,
                       const Spine::Location &loc,
                       const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiPrecipitation1h))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
 
@@ -2270,11 +2268,11 @@ ts::Value Snow1hLower(QImpl &q,
 
     if (prec1h == kFloatMissing)
     {
-      return Spine::TimeSeries::None();
+      return TS::None();
     }
     float ret = FmiSnowLowerLimit(prec1h);
     if (ret == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
     return ret;
   }
   catch (...)
@@ -2288,14 +2286,14 @@ ts::Value Snow1hLower(QImpl &q,
  * \brief Upper limit of water to snow conversion
  */
 // ----------------------------------------------------------------------
-ts::Value Snow1hUpper(QImpl &q,
+TS::Value Snow1hUpper(QImpl &q,
                       const Spine::Location &loc,
                       const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiPrecipitation1h))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
 
@@ -2303,11 +2301,11 @@ ts::Value Snow1hUpper(QImpl &q,
 
     // FmiSnowUpperLimit fails if input is 'nan', check here.
     if (prec1h == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float ret = FmiSnowUpperLimit(prec1h);
     if (ret == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
     return ret;
   }
   catch (...)
@@ -2321,7 +2319,7 @@ ts::Value Snow1hUpper(QImpl &q,
  * \brief Snow estimate if no Snow1h parameter present
  */
 // ----------------------------------------------------------------------
-ts::Value Snow1h(QImpl &q,
+TS::Value Snow1h(QImpl &q,
                  const Spine::Location &loc,
                  const boost::local_time::local_date_time &ldt)
 {
@@ -2332,24 +2330,24 @@ ts::Value Snow1h(QImpl &q,
       return q.param(kFmiSnow1h);
 
     if (!q.param(kFmiTemperature))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
 
     float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (!q.param(kFmiPrecipitation1h))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (t2m == kFloatMissing || wspd == kFloatMissing || prec1h == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     float snow1h = prec1h * FmiSnowWaterRatio(t2m, wspd);  // Can this be kFLoatMissing???
     return snow1h;
@@ -2366,14 +2364,14 @@ ts::Value Snow1h(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value WeatherSymbol(QImpl &q,
+TS::Value WeatherSymbol(QImpl &q,
                         const Spine::Location &loc,
                         const boost::local_time::local_date_time &ldt)
 {
   try
   {
     if (!q.param(kFmiWeatherSymbol3))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
 
@@ -2399,7 +2397,7 @@ ts::Value WeatherSymbol(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value WeatherText(QImpl &q,
+TS::Value WeatherText(QImpl &q,
                       const Spine::Location &loc,
                       const boost::local_time::local_date_time &ldt,
                       const std::string &lang,
@@ -2408,18 +2406,18 @@ ts::Value WeatherText(QImpl &q,
   try
   {
     if (!q.param(kFmiWeatherSymbol3))
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     NFmiMetTime t(ldt);
 
     float w = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (w == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     auto ret = translations.getTranslation("WeatherText", static_cast<int>(w), lang);
     if (!ret)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     return *ret;
   }
@@ -2684,7 +2682,7 @@ boost::optional<int> calc_weather_number(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value SmartSymbolNumber(QImpl &q,
+TS::Value SmartSymbolNumber(QImpl &q,
                             const Spine::Location &loc,
                             const boost::local_time::local_date_time &ldt)
 {
@@ -2695,7 +2693,7 @@ ts::Value SmartSymbolNumber(QImpl &q,
     auto symbol = calc_smart_symbol(q, latlon, ldt);
 
     if (!symbol || *symbol == kFloatMissing)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     // Add day/night information
     Fmi::Astronomy::solar_position_t sp =
@@ -2717,7 +2715,7 @@ ts::Value SmartSymbolNumber(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value WeatherNumber(QImpl &q,
+TS::Value WeatherNumber(QImpl &q,
                         const Spine::Location &loc,
                         const boost::local_time::local_date_time &ldt)
 {
@@ -2728,7 +2726,7 @@ ts::Value WeatherNumber(QImpl &q,
     auto number = calc_weather_number(q, latlon, ldt);
 
     if (!number)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     return *number;
   }
@@ -2744,7 +2742,7 @@ ts::Value WeatherNumber(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value SmartSymbolText(QImpl &q,
+TS::Value SmartSymbolText(QImpl &q,
                           const Spine::Location &loc,
                           const boost::local_time::local_date_time &ldt,
                           const std::string &lang)
@@ -2756,7 +2754,7 @@ ts::Value SmartSymbolText(QImpl &q,
     auto symbol = calc_smart_symbol(q, latlon, ldt);
 
     if (!symbol)
-      return Spine::TimeSeries::None();
+      return TS::None();
 
     if (lang == "en")
     {
@@ -3042,14 +3040,14 @@ ts::Value SmartSymbolText(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-ts::Value GridNorth(const QImpl &q, const Spine::Location &loc)
+TS::Value GridNorth(const QImpl &q, const Spine::Location &loc)
 {
   try
   {
     Fmi::CoordinateTransformation transformation("WGS84", q.SpatialReference());
     auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
     if (!opt_angle)
-      return Spine::TimeSeries::None();
+      return TS::None();
     return *opt_angle;
   }
   catch (...)
@@ -3064,7 +3062,7 @@ ts::Value GridNorth(const QImpl &q, const Spine::Location &loc)
  */
 // ----------------------------------------------------------------------
 
-ts::Value QImpl::dataValue(const ParameterOptions &opt,
+TS::Value QImpl::dataValue(const ParameterOptions &opt,
                            const NFmiPoint &latlon,
                            const boost::local_time::local_date_time &ldt)
 {
@@ -3091,17 +3089,17 @@ ts::Value QImpl::dataValue(const ParameterOptions &opt,
   }
 
   if (interpolatedValue == kFloatMissing)
-    return Spine::TimeSeries::None();
+    return TS::None();
 
   return interpolatedValue;
 }
 
-ts::Value QImpl::dataValueAtPressure(const ParameterOptions &opt,
+TS::Value QImpl::dataValueAtPressure(const ParameterOptions &opt,
 									 const NFmiPoint &latlon,
 									 const boost::local_time::local_date_time &ldt,
 									 float pressure)
 {
-  ts::Value retval = Spine::TimeSeries::None();
+  TS::Value retval = TS::None();
 
   NFmiMetTime t = ldt;
   
@@ -3120,12 +3118,12 @@ ts::Value QImpl::dataValueAtPressure(const ParameterOptions &opt,
   return retval;
 }
 
-ts::Value QImpl::dataValueAtHeight(const ParameterOptions &opt,
+TS::Value QImpl::dataValueAtHeight(const ParameterOptions &opt,
 								   const NFmiPoint &latlon,
 								   const boost::local_time::local_date_time &ldt,
 								   float height)
 {
-  ts::Value retval = Spine::TimeSeries::None();
+  TS::Value retval = TS::None();
 
   NFmiMetTime t = ldt;
   
@@ -3150,7 +3148,7 @@ ts::Value QImpl::dataValueAtHeight(const ParameterOptions &opt,
  */
 // ----------------------------------------------------------------------
 
-ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
+TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
                                       const boost::local_time::local_date_time &ldt,
                                       double levelResult)
 {
@@ -3169,7 +3167,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     case kFmiGEOID:
     {
       if (loc.geoid == 0)  // not sure why this is still here
-        return Spine::TimeSeries::None();
+        return TS::None();
       return Fmi::to_string(loc.geoid);
     }
     case kFmiLatitude:
@@ -3178,7 +3176,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       return loc.longitude;
     case kFmiLatLon:
     case kFmiLonLat:
-      return ts::LonLat(loc.longitude, loc.latitude);
+      return TS::LonLat(loc.longitude, loc.latitude);
     case kFmiRegion:
     {
       // This reintroduces an older bug/feature where the name of the location is given as a
@@ -3191,7 +3189,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
 
       if (loc.name.empty())
         // No area (administrative region) nor name known.
-        return Spine::TimeSeries::None();
+        return TS::None();
 
       // Place name known, administrative region unknown.
       return loc.name;
@@ -3204,7 +3202,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     {
       if (ldt.zone())
         return ldt.zone()->std_zone_name();
-      return Spine::TimeSeries::None();
+      return TS::None();
     }
     case kFmiLocalTZ:
       return loc.timezone;
@@ -3216,7 +3214,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       return opt.lastpoint.X();
     case kFmiNearLatLon:
     case kFmiNearLonLat:
-      return ts::LonLat(opt.lastpoint.X(), opt.lastpoint.Y());
+      return TS::LonLat(opt.lastpoint.X(), opt.lastpoint.Y());
     case kFmiPopulation:
       return Fmi::to_string(loc.population);
     case kFmiElevation:
@@ -3257,7 +3255,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
         for (resetTime(); !ok && nextTime();)
           ok = (validTime() > ldt.utc_time());
         if (!ok)
-          return Spine::TimeSeries::None();
+          return TS::None();
       }
       boost::posix_time::ptime utc = originTime();
       boost::local_time::local_date_time localt(utc, ldt.zone());
@@ -3406,7 +3404,7 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     case kFmiDirection:
     case kFmiSensorNo:
     case kFmiStationName:
-      return Spine::TimeSeries::None();
+      return TS::None();
     default:
       break;
   }
@@ -3421,12 +3419,12 @@ ts::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
 
 // ======================================================================
 
-ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::local_date_time &ldt)
+TS::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::local_date_time &ldt)
 {
   try
   {
     // Default return value
-    ts::Value retval = Spine::TimeSeries::None();
+    TS::Value retval = TS::None();
 
     // Shorthand variables
     const Spine::Location &loc = opt.loc;
@@ -3482,7 +3480,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
           case kFmiLatLon:
           case kFmiLonLat:
           {
-            retval = ts::LonLat(loc.longitude, loc.latitude);
+            retval = TS::LonLat(loc.longitude, loc.latitude);
             break;
           }
           case kFmiWindCompass8:
@@ -3596,7 +3594,7 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
     if (boost::get<double>(&retval) != nullptr)
     {
       if (*(boost::get<double>(&retval)) == kFloatMissing)
-        retval = Spine::TimeSeries::None();
+        retval = TS::None();
     }
 
     return retval;
@@ -3607,14 +3605,14 @@ ts::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
   }
 }
 
-ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
+TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
                                  const boost::local_time::local_date_time &ldt,
                                  float pressure)
 {
   try
   {
     // Default return value
-    ts::Value retval = Spine::TimeSeries::None();
+    TS::Value retval = TS::None();
 
     // Some shorthand variables
     const Spine::Location &loc = opt.loc;
@@ -3648,7 +3646,7 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
           }
 
           if (interpolatedValue == kFloatMissing)
-            retval = Spine::TimeSeries::None();
+            retval = TS::None();
           else
             retval = interpolatedValue;
         }
@@ -3663,7 +3661,7 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
         else if (num == kFmiLongitude)
           retval = loc.longitude;
         else if (num == kFmiLatLon || num == kFmiLonLat)
-          retval = ts::LonLat(loc.longitude, loc.latitude);
+          retval = TS::LonLat(loc.longitude, loc.latitude);
 		else if(num == kFmiWindUMS || num == kFmiWindVMS)
 		  {
 			if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
@@ -3686,7 +3684,7 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
     if (boost::get<double>(&retval) != nullptr)
     {
       if (*(boost::get<double>(&retval)) == kFloatMissing)
-        retval = Spine::TimeSeries::None();
+        retval = TS::None();
     }
 
     return retval;
@@ -3697,14 +3695,14 @@ ts::Value QImpl::valueAtPressure(const ParameterOptions &opt,
   }
 }
 
-ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
+TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
                                const boost::local_time::local_date_time &ldt,
                                float height)
 {
   try
   {
     // Default return value
-    ts::Value retval = Spine::TimeSeries::None();
+    TS::Value retval = TS::None();
 
     // Some shorthand variables
     const Spine::Location &loc = opt.loc;
@@ -3738,7 +3736,7 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
           }
 
           if (interpolatedValue == kFloatMissing)
-            retval = Spine::TimeSeries::None();
+            retval = TS::None();
           else
             retval = interpolatedValue;
         }
@@ -3753,7 +3751,7 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
         else if (num == kFmiLongitude)
           retval = loc.longitude;
         else if (num == kFmiLatLon || num == kFmiLonLat)
-          retval = ts::LonLat(loc.longitude, loc.latitude);
+          retval = TS::LonLat(loc.longitude, loc.latitude);
 		else if(num == kFmiWindUMS || num == kFmiWindVMS)
 		  {
 			if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
@@ -3777,7 +3775,7 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
     if (boost::get<double>(&retval) != nullptr)
     {
       if (*(boost::get<double>(&retval)) == kFloatMissing)
-        retval = Spine::TimeSeries::None();
+        retval = TS::None();
     }
 
     return retval;
@@ -3789,18 +3787,18 @@ ts::Value QImpl::valueAtHeight(const ParameterOptions &opt,
 }
 
 // one location, many timesteps
-ts::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
-                                const Spine::TimeSeriesGenerator::LocalTimeList &tlist)
+TS::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
+                                const TS::TimeSeriesGenerator::LocalTimeList &tlist)
 {
   try
   {
 	check_local_time_pool(param);
 
-    ts::TimeSeriesPtr ret(new ts::TimeSeries(param.localTimePool));
+    TS::TimeSeriesPtr ret(new TS::TimeSeries(param.localTimePool));
 
     for (const boost::local_time::local_date_time &ldt : tlist)
     {
-      ret->emplace_back(ts::TimedValue(ldt, value(param, ldt)));
+      ret->emplace_back(TS::TimedValue(ldt, value(param, ldt)));
     }
 
     return ret;
@@ -3810,19 +3808,19 @@ ts::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-ts::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
-                                          const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+TS::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
+                                          const TS::TimeSeriesGenerator::LocalTimeList &tlist,
                                           float pressure)
 {
   try
   {
 	check_local_time_pool(param);
 
-    ts::TimeSeriesPtr ret(new ts::TimeSeries(param.localTimePool));
+    TS::TimeSeriesPtr ret(new TS::TimeSeries(param.localTimePool));
 
     for (const boost::local_time::local_date_time &ldt : tlist)
     {
-      ret->emplace_back(ts::TimedValue(ldt, valueAtPressure(param, ldt, pressure)));
+      ret->emplace_back(TS::TimedValue(ldt, valueAtPressure(param, ldt, pressure)));
     }
 
     return ret;
@@ -3832,19 +3830,19 @@ ts::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-ts::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
-                                        const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+TS::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
+                                        const TS::TimeSeriesGenerator::LocalTimeList &tlist,
                                         float height)
 {
   try
   {
 	check_local_time_pool(param);
 
-    ts::TimeSeriesPtr ret(new ts::TimeSeries(param.localTimePool));
+    TS::TimeSeriesPtr ret(new TS::TimeSeries(param.localTimePool));
 
     for (const boost::local_time::local_date_time &ldt : tlist)
     {
-      ret->emplace_back(ts::TimedValue(ldt, valueAtHeight(param, ldt, height)));
+      ret->emplace_back(TS::TimedValue(ldt, valueAtHeight(param, ldt, height)));
     }
 
     return ret;
@@ -3856,15 +3854,15 @@ ts::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 }
 
 // many locations (indexmask), many timesteps
-ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
+TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                      const NFmiIndexMask &indexmask,
-                                     const Spine::TimeSeriesGenerator::LocalTimeList &tlist)
+                                     const TS::TimeSeriesGenerator::LocalTimeList &tlist)
 {
   try
   {
 	check_local_time_pool(param);
 
-    ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
+    TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
     for (const auto &mask : indexmask)
     {
@@ -3900,10 +3898,10 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                     param.lastpoint,
 									param.localTimePool);
 
-      ts::TimeSeriesPtr timeseries = values(paramOptions, tlist);
-      ts::LonLat lonlat(latlon.X(), latlon.Y());
+      TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
+      TS::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -3913,17 +3911,17 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
+TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(
     const ParameterOptions &param,
     const NFmiIndexMask &indexmask,
-    const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+    const TS::TimeSeriesGenerator::LocalTimeList &tlist,
     float pressure)
 {
   try
   {
 	check_local_time_pool(param);
 
-    ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
+    TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
     for (const auto &mask : indexmask)
     {
@@ -3959,10 +3957,10 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
                                     param.lastpoint,
 									param.localTimePool);
 
-      ts::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
-      ts::LonLat lonlat(latlon.X(), latlon.Y());
+      TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
+      TS::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -3972,16 +3970,16 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
+TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                              const NFmiIndexMask &indexmask,
-                                             const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                             const TS::TimeSeriesGenerator::LocalTimeList &tlist,
                                              float height)
 {
   try
   {
 	check_local_time_pool(param);
 
-    ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
+    TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
     for (const auto &mask : indexmask)
     {
@@ -4017,10 +4015,10 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                     param.lastpoint,
 									param.localTimePool);
 
-      ts::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
-      ts::LonLat lonlat(latlon.X(), latlon.Y());
+      TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
+      TS::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -4035,16 +4033,16 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 
 // BUG?? Why is maxdistance in the API?
 
-ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
+TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                      const Spine::LocationList &llist,
-                                     const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                     const TS::TimeSeriesGenerator::LocalTimeList &tlist,
                                      const double & /* maxdistance */)
 {
   try
   {
 	check_local_time_pool(param);
 
-    ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
+    TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
     for (const Spine::LocationPtr &loc : llist)
     {
@@ -4063,10 +4061,10 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                     param.lastpoint,
 									param.localTimePool);
 
-      ts::TimeSeriesPtr timeseries = values(paramOptions, tlist);
-      ts::LonLat lonlat(loc->longitude, loc->latitude);
+      TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
+      TS::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -4076,10 +4074,10 @@ ts::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
+TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(
     const ParameterOptions &param,
     const Spine::LocationList &llist,
-    const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+    const TS::TimeSeriesGenerator::LocalTimeList &tlist,
     const double & /* maxdistance */,
     float pressure)
 {
@@ -4087,7 +4085,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
   {
 	check_local_time_pool(param);
 
-    ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
+    TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
     for (const Spine::LocationPtr &loc : llist)
     {
@@ -4106,10 +4104,10 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
                                     param.lastpoint,
 									param.localTimePool);
 
-      ts::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
-      ts::LonLat lonlat(loc->longitude, loc->latitude);
+      TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
+      TS::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -4119,9 +4117,9 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtPressure(
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
+TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                              const Spine::LocationList &llist,
-                                             const Spine::TimeSeriesGenerator::LocalTimeList &tlist,
+                                             const TS::TimeSeriesGenerator::LocalTimeList &tlist,
                                              const double & /* maxdistance */,
                                              float height)
 {
@@ -4129,7 +4127,7 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
   {
 	check_local_time_pool(param);
 
-    ts::TimeSeriesGroupPtr ret(new ts::TimeSeriesGroup);
+    TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
     for (const Spine::LocationPtr &loc : llist)
     {
@@ -4148,10 +4146,10 @@ ts::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                     param.lastpoint,
 									param.localTimePool);
 
-      ts::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
-      ts::LonLat lonlat(loc->longitude, loc->latitude);
+      TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
+      TS::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->emplace_back(ts::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
     }
 
     return ret;
@@ -4421,7 +4419,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
       boost::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
       boost::local_time::time_zone_ptr utc(new boost::local_time::posix_time_zone("UTC"));
       boost::local_time::local_date_time localdatetime(theTime, utc);
-	  SmartMet::Spine::TimeSeries::LocalTimePoolPtr localTimePool = nullptr;
+	  TS::LocalTimePoolPtr localTimePool = nullptr;
 
       auto mylocale = std::locale::classic();
 
