@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.1.21
+Version: 22.3.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -20,9 +20,10 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-macgyver-devel >= 21.1.21
+BuildRequires: smartmet-library-timeseries-devel >= 22.3.8
+BuildRequires: smartmet-library-macgyver-devel >= 22.3.8
 BuildRequires: smartmet-library-newbase-devel >= 21.1.21
-BuildRequires: smartmet-library-spine-devel >= 21.1.21
+BuildRequires: smartmet-library-spine-devel >= 22.3.8
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -32,9 +33,10 @@ Requires: boost169-thread
 Requires: gdal34-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
-Requires: smartmet-library-macgyver >= 21.1.21
+Requires: smartmet-library-timeseries >= 22.3.8
+Requires: smartmet-library-macgyver >= 22.3.8
 Requires: smartmet-library-newbase >= 21.1.21
-Requires: smartmet-library-spine >= 21.1.21
+Requires: smartmet-library-spine >= 22.3.8
 #TestRequires: smartmet-library-macgyver-devel >= 21.1.21
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal34-devel
@@ -80,6 +82,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Mar 8 2022 Anssi Reponen <anssi.reponen@fmi.fi> - 22.3.8-1.fmi
+- Started using timeseries-library (BRAINSTORM-2259)
+
 * Fri Jan 21 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.1.21-1.fmi
 - Repackage due to upgrade of packages from PGDG repo: gdal-3.4, geos-3.10, proj-8.2
 

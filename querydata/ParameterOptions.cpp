@@ -20,7 +20,7 @@ ParameterOptions::ParameterOptions(const Spine::Parameter& theParam,
                                    const bool& theNearestPointFlag,
                                    const NFmiPoint& theNearestPoint,
                                    NFmiPoint& theLastPoint,
-								   Spine::TimeSeries::LocalTimePoolPtr theLocalTimePool)
+								   TS::LocalTimePoolPtr theLocalTimePool)
 : par(theParam),
   producer(theProducer),
   loc(theLocation),
