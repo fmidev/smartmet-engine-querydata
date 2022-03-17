@@ -94,7 +94,7 @@ rpm: clean protoc $(SPEC).spec
 .SUFFIXES: $(SUFFIXES) .cpp
 
 obj/%.o: %.cpp
-	$(CXX) $(CFLAGS) $(INCLUDES) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(INCLUDES) -c -MD -MF $(patsubst obj/%.o, obj/%.d, $@) -MT $@ -o $@ $<
 
 obj/Engine.o: CFLAGS += -Wno-deprecated-declarations
 
