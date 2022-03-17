@@ -14,10 +14,11 @@ DEFINES = -DUNIX -D_REENTRANT
 
 LIBS += -L$(libdir) \
 	$(REQUIRED_LIBS) \
+	-lsmartmet-timeseries \
 	-lsmartmet-spine \
 	-lsmartmet-gis \
-	-lsmartmet-macgyver \
 	-lsmartmet-newbase \
+	-lsmartmet-macgyver \
 	-lboost_date_time \
 	-lboost_regex \
 	-lboost_thread \

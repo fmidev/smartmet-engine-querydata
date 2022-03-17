@@ -14,7 +14,7 @@
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
-#include <spine/ParameterFactory.h>
+#include <timeseries/ParameterFactory.h>
 #include <spine/TableFormatter.h>
 #include <sstream>
 #include <stdexcept>
@@ -889,7 +889,7 @@ Repository::ContentTable Repository::getRepoContents(
         for (qi->ResetParam(); qi->NextParam(false);)
         {
           int paramID = boost::numeric_cast<int>(qi->Param().GetParamIdent());
-          std::string paramName = Spine::ParameterFactory::instance().name(paramID);
+          std::string paramName = TimeSeries::ParameterFactory::instance().name(paramID);
           if (!paramName.empty())
             params.push_back(paramName);
           else

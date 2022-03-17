@@ -28,7 +28,7 @@
 #include <newbase/NFmiQueryData.h>
 #include <newbase/NFmiQueryDataUtil.h>
 #include <newbase/NFmiTimeList.h>
-#include <spine/ParameterFactory.h>
+#include <timeseries/ParameterFactory.h>
 #include <cassert>
 #include <ogr_spatialref.h>
 #include <stdexcept>
@@ -300,7 +300,7 @@ MetaData QImpl::metaData()
     for (qi.ResetParam(); qi.NextParam(false);)
     {
       const int paramID = boost::numeric_cast<int>(qi.Param().GetParamIdent());
-      const std::string paramName = Spine::ParameterFactory::instance().name(paramID);
+      const std::string paramName = TimeSeries::ParameterFactory::instance().name(paramID);
       const std::string paramDesc = qi.Param().GetParamName().CharPtr();
       const std::string paramPrec = qi.Param().GetParam()->Precision().CharPtr();
       // Find the numerical part of the precision string
