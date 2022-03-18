@@ -20,10 +20,10 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-timeseries-devel >= 22.3.8
+BuildRequires: smartmet-library-timeseries-devel >= 22.3.18
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.8
 BuildRequires: smartmet-library-newbase-devel >= 21.1.21
-BuildRequires: smartmet-library-spine-devel >= 22.3.8
+BuildRequires: smartmet-library-spine-devel >= 22.3.18
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -33,11 +33,11 @@ Requires: boost169-thread
 Requires: gdal34-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
-Requires: smartmet-library-timeseries >= 22.3.8
+Requires: smartmet-library-timeseries >= 22.3.18
 Requires: smartmet-library-macgyver >= 22.3.8
 Requires: smartmet-library-newbase >= 21.1.21
-Requires: smartmet-library-spine >= 22.3.8
-#TestRequires: smartmet-library-macgyver-devel >= 21.1.21
+Requires: smartmet-library-spine >= 22.3.18
+#TestRequires: smartmet-utils-devel >= 22.2.8
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal34-devel
 #TestRequires: gcc-c++
@@ -63,7 +63,7 @@ SmartMet %{SPECNAME} development headers.
 rm -rf $RPM_BUILD_ROOT
 
 %setup -q -n %{SPECNAME}
- 
+
 %build -q -n %{SPECNAME}
 make %{_smp_mflags}
 
