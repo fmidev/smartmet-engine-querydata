@@ -178,8 +178,8 @@ void Engine::init()
     {
       boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
-	
-	repomanager->cleanValidPointsCache();
+
+    repomanager->cleanValidPointsCache();
 
     // We got this far, assume config file must be valid
     lastConfigErrno = 0;
@@ -476,7 +476,7 @@ Producer Engine::find(double lon,
                                      maxdist,
                                      usedatamaxdistance,
                                      leveltype,
-									 CHECK_LATEST_MODEL_AGE);
+                                     CHECK_LATEST_MODEL_AGE);
   }
   catch (...)
   {
@@ -1003,6 +1003,48 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ) const
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Change all kFloatMissing values to NaN
+ */
+// ----------------------------------------------------------------------
+
+void set_missing_to_nan(NFmiDataMatrix<float>& values)
+{
+  const std::size_t nx = values.NX();
+  const std::size_t ny = values.NY();
+  if (nx == 0 || ny == 0)
+    return;
+
+  const auto nan = std::numeric_limits<float>::quiet_NaN();
+
+  // Unfortunately NFmiDataMatrix is a vector of vectors, memory
+  // access patterns are not optimal
+
+  for (std::size_t i = 0; i < nx; i++)
+  {
+    auto& tmp = values[i];
+    for (std::size_t j = 0; j < ny; j++)
+    {
+      if (tmp[j] == kFloatMissing)
+        tmp[j] = nan;
+    }
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Get data values and change kFloatMissing to NaN
+ */
+// ----------------------------------------------------------------------
+
+ValuesPtr Engine::getValues(const Q& theQ, boost::posix_time::ptime theTime) const
+{
+  auto ret = std::make_shared<Values>(theQ->values(theTime));
+  set_missing_to_nan(*ret);
+  return ret;
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Get the data values
  *
  * Retrieval is done asynchronously through a shared future so that for
@@ -1024,9 +1066,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = std::async(std::launch::async,
-                          [&] { return std::make_shared<Values>(theQ->values(theTime)); })
-                   .share();
+    auto ftr = std::async(std::launch::async, [&] { return getValues(theQ, theTime); }).share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);
@@ -1096,12 +1136,13 @@ int Engine::getLastConfigErrno()
 Fmi::Cache::CacheStatistics Engine::getCacheStats() const
 {
   Fmi::Cache::CacheStatistics ret;
-  
+
   auto repomanager = itsRepoManager.load();
   ret.insert(std::make_pair("Querydata::lat_lon_cache", repomanager->getCacheStats()));
-  ret.insert(std::make_pair("Querydata::wgs84_envelope_cache", WGS84EnvelopeFactory::getCacheStats()));
+  ret.insert(
+      std::make_pair("Querydata::wgs84_envelope_cache", WGS84EnvelopeFactory::getCacheStats()));
 
-  return ret;  
+  return ret;
 }
 
 }  // namespace Querydata
