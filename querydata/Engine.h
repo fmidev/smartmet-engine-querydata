@@ -177,8 +177,6 @@ class Engine : public Spine::SmartMetEngine
   void configFileWatch();           // A function in separate thread checking the config file
   Fmi::Cache::CacheStatistics getCacheStats() const override;  // Get cache statistics
 
-  ValuesPtr getValues(const Q& theQ, boost::posix_time::ptime theTime) const;
-
 };  // class Engine
 
 }  // namespace Querydata

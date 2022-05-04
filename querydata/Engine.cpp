@@ -1009,6 +1009,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ) const
 
 void set_missing_to_nan(NFmiDataMatrix<float>& values)
 {
+  std::cout << "set_missing_to_nan called\n";
   const std::size_t nx = values.NX();
   const std::size_t ny = values.NY();
   if (nx == 0 || ny == 0)
@@ -1024,6 +1025,8 @@ void set_missing_to_nan(NFmiDataMatrix<float>& values)
     auto& tmp = values[i];
     for (std::size_t j = 0; j < ny; j++)
     {
+      std::cout << i << " " << j << " " << tmp[j] << "\n";
+
       if (tmp[j] == kFloatMissing)
         tmp[j] = nan;
     }
@@ -1036,7 +1039,7 @@ void set_missing_to_nan(NFmiDataMatrix<float>& values)
  */
 // ----------------------------------------------------------------------
 
-ValuesPtr Engine::getValues(const Q& theQ, boost::posix_time::ptime theTime) const
+ValuesPtr get_values(const Q& theQ, boost::posix_time::ptime theTime)
 {
   auto ret = std::make_shared<Values>(theQ->values(theTime));
   set_missing_to_nan(*ret);
@@ -1066,7 +1069,7 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = std::async(std::launch::async, [&] { return getValues(theQ, theTime); }).share();
+    auto ftr = std::async(std::launch::async, [&] { return get_values(theQ, theTime); }).share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);
@@ -1079,6 +1082,21 @@ ValuesPtr Engine::getValues(const Q& theQ,
     throw Fmi::Exception::Trace(BCP, "Failed to retrieve data")
         .addParameter("time", Fmi::to_iso_extended_string(theTime));
   }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Get data values and change kFloatMissing to NaN
+ */
+// ----------------------------------------------------------------------
+
+ValuesPtr get_values(const Q& theQ,
+                     const Spine::Parameter& theParam,
+                     boost::posix_time::ptime theTime)
+{
+  auto ret = std::make_shared<Values>(theQ->values(theParam, theTime));
+  set_missing_to_nan(*ret);
+  return ret;
 }
 
 // ----------------------------------------------------------------------
@@ -1105,9 +1123,8 @@ ValuesPtr Engine::getValues(const Q& theQ,
       return values->get();
 
     // Else create a shared future for calculating the values
-    auto ftr = std::async(std::launch::async,
-                          [&] { return std::make_shared<Values>(theQ->values(theParam, theTime)); })
-                   .share();
+    auto ftr =
+        std::async(std::launch::async, [&] { return get_values(theQ, theParam, theTime); }).share();
 
     // Store the shared future into the cache for other threads to see too
     itsValuesCache.insert(theValuesHash, ftr);
