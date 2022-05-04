@@ -1009,7 +1009,6 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ) const
 
 void set_missing_to_nan(NFmiDataMatrix<float>& values)
 {
-  std::cout << "set_missing_to_nan called\n";
   const std::size_t nx = values.NX();
   const std::size_t ny = values.NY();
   if (nx == 0 || ny == 0)
@@ -1024,12 +1023,8 @@ void set_missing_to_nan(NFmiDataMatrix<float>& values)
   {
     auto& tmp = values[i];
     for (std::size_t j = 0; j < ny; j++)
-    {
-      std::cout << i << " " << j << " " << tmp[j] << "\n";
-
       if (tmp[j] == kFloatMissing)
         tmp[j] = nan;
-    }
   }
 }
 
