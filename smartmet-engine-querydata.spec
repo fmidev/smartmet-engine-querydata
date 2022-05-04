@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.4.29
+Version: 22.5.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -23,7 +23,7 @@ BuildRequires: rpm-build
 BuildRequires: smartmet-library-timeseries-devel >= 22.3.18
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.28
 BuildRequires: smartmet-library-newbase-devel >= 22.4.28
-BuildRequires: smartmet-library-spine-devel >= 22.3.18
+BuildRequires: smartmet-library-spine-devel >= 22.4.29
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -36,7 +36,7 @@ Requires: protobuf
 Requires: smartmet-library-timeseries >= 22.3.18
 Requires: smartmet-library-macgyver >= 22.3.28
 Requires: smartmet-library-newbase >= 22.4.28
-Requires: smartmet-library-spine >= 22.3.18
+Requires: smartmet-library-spine >= 22.4.29
 #TestRequires: smartmet-utils-devel >= 22.2.8
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal34-devel
@@ -82,7 +82,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
-* Fri Apr 29 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.4.29-1.fmi
+* Wed May  4 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.4-1.fmi
 - GetValues now automatically converts kFloatMissing to NaN (cached results benefit tiled contouring)
 
 * Fri Mar 18 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.3.18-1.fmi
