@@ -33,10 +33,6 @@
 #include <ogr_spatialref.h>
 #include <stdexcept>
 
-#ifndef WGS84
-#include <newbase/NFmiGdalArea.h>
-#endif
-
 namespace
 {
 // SmartSymbol / WeatherNumber calculation limits
@@ -61,7 +57,12 @@ const int cloud_limit6 = 72;
 const int cloud_limit7 = 85;
 const int cloud_limit8 = 93;
 
-enum class InterpolationMethod{PRESSURE,HEIGHT,SURFACE};
+enum class InterpolationMethod
+{
+  PRESSURE,
+  HEIGHT,
+  SURFACE
+};
 
 const char *LevelName(FmiLevelType theLevel)
 {
@@ -120,12 +121,13 @@ namespace Engine
 {
 namespace Querydata
 {
-void check_local_time_pool(const ParameterOptions& options)
+void check_local_time_pool(const ParameterOptions &options)
 {
-  // LocalTimePool must be created by client plugin, because references to localtimes in the pool 
+  // LocalTimePool must be created by client plugin, because references to localtimes in the pool
   // are used in the result set and they must be valid as log as result set is processed
-  if(options.localTimePool == nullptr)
-	throw Fmi::Exception::Trace(BCP, "Querydata::ParameterOptions::localTimePool can not be null!!!");
+  if (options.localTimePool == nullptr)
+    throw Fmi::Exception::Trace(BCP,
+                                "Querydata::ParameterOptions::localTimePool can not be null!!!");
 }
 
 // Max interpolation gap
@@ -1837,8 +1839,8 @@ std::string format_date(const boost::local_time::local_date_time &ldt,
 TS::Value WindUMS(QImpl &q,
                   const Spine::Location &loc,
                   const boost::local_time::local_date_time &ldt,
-				  boost::optional<float> level = boost::none,
-				  InterpolationMethod method = InterpolationMethod::SURFACE)
+                  boost::optional<float> level = boost::none,
+                  InterpolationMethod method = InterpolationMethod::SURFACE)
 {
   try
   {
@@ -1856,7 +1858,10 @@ TS::Value WindUMS(QImpl &q,
     if (!q.param(kFmiWindUMS))
       return TS::None();
 
-    auto u = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
+    auto u = (level ? (method == InterpolationMethod::PRESSURE
+                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                    : q.interpolate(latlon, ldt, maxgap));
 
     if (angle == 0)
       return u;
@@ -1864,7 +1869,10 @@ TS::Value WindUMS(QImpl &q,
     if (!q.param(kFmiWindVMS))
       return TS::None();
 
-    auto v = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
+    auto v = (level ? (method == InterpolationMethod::PRESSURE
+                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                    : q.interpolate(latlon, ldt, maxgap));
 
     if (u == kFloatMissing || v == kFloatMissing)
       return TS::None();
@@ -1888,8 +1896,8 @@ TS::Value WindUMS(QImpl &q,
 TS::Value WindVMS(QImpl &q,
                   const Spine::Location &loc,
                   const boost::local_time::local_date_time &ldt,
-				  boost::optional<float> level = boost::none,
-				  InterpolationMethod method = InterpolationMethod::SURFACE)
+                  boost::optional<float> level = boost::none,
+                  InterpolationMethod method = InterpolationMethod::SURFACE)
 {
   try
   {
@@ -1909,7 +1917,10 @@ TS::Value WindVMS(QImpl &q,
 
     NFmiMetTime t(ldt);
 
-    auto v = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
+    auto v = (level ? (method == InterpolationMethod::PRESSURE
+                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                    : q.interpolate(latlon, ldt, maxgap));
 
     if (angle == 0)
       return v;
@@ -1917,7 +1928,10 @@ TS::Value WindVMS(QImpl &q,
     if (!q.param(kFmiWindUMS))
       return TS::None();
 
-    auto u = (level ? (method == InterpolationMethod::PRESSURE ? q.interpolateAtPressure(latlon, ldt, maxgap, *level) : q.interpolateAtHeight(latlon, ldt, maxgap, *level)) : q.interpolate(latlon, ldt, maxgap));
+    auto u = (level ? (method == InterpolationMethod::PRESSURE
+                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                    : q.interpolate(latlon, ldt, maxgap));
 
     if (u == kFloatMissing || v == kFloatMissing)
       return TS::None();
@@ -3095,49 +3109,49 @@ TS::Value QImpl::dataValue(const ParameterOptions &opt,
 }
 
 TS::Value QImpl::dataValueAtPressure(const ParameterOptions &opt,
-									 const NFmiPoint &latlon,
-									 const boost::local_time::local_date_time &ldt,
-									 float pressure)
+                                     const NFmiPoint &latlon,
+                                     const boost::local_time::local_date_time &ldt,
+                                     float pressure)
 {
   TS::Value retval = TS::None();
 
   NFmiMetTime t = ldt;
-  
+
   float interpolatedValue = interpolateAtPressure(latlon, t, pressure, maxgap);
-  
+
   // If we got no value and the proper flag is on,
   // find the nearest point with valid values and use
   // the values from that point
-  
+
   if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
-	interpolatedValue = interpolateAtPressure(opt.nearestpoint, t, pressure, maxgap);
-  
+    interpolatedValue = interpolateAtPressure(opt.nearestpoint, t, pressure, maxgap);
+
   if (interpolatedValue != kFloatMissing)
-	retval = interpolatedValue;
+    retval = interpolatedValue;
 
   return retval;
 }
 
 TS::Value QImpl::dataValueAtHeight(const ParameterOptions &opt,
-								   const NFmiPoint &latlon,
-								   const boost::local_time::local_date_time &ldt,
-								   float height)
+                                   const NFmiPoint &latlon,
+                                   const boost::local_time::local_date_time &ldt,
+                                   float height)
 {
   TS::Value retval = TS::None();
 
   NFmiMetTime t = ldt;
-  
+
   float interpolatedValue = interpolateAtHeight(latlon, t, height, maxgap);
-  
+
   // If we got no value and the proper flag is on,
   // find the nearest point with valid values and use
   // the values from that point
-  
+
   if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
-	interpolatedValue = interpolateAtHeight(opt.nearestpoint, t, height, maxgap);
-  
+    interpolatedValue = interpolateAtHeight(opt.nearestpoint, t, height, maxgap);
+
   if (interpolatedValue != kFloatMissing)
-	retval = interpolatedValue;
+    retval = interpolatedValue;
 
   return retval;
 }
@@ -3662,16 +3676,19 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
           retval = loc.longitude;
         else if (num == kFmiLatLon || num == kFmiLonLat)
           retval = TS::LonLat(loc.longitude, loc.latitude);
-		else if(num == kFmiWindUMS || num == kFmiWindVMS)
-		  {
-			if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
-			  {
-				if (isRelativeUV())
-				  retval = (num == kFmiWindUMS ? WindUMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE) : WindVMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE));
-				else
-				  retval = dataValueAtPressure(opt, latlon, ldt, pressure);
-			  }
-		  }
+        else if (num == kFmiWindUMS || num == kFmiWindVMS)
+        {
+          if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") &&
+              !isClimatology())
+          {
+            if (isRelativeUV())
+              retval = (num == kFmiWindUMS
+                            ? WindUMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE)
+                            : WindVMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE));
+            else
+              retval = dataValueAtPressure(opt, latlon, ldt, pressure);
+          }
+        }
         break;
       }
       case Spine::Parameter::Type::DataIndependent:
@@ -3752,16 +3769,19 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
           retval = loc.longitude;
         else if (num == kFmiLatLon || num == kFmiLonLat)
           retval = TS::LonLat(loc.longitude, loc.latitude);
-		else if(num == kFmiWindUMS || num == kFmiWindVMS)
-		  {
-			if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
-			  {
-				if (isRelativeUV())
-				  retval = (num == kFmiWindUMS ? WindUMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT) : WindVMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT));
-				else
-				  retval = dataValueAtHeight(opt, latlon, ldt, height);
-			  }
-		  }
+        else if (num == kFmiWindUMS || num == kFmiWindVMS)
+        {
+          if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") &&
+              !isClimatology())
+          {
+            if (isRelativeUV())
+              retval = (num == kFmiWindUMS
+                            ? WindUMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT)
+                            : WindVMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT));
+            else
+              retval = dataValueAtHeight(opt, latlon, ldt, height);
+          }
+        }
 
         break;
       }
@@ -3792,7 +3812,7 @@ TS::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
 {
   try
   {
-	check_local_time_pool(param);
+    check_local_time_pool(param);
 
     TS::TimeSeriesPtr ret(new TS::TimeSeries(param.localTimePool));
 
@@ -3814,7 +3834,7 @@ TS::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
 {
   try
   {
-	check_local_time_pool(param);
+    check_local_time_pool(param);
 
     TS::TimeSeriesPtr ret(new TS::TimeSeries(param.localTimePool));
 
@@ -3836,7 +3856,7 @@ TS::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 {
   try
   {
-	check_local_time_pool(param);
+    check_local_time_pool(param);
 
     TS::TimeSeriesPtr ret(new TS::TimeSeries(param.localTimePool));
 
@@ -3860,7 +3880,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
 {
   try
   {
-	check_local_time_pool(param);
+    check_local_time_pool(param);
 
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
@@ -3896,7 +3916,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
                                     param.lastpoint,
-									param.localTimePool);
+                                    param.localTimePool);
 
       TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       TS::LonLat lonlat(latlon.X(), latlon.Y());
@@ -3911,15 +3931,14 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(
-    const ParameterOptions &param,
-    const NFmiIndexMask &indexmask,
-    const TS::TimeSeriesGenerator::LocalTimeList &tlist,
-    float pressure)
+TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
+                                               const NFmiIndexMask &indexmask,
+                                               const TS::TimeSeriesGenerator::LocalTimeList &tlist,
+                                               float pressure)
 {
   try
   {
-	check_local_time_pool(param);
+    check_local_time_pool(param);
 
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
@@ -3955,7 +3974,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
                                     param.lastpoint,
-									param.localTimePool);
+                                    param.localTimePool);
 
       TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       TS::LonLat lonlat(latlon.X(), latlon.Y());
@@ -3977,7 +3996,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 {
   try
   {
-	check_local_time_pool(param);
+    check_local_time_pool(param);
 
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
@@ -4013,7 +4032,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
                                     param.lastpoint,
-									param.localTimePool);
+                                    param.localTimePool);
 
       TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       TS::LonLat lonlat(latlon.X(), latlon.Y());
@@ -4040,7 +4059,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
 {
   try
   {
-	check_local_time_pool(param);
+    check_local_time_pool(param);
 
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
@@ -4059,7 +4078,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
                                     param.lastpoint,
-									param.localTimePool);
+                                    param.localTimePool);
 
       TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
@@ -4074,16 +4093,15 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(
-    const ParameterOptions &param,
-    const Spine::LocationList &llist,
-    const TS::TimeSeriesGenerator::LocalTimeList &tlist,
-    const double & /* maxdistance */,
-    float pressure)
+TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
+                                               const Spine::LocationList &llist,
+                                               const TS::TimeSeriesGenerator::LocalTimeList &tlist,
+                                               const double & /* maxdistance */,
+                                               float pressure)
 {
   try
   {
-	check_local_time_pool(param);
+    check_local_time_pool(param);
 
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
@@ -4102,7 +4120,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
                                     param.lastpoint,
-									param.localTimePool);
+                                    param.localTimePool);
 
       TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
@@ -4125,7 +4143,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 {
   try
   {
-	check_local_time_pool(param);
+    check_local_time_pool(param);
 
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
@@ -4144,7 +4162,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                     param.findnearestvalidpoint,
                                     param.nearestpoint,
                                     param.lastpoint,
-									param.localTimePool);
+                                    param.localTimePool);
 
       TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
@@ -4349,13 +4367,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
     // Establish new projection and the required grid size of the desired resolution
 
-#ifdef WGS84
     std::shared_ptr<NFmiArea> newarea(
         NFmiArea::CreateFromBBox(theCrs, NFmiPoint(theXmin, theYmin), NFmiPoint(theXmax, theYmax)));
-#else
-    auto newarea =
-        std::make_shared<NFmiGdalArea>("FMI", theCrs, theXmin, theYmin, theXmax, theYmax);
-#endif
 
     double datawidth = newarea->WorldXYWidth() / 1000.0;  // view extent in kilometers
     double dataheight = newarea->WorldXYHeight() / 1000.0;
@@ -4419,7 +4432,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
       boost::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
       boost::local_time::time_zone_ptr utc(new boost::local_time::posix_time_zone("UTC"));
       boost::local_time::local_date_time localdatetime(theTime, utc);
-	  TS::LocalTimePoolPtr localTimePool = nullptr;
+      TS::LocalTimePoolPtr localTimePool = nullptr;
 
       auto mylocale = std::locale::classic();
 
@@ -4451,7 +4464,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                                      false,
                                      NFmiPoint(),
                                      dummy,
-									 localTimePool);
+                                     localTimePool);
 
             auto result = value(options, localdatetime);
             if (boost::get<double>(&result) != nullptr)

@@ -182,12 +182,15 @@ RepoManager::RepoManager(const std::string& configfile)
       lookupHostSetting(itsConfig, itsMaxThreadCount, "maxthreads", hostname);
       lookupHostSetting(itsConfig, itsVerbose, "verbose", hostname);
       lookupHostSetting(itsConfig, itsValidPointsCacheDir, "valid_points_cache_dir", hostname);
-      lookupHostSetting(itsConfig, itsCleanValidPointsCacheDir, "clean_valid_points_cache_dir", hostname);
+      lookupHostSetting(
+          itsConfig, itsCleanValidPointsCacheDir, "clean_valid_points_cache_dir", hostname);
 
-	  if(itsValidPointsCacheDir.empty())
-        std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA + " [querydata] valid_points_cache_dir setting is empty, cache will not be created!" +
-                      ANSI_FG_DEFAULT)
-                  << std::endl;
+      if (itsValidPointsCacheDir.empty())
+        std::cerr
+            << (Spine::log_time_str() + ANSI_FG_MAGENTA +
+                " [querydata] valid_points_cache_dir setting is empty, cache will not be created!" +
+                ANSI_FG_DEFAULT)
+            << std::endl;
 
       itsRepo.verbose(itsVerbose);
 
@@ -638,8 +641,8 @@ void RepoManager::load(Producer producer,
         std::cout << msg.str() << std::flush;
       }
 
-#ifndef WGS84
       // Update latlon-cache if necessary. In any case make sure model cache is up to date
+      // WARNING: DEPRECATED CODE BLOCK IN WGS84 MODE - THE RETURNED SHARED_PTR IS EMPTY
 
       auto hash = model->gridHashValue();
       auto latlons = itsLatLonCache.find(hash);  // cached coordinates, if any
@@ -647,7 +650,6 @@ void RepoManager::load(Producer producer,
         itsLatLonCache.insert(hash, model->makeLatLonCache());  // request latlons and cache them
       else
         model->setLatLonCache(*latlons);  // set model cache from our cache
-#endif
 
       {
         // update structures safely
@@ -716,51 +718,54 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
 
 void RepoManager::cleanValidPointsCache()
 {
-  if (!boost::filesystem::exists(itsValidPointsCacheDir) || !boost::filesystem::is_directory(itsValidPointsCacheDir))
-	return;
+  if (!boost::filesystem::exists(itsValidPointsCacheDir) ||
+      !boost::filesystem::is_directory(itsValidPointsCacheDir))
+    return;
 
   std::set<std::string> cachefiles;
-  for(const auto& producer : itsProducerList)
-	{
-	  const auto shared_models = itsRepo.getAllModels(producer);
-	  for(const auto& shared_model : shared_models)
-		{
-		  if(shared_model.second->itsValidPoints)
-			cachefiles.insert(shared_model.second->itsValidPoints->cacheFile());
-		}
-	}
+  for (const auto& producer : itsProducerList)
+  {
+    const auto shared_models = itsRepo.getAllModels(producer);
+    for (const auto& shared_model : shared_models)
+    {
+      if (shared_model.second->itsValidPoints)
+        cachefiles.insert(shared_model.second->itsValidPoints->cacheFile());
+    }
+  }
 
-  if(cachefiles.empty())
-	return;
+  if (cachefiles.empty())
+    return;
 
-  //boost::system::error_code ec;
+  // boost::system::error_code ec;
   boost::filesystem::directory_iterator end_itr;
   for (boost::filesystem::directory_iterator itr(itsValidPointsCacheDir); itr != end_itr; ++itr)
-	{
-	  if (SmartMet::Spine::Reactor::isShuttingDown())
-		return;
-	  
-	  if (is_regular_file(itr->status()))
-		{
-		  std::string filename = (itsValidPointsCacheDir + "/" + itr->path().filename().string());
-		  if(cachefiles.find(filename) == cachefiles.end())
-			{
-			  if(itsCleanValidPointsCacheDir)
-				{
-				  std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA + " [querydata] Deleting redundant valid points cache file '" + filename + "'" +
-							  ANSI_FG_DEFAULT)
-						  << std::endl;
-				  boost::filesystem::remove(filename);
-				}
-			  else
-				{
-				  std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA + " [querydata] Redundant valid points cache file detected '" + filename + "', consider deleting it!" +
-							  ANSI_FG_DEFAULT)
-						  << std::endl;
-				}
-			}
-		}
-	}
+  {
+    if (SmartMet::Spine::Reactor::isShuttingDown())
+      return;
+
+    if (is_regular_file(itr->status()))
+    {
+      std::string filename = (itsValidPointsCacheDir + "/" + itr->path().filename().string());
+      if (cachefiles.find(filename) == cachefiles.end())
+      {
+        if (itsCleanValidPointsCacheDir)
+        {
+          std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA +
+                        " [querydata] Deleting redundant valid points cache file '" + filename +
+                        "'" + ANSI_FG_DEFAULT)
+                    << std::endl;
+          boost::filesystem::remove(filename);
+        }
+        else
+        {
+          std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA +
+                        " [querydata] Redundant valid points cache file detected '" + filename +
+                        "', consider deleting it!" + ANSI_FG_DEFAULT)
+                    << std::endl;
+        }
+      }
+    }
+  }
 }
 
 }  // namespace Querydata

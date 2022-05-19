@@ -14,8 +14,8 @@
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
-#include <timeseries/ParameterFactory.h>
 #include <spine/TableFormatter.h>
+#include <timeseries/ParameterFactory.h>
 #include <sstream>
 #include <stdexcept>
 
@@ -30,24 +30,24 @@ namespace
 bool latest_model_age_ok(const Repository::SharedModels& time_models, unsigned int max_latest_age)
 {
   if (time_models.empty())
-	return false;
-  if(max_latest_age == 0)
-	return true;
-  
+    return false;
+  if (max_latest_age == 0)
+    return true;
+
   auto now = boost::posix_time::second_clock::universal_time();
-  
+
   auto time_limit = now - boost::posix_time::seconds(max_latest_age);
-  
+
   for (auto time_model = time_models.begin(), end = time_models.end(); time_model != end;)
-    {
-      if (time_model->second->modificationTime() >= time_limit)
-		return true;
-	  time_model++;
-	}
-  
+  {
+    if (time_model->second->modificationTime() >= time_limit)
+      return true;
+    time_model++;
+  }
+
   return false;
 }
-}
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*!
@@ -568,7 +568,7 @@ Producer Repository::find(const ProducerList& producerlist,
                           double maxdist,
                           bool usedatamaxdist,
                           const std::string& leveltype,
-						  bool checkLatestModelAge/* = false*/) const
+                          bool checkLatestModelAge /* = false*/) const
 {
   try
   {
@@ -585,8 +585,9 @@ Producer Repository::find(const ProducerList& producerlist,
             (usedatamaxdist && prod_config->second.maxdistance > 0 ? prod_config->second.maxdistance
                                                                    : maxdist);
 
-		if(checkLatestModelAge && !latest_model_age_ok(producer_model->second, prod_config->second.max_latest_age))
-		  continue;
+        if (checkLatestModelAge &&
+            !latest_model_age_ok(producer_model->second, prod_config->second.max_latest_age))
+          continue;
 
         if (contains(producer_model->second, lon, lat, chosenmaxdist, leveltype))
           return producer;
@@ -615,8 +616,9 @@ Producer Repository::find(const ProducerList& producerlist,
           const auto producer_model = itsProducers.find(producer);
           if (producer_model != itsProducers.end())
           {
-			if(checkLatestModelAge && !latest_model_age_ok(producer_model->second, prod_config->second.max_latest_age))
-			  continue;
+            if (checkLatestModelAge &&
+                !latest_model_age_ok(producer_model->second, prod_config->second.max_latest_age))
+              continue;
 
             if (contains(producer_model->second, lon, lat, chosenmaxdist, leveltype))
               return producer;
@@ -827,16 +829,9 @@ Repository::ContentTable Repository::getRepoContents(const std::string& timeForm
   return getRepoContents(producer, timeFormat, projectionFormat);
 }
 
-#ifdef WGS84
 Repository::ContentTable Repository::getRepoContents(const std::string& producer,
                                                      const std::string& timeFormat,
                                                      const std::string& projectionFormat) const
-#else
-Repository::ContentTable Repository::getRepoContents(
-    const std::string& producer,
-    const std::string& timeFormat,
-    const std::string& /* projectionFormat */) const
-#endif
 {
   try
   {
@@ -913,16 +908,11 @@ Repository::ContentTable Repository::getRepoContents(
         std::string projectionText;
         if (qi->Area() == nullptr)
           projectionText = "nan";
-#ifdef WGS84
         else if (projectionFormat == "wkt")
           projectionText = qi->Area()->WKT();
-        // Defaults to newbase form
         else
           projectionText = qi->Area()->ProjStr();
-#else
-        else
-          projectionText = qi->Area()->WKT();
-#endif
+
         // For nicer output in browsers we replace for example ",PROJCS" with ", PROJCS"
         boost::regex rex(",([A-Z])");
         projectionText = boost::regex_replace(projectionText, rex, ", $1");

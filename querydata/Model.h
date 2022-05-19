@@ -78,10 +78,10 @@ class Model : private boost::noncopyable, public boost::enable_shared_from_this<
   NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist) const;
 
   std::size_t gridHashValue() const;
-#ifndef WGS84
+
+  // Deprecated in WGS84 branch
   void setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache);
   boost::shared_ptr<std::vector<NFmiPoint>> makeLatLonCache();
-#endif
 
   void uncache() const;
 

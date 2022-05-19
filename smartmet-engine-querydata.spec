@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.5.4
-Release: 2%{?dist}.fmi
+Version: 22.5.19
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -82,6 +82,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu May 19 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.19-1.fmi
+- Removed obsolete WGS84 branch code
+
 * Wed May  4 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.4-2.fmi
 - GetValues now automatically converts kFloatMissing to NaN (cached results benefit tiled contouring)
 
