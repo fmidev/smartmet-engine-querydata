@@ -964,7 +964,7 @@ CoordinatesPtr Engine::getWorldCoordinates(const Q& theQ, const Fmi::SpatialRefe
     // WMS tiles since with proj(invproj(p)) may differ significantly
     // from p outside the valid area of the projection.
 
-    auto datawkt = theQ->info()->Area()->WKT();
+    auto datawkt = theQ->area().WKT();
     auto reqwkt = Fmi::OGR::exportToWkt(theSR);
 
     if (datawkt != reqwkt)

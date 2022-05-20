@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 22.5.20
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -82,6 +82,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri May 20 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.20-2.fmi
+- Small security improvements
+
 * Fri May 20 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.20-1.fmi
 - Repackaged due to ABI changes to newbase LatLon methods
 

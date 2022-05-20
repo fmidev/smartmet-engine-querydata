@@ -897,9 +897,10 @@ const NFmiArea &QImpl::area() const
 {
   try
   {
-    if (itsInfo->Area() == nullptr)
+    auto *area = itsInfo->Area();
+    if (area == nullptr)
       throw Fmi::Exception(BCP, "Attempt to access unset area in querydata");
-    return *itsInfo->Area();
+    return *area;
   }
   catch (...)
   {
