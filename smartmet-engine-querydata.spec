@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.5.19
+Version: 22.5.20
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -20,10 +20,10 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-timeseries-devel >= 22.3.18
+BuildRequires: smartmet-library-timeseries-devel >= 22.5.20
 BuildRequires: smartmet-library-macgyver-devel >= 22.3.28
-BuildRequires: smartmet-library-newbase-devel >= 22.4.28
-BuildRequires: smartmet-library-spine-devel >= 22.4.29
+BuildRequires: smartmet-library-newbase-devel >= 22.5.20
+BuildRequires: smartmet-library-spine-devel >= 22.5.16
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -33,10 +33,10 @@ Requires: boost169-thread
 Requires: gdal34-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
-Requires: smartmet-library-timeseries >= 22.3.18
+Requires: smartmet-library-timeseries >= 22.5.20
 Requires: smartmet-library-macgyver >= 22.3.28
-Requires: smartmet-library-newbase >= 22.4.28
-Requires: smartmet-library-spine >= 22.4.29
+Requires: smartmet-library-newbase >= 22.5.20
+Requires: smartmet-library-spine >= 22.5.16
 #TestRequires: smartmet-utils-devel >= 22.2.8
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal34-devel
@@ -82,6 +82,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri May 20 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.20-1.fmi
+- Repackaged due to ABI changes to newbase LatLon methods
+
 * Thu May 19 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.19-1.fmi
 - Removed obsolete WGS84 branch code
 
