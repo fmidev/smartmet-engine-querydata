@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.5.20
-Release: 2%{?dist}.fmi
+Version: 22.5.24
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -20,10 +20,10 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-timeseries-devel >= 22.5.20
-BuildRequires: smartmet-library-macgyver-devel >= 22.3.28
-BuildRequires: smartmet-library-newbase-devel >= 22.5.20
-BuildRequires: smartmet-library-spine-devel >= 22.5.16
+BuildRequires: smartmet-library-timeseries-devel >= 22.5.24
+BuildRequires: smartmet-library-macgyver-devel >= 22.5.24
+BuildRequires: smartmet-library-newbase-devel >= 22.5.24
+BuildRequires: smartmet-library-spine-devel >= 22.5.24
 Requires: boost169-date-time
 Requires: boost169-filesystem
 Requires: boost169-iostreams
@@ -33,10 +33,10 @@ Requires: boost169-thread
 Requires: gdal34-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
-Requires: smartmet-library-timeseries >= 22.5.20
-Requires: smartmet-library-macgyver >= 22.3.28
-Requires: smartmet-library-newbase >= 22.5.20
-Requires: smartmet-library-spine >= 22.5.16
+Requires: smartmet-library-timeseries >= 22.5.24
+Requires: smartmet-library-macgyver >= 22.5.24
+Requires: smartmet-library-newbase >= 22.5.24
+Requires: smartmet-library-spine >= 22.5.24
 #TestRequires: smartmet-utils-devel >= 22.2.8
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal34-devel
@@ -82,6 +82,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue May 24 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.24-1.fmi
+- Repackaged due to NFmiArea ABI changes
+
 * Fri May 20 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.5.20-2.fmi
 - Small security improvements
 
