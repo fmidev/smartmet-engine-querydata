@@ -167,12 +167,12 @@ protected:
 
   ValuesPtr getValuesDefault(const Q& theQ,
                              std::size_t theValuesHash,
-                             boost::posix_time::ptime theTime) const;
+                             boost::posix_time::ptime theTime) const override;
 
   ValuesPtr getValuesForParam(const Q& theQ,
                               const Spine::Parameter& theParam,
                               std::size_t theValuesHash,
-                              boost::posix_time::ptime theTime) const;
+                              boost::posix_time::ptime theTime) const override;
 
  protected:
   void init() override;
