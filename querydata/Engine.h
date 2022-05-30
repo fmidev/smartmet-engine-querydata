@@ -1,39 +1,20 @@
-// ======================================================================
-/*!
- * \brief Interface of class QEngine
- */
-// ======================================================================
-
 #pragma once
 
-#include "ParameterTranslations.h"
+#include "OriginTime.h"
 #include "Producer.h"
 #include "Repository.h"
-#include "Synchro.h"
-#include <boost/atomic.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/smart_ptr/atomic_shared_ptr.hpp>
+#include "RepoManager.h"
 #include <gis/CoordinateMatrix.h>
-#include <macgyver/Cache.h>
 #include <spine/SmartMetEngine.h>
-#include <future>
-#include <string>
-#include <system_error>
 
-class NFmiPoint;
-class OGRSpatialReference;
+#include "ParameterTranslations.h"
+#include "Synchro.h"
+#include <macgyver/Cache.h>
 
 using CoordinatesPtr = std::shared_ptr<Fmi::CoordinateMatrix>;
 
 using Values = NFmiDataMatrix<float>;
 using ValuesPtr = std::shared_ptr<Values>;
-
-namespace Fmi
-{
-class SpatialReference;
-}
 
 namespace SmartMet
 {
@@ -46,8 +27,6 @@ namespace Engine
 {
 namespace Querydata
 {
-struct RepoManager;
-
 struct CacheReportingStruct
 {
   std::size_t coordinate_cache_max_size;
@@ -58,126 +37,192 @@ struct CacheReportingStruct
 
 class Engine : public Spine::SmartMetEngine
 {
- private:
-  friend class Synchronizer;
-
-  boost::atomic_shared_ptr<RepoManager> itsRepoManager;
-
-  boost::shared_ptr<Synchronizer> itsSynchro;
-
-  // get QEngine synchronization information
-  Repository::MetaObject getSynchroInfos() const;
-
-  const std::string itsConfigFile;
-
-  // Cached querydata coordinates.
-  using CoordinateCache = Fmi::Cache::Cache<std::size_t, std::shared_future<CoordinatesPtr>>;
-  mutable CoordinateCache itsCoordinateCache;
-
-  // Cached querydata values
-  using ValuesCache = Fmi::Cache::Cache<std::size_t, std::shared_future<ValuesPtr>>;
-  mutable ValuesCache itsValuesCache;
-
-  int itsActiveThreadCount;
-
-  boost::atomic_shared_ptr<ParameterTranslations> itsParameterTranslations;
-
  public:
-  // constructor is available only with a libconfig configuration file
-  // will also start a background thread to monitor querydata directories
-  Engine(const std::string& configfile);
-  Engine() = delete;
+  Engine();
 
-  // request available information
-  const ProducerList& producers() const;                    // available producers
-  OriginTimes origintimes(const Producer& producer) const;  // available origintimes
+  virtual ~Engine();
 
-  bool hasProducer(const Producer& producer) const;
+  /**
+   *   @brief Return available producers
+   */
+  virtual const ProducerList& producers() const;
 
-  CacheReportingStruct getCacheSizes() const;
+  /**
+   *   @brief Return available origintimes
+   **/
+  virtual OriginTimes origintimes(const Producer& producer) const;
 
-  // select producer which has relevant data for the coordinate
-  Producer find(double longitude,
+  virtual bool hasProducer(const Producer& producer) const;
+
+    // select producer which has relevant data for the coordinate
+  virtual Producer find(double longitude,
                 double latitude,
                 double maxdistance = 60,
                 bool usedatamaxdistance = true,
                 const std::string& leveltype = "") const;
 
-  Producer find(const ProducerList& producerlist,
+  virtual Producer find(const ProducerList& producerlist,
                 double longitude,
                 double latitude,
                 double maxdistance = 60,
                 bool usedatamaxdistance = true,
                 const std::string& leveltype = "") const;
 
-  // data accessors: latest data or specific origintime
-  Q get(const Producer& producer) const;
+  /**
+   *   @brief data accessor: latest data
+   */
+  virtual Q get(const Producer& producer) const;
 
-  Q get(const Producer& producer, const OriginTime& origintime) const;
+  /**
+   *   @brief data accessor: specific origintime
+   */
+  virtual Q get(const Producer& producer, const OriginTime& origintime) const;
 
-  // Get detailed info of current producers
-  Repository::ContentTable getProducerInfo(const std::string& timeFormat,
-                                           boost::optional<std::string> producer) const;
-  // Get info of parameters of each producer
-  Repository::ContentTable getParameterInfo(boost::optional<std::string> producer) const;
 
-  // Get current engine contents
-  Repository::ContentTable getEngineContents(const std::string& timeFormat,
-                                             const std::string& projectionFormat) const;
-  Repository::ContentTable getEngineContents(const std::string& producer,
-                                             const std::string& timeFormat,
-                                             const std::string& projectionFormat) const;
+  /**
+   *  @brief Get detailed info of current producers
+   */
+  virtual Repository::ContentTable getProducerInfo(const std::string& timeFormat,
+                                                   boost::optional<std::string> producer) const;
 
-  // Get producer data period
+  /**
+   *  @brief Get info of parameters of each producer
+   */
+  virtual Repository::ContentTable getParameterInfo(boost::optional<std::string> producer) const;
 
-  boost::posix_time::time_period getProducerTimePeriod(const Producer& producer) const;
+  /**
+   *  @brief Get current engine contents
+   */
+  inline Repository::ContentTable
+  getEngineContents(const std::string& timeFormat,
+                    const std::string& projectionFormat) const
+  {
+    return getEngineContentsForAllProducers(timeFormat, projectionFormat);
+  }
 
-  // Get engine metadata
-  std::list<MetaData> getEngineMetadata() const;
+  inline Repository::ContentTable
+  getEngineContents(const std::string& producer,
+                    const std::string& timeFormat,
+                    const std::string& projectionFormat) const
+  {
+    return getEngineContentsForProducer(producer, timeFormat, projectionFormat);
+  }
 
-  // Get engine metadata with options
-  std::list<MetaData> getEngineMetadata(const MetaQueryOptions& theOptions) const;
+  /**
+   *  @brief  Get producer data period
+   */
+  virtual boost::posix_time::time_period getProducerTimePeriod(const Producer& producer) const;
 
-  // Get synchronized engine metadata
-  std::list<MetaData> getEngineSyncMetadata(const std::string& syncGroup) const;
+  /**
+   *  @brief Get engine metadata
+   */
+  inline std::list<MetaData> getEngineMetadata() const
+  {
+    return getEngineMetadataBasic();
+  }
 
-  // Get synchronized engine metadata with options
-  std::list<MetaData> getEngineSyncMetadata(const std::string& syncGroup,
-                                            const MetaQueryOptions& theOptions) const;
-  // Get synchronized producers for given synchronization group
-  boost::optional<ProducerMap> getSyncProducers(const std::string& syncGroup) const;
+  /**
+   *  @brief Get engine metadata with options
+   */
+  inline std::list<MetaData> getEngineMetadata(const MetaQueryOptions& theOptions) const
+  {
+    return getEngineMetadataWithOptions(theOptions);
+  }
 
-  // Start synchronization with other QEngines
-  void startSynchronize(Spine::Reactor* theReactor);
+  /**
+   *  @brief Get synchronized engine metadata
+   */
+  inline std::list<MetaData> getEngineSyncMetadata(const std::string& syncGroup) const
+  {
+    return getEngineSyncMetadataBasic(syncGroup);
+  }
 
-  // get producer's configuration
-  const ProducerConfig& getProducerConfig(const std::string& producer) const;
+  /**
+   *  @brief Get synchronized engine metadata with options
+   */
+  inline std::list<MetaData> getEngineSyncMetadata(const std::string& syncGroup,
+                                                   const MetaQueryOptions& theOptions) const
+  {
+    return getEngineSyncMetadataWithOptions(syncGroup, theOptions);
+  }
 
-  CoordinatesPtr getWorldCoordinates(const Q& theQ) const;
-  CoordinatesPtr getWorldCoordinates(const Q& theQ, const Fmi::SpatialReference& theSR) const;
+  virtual Repository::MetaObject getSynchroInfos() const;
 
-  ValuesPtr getValues(const Q& theQ,
-                      std::size_t theValuesHash,
-                      boost::posix_time::ptime theTime) const;
+  /**
+   *  @brief Get synchronized producers for given synchronization group
+   */
+  virtual boost::optional<ProducerMap> getSyncProducers(const std::string& syncGroup) const;
 
-  ValuesPtr getValues(const Q& theQ,
-                      const Spine::Parameter& theParam,
-                      std::size_t theValuesHash,
-                      boost::posix_time::ptime theTime) const;
+  /**
+   *  @brief Start synchronization with other QEngines
+   */
+  virtual void startSynchronize(Spine::Reactor* theReactor);
+
+  virtual const ProducerConfig& getProducerConfig(const std::string& producer) const;
+
+  inline CoordinatesPtr getWorldCoordinates(const Q& theQ) const
+  {
+    return getWorldCoordinatesDefault(theQ);
+  }
+
+  inline CoordinatesPtr getWorldCoordinates(const Q& theQ, const Fmi::SpatialReference& theSR) const
+  {
+    return getWorldCoordinatesForSR(theQ, theSR);
+  }
+
+  inline ValuesPtr getValues(const Q& theQ,
+                             std::size_t theValuesHash,
+                             boost::posix_time::ptime theTime) const
+  {
+    return getValuesDefault(theQ, theValuesHash, theTime);
+  }
+
+  inline ValuesPtr getValues(const Q& theQ,
+                             const Spine::Parameter& theParam,
+                             std::size_t theValuesHash,
+                             boost::posix_time::ptime theTime) const
+  {
+    return getValuesForParam(theQ, theParam, theValuesHash, theTime);
+  }
 
  protected:
+  virtual Repository::ContentTable
+    getEngineContentsForAllProducers(const std::string& timeFormat,
+                                     const std::string& projectionFormat) const;
+
+  virtual Repository::ContentTable
+    getEngineContentsForProducer(const std::string& producer,
+                                 const std::string& timeFormat,
+                                 const std::string& projectionFormat) const;
+
+  virtual std::list<MetaData> getEngineMetadataBasic() const;
+
+  virtual std::list<MetaData> getEngineMetadataWithOptions(const MetaQueryOptions& theOptions) const;
+
+  virtual std::list<MetaData> getEngineSyncMetadataBasic(const std::string& syncGroup) const;
+
+  virtual std::list<MetaData> getEngineSyncMetadataWithOptions(const std::string& syncGroup,
+                                                               const MetaQueryOptions& theOptions) const;
+
+
+  virtual CoordinatesPtr getWorldCoordinatesDefault(const Q& theQ) const;
+
+  virtual CoordinatesPtr getWorldCoordinatesForSR(const Q& theQ, const Fmi::SpatialReference& theSR) const;
+
+  virtual ValuesPtr getValuesDefault(const Q& theQ,
+                                     std::size_t theValuesHash,
+                                     boost::posix_time::ptime theTime) const;
+
+  virtual ValuesPtr getValuesForParam(const Q& theQ,
+                                      const Spine::Parameter& theParam,
+                                      std::size_t theValuesHash,
+                                      boost::posix_time::ptime theTime) const;
+
   void init() override;
+
   void shutdown() override;
-  std::time_t getConfigModTime();
-  boost::atomic<int> lastConfigErrno;
-  int getLastConfigErrno();
 
- private:
-  boost::thread configFileWatcher;  // A thread watching for config file changes
-  void configFileWatch();           // A function in separate thread checking the config file
-  Fmi::Cache::CacheStatistics getCacheStats() const override;  // Get cache statistics
-
-};  // class Engine
+};
 
 }  // namespace Querydata
 }  // namespace Engine
