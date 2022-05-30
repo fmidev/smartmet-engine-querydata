@@ -54,7 +54,9 @@ class Engine : public Spine::SmartMetEngine
 
   virtual bool hasProducer(const Producer& producer) const;
 
-    // select producer which has relevant data for the coordinate
+  virtual CacheReportingStruct getCacheSizes() const;
+
+  // select producer which has relevant data for the coordinate
   virtual Producer find(double longitude,
                 double latitude,
                 double maxdistance = 60,

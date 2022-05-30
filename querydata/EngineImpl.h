@@ -93,7 +93,7 @@ public:
 
   bool hasProducer(const Producer& producer) const override;
 
-  CacheReportingStruct getCacheSizes() const;
+  CacheReportingStruct getCacheSizes() const override;
 
   // select producer which has relevant data for the coordinate
   Producer find(double longitude,

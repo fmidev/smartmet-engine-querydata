@@ -38,6 +38,11 @@ bool Engine::hasProducer(const Producer& producer) const
     REPORT_DISABLED;
 }
 
+CacheReportingStruct Engine::getCacheSizes() const
+{
+    REPORT_DISABLED;
+}
+
 Producer
 Engine::find(double longitude,
              double latitude,
