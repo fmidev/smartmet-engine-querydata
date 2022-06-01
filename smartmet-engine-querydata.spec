@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.5.31
+Version: 22.6.1
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -22,7 +22,7 @@ BuildRequires: protobuf-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-timeseries-devel >= 22.5.24
 BuildRequires: smartmet-library-macgyver-devel >= 22.5.24
-BuildRequires: smartmet-library-newbase-devel >= 22.5.24
+BuildRequires: smartmet-library-newbase-devel >= 22.6.1
 BuildRequires: smartmet-library-spine-devel >= 22.5.24
 Requires: boost169-date-time
 Requires: boost169-filesystem
@@ -35,7 +35,7 @@ Requires: jsoncpp >= 1.8.4
 Requires: protobuf
 Requires: smartmet-library-timeseries >= 22.5.24
 Requires: smartmet-library-macgyver >= 22.5.24
-Requires: smartmet-library-newbase >= 22.5.24
+Requires: smartmet-library-newbase >= 22.6.1
 Requires: smartmet-library-spine >= 22.5.24
 #TestRequires: smartmet-utils-devel >= 22.2.8
 #TestRequires: jsoncpp-devel >= 1.8.4
@@ -82,6 +82,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Jun  1 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.6.1-1.fmi
+- Use SimpleWKT comparisons to see projections are equal despite +wktext etc
+
 * Tue May 31 2022 Andris Pavēnis <andris.pavenis@fmi.fi> 22.5.31-1.fmi
 - Support engine disabling
 

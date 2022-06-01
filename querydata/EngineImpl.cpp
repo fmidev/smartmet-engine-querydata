@@ -459,10 +459,10 @@ Q EngineImpl::get(const Producer& producer, const boost::posix_time::ptime& orig
 // ----------------------------------------------------------------------
 
 Producer EngineImpl::find(double lon,
-                      double lat,
-                      double maxdist,
-                      bool usedatamaxdistance,
-                      const std::string& leveltype) const
+                          double lat,
+                          double maxdist,
+                          bool usedatamaxdistance,
+                          const std::string& leveltype) const
 {
   try
   {
@@ -493,11 +493,11 @@ Producer EngineImpl::find(double lon,
 // ----------------------------------------------------------------------
 
 Producer EngineImpl::find(const ProducerList& producerlist,
-                      double longitude,
-                      double latitude,
-                      double maxdistance,
-                      bool usedatamaxdistance,
-                      const std::string& leveltype) const
+                          double longitude,
+                          double latitude,
+                          double maxdistance,
+                          bool usedatamaxdistance,
+                          const std::string& leveltype) const
 {
   try
   {
@@ -525,7 +525,7 @@ Producer EngineImpl::find(const ProducerList& producerlist,
 // ----------------------------------------------------------------------
 
 Repository::ContentTable EngineImpl::getProducerInfo(const std::string& timeFormat,
-                                                 boost::optional<std::string> producer) const
+                                                     boost::optional<std::string> producer) const
 {
   try
   {
@@ -579,9 +579,8 @@ Repository::ContentTable EngineImpl::getParameterInfo(boost::optional<std::strin
  */
 // ----------------------------------------------------------------------
 
-Repository::ContentTable
-EngineImpl::getEngineContentsForAllProducers(const std::string& timeFormat,
-                                             const std::string& projectionFormat) const
+Repository::ContentTable EngineImpl::getEngineContentsForAllProducers(
+    const std::string& timeFormat, const std::string& projectionFormat) const
 {
   try
   {
@@ -603,10 +602,10 @@ EngineImpl::getEngineContentsForAllProducers(const std::string& timeFormat,
  */
 // ----------------------------------------------------------------------
 
-Repository::ContentTable
-EngineImpl::getEngineContentsForProducer(const std::string& producer,
-                                         const std::string& timeFormat,
-                                         const std::string& projectionFormat) const
+Repository::ContentTable EngineImpl::getEngineContentsForProducer(
+    const std::string& producer,
+    const std::string& timeFormat,
+    const std::string& projectionFormat) const
 {
   try
   {
@@ -679,8 +678,8 @@ std::list<MetaData> EngineImpl::getEngineMetadataBasic() const
   }
 }
 
-std::list<MetaData>
-EngineImpl::getEngineMetadataWithOptions(const MetaQueryOptions& theOptions) const
+std::list<MetaData> EngineImpl::getEngineMetadataWithOptions(
+    const MetaQueryOptions& theOptions) const
 {
   try
   {
@@ -696,8 +695,7 @@ EngineImpl::getEngineMetadataWithOptions(const MetaQueryOptions& theOptions) con
   }
 }
 
-std::list<MetaData>
-EngineImpl::getEngineSyncMetadataBasic(const std::string& syncGroup) const
+std::list<MetaData> EngineImpl::getEngineSyncMetadataBasic(const std::string& syncGroup) const
 {
   try
   {
@@ -747,9 +745,8 @@ EngineImpl::getEngineSyncMetadataBasic(const std::string& syncGroup) const
   }
 }
 
-std::list<MetaData>
-EngineImpl::getEngineSyncMetadataWithOptions(const std::string& syncGroup,
-                                             const MetaQueryOptions& options) const
+std::list<MetaData> EngineImpl::getEngineSyncMetadataWithOptions(
+    const std::string& syncGroup, const MetaQueryOptions& options) const
 {
   try
   {
@@ -954,7 +951,8 @@ CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
   }
 }
 
-CoordinatesPtr EngineImpl::getWorldCoordinatesForSR(const Q& theQ, const Fmi::SpatialReference& theSR) const
+CoordinatesPtr EngineImpl::getWorldCoordinatesForSR(const Q& theQ,
+                                                    const Fmi::SpatialReference& theSR) const
 {
   try
   {
@@ -969,8 +967,8 @@ CoordinatesPtr EngineImpl::getWorldCoordinatesForSR(const Q& theQ, const Fmi::Sp
     // WMS tiles since with proj(invproj(p)) may differ significantly
     // from p outside the valid area of the projection.
 
-    auto datawkt = theQ->info()->Area()->WKT();
-    auto reqwkt = Fmi::OGR::exportToWkt(theSR);
+    auto datawkt = theQ->info()->Area()->SimpleWKT();
+    auto reqwkt = Fmi::OGR::exportToSimpleWkt(theSR);
 
     if (datawkt != reqwkt)
       Fmi::hash_combine(projhash, theSR.hashValue());
@@ -1057,8 +1055,8 @@ ValuesPtr get_values(const Q& theQ, boost::posix_time::ptime theTime)
 // ----------------------------------------------------------------------
 
 ValuesPtr EngineImpl::getValuesDefault(const Q& theQ,
-                            std::size_t theValuesHash,
-                            boost::posix_time::ptime theTime) const
+                                       std::size_t theValuesHash,
+                                       boost::posix_time::ptime theTime) const
 {
   try
   {
@@ -1110,9 +1108,9 @@ ValuesPtr get_values(const Q& theQ,
 // ----------------------------------------------------------------------
 
 ValuesPtr EngineImpl::getValuesForParam(const Q& theQ,
-                            const Spine::Parameter& theParam,
-                            std::size_t theValuesHash,
-                            boost::posix_time::ptime theTime) const
+                                        const Spine::Parameter& theParam,
+                                        std::size_t theValuesHash,
+                                        boost::posix_time::ptime theTime) const
 {
   try
   {
@@ -1162,25 +1160,26 @@ Fmi::Cache::CacheStatistics EngineImpl::getCacheStats() const
   return ret;
 }
 
-Engine*
-EngineImpl::create(const std::string& configfile)
+Engine* EngineImpl::create(const std::string& configfile)
 {
   try
   {
-      SmartMet::Spine::ConfigBase cfg(configfile);
-      bool disabled = cfg.get_optional_config_param<bool>("disabled", false);
-      if (disabled) {
-          return new Engine();
-      } else {
-          return new EngineImpl(configfile);
-      }
+    SmartMet::Spine::ConfigBase cfg(configfile);
+    bool disabled = cfg.get_optional_config_param<bool>("disabled", false);
+    if (disabled)
+    {
+      return new Engine();
+    }
+    else
+    {
+      return new EngineImpl(configfile);
+    }
   }
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-
 
 }  // namespace Querydata
 }  // namespace Engine
