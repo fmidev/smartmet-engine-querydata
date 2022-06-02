@@ -4380,6 +4380,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     width = std::max(width, 2);
     height = std::max(height, 2);
 
+    newarea->SetGridSize(width, height);  // to get fast LatLon access for the grid
+
     NFmiGrid grid(newarea.get(), width, height);
     NFmiHPlaceDescriptor hdesc(grid);
 
