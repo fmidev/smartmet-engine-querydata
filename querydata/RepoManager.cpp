@@ -32,7 +32,7 @@
 #include "Producer.h"
 #include "Repository.h"
 #include "ValidPoints.h"
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
@@ -260,6 +260,8 @@ RepoManager::RepoManager(const std::string& configfile)
 
 void RepoManager::init()
 {
+  using namespace boost::placeholders;
+
   try
   {
     for (const auto& pinfo : itsConfigList)

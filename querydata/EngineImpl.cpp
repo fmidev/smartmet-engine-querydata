@@ -10,7 +10,7 @@
 #include "Repository.h"
 #include "Synchro.h"
 #include "WGS84EnvelopeFactory.h"
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
