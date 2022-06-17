@@ -10,7 +10,14 @@ Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
 Source0: %{name}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-BuildRequires: boost169-devel
+
+%if 0%{?rhel} && 0%{rhel} < 9
+%define smartmet_boost boost169
+%else
+%define smartmet_boost boost
+%endif
+
+BuildRequires: %{smartmet_boost}-devel
 BuildRequires: bzip2-devel
 BuildRequires: gcc-c++
 BuildRequires: gdal34-devel
@@ -20,23 +27,23 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-timeseries-devel >= 22.5.24
-BuildRequires: smartmet-library-macgyver-devel >= 22.5.24
-BuildRequires: smartmet-library-newbase-devel >= 22.6.2
-BuildRequires: smartmet-library-spine-devel >= 22.5.24
-Requires: boost169-date-time
-Requires: boost169-filesystem
-Requires: boost169-iostreams
-Requires: boost169-serialization
-Requires: boost169-system
-Requires: boost169-thread
+BuildRequires: smartmet-library-timeseries-devel >= 22.6.16
+BuildRequires: smartmet-library-macgyver-devel >= 22.6.16
+BuildRequires: smartmet-library-newbase-devel >= 22.6.16
+BuildRequires: smartmet-library-spine-devel >= 22.6.16
+Requires: %{smartmet_boost}-date-time
+Requires: %{smartmet_boost}-filesystem
+Requires: %{smartmet_boost}-iostreams
+Requires: %{smartmet_boost}-serialization
+Requires: %{smartmet_boost}-system
+Requires: %{smartmet_boost}-thread
 Requires: gdal34-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
-Requires: smartmet-library-timeseries >= 22.5.24
-Requires: smartmet-library-macgyver >= 22.5.24
-Requires: smartmet-library-newbase >= 22.6.2
-Requires: smartmet-library-spine >= 22.5.24
+Requires: smartmet-library-timeseries >= 22.6.16
+Requires: smartmet-library-macgyver >= 22.6.16
+Requires: smartmet-library-newbase >= 22.6.16
+Requires: smartmet-library-spine >= 22.6.16
 #TestRequires: smartmet-utils-devel >= 22.2.8
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal34-devel
