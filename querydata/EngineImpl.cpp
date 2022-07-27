@@ -1153,10 +1153,10 @@ Fmi::Cache::CacheStatistics EngineImpl::getCacheStats() const
   Fmi::Cache::CacheStatistics ret;
 
   auto repomanager = itsRepoManager.load();
-  ret.insert(std::make_pair("Querydata::lat_lon_cache", repomanager->getCacheStats()));
-  ret.insert(
-      std::make_pair("Querydata::wgs84_envelope_cache", WGS84EnvelopeFactory::getCacheStats()));
-
+  ret["Querydata::lat_lon_cache"] = repomanager->getCacheStats();
+  ret["Querydata::wgs84_envelope_cache"] = WGS84EnvelopeFactory::getCacheStats();
+  ret["Querydata::values_cache"] = itsValuesCache.statistics();
+  ret["Querydata::coordinate_cache"] = itsCoordinateCache.statistics();
   return ret;
 }
 

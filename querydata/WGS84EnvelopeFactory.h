@@ -1,7 +1,7 @@
 #pragma once
 #include <boost/shared_ptr.hpp>
-#include <newbase/NFmiFastQueryInfo.h>
 #include <macgyver/Cache.h>
+#include <newbase/NFmiFastQueryInfo.h>
 
 namespace SmartMet
 {
@@ -18,7 +18,7 @@ std::shared_ptr<WGS84Envelope> Get(const boost::shared_ptr<NFmiFastQueryInfo>& t
 
 void SetCacheSize(std::size_t newMaxSize);
 
-const Fmi::Cache::CacheStats& getCacheStats();
+Fmi::Cache::CacheStats getCacheStats();
 
 }  // namespace WGS84EnvelopeFactory
 }  // namespace Querydata

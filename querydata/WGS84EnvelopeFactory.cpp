@@ -41,8 +41,10 @@ void SetCacheSize(std::size_t newMaxSize)
   g_WGS84GlobalEnvelopeCache.resize(newMaxSize);
 }
 
-const Fmi::Cache::CacheStats& getCacheStats()  { return g_WGS84GlobalEnvelopeCache.statistics(); }
-
+Fmi::Cache::CacheStats getCacheStats()
+{
+  return g_WGS84GlobalEnvelopeCache.statistics();
+}
 
 }  // namespace WGS84EnvelopeFactory
 }  // namespace Querydata
