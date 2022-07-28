@@ -56,7 +56,7 @@ class Repository
                 double maxdist,
                 bool usedatamaxdist,
                 const std::string& leveltype,
-				bool checkLatestModelAge = false) const;
+                bool checkLatestModelAge = false) const;
 
   OriginTimes originTimes(const Producer& producer) const;
 
@@ -65,6 +65,7 @@ class Repository
   // Must not use aliases for these!
   Q get(const Producer& producer) const;
   Q get(const Producer& producer, const OriginTime& origintime) const;
+  Q get(const Producer& producer, const boost::posix_time::time_period& timeperiod) const;
 
   Q getAll(const Producer& producer) const;
 

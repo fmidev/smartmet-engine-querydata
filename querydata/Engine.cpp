@@ -19,220 +19,156 @@ Engine::Engine() = default;
 
 Engine::~Engine() = default;
 
-const ProducerList&
-Engine::producers() const
+const ProducerList& Engine::producers() const
 {
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-OriginTimes
-Engine::origintimes(const Producer& producer) const
+OriginTimes Engine::origintimes(const Producer& /* producer */) const
 {
-    (void)producer;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-bool Engine::hasProducer(const Producer& producer) const
+bool Engine::hasProducer(const Producer& /* producer */) const
 {
-    (void)producer;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
 CacheReportingStruct Engine::getCacheSizes() const
 {
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-Producer
-Engine::find(double longitude,
-             double latitude,
-             double maxdistance,
-             bool usedatamaxdistance,
-             const std::string& leveltype) const
+Producer Engine::find(double /* longitude */,
+                      double /* latitude */,
+                      double /* maxdistance */,
+                      bool /* usedatamaxdistance */,
+                      const std::string& /* leveltype */) const
 {
-    (void)longitude;
-    (void)latitude;
-    (void)maxdistance;
-    (void)usedatamaxdistance;
-    (void)leveltype;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-Producer
-Engine::find(const ProducerList& producerlist,
-             double longitude,
-             double latitude,
-             double maxdistance,
-             bool usedatamaxdistance,
-             const std::string& leveltype) const
-{   (void)producerlist;
-    (void)longitude;
-    (void)latitude;
-    (void)maxdistance;
-    (void)usedatamaxdistance;
-    (void)leveltype;
-    REPORT_DISABLED;
-}
-
-Q
-Engine::get(const Producer& producer) const
+Producer Engine::find(const ProducerList& /* producerlist */,
+                      double /* longitude */,
+                      double /* latitude */,
+                      double /* maxdistance */,
+                      bool /* usedatamaxdistance */,
+                      const std::string& /* leveltype */) const
 {
-    (void)producer;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-Q
-Engine::get(const Producer& producer, const OriginTime& origintime) const
+Q Engine::get(const Producer& /* producer */) const
 {
-    (void)producer;
-    (void)origintime;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-Repository::ContentTable
-Engine::getProducerInfo(const std::string& timeFormat,
-                        boost::optional<std::string> producer) const
+Q Engine::get(const Producer& /* producer */, const OriginTime& /* origintime */) const
 {
-    (void)timeFormat;
-    (void)producer;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-Repository::ContentTable
-Engine::getParameterInfo(boost::optional<std::string> producer) const
+Q Engine::get(const Producer& /* producer */,
+              const boost::posix_time::time_period& /* timePeriod */) const
 {
-    (void)producer;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-boost::posix_time::time_period
-Engine::getProducerTimePeriod(const Producer& producer) const
+Repository::ContentTable Engine::getProducerInfo(const std::string& /* timeFormat */,
+                                                 boost::optional<std::string> /* producer */) const
 {
-    (void)producer;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-boost::optional<ProducerMap>
-Engine::getSyncProducers(const std::string& syncGroup) const
+Repository::ContentTable Engine::getParameterInfo(boost::optional<std::string> /* producer */) const
 {
-    (void)syncGroup;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-void
-Engine::startSynchronize(Spine::Reactor* theReactor)
+boost::posix_time::time_period Engine::getProducerTimePeriod(const Producer& /* producer */) const
 {
-    (void)theReactor;
+  REPORT_DISABLED;
 }
 
-const ProducerConfig&
-Engine::getProducerConfig(const std::string& producer) const
+boost::optional<ProducerMap> Engine::getSyncProducers(const std::string& /* syncGroup */) const
 {
-    (void)producer;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-Repository::MetaObject
-Engine::getSynchroInfos() const
+void Engine::startSynchronize(Spine::Reactor* /* theReactor */) {}
+
+const ProducerConfig& Engine::getProducerConfig(const std::string& /* producer */) const
 {
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-Repository::ContentTable
-Engine::getEngineContentsForAllProducers(const std::string& timeFormat,
-                                         const std::string& projectionFormat) const
+Repository::MetaObject Engine::getSynchroInfos() const
 {
-    (void)timeFormat;
-    (void)projectionFormat;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-Repository::ContentTable
-Engine::getEngineContentsForProducer(const std::string& producer,
-                                     const std::string& timeFormat,
-                                     const std::string& projectionFormat) const
+Repository::ContentTable Engine::getEngineContentsForAllProducers(
+    const std::string& /* timeFormat */, const std::string& /* projectionFormat */) const
 {
-    (void)producer;
-    (void)timeFormat;
-    (void)projectionFormat;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-std::list<MetaData>
-Engine::getEngineMetadataBasic() const
+Repository::ContentTable Engine::getEngineContentsForProducer(
+    const std::string& /* producer */,
+    const std::string& /* timeFormat */,
+    const std::string& /* projectionFormat */) const
 {
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-std::list<MetaData>
-Engine::getEngineMetadataWithOptions(const MetaQueryOptions& theOptions) const
+std::list<MetaData> Engine::getEngineMetadataBasic() const
 {
-    (void)theOptions;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-std::list<MetaData>
-Engine::getEngineSyncMetadataBasic(const std::string& syncGroup) const
+std::list<MetaData> Engine::getEngineMetadataWithOptions(
+    const MetaQueryOptions& /* theOptions */) const
 {
-    (void)syncGroup;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-std::list<MetaData>
-Engine::getEngineSyncMetadataWithOptions(const std::string& syncGroup,
-                                         const MetaQueryOptions& theOptions) const
+std::list<MetaData> Engine::getEngineSyncMetadataBasic(const std::string& /* syncGroup  */) const
 {
-    (void)syncGroup;
-    (void)theOptions;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-CoordinatesPtr
-Engine::getWorldCoordinatesDefault(const Q& theQ) const
+std::list<MetaData> Engine::getEngineSyncMetadataWithOptions(
+    const std::string& /* syncGroup */, const MetaQueryOptions& /* theOptions */) const
 {
-    (void)theQ;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-CoordinatesPtr
-Engine::getWorldCoordinatesForSR(const Q& theQ, const Fmi::SpatialReference& theSR) const
+CoordinatesPtr Engine::getWorldCoordinatesDefault(const Q& /* theQ */) const
 {
-    (void)theQ;
-    (void)theSR;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-ValuesPtr
-Engine::getValuesDefault(const Q& theQ,
-                         std::size_t theValuesHash,
-                         boost::posix_time::ptime theTime) const
+CoordinatesPtr Engine::getWorldCoordinatesForSR(const Q& /* theQ */,
+                                                const Fmi::SpatialReference& /* theSR */) const
 {
-    (void)theQ;
-    (void)theValuesHash;
-    (void)theTime;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-ValuesPtr
-Engine::getValuesForParam(const Q& theQ,
-                  const Spine::Parameter& theParam,
-                  std::size_t theValuesHash,
-                  boost::posix_time::ptime theTime) const
+ValuesPtr Engine::getValuesDefault(const Q& /* theQ */,
+                                   std::size_t /* theValuesHash */,
+                                   boost::posix_time::ptime /* theTime */) const
 {
-    (void)theQ;
-    (void)theParam;
-    (void)theValuesHash;
-    (void)theTime;
-    REPORT_DISABLED;
+  REPORT_DISABLED;
 }
 
-void
-Engine::init()
+ValuesPtr Engine::getValuesForParam(const Q& /* theQ */,
+                                    const Spine::Parameter& /* theParam */,
+                                    std::size_t /* theValuesHash */,
+                                    boost::posix_time::ptime /* theTime */) const
 {
+  REPORT_DISABLED;
 }
 
-void
-Engine::shutdown()
-{
-}
+void Engine::init() {}
 
+void Engine::shutdown() {}

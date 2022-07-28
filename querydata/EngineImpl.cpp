@@ -452,6 +452,29 @@ Q EngineImpl::get(const Producer& producer, const boost::posix_time::ptime& orig
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Get data for the given producer and valid time period
+ */
+// ----------------------------------------------------------------------
+
+Q EngineImpl::get(const Producer& producer, const boost::posix_time::time_period& timePeriod) const
+{
+  try
+  {
+    auto repomanager = itsRepoManager.load();
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+    auto q = repomanager->itsRepo.get(producer, timePeriod);
+    q->setParameterTranslations(itsParameterTranslations.load());
+    return q;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Select first model which covers the given point
  *
  * Returns empty producer if there are no matches.
