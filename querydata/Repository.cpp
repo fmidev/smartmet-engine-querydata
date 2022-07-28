@@ -440,10 +440,7 @@ Q Repository::get(const Producer& producer, const boost::posix_time::time_period
     }
 
     if (okmodels.empty())
-      throw Fmi::Exception(
-          BCP, "Repository getPeriod: No multifile data available for producer '" + producer + "'")
-          .addParameter("starttime", Fmi::to_iso_string(timeperiod.begin()))
-          .addParameter("endtime", Fmi::to_iso_string(timeperiod.end()));
+      return getAll(producer);  // Attempt to interpolate instead
 
     return boost::make_shared<QImpl>(okmodels);
   }
