@@ -2,8 +2,8 @@
 
 #include "OriginTime.h"
 #include "Producer.h"
-#include "Repository.h"
 #include "RepoManager.h"
+#include "Repository.h"
 #include <gis/CoordinateMatrix.h>
 #include <spine/SmartMetEngine.h>
 
@@ -58,17 +58,17 @@ class Engine : public Spine::SmartMetEngine
 
   // select producer which has relevant data for the coordinate
   virtual Producer find(double longitude,
-                double latitude,
-                double maxdistance = 60,
-                bool usedatamaxdistance = true,
-                const std::string& leveltype = "") const;
+                        double latitude,
+                        double maxdistance = 60,
+                        bool usedatamaxdistance = true,
+                        const std::string& leveltype = "") const;
 
   virtual Producer find(const ProducerList& producerlist,
-                double longitude,
-                double latitude,
-                double maxdistance = 60,
-                bool usedatamaxdistance = true,
-                const std::string& leveltype = "") const;
+                        double longitude,
+                        double latitude,
+                        double maxdistance = 60,
+                        bool usedatamaxdistance = true,
+                        const std::string& leveltype = "") const;
 
   /**
    *   @brief data accessor: latest data
@@ -80,6 +80,10 @@ class Engine : public Spine::SmartMetEngine
    */
   virtual Q get(const Producer& producer, const OriginTime& origintime) const;
 
+  /**
+   *   @brief data accessor: specific valid time period, possibly extracted from a multifile
+   */
+  virtual Q get(const Producer& producer, const boost::posix_time::time_period& timePeriod) const;
 
   /**
    *  @brief Get detailed info of current producers
@@ -95,17 +99,15 @@ class Engine : public Spine::SmartMetEngine
   /**
    *  @brief Get current engine contents
    */
-  inline Repository::ContentTable
-  getEngineContents(const std::string& timeFormat,
-                    const std::string& projectionFormat) const
+  inline Repository::ContentTable getEngineContents(const std::string& timeFormat,
+                                                    const std::string& projectionFormat) const
   {
     return getEngineContentsForAllProducers(timeFormat, projectionFormat);
   }
 
-  inline Repository::ContentTable
-  getEngineContents(const std::string& producer,
-                    const std::string& timeFormat,
-                    const std::string& projectionFormat) const
+  inline Repository::ContentTable getEngineContents(const std::string& producer,
+                                                    const std::string& timeFormat,
+                                                    const std::string& projectionFormat) const
   {
     return getEngineContentsForProducer(producer, timeFormat, projectionFormat);
   }
@@ -118,10 +120,7 @@ class Engine : public Spine::SmartMetEngine
   /**
    *  @brief Get engine metadata
    */
-  inline std::list<MetaData> getEngineMetadata() const
-  {
-    return getEngineMetadataBasic();
-  }
+  inline std::list<MetaData> getEngineMetadata() const { return getEngineMetadataBasic(); }
 
   /**
    *  @brief Get engine metadata with options
@@ -188,28 +187,28 @@ class Engine : public Spine::SmartMetEngine
   }
 
  protected:
-  virtual Repository::ContentTable
-    getEngineContentsForAllProducers(const std::string& timeFormat,
-                                     const std::string& projectionFormat) const;
+  virtual Repository::ContentTable getEngineContentsForAllProducers(
+      const std::string& timeFormat, const std::string& projectionFormat) const;
 
-  virtual Repository::ContentTable
-    getEngineContentsForProducer(const std::string& producer,
-                                 const std::string& timeFormat,
-                                 const std::string& projectionFormat) const;
+  virtual Repository::ContentTable getEngineContentsForProducer(
+      const std::string& producer,
+      const std::string& timeFormat,
+      const std::string& projectionFormat) const;
 
   virtual std::list<MetaData> getEngineMetadataBasic() const;
 
-  virtual std::list<MetaData> getEngineMetadataWithOptions(const MetaQueryOptions& theOptions) const;
+  virtual std::list<MetaData> getEngineMetadataWithOptions(
+      const MetaQueryOptions& theOptions) const;
 
   virtual std::list<MetaData> getEngineSyncMetadataBasic(const std::string& syncGroup) const;
 
-  virtual std::list<MetaData> getEngineSyncMetadataWithOptions(const std::string& syncGroup,
-                                                               const MetaQueryOptions& theOptions) const;
-
+  virtual std::list<MetaData> getEngineSyncMetadataWithOptions(
+      const std::string& syncGroup, const MetaQueryOptions& theOptions) const;
 
   virtual CoordinatesPtr getWorldCoordinatesDefault(const Q& theQ) const;
 
-  virtual CoordinatesPtr getWorldCoordinatesForSR(const Q& theQ, const Fmi::SpatialReference& theSR) const;
+  virtual CoordinatesPtr getWorldCoordinatesForSR(const Q& theQ,
+                                                  const Fmi::SpatialReference& theSR) const;
 
   virtual ValuesPtr getValuesDefault(const Q& theQ,
                                      std::size_t theValuesHash,
@@ -223,7 +222,6 @@ class Engine : public Spine::SmartMetEngine
   void init() override;
 
   void shutdown() override;
-
 };
 
 }  // namespace Querydata

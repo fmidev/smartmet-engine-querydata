@@ -81,7 +81,7 @@ class EngineImpl final : public Engine
   // will also start a background thread to monitor querydata directories
   EngineImpl(const std::string& configfile);
 
-public:
+ public:
   EngineImpl() = delete;
 
   // Factory method
@@ -109,10 +109,12 @@ public:
                 bool usedatamaxdistance = true,
                 const std::string& leveltype = "") const override;
 
-  // data accessors: latest data or specific origintime
+  // data accessors: latest data, specific origintime or specific valid time period
   Q get(const Producer& producer) const override;
 
   Q get(const Producer& producer, const OriginTime& origintime) const override;
+
+  Q get(const Producer& producer, const boost::posix_time::time_period& timePeriod) const override;
 
   // Get detailed info of current producers
   Repository::ContentTable getProducerInfo(const std::string& timeFormat,
@@ -120,50 +122,50 @@ public:
   // Get info of parameters of each producer
   Repository::ContentTable getParameterInfo(boost::optional<std::string> producer) const override;
 
-protected:
+ protected:
   // Get current engine contents
-  Repository::ContentTable
-  getEngineContentsForAllProducers(const std::string& timeFormat,
-                                   const std::string& projectionFormat) const override;
-  Repository::ContentTable
-  getEngineContentsForProducer(const std::string& producer,
-                               const std::string& timeFormat,
-                               const std::string& projectionFormat) const override;
+  Repository::ContentTable getEngineContentsForAllProducers(
+      const std::string& timeFormat, const std::string& projectionFormat) const override;
+  Repository::ContentTable getEngineContentsForProducer(
+      const std::string& producer,
+      const std::string& timeFormat,
+      const std::string& projectionFormat) const override;
 
-public:
+ public:
   // Get producer data period
 
   boost::posix_time::time_period getProducerTimePeriod(const Producer& producer) const override;
 
-protected:
+ protected:
   // Get engine metadata
   std::list<MetaData> getEngineMetadataBasic() const override;
 
   // Get engine metadata with options
-  std::list<MetaData> getEngineMetadataWithOptions(const MetaQueryOptions& theOptions) const override;
+  std::list<MetaData> getEngineMetadataWithOptions(
+      const MetaQueryOptions& theOptions) const override;
 
   // Get synchronized engine metadata
-    std::list<MetaData> getEngineSyncMetadataBasic(const std::string& syncGroup) const override;
+  std::list<MetaData> getEngineSyncMetadataBasic(const std::string& syncGroup) const override;
 
   // Get synchronized engine metadata with options
-  std::list<MetaData>
-  getEngineSyncMetadataWithOptions(const std::string& syncGroup,
-                                   const MetaQueryOptions& theOptions) const override;
+  std::list<MetaData> getEngineSyncMetadataWithOptions(
+      const std::string& syncGroup, const MetaQueryOptions& theOptions) const override;
 
-public:
+ public:
   // Get synchronized producers for given synchronization group
-    boost::optional<ProducerMap> getSyncProducers(const std::string& syncGroup) const override;
+  boost::optional<ProducerMap> getSyncProducers(const std::string& syncGroup) const override;
 
   // Start synchronization with other QEngines
-    void startSynchronize(Spine::Reactor* theReactor) override;
+  void startSynchronize(Spine::Reactor* theReactor) override;
 
   // get producer's configuration
   const ProducerConfig& getProducerConfig(const std::string& producer) const override;
 
-protected:
+ protected:
   CoordinatesPtr getWorldCoordinatesDefault(const Q& theQ) const override;
 
-  CoordinatesPtr getWorldCoordinatesForSR(const Q& theQ, const Fmi::SpatialReference& theSR) const override;
+  CoordinatesPtr getWorldCoordinatesForSR(const Q& theQ,
+                                          const Fmi::SpatialReference& theSR) const override;
 
   ValuesPtr getValuesDefault(const Q& theQ,
                              std::size_t theValuesHash,

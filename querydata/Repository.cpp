@@ -47,6 +47,24 @@ bool latest_model_age_ok(const Repository::SharedModels& time_models, unsigned i
 
   return false;
 }
+
+// Boost time_period is null if the duration is null, hence the intersects method does not work as
+// we want
+bool periods_overlap(const boost::posix_time::time_period& period1,
+                     const boost::posix_time::time_period& period2)
+{
+  const auto& t1 = period1.begin();
+  const auto& t2 = period1.end();
+  const auto& T1 = period2.begin();
+  const auto& T2 = period2.end();
+
+  if (T1 > t2)
+    return false;
+  if (t1 > T2)
+    return false;
+  return true;
+}
+
 }  // namespace
 
 // ----------------------------------------------------------------------
@@ -201,7 +219,6 @@ Q Repository::get(const Producer& producer) const
   try
   {
     // If the data is multifile return all of them instead of just the latest file
-
     const auto prod_config = itsProducerConfigs.find(producer);
     if (prod_config != itsProducerConfigs.end())
     {
@@ -353,6 +370,80 @@ Q Repository::getAll(const Producer& producer) const
     }
 
     // Construct a view of the data
+
+    return boost::make_shared<QImpl>(okmodels);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Get the data for the given valid time period
+ */
+// ----------------------------------------------------------------------
+
+Q Repository::get(const Producer& producer, const boost::posix_time::time_period& timeperiod) const
+{
+  try
+  {
+    // If the data is not a multifile ignore the timeperiod parameter
+    const auto prod_config = itsProducerConfigs.find(producer);
+    if (prod_config != itsProducerConfigs.end())
+    {
+      if (!prod_config->second.ismultifile)
+        return get(producer);
+    }
+
+    // Find the models
+    const auto producer_model = itsProducers.find(producer);
+
+    if (producer_model == itsProducers.end())
+    {
+      throw Fmi::Exception(
+          BCP, "Repository getPeriod: No data available for producer '" + producer + "'")
+          .disableStackTrace();
+    }
+
+    const SharedModels& models = producer_model->second;
+
+    if (models.empty())
+    {
+      throw Fmi::Exception(
+          BCP, "Repository getPeriod: No data available for producer '" + producer + "'")
+          .disableStackTrace();
+    }
+
+    // Construct a vector of datas with similar grids only and which cover the given time period
+
+    std::vector<SharedModel> okmodels;
+    boost::optional<std::size_t> hash;
+
+    for (const auto& otime_model : models)
+    {
+      // Now check if the model overlaps the desired time period
+      auto validtimes = otime_model.second->validTimes();
+      auto period = boost::posix_time::time_period(validtimes->front(), validtimes->back());
+
+      if (periods_overlap(period, timeperiod))
+      {
+        // Check if we need to interrupt the multfile due to grid changes and start a new one
+        auto tmphash = otime_model.second->gridHashValue();
+        if (hash && *hash != tmphash)
+          okmodels.clear();
+
+        okmodels.push_back(otime_model.second);
+        hash = tmphash;
+      }
+    }
+
+    if (okmodels.empty())
+      throw Fmi::Exception(
+          BCP, "Repository getPeriod: No multifile data available for producer '" + producer + "'")
+          .addParameter("starttime", Fmi::to_iso_string(timeperiod.begin()))
+          .addParameter("endtime", Fmi::to_iso_string(timeperiod.end()));
 
     return boost::make_shared<QImpl>(okmodels);
   }
