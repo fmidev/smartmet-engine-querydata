@@ -144,8 +144,7 @@ RepoManager::RepoManager(const std::string& configfile)
     : itsVerbose(false),
       updateTasks(new Fmi::AsyncTaskGroup),
       itsMaxThreadCount(10),  // default if not configured
-      itsThreadCount(0),
-      itsLatLonCache(500)
+      itsThreadCount(0)
 {
   boost::system::error_code ec;
 
@@ -176,6 +175,10 @@ RepoManager::RepoManager(const std::string& configfile)
       itsConfig.readFile(configfile.c_str());
 
       // Options
+
+      int lat_lon_cache_size = 500;
+      itsConfig.lookupValue("cache.lat_lon_size", lat_lon_cache_size);
+      itsLatLonCache.resize(lat_lon_cache_size);
 
       const std::string& hostname = boost::asio::ip::host_name();
 

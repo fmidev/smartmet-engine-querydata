@@ -46,22 +46,13 @@ namespace Querydata
 {
 namespace
 {
-ParameterTranslations read_translations(const std::string& configfile)
+ParameterTranslations read_translations(const libconfig::Config& config)
 {
   try
   {
     Json::Reader jsonreader;
 
     ParameterTranslations translations;
-
-    libconfig::Config config;
-
-    // Enable sensible relative include paths
-    boost::filesystem::path p = configfile;
-    p.remove_filename();
-    config.setIncludeDir(p.c_str());
-
-    config.readFile(configfile.c_str());
 
     // Establish default language
 
@@ -130,9 +121,8 @@ ParameterTranslations read_translations(const std::string& configfile)
   catch (const libconfig::ParseException& e)
   {
     throw Fmi::Exception(BCP,
-                         "Qengine configuration " + configfile + " error '" +
-                             std::string(e.getError()) + "' on line " +
-                             std::to_string(e.getLine()));
+                         "Qengine configuration error '" + std::string(e.getError()) +
+                             "' on line " + std::to_string(e.getLine()));
   }
 }
 
@@ -162,15 +152,30 @@ void EngineImpl::init()
 {
   try
   {
-    itsCoordinateCache.resize(100);
-    itsValuesCache.resize(5000);
+    libconfig::Config config;
 
-    itsParameterTranslations =
-        boost::make_shared<ParameterTranslations>(read_translations(itsConfigFile));
+    // Enable sensible relative include paths
+    boost::filesystem::path p = itsConfigFile;
+    p.remove_filename();
+    config.setIncludeDir(p.c_str());
+    config.readFile(itsConfigFile.c_str());
 
+    itsParameterTranslations = boost::make_shared<ParameterTranslations>(read_translations(config));
+
+    // Init caches
+    int coordinate_cache_size = 100;
+    int values_cache_size = 5000;
+    config.lookupValue("cache.coordinates_size", coordinate_cache_size);
+    config.lookupValue("cache.values_size", values_cache_size);
+
+    itsCoordinateCache.resize(coordinate_cache_size);
+    itsValuesCache.resize(values_cache_size);
+
+    // Init querydata manager
     auto repomanager = itsRepoManager.load();
     repomanager->init();
 
+    // Synchronize metadata
     itsSynchro = boost::make_shared<Synchronizer>(this, itsConfigFile);
 
     // Wait until all initial data has been loaded
