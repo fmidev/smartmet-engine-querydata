@@ -27,6 +27,8 @@ namespace Querydata
 {
 namespace
 {
+const Repository::SharedModels gNoModels;  // empty global so we can return a reference to it
+
 bool latest_model_age_ok(const Repository::SharedModels& time_models, unsigned int max_latest_age)
 {
   if (time_models.empty())
@@ -210,6 +212,37 @@ bool Repository::hasProducer(const Producer& producer) const
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Find named producer, possibly based on an alias
+ */
+// ----------------------------------------------------------------------
+
+const Repository::SharedModels& Repository::findProducer(const std::string& producer) const
+{
+  auto producer_model = itsProducers.find(producer);
+  if (producer_model != itsProducers.end())
+    return producer_model->second;
+
+  // Search aliases
+
+  for (const auto& config : itsProducerConfigs)
+  {
+    const auto& aliases = config.second.aliases;
+    auto pos = aliases.find(producer);
+    if (pos != aliases.end())
+    {
+      producer_model = itsProducers.find(config.second.producer);
+      break;
+    }
+  }
+
+  if (producer_model != itsProducers.end())
+    return producer_model->second;
+
+  return gNoModels;
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Get newest data for the given producer
  */
 // ----------------------------------------------------------------------
@@ -223,33 +256,22 @@ Q Repository::get(const Producer& producer) const
     if (prod_config != itsProducerConfigs.end())
     {
       if (prod_config->second.ismultifile)
-      {
         return getAll(producer);
-      }
     }
 
     // Return the latest model only
 
-    const auto producer_model = itsProducers.find(producer);
+    const auto& models = findProducer(producer);
 
-    if (producer_model == itsProducers.end())
+    if (models.empty())
     {
       throw Fmi::Exception(BCP,
-                           "Repository get (1): No data available for producer '" + producer + "'!")
-          .disableStackTrace();
-    }
-
-    const SharedModels& time_model = producer_model->second;
-
-    if (time_model.empty())
-    {
-      throw Fmi::Exception(BCP,
-                           "Repository get (2): No data available for producer '" + producer + "'!")
+                           "Repository get: No data available for producer '" + producer + "'!")
           .disableStackTrace();
     }
 
     // newest origintime is at the end
-    auto last = --time_model.end();
+    auto last = --models.end();
 
     return boost::make_shared<QImpl>(last->second);
   }
@@ -269,21 +291,14 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
 {
   try
   {
-    const auto producer_model = itsProducers.find(producer);
-
-    if (producer_model == itsProducers.end())
-    {
-      throw Fmi::Exception(BCP,
-                           "Repository get (3): No data available for producer '" + producer + "'!")
-          .disableStackTrace();
-    }
-
-    const SharedModels& models = producer_model->second;
+    const auto& models = findProducer(producer);
 
     if (models.empty())
+    {
       throw Fmi::Exception(BCP,
-                           "Repository get (4): No data available for producer '" + producer + "'!")
+                           "Repository get: No data available for producer '" + producer + "'!")
           .disableStackTrace();
+    }
 
     SharedModels::const_iterator time_model;
     if (origintime.is_pos_infinity())
@@ -299,21 +314,9 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
       return boost::make_shared<QImpl>(time_model->second);
     }
 
-#if 1
     auto iter = models.find(origintime);
     if (iter != models.end())
       return boost::make_shared<QImpl>(iter->second);
-#else
-    // This was deprecated 27.4.2015 in favour of exact origintime requests
-
-    // Find latest model with origintime <= given limit. This is potentially
-    // slow if one is searching for very old radar data, but then again
-    // one should use the radar data as a multifile instead
-    for (auto iter = models.crbegin(); iter != models.crend(); ++iter)
-      if (iter->first <= origintime)
-        return boost::make_shared<QImpl>(iter->second);
-
-#endif
 
     throw Fmi::Exception(BCP,
                          "Repository get: No data available for producer '" + producer +
@@ -337,16 +340,7 @@ Q Repository::getAll(const Producer& producer) const
   try
   {
     // Find the models
-    const auto producer_model = itsProducers.find(producer);
-
-    if (producer_model == itsProducers.end())
-    {
-      throw Fmi::Exception(
-          BCP, "Repository getPeriod: No data available for producer '" + producer + "'")
-          .disableStackTrace();
-    }
-
-    const SharedModels& models = producer_model->second;
+    const auto& models = findProducer(producer);
 
     if (models.empty())
     {
@@ -398,16 +392,7 @@ Q Repository::get(const Producer& producer, const boost::posix_time::time_period
     }
 
     // Find the models
-    const auto producer_model = itsProducers.find(producer);
-
-    if (producer_model == itsProducers.end())
-    {
-      throw Fmi::Exception(
-          BCP, "Repository getPeriod: No data available for producer '" + producer + "'")
-          .disableStackTrace();
-    }
-
-    const SharedModels& models = producer_model->second;
+    const auto& models = findProducer(producer);
 
     if (models.empty())
     {

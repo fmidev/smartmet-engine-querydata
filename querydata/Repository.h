@@ -122,6 +122,9 @@ class Repository
   ProducerConfigs itsProducerConfigs;
   bool itsVerbose = false;
   std::map<std::string, ProducerStatus> itsProducerStatus;
+
+  const SharedModels& findProducer(const std::string& producer) const;
+
 };  // class Repository
 
 }  // namespace Querydata
