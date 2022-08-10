@@ -1,95 +1,127 @@
+Table of Contents
+=================
+
+  * [SMartMet Server](#SmartMet Server)
+  * [Introduction](#introduction)
+  * [Configuration](#configuration)
+  * [Docker](#docker)
+
 # SmartMet Server
-SmartMet Server is a data and procut server for MetOcean data. It provides high capacity and high availability data and product server for MetOcean data. The server is written in C++. 
 
-The server can read input data from various sources:
-* GRIB (1 and 2) 
-* NetCDF
-* SQL database
+[SmartMet Server](https://github.com/fmidev/smartmet-server) is a data
+and procut server for MetOcean data. It provides high capacity and
+high availability data and product server for MetOcean data. The
+server is written in C++.
 
-The server provides several output interfaces:
-* WMS 1.3.0
-* WFS 2.0
-* Several custom interface
-and several output formats:
-* JSON
-* XML
-* ASCII
-* HTML
-* SERIAL
-* GRIB1
-* GRIB2 
-* NetCDF
-* Raster images
+# Introduction 
 
-The server is INSPIRE compliant. It is used for FMI data services and product generation. It's been operative since 2008 and used for FMI Open Data Portal since 2013.
+In the SmartMet Server, the engines provide shared access to the data
+and the plugins provide APIs based on the services provided by the
+engines.
 
-The server is especially good for extracting weather data and generating products based on gridded data (GRIB and NetCDF). The data is extracted and products generating always on-demand. 
+The querydata engine referred to as QEngine provides access to the grid
+data. QEngine supports the QueryData format for data, but it has ready
+tools to convert the data in GRIB, NetCDFand HDF format to QueryData.
 
-## Server Structure
+QEngine memory-maps the data from NFS. It supports both spatial and
+temporal interpolation and nearest point selection. The used method
+depends on the parameter. QEngine selects the best data source for the
+requested region.
 
-![](https://github.com/fmidev/smartmet-server/blob/master/SmartMet_Structure.png "Server structure")
+QEngine has several Post-processing capabilities. It can correct the
+data based on accurate DEM (up to 30 meter resolution) and also based
+on land/water information.  Correlation done to the temperature is
+based on the difference between model and real taking into account of
+the following factors, namely, topography, land/water information,
+used to give more weight on corresponding grid points in
+interpolation. QEngine can calculate derivative parameters such as
+FeelsLike, sunset, day length, etc.
 
-SmartMet Server consists of following components:
+# Configuration
 
-<table>
-<tr>
-<th>Component</th><th>Description</th><th>Source Code</th>
-</tr>
-<tr valign="top">
-<td>qdtools         </td><td>Helper programs to handle underling data          </td><td> https://github.com/fmidev/smartmet-qdtools </td></tr>
-<tr valign="top">
-<td> Libraries       </td><td>Libraries required to run programs and the server </td><td> https://github.com/fmidev/smartmet-library-spine<br>
-     		     				    		     	 		  https://github.com/fmidev/smartmet-library-newbase<br>
-											  https://github.com/fmidev/smartmet-library-macgyver<br>
-											  https://github.com/fmidev/smartmet-library-gis<br>
-											  https://github.com/fmidev/smartmet-library-giza<br>
-											  https://github.com/fmidev/smartmet-library-locus<br>
-											  https://github.com/fmidev/smartmet-library-regression<br>
-											  https://github.com/fmidev/smartmet-library-imagine</td>
-</tr
-<tr valign="top">
-<td>Server          </td><td>The server daemon itself                          </td><td> https://github.com/fmidev/smartmet-server  </td>
-</tr>
-<tr valign="top">
-<td>Engines         </td><td>Common modules with a state                       </td><td> https://github.com/fmidev/smartmet-engine-geonames<br>
-											 https://github.com/fmidev/smartmet-engine-sputnik<br>
-											 https://github.com/fmidev/smartmet-engine-querydata<br>
-											 https://github.com/fmidev/smartmet-engine-observation<br>
-											 https://github.com/fmidev/smartmet-engine-contour<br>
-											 https://github.com/fmidev/smartmet-engine-gis </td>
-</tr>
-<tr valign="top">
-<td>Plugins         </td><td>Plugins providing interfaces to clients           </td><td> https://github.com/fmidev/smartmet-plugin-timeseries<br>
-											  https://github.com/fmidev/smartmet-plugin-meta<br>
-											  https://github.com/fmidev/smartmet-plugin-frontend<br>
-											  https://github.com/fmidev/smartmet-plugin-wfs<br>
-											  https://github.com/fmidev/smartmet-plugin-wms<br>
-											  https://github.com/fmidev/smartmet-plugin-autocomplete<br>
-											  https://github.com/fmidev/smartmet-plugin-backend<br>
-											  https://github.com/fmidev/smartmet-plugin-download<br>
-											  https://github.com/fmidev/smartmet-plugin-admin </td>
-</tr>
-</table>
+## Generic settings
 
-## Licence
-The server is published with MIT-license.
+* `verbose = true/false` - in verbose mode the engine will report newly loaded data
+* `maxthreads = N` - the number of threads used to read data on start up
+* `valid_points_cache_dir = "path"` - directory where to cache information on the grids
 
-## How to contribute
-Found a bug? Want to implement a new feature? Your contribution is very welcome!
+## Overriding generic settings
 
-Small changes and bug fixes can be submitted via pull request. In larger contributions, premilinary plan is recommended (in GitHub wiki). 
+Settings can be overridden for groups of hosts using an `overrides` group. Sample configuration:
 
-CLA is required in order to contribute. Please contact us for more information!
+```
+overrides:
+(
+   {
+      name = [ "test1", "test2.fmi" ];  # host name prefixes
+      maxthreads = 5;                   # do not use too many threads on test machines
+      verbose    = true;                # report what is being done on test machines
+   },
+   {
+      name = [ "super1", "super2" ];
+      maxthreads = 50;                  # use more threads on powerful servers
+   }
+)
+```
 
-## Documentation
-Each module is documented in module [module wiki](../../wiki). 
+## Producers
 
-## Communication and Resources
-You may contact us from following channels:
-* Email: beta@fmi.fi
-* Facebook: https://www.facebook.com/fmibeta/
-* GitHub: [issues](../../issues)
+The `producers` setting will list the producers in the order they will be used for finding a producer for the requested coordinates if no producer is otherwise set in the request. Producers may be grouped using an `alias` command to limit the search.
 
-Other resources which may be useful:
-* Presentation about the server: http://www.slideshare.net/tervo/smartmet-server-providing-metocean-data
-* Our public web pages (in Finnish):  http://ilmatieteenlaitos.fi/avoin-lahdekoodi
+Sample configuration:
+```
+producers =
+[
+    "local_default_model",   # local high resolution model
+    "hirlam_europe",
+    "ecmwf_world",           # this will match any coordinate
+    ....                     # and hence the remaining producers must be requested explicitly by name
+]
+```
+
+Each producer is configured in more detail using a top level block as follows:
+```
+hirlam_scandinavia:
+{
+        mmap                    = false;
+        alias                   = "hirlam";
+        directory               = "/path/to/hirlam/scandinavia/querydata";
+        pattern                 = ".*_hirlam_scandinavia\.sqd$";
+        forecast                = true;
+        type                    = "grid";
+        leveltype               = "surface";
+        fullgrid                = false;
+        refresh_interval_secs   = 45;
+        number_to_keep          = 2;
+        update_interval         = "PT1H";
+        minimum_expires         = "PT10M";
+        relative_uv             = false;
+};
+```
+
+The individual settings are as follows
+* `alias` - optional grouping for the producer
+* `directory` - path to the querydata files
+* `pattern` - required filename pattern
+* `forecast` - true for forecasts, false for observations
+* `climatology` - false by default. If true, the data can be queried for any year, only the date part matters
+* `type` - grid, points. Some operations are permitted only for grids or points.
+* `leveltype` - surface, pressure, model, points
+* `fullgrid` - true if data is valid for all points, saves speed when server starts
+* `refresh_interval_secs` - (default: 60) How often to check the directory for changes
+* `number_to_keep` - (default: 2) How many newest models to keep in the engine. Should be at least two for directories that change over time in server clusters. If the data is static and never updates, the value can be set to 1. When using "multifile mode" this value should be greater than two, or if old data is otherwise often requested using origintime-settings.
+* `update_interval` - (default: 3600) Estimated update interval for the data, used for expiration headers
+* `minimum_expires` - (default: 600) Minimum expiration header even though the model might be just a minute or two late
+* `mmap` - true by default, often set to false for the most important local model
+* `max_age` - time when the data should be dropped from the engine even if it still exists on the disk
+* `relative_uv` - are wind U- and V-components relative to the local grid orientation or east/north components
+
+For historical reasons durations can be specified using ISO8601 or as simple offsets:
+* 0, 0m, 0h (zero offset with or without units)
+* (+|-){N}{unit} where N is a positive integer and unit is one of 'm' (minutes), 'h' (hours), 'w' (weeks) or 'y' (years). If the units are omitted, minutes will be used.
+
+## Docker
+
+SmartMet Server can be dockerized. This [tutorial](docs/docker.md)
+explains how to explains how to configure the querydata engine
+(QEngine) of the SmartMet Server when using Docker.
