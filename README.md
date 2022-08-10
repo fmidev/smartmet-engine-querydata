@@ -44,6 +44,13 @@ FeelsLike, sunset, day length, etc.
 * `verbose = true/false` - in verbose mode the engine will report newly loaded data
 * `maxthreads = N` - the number of threads used to read data on start up
 * `valid_points_cache_dir = "path"` - directory where to cache information on the grids
+* `clean_valid_points_cache_dir = true/false` - whether to automatically clean the above directory on start up or not
+
+## Cache settings
+
+* `cache.values_size = N` - how many processed grids to cache, default is 5000
+* `cache.coordinates_size = N` - how many projected grid coordinates to cache, default is 100
+* `cache.lat_lon_size = N` - how many latlon grids to cache, default is 500
 
 ## Overriding generic settings
 
@@ -119,6 +126,40 @@ The individual settings are as follows
 For historical reasons durations can be specified using ISO8601 or as simple offsets:
 * 0, 0m, 0h (zero offset with or without units)
 * (+|-){N}{unit} where N is a positive integer and unit is one of 'm' (minutes), 'h' (hours), 'w' (weeks) or 'y' (years). If the units are omitted, minutes will be used.
+
+## Translations for specific weather parameters
+
+The Querydata Engine enables converting a numeric WeatherSymbol3 to a textual WeatherText parameter on the fly. The code assumes the translations are defined in the configuration for specific ISO2 language codes as follows:
+
+```
+language = "fi";
+
+translations:
+{
+        WeatherText:
+        (
+                {
+                        value   = 1;
+                        en      = "sunny";
+                        sv      = "klart";
+                        fi      = "selke\\u00e4\\u00e4";
+                },
+                {
+                        value   = 2;
+                        en      = "partly cloudy";
+                        sv      = "halvklart";
+                        fi      = "puolipilvist\\u00e4";
+                },
+                {
+                        value   = 3;
+                        en      = "cloudy";
+                        sv      = "mulet";
+                        fi      = "pilvist\\u00e4";
+                },
+                ...
+```
+
+Unfortunately the translations for the more modern SmartSymbol are still hardcoded into the C++ code.
 
 ## Docker
 
