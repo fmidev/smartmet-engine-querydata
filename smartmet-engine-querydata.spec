@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.8.8
+Version: 22.8.11
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -89,6 +89,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Aug 11 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.11-1.fmi
+- SmartSymbolText translations are now read from the configuration file
+
 * Mon Aug  8 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.8-1.fmi
 - Enable aliases when searching for producers by name only (instead of with coordinates too)
 
