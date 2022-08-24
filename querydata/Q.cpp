@@ -365,8 +365,8 @@ MetaData QImpl::metaData()
     meta.xNumber = boost::numeric_cast<unsigned int>(grid->XNumber());
     meta.yNumber = boost::numeric_cast<unsigned int>(grid->YNumber());
 
-    meta.xResolution = area->WorldXYWidth() / grid->XNumber() / 1000.0;
-    meta.yResolution = area->WorldXYHeight() / grid->YNumber() / 1000.0;
+    meta.xResolution = area->WorldXYWidth() / (grid->XNumber() - 1) / 1000.0;
+    meta.yResolution = area->WorldXYHeight() / (grid->YNumber() - 1) / 1000.0;
 
     meta.areaWidth = area->WorldXYWidth() / 1000.0;
     meta.areaHeight = area->WorldXYHeight() / 1000.0;
