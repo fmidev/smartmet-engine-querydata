@@ -43,6 +43,7 @@
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/Convenience.h>
+#include <spine/Exceptions.h>
 #include <spine/Reactor.h>
 #include <cassert>
 #include <set>
@@ -233,17 +234,9 @@ RepoManager::RepoManager(const std::string& configfile)
       updateTasks->on_task_error([](const std::string& /* unused */)
                                  { Fmi::Exception::Trace(BCP, "Operation failed").printError(); });
     }
-    catch (const libconfig::ParseException& e)
+    catch (...)
     {
-      throw Fmi::Exception(BCP,
-                           "Qengine configuration " + configfile + " error '" +
-                               std::string(e.getError()) + "' on line " +
-                               std::to_string(e.getLine()));
-    }
-    catch (const libconfig::ConfigException& e)
-    {
-      throw Fmi::Exception(
-          BCP, configfile + ": " + std::strerror(ec.value()));  // NOLINT not thread safe
+      Spine::Exceptions::handle("Querydata engine");
     }
   }
   catch (...)

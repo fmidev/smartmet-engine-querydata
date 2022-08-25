@@ -22,6 +22,7 @@
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
 #include <spine/Convenience.h>
+#include <spine/Exceptions.h>
 #include <spine/Reactor.h>
 #include <chrono>
 #include <exception>
@@ -118,11 +119,9 @@ ParameterTranslations read_translations(const libconfig::Config& config)
 
     return translations;
   }
-  catch (const libconfig::ParseException& e)
+  catch (...)
   {
-    throw Fmi::Exception(BCP,
-                         "Qengine configuration error '" + std::string(e.getError()) +
-                             "' on line " + std::to_string(e.getLine()));
+    Spine::Exceptions::handle("Querydata engine");
   }
 }
 
