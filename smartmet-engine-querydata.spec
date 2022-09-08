@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.8.25
+Version: 22.9.8
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,8 +29,8 @@ BuildRequires: protobuf-devel
 BuildRequires: rpm-build
 BuildRequires: smartmet-library-timeseries-devel >= 22.7.27
 BuildRequires: smartmet-library-macgyver-devel >= 22.8.23
-BuildRequires: smartmet-library-newbase-devel >= 22.8.24
-BuildRequires: smartmet-library-spine-devel >= 22.8.25
+BuildRequires: smartmet-library-newbase-devel >= 22.8.29
+BuildRequires: smartmet-library-spine-devel >= 22.9.5
 Requires: %{smartmet_boost}-date-time
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
@@ -42,8 +42,8 @@ Requires: jsoncpp >= 1.8.4
 Requires: protobuf
 Requires: smartmet-library-timeseries >= 22.7.27
 Requires: smartmet-library-macgyver >= 22.8.23
-Requires: smartmet-library-newbase >= 22.8.24
-Requires: smartmet-library-spine >= 22.8.25
+Requires: smartmet-library-newbase >= 22.8.29
+Requires: smartmet-library-spine >= 22.9.5
 #TestRequires: smartmet-utils-devel >= 22.2.8
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal34-devel
@@ -89,6 +89,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Sep  8 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.9.8-1.fmi
+- Fixed sunrise etc to be formatted according to the set timeformat
+
 * Thu Aug 25 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.8.25-1.fmi
 - Use a generic exception handler for configuration file errors
 

@@ -3027,27 +3027,27 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     case kFmiMoonrise:
     {
       auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      return Fmi::to_iso_string(ltime.moonrise.local_time());
+      return opt.timeformatter.format(ltime.moonrise.local_time());
     }
     case kFmiMoonrise2:
     {
       auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
 
       if (ltime.moonrise2_today())
-        return Fmi::to_iso_string(ltime.moonrise2.local_time());
+        return opt.timeformatter.format(ltime.moonrise2.local_time());
 
       return std::string("");
     }
     case kFmiMoonset:
     {
       auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      return Fmi::to_iso_string(ltime.moonset.local_time());
+      return opt.timeformatter.format(ltime.moonset.local_time());
     }
     case kFmiMoonset2:
     {
       auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
       if (ltime.moonset2_today())
-        return Fmi::to_iso_string(ltime.moonset2.local_time());
+        return opt.timeformatter.format(ltime.moonset2.local_time());
       return std::string("");
     }
     case kFmiMoonriseToday:
@@ -3084,12 +3084,12 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     case kFmiSunrise:
     {
       auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
-      return Fmi::to_iso_string(stime.sunrise.local_time());
+      return opt.timeformatter.format(stime.sunrise.local_time());
     }
     case kFmiSunset:
     {
       auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
-      return Fmi::to_iso_string(stime.sunset.local_time());
+      return opt.timeformatter.format(stime.sunset.local_time());
     }
     case kFmiNoon:
     {
