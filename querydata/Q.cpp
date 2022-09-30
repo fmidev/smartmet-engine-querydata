@@ -2438,7 +2438,7 @@ TS::Value WeatherText(QImpl &q,
   }
   catch (...)
   {
-    throw Fmi::Exception::Trace(BCP, u8"Operation failed!");
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
