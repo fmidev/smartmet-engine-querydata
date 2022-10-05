@@ -21,12 +21,10 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #include <gis/CoordinateMatrix.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/Thread.h>
 #include <timeseries/TimeSeriesInclude.h>
-
 #include <list>
 
 class NFmiArea;
@@ -47,12 +45,14 @@ namespace Engine
 {
 namespace Querydata
 {
-class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<QImpl>
+class QImpl : public boost::enable_shared_from_this<QImpl>
 {
  public:
   ~QImpl();
 
   QImpl() = delete;
+  QImpl(const QImpl& other) = delete;
+  QImpl& operator=(const QImpl& other) = delete;
   QImpl(SharedModel theModel);
   QImpl(const std::vector<SharedModel>& theModels);
 
@@ -242,58 +242,49 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                                   const Fmi::LandCover& theLandCover);
 
   // one location, one timestep
-  TS::Value value(const ParameterOptions& opt,
-                                 const boost::local_time::local_date_time& ldt);
+  TS::Value value(const ParameterOptions& opt, const boost::local_time::local_date_time& ldt);
   TS::Value valueAtPressure(const ParameterOptions& opt,
-                                           const boost::local_time::local_date_time& ldt,
-                                           float pressure);
+                            const boost::local_time::local_date_time& ldt,
+                            float pressure);
   TS::Value valueAtHeight(const ParameterOptions& opt,
-                                         const boost::local_time::local_date_time& ldt,
-                                         float height);
+                          const boost::local_time::local_date_time& ldt,
+                          float height);
   // one location, many timesteps
   TS::TimeSeriesPtr values(const ParameterOptions& param,
-                                          const TS::TimeSeriesGenerator::LocalTimeList& tlist);
-  TS::TimeSeriesPtr valuesAtPressure(
-      const ParameterOptions& param,
-      const TS::TimeSeriesGenerator::LocalTimeList& tlist,
-      float pressure);
-  TS::TimeSeriesPtr valuesAtHeight(
-      const ParameterOptions& param,
-      const TS::TimeSeriesGenerator::LocalTimeList& tlist,
-      float height);
+                           const TS::TimeSeriesGenerator::LocalTimeList& tlist);
+  TS::TimeSeriesPtr valuesAtPressure(const ParameterOptions& param,
+                                     const TS::TimeSeriesGenerator::LocalTimeList& tlist,
+                                     float pressure);
+  TS::TimeSeriesPtr valuesAtHeight(const ParameterOptions& param,
+                                   const TS::TimeSeriesGenerator::LocalTimeList& tlist,
+                                   float height);
   // many locations (indexmask), many timesteps
-  TS::TimeSeriesGroupPtr values(
-      const ParameterOptions& param,
-      const NFmiIndexMask& indexmask,
-      const TS::TimeSeriesGenerator::LocalTimeList& tlist);
-  TS::TimeSeriesGroupPtr valuesAtPressure(
-      const ParameterOptions& param,
-      const NFmiIndexMask& indexmask,
-      const TS::TimeSeriesGenerator::LocalTimeList& tlist,
-      float pressure);
-  TS::TimeSeriesGroupPtr valuesAtHeight(
-      const ParameterOptions& param,
-      const NFmiIndexMask& indexmask,
-      const TS::TimeSeriesGenerator::LocalTimeList& tlist,
-      float height);
+  TS::TimeSeriesGroupPtr values(const ParameterOptions& param,
+                                const NFmiIndexMask& indexmask,
+                                const TS::TimeSeriesGenerator::LocalTimeList& tlist);
+  TS::TimeSeriesGroupPtr valuesAtPressure(const ParameterOptions& param,
+                                          const NFmiIndexMask& indexmask,
+                                          const TS::TimeSeriesGenerator::LocalTimeList& tlist,
+                                          float pressure);
+  TS::TimeSeriesGroupPtr valuesAtHeight(const ParameterOptions& param,
+                                        const NFmiIndexMask& indexmask,
+                                        const TS::TimeSeriesGenerator::LocalTimeList& tlist,
+                                        float height);
   // many locations (llist), many timesteps
-  TS::TimeSeriesGroupPtr values(
-      const ParameterOptions& param,
-      const Spine::LocationList& llist,
-      const TS::TimeSeriesGenerator::LocalTimeList& tlist,
-      const double& maxdistance);
-  TS::TimeSeriesGroupPtr valuesAtPressure(
-      const ParameterOptions& param,
-      const Spine::LocationList& llist,
-      const TS::TimeSeriesGenerator::LocalTimeList& tlist,
-      const double& maxdistance,
-      float pressure);
-  TS::TimeSeriesGroupPtr valuesAtHeight(
-      const ParameterOptions& param,
-      const Spine::LocationList& llist,
-      const TS::TimeSeriesGenerator::LocalTimeList& tlist,
-      const double& maxdistance,
-      float height);
+  TS::TimeSeriesGroupPtr values(const ParameterOptions& param,
+                                const Spine::LocationList& llist,
+                                const TS::TimeSeriesGenerator::LocalTimeList& tlist,
+                                const double& maxdistance);
+  TS::TimeSeriesGroupPtr valuesAtPressure(const ParameterOptions& param,
+                                          const Spine::LocationList& llist,
+                                          const TS::TimeSeriesGenerator::LocalTimeList& tlist,
+                                          const double& maxdistance,
+                                          float pressure);
+  TS::TimeSeriesGroupPtr valuesAtHeight(const ParameterOptions& param,
+                                        const Spine::LocationList& llist,
+                                        const TS::TimeSeriesGenerator::LocalTimeList& tlist,
+                                        const double& maxdistance,
+                                        float height);
 
   bool selectLevel(double theLevel);
 
@@ -309,20 +300,20 @@ class QImpl : private boost::noncopyable, public boost::enable_shared_from_this<
                                          const boost::posix_time::ptime& theInterpolatedTime);
 
   TS::Value dataIndependentValue(const ParameterOptions& opt,
-                                                const boost::local_time::local_date_time& ldt,
-                                                double levelResult);
+                                 const boost::local_time::local_date_time& ldt,
+                                 double levelResult);
 
   TS::Value dataValue(const ParameterOptions& opt,
-                                     const NFmiPoint& latlon,
-                                     const boost::local_time::local_date_time& ldt);
-  TS::Value dataValueAtPressure(const ParameterOptions &opt,
-											   const NFmiPoint &latlon,
-											   const boost::local_time::local_date_time &ldt,
-											   float pressure);
-  TS::Value dataValueAtHeight(const ParameterOptions &opt,
-											 const NFmiPoint &latlon,
-											 const boost::local_time::local_date_time &ldt,
-											 float height);
+                      const NFmiPoint& latlon,
+                      const boost::local_time::local_date_time& ldt);
+  TS::Value dataValueAtPressure(const ParameterOptions& opt,
+                                const NFmiPoint& latlon,
+                                const boost::local_time::local_date_time& ldt,
+                                float pressure);
+  TS::Value dataValueAtHeight(const ParameterOptions& opt,
+                              const NFmiPoint& latlon,
+                              const boost::local_time::local_date_time& ldt,
+                              float height);
 
   std::vector<SharedModel> itsModels;
   std::vector<SharedInfo> itsInfos;  // used only in destructor and MultiInfo constructor

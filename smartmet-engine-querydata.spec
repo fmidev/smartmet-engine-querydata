@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.9.9
+Version: 22.10.5
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -27,7 +27,7 @@ BuildRequires: protobuf
 BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
-BuildRequires: smartmet-library-timeseries-devel >= 22.9.9
+BuildRequires: smartmet-library-timeseries-devel >= 22.10.4
 BuildRequires: smartmet-library-macgyver-devel >= 22.8.23
 BuildRequires: smartmet-library-newbase-devel >= 22.8.29
 BuildRequires: smartmet-library-spine-devel >= 22.9.5
@@ -40,7 +40,7 @@ Requires: %{smartmet_boost}-thread
 Requires: gdal34-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
-Requires: smartmet-library-timeseries >= 22.9.9
+Requires: smartmet-library-timeseries >= 22.10.4
 Requires: smartmet-library-macgyver >= 22.8.23
 Requires: smartmet-library-newbase >= 22.8.29
 Requires: smartmet-library-spine >= 22.9.5
@@ -89,6 +89,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Oct  5 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.10.5-1.fmi
+- Do not use boost::noncopyable
+
 * Fri Sep  9 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.9.9-1.fmi
 - Repackaged since TimeSeries library ABI changed
 

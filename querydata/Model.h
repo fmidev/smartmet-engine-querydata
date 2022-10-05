@@ -13,12 +13,10 @@
 
 #include "Producer.h"
 #include "ValidTimeList.h"
-
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/utility.hpp>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <spine/Thread.h>
 #include <list>
@@ -36,7 +34,7 @@ namespace Querydata
 {
 class ValidPoints;
 
-class Model : private boost::noncopyable, public boost::enable_shared_from_this<Model>
+class Model : public boost::enable_shared_from_this<Model>
 {
  public:
   Model(const boost::filesystem::path& filename,
