@@ -9,10 +9,10 @@
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/serialization/vector.hpp>
+#include <macgyver/AnsiEscapeCodes.h>
 #include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>
-#include <macgyver/AnsiEscapeCodes.h>
 #include <spine/Convenience.h>
 #include <fstream>
 
@@ -56,12 +56,13 @@ ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, 
   itsCacheFile = cachedir + "/" + Fmi::to_string(hash);
 
   if (!boost::filesystem::is_directory(cachedir))
-	{
-	  std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA + " [querydata] Creating valid points cache directory '" + cachedir + "'" +
-					ANSI_FG_DEFAULT)
-				<< std::endl;
-	  boost::filesystem::create_directories(cachedir);
-	}
+  {
+    std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA +
+                  " [querydata] Creating valid points cache directory '" + cachedir + "'" +
+                  ANSI_FG_DEFAULT)
+              << std::endl;
+    boost::filesystem::create_directories(cachedir);
+  }
 
   // Try using a cached file first
   try
@@ -88,30 +89,36 @@ ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, 
     qinfo.LastTime();
     auto last_time = qinfo.TimeIndex();
 
-    for (qinfo.ResetLocation(); qinfo.NextLocation();)
-    {
-      // seek any valid value for the point
+    // Seek if there are any valid values for a point
 
-      for (qinfo.ResetParam(); qinfo.NextParam();)
+    for (qinfo.ResetParam(); qinfo.NextParam();)
+    {
+      for (qinfo.ResetLocation(); qinfo.NextLocation();)
       {
-        for (qinfo.ResetLevel(); qinfo.NextLevel();)
+        auto index = qinfo.LocationIndex();
+        if (!itsMask[index])
         {
-          // Check only the first and last times for speed
-          qinfo.TimeIndex(first_time);
-          if (qinfo.FloatValue() != kFloatMissing)
+          for (qinfo.ResetLevel(); qinfo.NextLevel();)
           {
-            itsMask[qinfo.LocationIndex()] = true;
-            goto nextpoint;
-          }
-          qinfo.TimeIndex(last_time);
-          if (qinfo.FloatValue() != kFloatMissing)
-          {
-            itsMask[qinfo.LocationIndex()] = true;
-            goto nextpoint;
+            // Check only the first and last times for speed
+            qinfo.TimeIndex(first_time);
+            if (qinfo.FloatValue() != kFloatMissing)
+            {
+              itsMask[index] = true;
+              break;
+            }
+            if (first_time != last_time)
+            {
+              qinfo.TimeIndex(last_time);
+              if (qinfo.FloatValue() != kFloatMissing)
+              {
+                itsMask[index] = true;
+                break;
+              }
+            }
           }
         }
       }
-    nextpoint:;
     }
 
     try
