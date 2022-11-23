@@ -670,7 +670,10 @@ void RepoManager::load(Producer producer,
   }  // for all files
 
   if (!Spine::Reactor::isShuttingDown())
+  {
+    Spine::WriteLock lock(itsMutex);
     itsRepo.updateProducerStatus(producer, data_load_time, itsRepo.getAllModels(producer).size());
+  }
 
   --itsThreadCount;
 }

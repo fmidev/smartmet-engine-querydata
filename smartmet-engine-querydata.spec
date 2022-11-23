@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 22.11.23
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -89,6 +89,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Nov 23 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.11.23-2.fmi
+- Fixed a race condition by adding a mutex
+
 * Wed Nov 23 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.11.23-1.fmi
 - Optimized ValidPoints construction for speed
 
