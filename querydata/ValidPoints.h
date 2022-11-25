@@ -15,6 +15,8 @@
 
 #pragma once
 
+#include "Producer.h"
+#include <boost/filesystem.hpp>
 #include <string>
 #include <vector>
 
@@ -30,7 +32,11 @@ class ValidPoints
 {
  public:
   ValidPoints() = delete;
-  ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, std::size_t hash);
+  ValidPoints(const Producer& producer,
+              const boost::filesystem::path& path,
+              NFmiFastQueryInfo& qinfo,
+              const std::string& cachedir,
+              std::size_t hash);
   bool isvalid(std::size_t index) const;
 
   void uncache() const;

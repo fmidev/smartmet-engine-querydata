@@ -5,10 +5,11 @@
 // ======================================================================
 
 #include "ValidPoints.h"
+#include "Producer.h"
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/serialization/vector.hpp>
+#include <fmt/format.h>
 #include <macgyver/AnsiEscapeCodes.h>
 #include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
@@ -50,10 +51,14 @@ void ValidPoints::uncache() const
  */
 // ----------------------------------------------------------------------
 
-ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, std::size_t hash)
+ValidPoints::ValidPoints(const Producer& producer,
+                         const boost::filesystem::path& path,
+                         NFmiFastQueryInfo& qinfo,
+                         const std::string& cachedir,
+                         std::size_t hash)
     : itsMask(qinfo.SizeLocations(), false)
 {
-  itsCacheFile = cachedir + "/" + Fmi::to_string(hash);
+  itsCacheFile = cachedir + '/' + producer + '-' + Fmi::to_string(hash);
 
   if (!boost::filesystem::is_directory(cachedir))
   {
@@ -75,9 +80,13 @@ ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, 
       return;
     }
   }
-  catch (...)
+  catch (std::exception& ex)
   {
-    std::cerr << Spine::log_time_str() << " failed to unserialize " << itsCacheFile << std::endl;
+    std::cerr << fmt::format("{} failed to unserialize {} for {}. Reason: {}\n",
+                             Spine::log_time_str(),
+                             itsCacheFile,
+                             path.string(),
+                             ex.what());
   }
 
   // Calculate from querydata and cache the results
@@ -130,9 +139,13 @@ ValidPoints::ValidPoints(NFmiFastQueryInfo& qinfo, const std::string& cachedir, 
       archive& BOOST_SERIALIZATION_NVP(itsMask);
       boost::filesystem::rename(tmpfile, itsCacheFile);
     }
-    catch (...)
+    catch (std::exception& ex)
     {
-      std::cerr << Spine::log_time_str() << " failed to serialize " << itsCacheFile << std::endl;
+      std::cerr << fmt::format("{} failed to serialize {} for {}. Reason: {}\n",
+                               Spine::log_time_str(),
+                               itsCacheFile,
+                               path.string(),
+                               ex.what());
     }
   }
   catch (...)

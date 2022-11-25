@@ -90,7 +90,8 @@ Model::Model(const boost::filesystem::path& filename,
     // needs to be done or not. findvalidpoint acts accordingly.
 
     if (!itsFullGrid && !validpointscachedir.empty())
-      itsValidPoints = boost::make_shared<ValidPoints>(*qinfo, validpointscachedir, itsHashValue);
+      itsValidPoints = boost::make_shared<ValidPoints>(
+          itsProducer, itsPath, *qinfo, validpointscachedir, itsHashValue);
 
     // Requesting the valid times repeatedly is slow if we have to do
     // a time conversion to ptime every time - hence we optimize
