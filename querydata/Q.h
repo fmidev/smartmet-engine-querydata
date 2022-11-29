@@ -328,10 +328,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 using Q = boost::shared_ptr<QImpl>;
 using QList = std::list<Q>;
 
-inline std::size_t hash_value(const Q& theQ)
-{
-  return theQ->hashValue();
-}
+std::size_t hash_value(const Q& theQ);
 
 }  // namespace Querydata
 }  // namespace Engine

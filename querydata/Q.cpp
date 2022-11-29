@@ -4285,6 +4285,13 @@ bool QImpl::needsGlobeWrap() const
   return itsInfo->NeedsGlobeWrap();
 }
 
+std::size_t hash_value(const Q &theQ)
+{
+  if (theQ)
+    return theQ->hashValue();
+  return 666U;
+}
+
 }  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet
