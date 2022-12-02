@@ -727,6 +727,7 @@ Repository::ContentTable Repository::getProducerInfo(const ProducerList& produce
                                                 "forecast",
                                                 "climatology",
                                                 "fullgrid",
+                                                "staticgrid",
                                                 "mmap",
                                                 "type",
                                                 "leveltype",
@@ -809,6 +810,8 @@ Repository::ContentTable Repository::getProducerInfo(const ProducerList& produce
       resultTable->set(column, row, Fmi::to_string(thisConfig.isclimatology));
       ++column;
       resultTable->set(column, row, Fmi::to_string(thisConfig.isfullgrid));
+      ++column;
+      resultTable->set(column, row, Fmi::to_string(thisConfig.isstaticgrid));
       ++column;
       resultTable->set(column, row, Fmi::to_string(thisConfig.mmap));
       ++column;

@@ -37,6 +37,7 @@ Model::Model(const boost::filesystem::path& filename,
              std::string levelname,
              bool climatology,
              bool full,
+             bool staticgrid,
              bool relativeuv,
              unsigned int update_interval,
              unsigned int minimum_expiration_time,
@@ -48,6 +49,7 @@ Model::Model(const boost::filesystem::path& filename,
       itsMinimumExpirationTime(minimum_expiration_time),
       itsClimatology(climatology),
       itsFullGrid(full),
+      itsStaticGrid(staticgrid),
       itsRelativeUV(relativeuv),
       itsValidTimeList(new ValidTimeList()),
       itsQueryData(new NFmiQueryData(filename.string(), mmap))
@@ -74,6 +76,7 @@ Model::Model(const boost::filesystem::path& filename,
     // querydata.conf changes may alter essential model properties
     Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsClimatology));
     Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsFullGrid));
+    Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsStaticGrid));
     Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsRelativeUV));
 
     // We need an info object to intialize some data members
@@ -90,8 +93,19 @@ Model::Model(const boost::filesystem::path& filename,
     // needs to be done or not. findvalidpoint acts accordingly.
 
     if (!itsFullGrid && !validpointscachedir.empty())
-      itsValidPoints = boost::make_shared<ValidPoints>(
-          itsProducer, itsPath, *qinfo, validpointscachedir, itsHashValue);
+    {
+      // Use grid hash for static grids, full hash otherwise
+      auto hash = itsHashValue;
+      if (itsStaticGrid)
+      {
+        hash = Fmi::hash_value(itsProducer);
+        Fmi::hash_combine(hash, qinfo->GridHashValue());
+        // Ignoring modification, path etc since the grid is static
+      }
+
+      itsValidPoints =
+          boost::make_shared<ValidPoints>(itsProducer, itsPath, *qinfo, validpointscachedir, hash);
+    }
 
     // Requesting the valid times repeatedly is slow if we have to do
     // a time conversion to ptime every time - hence we optimize
@@ -127,6 +141,7 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
       itsMinimumExpirationTime(theModel.itsMinimumExpirationTime),
       itsClimatology(theModel.itsClimatology),
       itsFullGrid(theModel.itsFullGrid),
+      itsStaticGrid(theModel.itsStaticGrid),
       itsRelativeUV(theModel.itsRelativeUV),
       itsValidPoints(theModel.itsValidPoints),
       itsValidTimeList(theModel.itsValidTimeList),
@@ -147,6 +162,7 @@ Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
       itsUpdateInterval(0),
       itsMinimumExpirationTime(999999),
       itsFullGrid(true),
+      itsStaticGrid(false),
       itsValidTimeList(new ValidTimeList()),
       itsQueryData(std::move(theData))
 {
@@ -286,6 +302,17 @@ bool Model::isClimatology() const
 bool Model::isFullGrid() const
 {
   return itsFullGrid;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Return true if grid is static, meaningful only if also not full
+ */
+// ----------------------------------------------------------------------
+
+bool Model::isStaticGrid() const
+{
+  return itsStaticGrid;
 }
 
 // ----------------------------------------------------------------------

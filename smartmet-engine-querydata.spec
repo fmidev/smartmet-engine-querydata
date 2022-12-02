@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 22.11.29
+Version: 22.12.2
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -94,6 +94,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Dec  2 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.12.2-1.fmi
+- Added a 'staticgrid' setting for models whose valid points do not change over time to speed up data loading
+
 * Tue Nov 29 2022 Mika Heiskanen <mika.heiskanen@fmi.fi> - 22.11.29-1.fmi
 - Added safety check for calculating the hash value for querydata to protect against segmentation faults
 

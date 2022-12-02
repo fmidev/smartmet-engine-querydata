@@ -43,6 +43,7 @@ class Model : public boost::enable_shared_from_this<Model>
         std::string levelname,
         bool climatology,
         bool full,
+        bool staticgrid,
         bool relativeuv,
         unsigned int update_interval,
         unsigned int minimum_expiration_time,
@@ -71,6 +72,7 @@ class Model : public boost::enable_shared_from_this<Model>
   const std::string& levelName() const;
   bool isClimatology() const;
   bool isFullGrid() const;
+  bool isStaticGrid() const;
   bool isRelativeUV() const;
 
   NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist) const;
@@ -102,6 +104,7 @@ class Model : public boost::enable_shared_from_this<Model>
   unsigned int itsMinimumExpirationTime;
   bool itsClimatology = false;
   bool itsFullGrid = false;
+  bool itsStaticGrid = false;
   bool itsRelativeUV = false;
 
   boost::shared_ptr<ValidPoints> itsValidPoints;

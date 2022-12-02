@@ -72,7 +72,8 @@ struct ProducerConfig
   bool ismultifile = false;
   bool isforecast = true;
   bool isclimatology = false;
-  bool isfullgrid = true;
+  bool isfullgrid = true;     // by default there are no grid points with no valid values
+  bool isstaticgrid = false;  // by default valid grid points may change during the season
   bool isrelativeuv = false;  // are U/V winds relative to grid orientation
   bool mmap = true;
 
@@ -82,14 +83,15 @@ struct ProducerConfig
 
   inline bool operator==(const ProducerConfig& c) const
   {
-    return c.isfullgrid == isfullgrid && c.isclimatology == isclimatology &&
-           c.isforecast == isforecast && c.ismultifile == ismultifile &&
-           c.maxdistance == maxdistance && c.number_to_keep == number_to_keep &&
-           c.update_interval == update_interval && c.minimum_expires == minimum_expires &&
-           c.max_age == max_age && c.refresh_interval_secs == refresh_interval_secs &&
-           c.leveltype == leveltype && c.type == type && c.pattern_str == pattern_str &&
-           c.directory == directory && c.aliases == aliases && c.producer == producer &&
-           c.max_age == max_age && c.isrelativeuv == isrelativeuv && c.mmap == mmap;
+    return c.isfullgrid == isfullgrid && c.isstaticgrid == isstaticgrid &&
+           c.isclimatology == isclimatology && c.isforecast == isforecast &&
+           c.ismultifile == ismultifile && c.maxdistance == maxdistance &&
+           c.number_to_keep == number_to_keep && c.update_interval == update_interval &&
+           c.minimum_expires == minimum_expires && c.max_age == max_age &&
+           c.refresh_interval_secs == refresh_interval_secs && c.leveltype == leveltype &&
+           c.type == type && c.pattern_str == pattern_str && c.directory == directory &&
+           c.aliases == aliases && c.producer == producer && c.max_age == max_age &&
+           c.isrelativeuv == isrelativeuv && c.mmap == mmap;
   }
   inline bool operator!=(const ProducerConfig& c) const { return !operator==(c); }
 
