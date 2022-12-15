@@ -463,6 +463,8 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
         const ProducerConfig& conf = producerConfig(producer);
         auto scan_time = boost::posix_time::second_clock::universal_time();
         auto next_scan_time = (scan_time + boost::posix_time::seconds(conf.refresh_interval_secs));
+
+        Spine::WriteLock lock(itsMutex);
         itsRepo.updateProducerStatus(producer, scan_time, next_scan_time);
       }
 

@@ -183,7 +183,11 @@ void EngineImpl::init()
       boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
 
-    repomanager->cleanValidPointsCache();
+    // Then clean the old serialized validpoint files safely
+    {
+      Spine::ReadLock lock(repomanager->itsMutex);
+      repomanager->cleanValidPointsCache();
+    }
 
     // We got this far, assume config file must be valid
     lastConfigErrno = 0;
