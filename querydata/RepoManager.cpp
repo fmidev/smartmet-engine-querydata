@@ -125,10 +125,18 @@ bool lookupHostSetting(const libconfig::Config& theConfig,
 
 RepoManager::~RepoManager()
 {
-  itsExpirationThread.interrupt();
-  itsMonitorThread.interrupt();
-  itsExpirationThread.join();
-  itsMonitorThread.join();
+  try
+  {
+    boost::this_thread::disable_interruption do_not_disturb;
+    itsExpirationThread.interrupt();
+    itsMonitorThread.interrupt();
+    itsExpirationThread.join();
+    itsMonitorThread.join();
+  }
+  catch (...)
+  {
+    std::cout << Fmi::Exception::Trace(BCP, "EXCEPTION IN DESTRUCTOR!") << std::endl;
+  }
 }
 
 // ----------------------------------------------------------------------
