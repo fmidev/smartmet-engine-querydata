@@ -65,8 +65,13 @@ class SynchronizerConfig : public Spine::ConfigBase
 {
  public:
   ~SynchronizerConfig() override = default;
-
   SynchronizerConfig(const std::string& configFile);
+
+  SynchronizerConfig() = delete;
+  SynchronizerConfig(const SynchronizerConfig& other) = delete;
+  SynchronizerConfig& operator=(const SynchronizerConfig& other) = delete;
+  SynchronizerConfig(SynchronizerConfig&& other) = delete;
+  SynchronizerConfig& operator=(SynchronizerConfig&& other) = delete;
 
   bool parse();
 
@@ -90,6 +95,12 @@ class Synchronizer
   Synchronizer(SmartMet::Engine::Querydata::Engine* itsParent, const std::string& configFile);
 
   ~Synchronizer();
+
+  Synchronizer() = delete;
+  Synchronizer(const Synchronizer& other) = delete;
+  Synchronizer& operator=(const Synchronizer& other) = delete;
+  Synchronizer(Synchronizer&& other) = delete;
+  Synchronizer& operator=(Synchronizer&& other) = delete;
 
   boost::optional<ProducerMap> getSynchedData(const std::string& syncGroup);
 
@@ -133,7 +144,7 @@ class Synchronizer
 
   ba::deadline_timer itsTimer;
 
-  Spine::Reactor* itsReactor;
+  Spine::Reactor* itsReactor = nullptr;
 
   bool hasLaunched = false;
 

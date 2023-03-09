@@ -49,12 +49,14 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 {
  public:
   ~QImpl();
+  QImpl(SharedModel theModel);
+  QImpl(const std::vector<SharedModel>& theModels);
 
   QImpl() = delete;
   QImpl(const QImpl& other) = delete;
   QImpl& operator=(const QImpl& other) = delete;
-  QImpl(SharedModel theModel);
-  QImpl(const std::vector<SharedModel>& theModels);
+  QImpl(QImpl&& other) = delete;
+  QImpl& operator=(QImpl&& other) = delete;
 
   // Avoid using this as much as possible
   boost::shared_ptr<NFmiFastQueryInfo> info();

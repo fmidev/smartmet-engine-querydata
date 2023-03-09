@@ -158,13 +158,7 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
 // ----------------------------------------------------------------------
 
 Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
-    : itsHashValue(theHash),
-      itsUpdateInterval(0),
-      itsMinimumExpirationTime(999999),
-      itsFullGrid(true),
-      itsStaticGrid(false),
-      itsValidTimeList(new ValidTimeList()),
-      itsQueryData(std::move(theData))
+    : itsHashValue(theHash), itsValidTimeList(new ValidTimeList()), itsQueryData(std::move(theData))
 {
   try
   {

@@ -176,7 +176,6 @@ class EngineImpl final : public Engine
                               std::size_t theValuesHash,
                               boost::posix_time::ptime theTime) const override;
 
- protected:
   void init() override;
   void shutdown() override;
   std::time_t getConfigModTime();

@@ -11,18 +11,6 @@ Range::Range(const ValueType& first, const ValueType& second)
 {
 }
 
-Range::Range(const Range& other) : mMin(other.getMin()), mMax(other.getMax()) {}
-
-Range& Range::operator=(const Range& other)
-{
-  if (this != &other)
-  {
-    mMin = other.getMin();
-    mMax = other.getMax();
-  }
-  return *this;
-}
-
 Range::ValueType Range::getMin() const
 {
   return mMin;

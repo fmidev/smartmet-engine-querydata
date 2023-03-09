@@ -29,8 +29,13 @@ struct RepoManager
   // construction & destruction
 
   ~RepoManager();
-  RepoManager() = delete;
   RepoManager(const std::string& configfile);
+
+  RepoManager() = delete;
+  RepoManager(const RepoManager& other) = delete;
+  RepoManager& operator=(const RepoManager& other) = delete;
+  RepoManager(RepoManager&& other) = delete;
+  RepoManager& operator=(RepoManager&& other) = delete;
 
   // generic API
 

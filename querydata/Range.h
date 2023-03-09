@@ -14,10 +14,14 @@ class Range
   using Shared = std::shared_ptr<Range>;
   using Unique = std::unique_ptr<Range>;
   using ValueType = double;
-  explicit Range(const ValueType& first, const ValueType& second);
-  explicit Range(const Range& other);
+  Range(const ValueType& first, const ValueType& second);
 
-  Range& operator=(const Range& other);
+  ~Range() = default;
+  Range() = delete;
+  Range(const Range& other) = default;
+  Range& operator=(const Range& other) = default;
+  Range(Range&& other) = default;
+  Range& operator=(Range&& other) = default;
 
   ValueType getMin() const;
   ValueType getMax() const;

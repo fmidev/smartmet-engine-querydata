@@ -40,7 +40,12 @@ class Engine : public Spine::SmartMetEngine
  public:
   Engine();
 
-  virtual ~Engine();
+  ~Engine() override;
+
+  Engine(const Engine& other) = delete;
+  Engine& operator=(const Engine& other) = delete;
+  Engine(Engine&& other) = delete;
+  Engine& operator=(Engine&& other) = delete;
 
   /**
    *   @brief Return available producers

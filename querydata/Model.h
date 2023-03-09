@@ -53,9 +53,12 @@ class Model : public boost::enable_shared_from_this<Model>
 
   Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
 
+  ~Model() = default;
   Model() = delete;
   Model(const Model& theModel) = delete;
   Model& operator=(const Model& theModel) = delete;
+  Model(Model&& theModel) = delete;
+  Model& operator=(Model&& theModel) = delete;
 
   friend std::size_t hash_value(const Model& theModel);
 
@@ -93,17 +96,17 @@ class Model : public boost::enable_shared_from_this<Model>
   SharedInfo info() const;
   void release(boost::shared_ptr<NFmiFastQueryInfo> theInfo) const;
 
-  std::size_t itsHashValue;
+  std::size_t itsHashValue = 0;
   boost::posix_time::ptime itsOriginTime;
   boost::posix_time::ptime itsLoadTime;
   boost::filesystem::path itsPath;
   boost::posix_time::ptime itsModificationTime;
   Producer itsProducer;
   std::string itsLevelName;
-  unsigned int itsUpdateInterval;
-  unsigned int itsMinimumExpirationTime;
+  unsigned int itsUpdateInterval = 0;
+  unsigned int itsMinimumExpirationTime = 999999;
   bool itsClimatology = false;
-  bool itsFullGrid = false;
+  bool itsFullGrid = true;
   bool itsStaticGrid = false;
   bool itsRelativeUV = false;
 

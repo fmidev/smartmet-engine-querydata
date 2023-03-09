@@ -733,7 +733,7 @@ std::list<MetaData> EngineImpl::getEngineSyncMetadataBasic(const std::string& sy
     auto syncProducers = itsSynchro->getSynchedData(syncGroup);
 
     if (!syncProducers)
-      return std::list<MetaData>();  // Unknown sync group
+      return {};  // Unknown sync group
 
     auto repomanager = itsRepoManager.load();
 
@@ -785,7 +785,7 @@ std::list<MetaData> EngineImpl::getEngineSyncMetadataWithOptions(
     auto repomanager = itsRepoManager.load();
 
     if (!syncProducers)
-      return std::list<MetaData>();  // Unknown sync group
+      return {};  // Unknown sync group
 
     std::list<MetaData> repocontent;
     {
@@ -1198,13 +1198,8 @@ Engine* EngineImpl::create(const std::string& configfile)
     SmartMet::Spine::ConfigBase cfg(configfile);
     bool disabled = cfg.get_optional_config_param<bool>("disabled", false);
     if (disabled)
-    {
       return new Engine();
-    }
-    else
-    {
-      return new EngineImpl(configfile);
-    }
+    return new EngineImpl(configfile);
   }
   catch (...)
   {

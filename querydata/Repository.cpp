@@ -700,7 +700,7 @@ Producer Repository::find(const ProducerList& producerlist,
       }
     }
 
-    return Producer();
+    return {};
   }
   catch (...)
   {
@@ -1297,7 +1297,7 @@ Repository::SharedModels Repository::getAllModels(const Producer& producer) cons
     const auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      return SharedModels();
+      return {};
 
     return producer_model->second;
   }
