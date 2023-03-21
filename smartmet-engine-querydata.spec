@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 23.3.9
+Version: 23.3.21
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -94,6 +94,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Mar 21 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.3.21-1.fmi
+- Allow disabling engine by not providing its configuration file
+
 * Thu Mar  9 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.3.9-1.fmi
 - Fixed destructors not to throw
 - Silenced CodeChecker warnings
