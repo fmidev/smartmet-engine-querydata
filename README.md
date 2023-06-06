@@ -71,6 +71,16 @@ overrides:
 )
 ```
 
+## Disabling engine
+
+QEngine can be loaded but disabled when only required to satisfy externel symbols in plugins, but not actually used
+due to plugin configuration. There are several ways to specify, that QEngine is disabled:
+* by providing configuration parameter `disabled = true`
+* by not providing configuration at all
+** setting  `configfile` is missing in engine section
+** empty string is provided as the value of the `configfile` setting in engine section
+A log message is generated in case of disabled engine
+
 ## Producers
 
 The `producers` setting will list the producers in the order they will be used for finding a producer for the requested coordinates if no producer is otherwise set in the request. Producers may be grouped using an `alias` command to limit the search.
