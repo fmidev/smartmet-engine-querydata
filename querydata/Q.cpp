@@ -335,6 +335,9 @@ MetaData QImpl::metaData()
     meta.levels = levels;
     meta.parameters = params;
 
+    // Point data does have an envelope
+    meta.wgs84Envelope = *(WGS84EnvelopeFactory::Get(itsModels[0]->info()));
+
     // Get projection string
     if (qi.Area() == nullptr)
     {
@@ -372,8 +375,6 @@ MetaData QImpl::metaData()
     meta.areaHeight = area->WorldXYHeight() / 1000.0;
 
     meta.aspectRatio = area->WorldXYAspectRatio();
-
-    meta.wgs84Envelope = *(WGS84EnvelopeFactory::Get(itsModels[0]->info()));
 
     return meta;
   }
