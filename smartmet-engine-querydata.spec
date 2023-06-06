@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 23.3.9
+Version: 23.6.6
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -31,10 +31,10 @@ BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 23.2.16
-BuildRequires: smartmet-library-macgyver-devel >= 23.3.3
+BuildRequires: smartmet-library-timeseries-devel >= 23.3.15
+BuildRequires: smartmet-library-macgyver-devel >= 23.6.6
 BuildRequires: smartmet-library-newbase-devel >= 23.2.9
-BuildRequires: smartmet-library-spine-devel >= 23.3.7
+BuildRequires: smartmet-library-spine-devel >= 23.4.27
 Requires: %{smartmet_boost}-date-time
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
@@ -45,11 +45,11 @@ Requires: gdal34-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
-Requires: smartmet-library-timeseries >= 23.2.16
-Requires: smartmet-library-macgyver >= 23.3.3
+Requires: smartmet-library-timeseries >= 23.3.15
+Requires: smartmet-library-macgyver >= 23.6.6
 Requires: smartmet-library-newbase >= 23.2.9
-Requires: smartmet-library-spine >= 23.3.7
-#TestRequires: smartmet-utils-devel >= 23.1.19
+Requires: smartmet-library-spine >= 23.4.27
+#TestRequires: smartmet-utils-devel >= 23.4.28
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal34-devel
 #TestRequires: gcc-c++
@@ -94,6 +94,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Jun  6 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.6.6-1.fmi
+- Return WGS84 envelope for point querydata too
+
 * Thu Mar  9 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.3.9-1.fmi
 - Fixed destructors not to throw
 - Silenced CodeChecker warnings
