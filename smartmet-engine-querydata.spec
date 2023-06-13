@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 23.6.6
+Version: 23.6.13
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -34,7 +34,7 @@ BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
 BuildRequires: smartmet-library-timeseries-devel >= 23.3.15
 BuildRequires: smartmet-library-macgyver-devel >= 23.6.6
 BuildRequires: smartmet-library-newbase-devel >= 23.2.9
-BuildRequires: smartmet-library-spine-devel >= 23.4.27
+BuildRequires: smartmet-library-spine-devel >= 23.6.13
 Requires: %{smartmet_boost}-date-time
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
@@ -48,7 +48,7 @@ Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: smartmet-library-timeseries >= 23.3.15
 Requires: smartmet-library-macgyver >= 23.6.6
 Requires: smartmet-library-newbase >= 23.2.9
-Requires: smartmet-library-spine >= 23.4.27
+Requires: smartmet-library-spine >= 23.6.13
 #TestRequires: smartmet-utils-devel >= 23.4.28
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal34-devel
@@ -94,6 +94,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Jun 13 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.6.13-1.fmi
+- Support internal and environment variables in configuration files
+
 * Tue Jun  6 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.6.6-1.fmi
 - Return WGS84 envelope for point querydata too
 
