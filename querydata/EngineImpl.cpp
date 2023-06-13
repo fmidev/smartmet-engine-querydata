@@ -22,6 +22,7 @@
 #include <macgyver/Exception.h>
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
+#include <spine/ConfigTools.h>
 #include <spine/Convenience.h>
 #include <spine/Exceptions.h>
 #include <spine/Reactor.h>
@@ -159,6 +160,7 @@ void EngineImpl::init()
     p.remove_filename();
     config.setIncludeDir(p.c_str());
     config.readFile(itsConfigFile.c_str());
+    Spine::expandVariables(config);
 
     itsParameterTranslations = boost::make_shared<ParameterTranslations>(read_translations(config));
 
@@ -1196,28 +1198,24 @@ Engine* EngineImpl::create(const std::string& configfile)
 {
   try
   {
-    const bool disabled =
-        [&configfile]()
-        {
-            const char* name = "SmartMet::Engine::QueryData::EngineImpl::create";
-            if (configfile.empty())
-            {
-              std::cout << Spine::log_time_str() << ' '
-                        << ANSI_FG_RED << name
-                        << ": configuration file not specified or its name is empty string: "
-                        << "engine disabled." << ANSI_FG_DEFAULT << std::endl;
-              return true;
-            }
+    const bool disabled = [&configfile]()
+    {
+      const char* name = "SmartMet::Engine::QueryData::EngineImpl::create";
+      if (configfile.empty())
+      {
+        std::cout << Spine::log_time_str() << ' ' << ANSI_FG_RED << name
+                  << ": configuration file not specified or its name is empty string: "
+                  << "engine disabled." << ANSI_FG_DEFAULT << std::endl;
+        return true;
+      }
 
-            SmartMet::Spine::ConfigBase cfg(configfile);
-            const bool result = cfg.get_optional_config_param<bool>("disabled", false);
-            if (result)
-              std::cout << Spine::log_time_str() << ' '
-                        << ANSI_FG_RED << name << ": engine disabled"
-                        << ANSI_FG_DEFAULT << std::endl;
-            return result;
-        }
-        ();
+      SmartMet::Spine::ConfigBase cfg(configfile);
+      const bool result = cfg.get_optional_config_param<bool>("disabled", false);
+      if (result)
+        std::cout << Spine::log_time_str() << ' ' << ANSI_FG_RED << name << ": engine disabled"
+                  << ANSI_FG_DEFAULT << std::endl;
+      return result;
+    }();
 
     if (disabled)
       return new Engine();

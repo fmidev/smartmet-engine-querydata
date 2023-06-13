@@ -42,6 +42,7 @@
 #include <macgyver/TypeName.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
+#include <spine/ConfigTools.h>
 #include <spine/Convenience.h>
 #include <spine/Exceptions.h>
 #include <spine/Reactor.h>
@@ -182,6 +183,7 @@ RepoManager::RepoManager(const std::string& configfile)
       itsConfig.setIncludeDir(p.c_str());
 
       itsConfig.readFile(configfile.c_str());
+      Spine::expandVariables(itsConfig);
 
       // Options
 
