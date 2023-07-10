@@ -23,7 +23,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: bzip2-devel
 BuildRequires: gcc-c++
-BuildRequires: gdal34-devel
+BuildRequires: gdal35-devel
 BuildRequires: jsoncpp-devel >= 1.8.4
 BuildRequires: make
 BuildRequires: protobuf
@@ -31,27 +31,27 @@ BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 23.6.15
+BuildRequires: smartmet-library-timeseries-devel >= 23.7.10
 BuildRequires: smartmet-library-macgyver-devel >= 23.6.15
-BuildRequires: smartmet-library-newbase-devel >= 23.6.15
-BuildRequires: smartmet-library-spine-devel >= 23.6.13
+BuildRequires: smartmet-library-newbase-devel >= 23.7.10
+BuildRequires: smartmet-library-spine-devel >= 23.7.10
 Requires: %{smartmet_boost}-date-time
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: gdal34-libs
+Requires: gdal35-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
-Requires: smartmet-library-timeseries >= 23.6.15
+Requires: smartmet-library-timeseries >= 23.7.10
 Requires: smartmet-library-macgyver >= 23.6.15
-Requires: smartmet-library-newbase >= 23.6.15
-Requires: smartmet-library-spine >= 23.6.13
-#TestRequires: smartmet-utils-devel >= 23.6.14
+Requires: smartmet-library-newbase >= 23.7.10
+Requires: smartmet-library-spine >= 23.7.10
+#TestRequires: smartmet-utils-devel >= 23.7.7
 #TestRequires: jsoncpp-devel >= 1.8.4
-#TestRequires: gdal34-devel
+#TestRequires: gdal35-devel
 #TestRequires: gcc-c++
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
@@ -64,7 +64,7 @@ SmartMet querydata engine
 Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
-Requires: gdal34-devel
+Requires: gdal35-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 
 Obsoletes: smartmet-brainstorm-qengine-devel < 16.11.1
