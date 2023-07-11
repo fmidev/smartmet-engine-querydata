@@ -43,7 +43,7 @@ class Repository
   Repository() = default;
 
   void add(const ProducerConfig& config);
-  void add(const Producer& producer, SharedModel model);
+  void add(const Producer& producer, const SharedModel& model);
 
   void remove(const Producer& producer, const boost::filesystem::path& path);
   void resize(const Producer& producer, std::size_t limit);
@@ -107,14 +107,14 @@ class Repository
   void verbose(bool flag);
 
  private:
-  bool contains(const SharedModels& models,
-                double lon,
-                double lat,
-                double maxdist,
-                const std::string& levelname) const;
+  // Member instead of anonymous in cpp since we need "friend" access rights
+  static bool contains(const SharedModels& models,
+                       double lon,
+                       double lat,
+                       double maxdist,
+                       const std::string& levelname);
 
-  // Each uniquely named producer has a number
-  // of models, which are sorted by their origin times
+  // Each uniquely named producer has a number of models, which are sorted by their origin times
 
   using Producers = std::map<Producer, SharedModels>;
   using ProducerConfigs = std::map<Producer, ProducerConfig>;

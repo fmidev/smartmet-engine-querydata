@@ -49,8 +49,8 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 {
  public:
   ~QImpl();
-  QImpl(SharedModel theModel);
-  QImpl(const std::vector<SharedModel>& theModels);
+  explicit QImpl(const SharedModel& theModel);
+  explicit QImpl(const std::vector<SharedModel>& theModels);
 
   QImpl() = delete;
   QImpl(const QImpl& other) = delete;
@@ -294,7 +294,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
   void setParameterTranslations(boost::shared_ptr<ParameterTranslations> translations)
   {
-    itsParameterTranslations = translations;
+    itsParameterTranslations = std::move(translations);
   }
 
  private:

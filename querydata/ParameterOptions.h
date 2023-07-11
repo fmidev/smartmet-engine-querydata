@@ -42,7 +42,7 @@ struct ParameterOptions
                    const bool& theNearestPointFlag,
                    const NFmiPoint& theNearestPoint,
                    NFmiPoint& theLastPoint,
-				   TS::LocalTimePoolPtr theLocalTimePool);
+                   const TS::LocalTimePoolPtr& theLocalTimePool);
 
   const Spine::Parameter& par;
   const Producer& producer;
@@ -57,7 +57,7 @@ struct ParameterOptions
   const bool& findnearestvalidpoint;
   const NFmiPoint& nearestpoint;
   NFmiPoint& lastpoint;
-  TS::LocalTimePoolPtr localTimePool; 
+  TS::LocalTimePoolPtr localTimePool;
 };
 
 }  // namespace Querydata

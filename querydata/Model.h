@@ -83,7 +83,7 @@ class Model : public boost::enable_shared_from_this<Model>
   std::size_t gridHashValue() const;
 
   // Deprecated in WGS84 branch
-  void setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache);
+  void setLatLonCache(const boost::shared_ptr<std::vector<NFmiPoint>>& theCache);
   boost::shared_ptr<std::vector<NFmiPoint>> makeLatLonCache();
 
   void uncache() const;
@@ -94,7 +94,7 @@ class Model : public boost::enable_shared_from_this<Model>
   friend class Repository;
   friend struct RepoManager;
   SharedInfo info() const;
-  void release(boost::shared_ptr<NFmiFastQueryInfo> theInfo) const;
+  void release(const boost::shared_ptr<NFmiFastQueryInfo>& theInfo) const;
 
   std::size_t itsHashValue = 0;
   boost::posix_time::ptime itsOriginTime;

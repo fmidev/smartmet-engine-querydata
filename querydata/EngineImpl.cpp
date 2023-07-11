@@ -124,6 +124,7 @@ ParameterTranslations read_translations(const libconfig::Config& config)
   catch (...)
   {
     Spine::Exceptions::handle("Querydata engine");
+    throw;  // NOT REACHED, but silences compiler warning
   }
 }
 
@@ -558,8 +559,8 @@ Producer EngineImpl::find(const ProducerList& producerlist,
  */
 // ----------------------------------------------------------------------
 
-Repository::ContentTable EngineImpl::getProducerInfo(const std::string& timeFormat,
-                                                     boost::optional<std::string> producer) const
+Repository::ContentTable EngineImpl::getProducerInfo(
+    const std::string& timeFormat, const boost::optional<std::string>& producer) const
 {
   try
   {
@@ -586,7 +587,8 @@ Repository::ContentTable EngineImpl::getProducerInfo(const std::string& timeForm
  */
 // ----------------------------------------------------------------------
 
-Repository::ContentTable EngineImpl::getParameterInfo(boost::optional<std::string> producer) const
+Repository::ContentTable EngineImpl::getParameterInfo(
+    const boost::optional<std::string>& producer) const
 {
   try
   {

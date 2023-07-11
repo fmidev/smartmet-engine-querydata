@@ -8,7 +8,6 @@
 #include "MetaQueryFilters.h"
 #include <boost/algorithm/string/join.hpp>
 #include <boost/date_time/posix_time/posix_time_io.hpp>
-#include <boost/tuple/tuple.hpp>
 #include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>
@@ -16,6 +15,7 @@
 #include <spine/Convenience.h>
 #include <spine/TableFormatter.h>
 #include <timeseries/ParameterFactory.h>
+#include <cassert>
 #include <sstream>
 #include <stdexcept>
 
@@ -67,6 +67,30 @@ bool periods_overlap(const boost::posix_time::time_period& period1,
   return true;
 }
 
+// ----------------------------------------------------------------------
+/*!
+ * \brief Match leveltypes
+ *
+ * Leveltype is OK if desired type is the same, or the desired
+ * type is "" implying first match is OK.
+ *
+ */
+// ----------------------------------------------------------------------
+
+bool leveltype_ok(const std::string& modeltype, const std::string& wantedtype)
+{
+  try
+  {
+    if (wantedtype.empty())
+      return true;
+    return (modeltype == wantedtype);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
 }  // namespace
 
 // ----------------------------------------------------------------------
@@ -93,7 +117,7 @@ void Repository::add(const ProducerConfig& config)
  */
 // ----------------------------------------------------------------------
 
-void Repository::add(const Producer& producer, SharedModel model)
+void Repository::add(const Producer& producer, const SharedModel& model)
 {
   try
   {
@@ -105,12 +129,14 @@ void Repository::add(const Producer& producer, SharedModel model)
     if (producer_model == itsProducers.end())
     {
       // Insert an empty map of models for a new producer
-      boost::tie(producer_model, ok) =
+      std::tie(producer_model, ok) =
           itsProducers.insert(Producers::value_type(producer, SharedModels()));
 
       if (!ok)
         throw Fmi::Exception(BCP, "Failed to add new model for producer '" + producer + "'!");
     }
+
+    assert(producer_model != itsProducers.end());  // To silence static analysis warning
 
     // And insert the model for the producer
 
@@ -300,18 +326,17 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
           .disableStackTrace();
     }
 
-    SharedModels::const_iterator time_model;
     if (origintime.is_pos_infinity())
     {
       // newest origintime is at the end
-      auto time_model = --models.end();
-      return boost::make_shared<QImpl>(time_model->second);
+      auto iter = --models.end();
+      return boost::make_shared<QImpl>(iter->second);
     }
     if (origintime.is_neg_infinity())
     {
       // oldest origintime is at the beginning
-      auto time_model = models.begin();
-      return boost::make_shared<QImpl>(time_model->second);
+      auto iter = models.begin();
+      return boost::make_shared<QImpl>(iter->second);
     }
 
     auto iter = models.find(origintime);
@@ -566,65 +591,6 @@ void Repository::expire(const Producer& producer, std::size_t max_age)
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Expiring model failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Match leveltypes
- *
- * Leveltype is OK if desired type is the same, or the desired
- * type is "" implying first match is OK.
- *
- */
-// ----------------------------------------------------------------------
-
-bool leveltype_ok(const std::string& modeltype, const std::string& wantedtype)
-{
-  try
-  {
-    if (wantedtype.empty())
-      return true;
-    return (modeltype == wantedtype);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Utility subroutine
- */
-// ----------------------------------------------------------------------
-
-bool Repository::contains(const Repository::SharedModels& models,
-                          double lon,
-                          double lat,
-                          double maxdist,
-                          const std::string& levelname) const
-{
-  try
-  {
-    if (models.empty())
-      return false;
-
-    SharedModel smodel = (--models.end())->second;
-    const Model& model = *smodel;
-
-    if (!leveltype_ok(model.levelName(), levelname))
-      return false;
-
-    auto qinfo = model.info();
-    bool result = qinfo->IsInside(NFmiPoint(lon, lat), 1000 * maxdist);
-    model.release(qinfo);
-
-    return result;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
 
@@ -1243,16 +1209,16 @@ Repository::MetaObject Repository::getSynchroInfos() const
 
       const ProducerConfig thisConfig = itsProducerConfigs.find(prodit.first)->second;
 
-      std::vector<bp::ptime> originTimes;
+      std::vector<bp::ptime> origintimes;
 
       for (const auto& modit : theseModels)
       {
         // Get querydata origintime
 
-        originTimes.push_back(modit.first);
+        origintimes.push_back(modit.first);
       }
 
-      props.insert(std::make_pair(thisConfig.producer, originTimes));
+      props.insert(std::make_pair(thisConfig.producer, origintimes));
     }
 
     return props;
@@ -1328,6 +1294,41 @@ void Repository::updateProducerStatus(const std::string& producer,
 void Repository::verbose(bool flag)
 {
   itsVerbose = flag;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Utility subroutine
+ */
+// ----------------------------------------------------------------------
+
+bool Repository::contains(const Repository::SharedModels& models,
+                          double lon,
+                          double lat,
+                          double maxdist,
+                          const std::string& levelname)
+{
+  try
+  {
+    if (models.empty())
+      return false;
+
+    SharedModel smodel = (--models.end())->second;
+    const Model& model = *smodel;
+
+    if (!leveltype_ok(model.levelName(), levelname))
+      return false;
+
+    auto qinfo = model.info();
+    bool result = qinfo->IsInside(NFmiPoint(lon, lat), 1000 * maxdist);
+    model.release(qinfo);
+
+    return result;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
 }
 
 }  // namespace Querydata

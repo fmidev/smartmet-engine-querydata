@@ -90,8 +90,8 @@ struct ProducerConfig
            c.minimum_expires == minimum_expires && c.max_age == max_age &&
            c.refresh_interval_secs == refresh_interval_secs && c.leveltype == leveltype &&
            c.type == type && c.pattern_str == pattern_str && c.directory == directory &&
-           c.aliases == aliases && c.producer == producer && c.max_age == max_age &&
-           c.isrelativeuv == isrelativeuv && c.mmap == mmap;
+           c.aliases == aliases && c.producer == producer && c.isrelativeuv == isrelativeuv &&
+           c.mmap == mmap;
   }
   inline bool operator!=(const ProducerConfig& c) const { return !operator==(c); }
 

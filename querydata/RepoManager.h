@@ -29,7 +29,7 @@ struct RepoManager
   // construction & destruction
 
   ~RepoManager();
-  RepoManager(const std::string& configfile);
+  explicit RepoManager(const std::string& configfile);
 
   RepoManager() = delete;
   RepoManager(const RepoManager& other) = delete;

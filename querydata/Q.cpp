@@ -172,7 +172,7 @@ QImpl::~QImpl()
  */
 // ----------------------------------------------------------------------
 
-QImpl::QImpl(SharedModel theModel)
+QImpl::QImpl(const SharedModel &theModel)
 {
   try
   {
@@ -324,12 +324,11 @@ MetaData QImpl::metaData()
     qi.ResetLevel();
     while (qi.NextLevel())
     {
-      const NFmiLevel &level = *qi.Level();
+      const NFmiLevel &l = *qi.Level();
 
-      const auto *type = ::LevelName(level.LevelType());
-      const auto *name = level.GetName().CharPtr();
-      auto value = level.LevelValue();
-      levels.emplace_back(type, name, value);
+      const auto *type = ::LevelName(l.LevelType());
+      const auto *name = l.GetName().CharPtr();
+      levels.emplace_back(type, name, l.LevelValue());
     }
 
     meta.levels = levels;
@@ -349,32 +348,32 @@ MetaData QImpl::metaData()
 
     // Get querydata area info
 
-    const NFmiArea *area = qi.Area();
-    const NFmiGrid *grid = qi.Grid();
+    const NFmiArea *a = qi.Area();
 
-    meta.ullon = area->TopLeftLatLon().X();
-    meta.ullat = area->TopLeftLatLon().Y();
-    meta.urlon = area->TopRightLatLon().X();
-    meta.urlat = area->TopRightLatLon().Y();
-    meta.bllon = area->BottomLeftLatLon().X();
-    meta.bllat = area->BottomLeftLatLon().Y();
-    meta.brlon = area->BottomRightLatLon().X();
-    meta.brlat = area->BottomRightLatLon().Y();
-    meta.clon = area->CenterLatLon().X();
-    meta.clat = area->CenterLatLon().Y();
+    meta.ullon = a->TopLeftLatLon().X();
+    meta.ullat = a->TopLeftLatLon().Y();
+    meta.urlon = a->TopRightLatLon().X();
+    meta.urlat = a->TopRightLatLon().Y();
+    meta.bllon = a->BottomLeftLatLon().X();
+    meta.bllat = a->BottomLeftLatLon().Y();
+    meta.brlon = a->BottomRightLatLon().X();
+    meta.brlat = a->BottomRightLatLon().Y();
+    meta.clon = a->CenterLatLon().X();
+    meta.clat = a->CenterLatLon().Y();
+
+    meta.areaWidth = a->WorldXYWidth() / 1000.0;
+    meta.areaHeight = a->WorldXYHeight() / 1000.0;
+
+    meta.aspectRatio = a->WorldXYAspectRatio();
 
     // Get querydata grid info
 
-    meta.xNumber = boost::numeric_cast<unsigned int>(grid->XNumber());
-    meta.yNumber = boost::numeric_cast<unsigned int>(grid->YNumber());
+    const NFmiGrid *g = qi.Grid();
+    meta.xNumber = boost::numeric_cast<unsigned int>(g->XNumber());
+    meta.yNumber = boost::numeric_cast<unsigned int>(g->YNumber());
 
-    meta.xResolution = area->WorldXYWidth() / (grid->XNumber() - 1) / 1000.0;
-    meta.yResolution = area->WorldXYHeight() / (grid->YNumber() - 1) / 1000.0;
-
-    meta.areaWidth = area->WorldXYWidth() / 1000.0;
-    meta.areaHeight = area->WorldXYHeight() / 1000.0;
-
-    meta.aspectRatio = area->WorldXYAspectRatio();
+    meta.xResolution = a->WorldXYWidth() / (g->XNumber() - 1) / 1000.0;
+    meta.yResolution = a->WorldXYHeight() / (g->YNumber() - 1) / 1000.0;
 
     return meta;
   }
@@ -898,10 +897,10 @@ const NFmiArea &QImpl::area() const
 {
   try
   {
-    const auto *area = itsInfo->Area();
-    if (area == nullptr)
+    const auto *a = itsInfo->Area();
+    if (a == nullptr)
       throw Fmi::Exception(BCP, "Attempt to access unset area in querydata");
-    return *area;
+    return *a;
   }
   catch (...)
   {
@@ -2635,9 +2634,7 @@ boost::optional<int> calc_weather_number(QImpl &q,
 
     // Precipitation form is optional
     float rform = kFloatMissing;
-    if (q.param(kFmiPotentialPrecipitationForm))
-      rform = q.interpolate(latlon, t, maxgap);
-    else if (q.param(kFmiPrecipitationForm))
+    if (q.param(kFmiPotentialPrecipitationForm) || q.param(kFmiPrecipitationForm))
       rform = q.interpolate(latlon, t, maxgap);
 
     int rform_class = (rform == kFloatMissing ? 9 : static_cast<int>(rform));
@@ -3195,12 +3192,12 @@ TS::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
           {
             time(ldt);
 
-            bool iswater = Fmi::LandCover::isOpenWater(loc.covertype);
+            bool water = Fmi::LandCover::isOpenWater(loc.covertype);
             // DEM data is more accurate
             if (loc.dem == 0)
-              iswater = true;
+              water = true;
 
-            retval = itsInfo->LandscapeInterpolatedValue(loc.dem, iswater, latlon, ldt);
+            retval = itsInfo->LandscapeInterpolatedValue(loc.dem, water, latlon, ldt);
           }
           break;
         }
@@ -3972,13 +3969,13 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
 
           if (loc.itsLocationIndex != static_cast<unsigned long>(-1))
           {
-            auto latLon = nativeGrid.GridToLatLon(loc.itsGridPoint);
-            auto dem = theDem.elevation(latLon.X(), latLon.Y(), theResolution);
+            auto latlon = nativeGrid.GridToLatLon(loc.itsGridPoint);
+            auto dem = theDem.elevation(latlon.X(), latlon.Y(), theResolution);
 
             theDemMatrix[i][j] = dem;
             theWaterFlagMatrix[i][j] =
                 ((dem == 0) ||
-                 Fmi::LandCover::isOpenWater(theLandCover.coverType(latLon.X(), latLon.Y())));
+                 Fmi::LandCover::isOpenWater(theLandCover.coverType(latlon.X(), latlon.Y())));
 
             intersectsGrid = true;
           }
@@ -4037,13 +4034,13 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
     for (int i = x1, i0 = 0; (i <= x2); i++, i0++)
       for (int j = y1, j0 = 0; (j <= y2); j++, j0++)
       {
-        auto latLon = nativeGrid.GridToLatLon(i, j);
-        auto dem = theDem.elevation(latLon.X(), latLon.Y(), theResolution);
+        auto latlon = nativeGrid.GridToLatLon(i, j);
+        auto dem = theDem.elevation(latlon.X(), latlon.Y(), theResolution);
 
         theDemMatrix[i0][j0] = dem;
         theWaterFlagMatrix[i0][j0] =
             ((dem == 0) ||
-             Fmi::LandCover::isOpenWater(theLandCover.coverType(latLon.X(), latLon.Y())));
+             Fmi::LandCover::isOpenWater(theLandCover.coverType(latlon.X(), latlon.Y())));
       }
 
     return true;
@@ -4118,13 +4115,13 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
     newarea->SetGridSize(width, height);  // to get fast LatLon access for the grid
 
-    NFmiGrid grid(newarea.get(), width, height);
-    NFmiHPlaceDescriptor hdesc(grid);
+    NFmiGrid newgrid(newarea.get(), width, height);
+    NFmiHPlaceDescriptor hdesc(newgrid);
 
     // Then create the new querydata
 
-    NFmiFastQueryInfo info(pdesc, tdesc, hdesc, vdesc);
-    boost::shared_ptr<NFmiQueryData> data(NFmiQueryDataUtil::CreateEmptyData(info));
+    NFmiFastQueryInfo newinfo(pdesc, tdesc, hdesc, vdesc);
+    boost::shared_ptr<NFmiQueryData> data(NFmiQueryDataUtil::CreateEmptyData(newinfo));
     if (data.get() == nullptr)
       throw Fmi::Exception(BCP, "Failed to create querydata by sampling");
 
@@ -4149,7 +4146,6 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
         valueMatrix = landscapeCachedInterpolation(locCache, timeCache, demMatrix, waterFlagMatrix);
       else
         // Target grid does not intersect the native grid
-        //
         valueMatrix.Resize(locCache.NX(), locCache.NY(), kFloatMissing);
 
       int nx = valueMatrix.NX();

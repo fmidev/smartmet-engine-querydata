@@ -125,7 +125,6 @@ Synchronizer::Synchronizer(SmartMet::Engine::Querydata::Engine* itsParent,
       itsConfig(configFile),
       itsSocket(itsIoService),
       itsTimer(itsIoService),
-      itsReactor(nullptr),
       isLaunchable(true)
 
 {
@@ -165,10 +164,17 @@ Synchronizer::Synchronizer(SmartMet::Engine::Querydata::Engine* itsParent,
 }
 
 Synchronizer::~Synchronizer()
+try
 {
   itsIoService.stop();
   if (itsCommThread != nullptr)
     itsCommThread->join();
+}
+catch (...)
+{
+  // This prevents the exception from escaping the try-catch block!
+  // https://wiki.sei.cmu.edu/confluence/display/cplusplus/DCL57-CPP.+Do+not+let+exceptions+escape+from+destructors+or+deallocation+functions
+  return;
 }
 
 void Synchronizer::launch(Spine::Reactor* theReactor)
@@ -237,8 +243,8 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& syn
     }
     auto it = itsSyncGroups.find(syncGroup);
     if (it == itsSyncGroups.end())
-      return boost::optional<ProducerMap>();  // unknown handler
-    return boost::optional<ProducerMap>(it->second.getConsensus());
+      return {};  // unknown handler
+    return it->second.getConsensus();
   }
   catch (...)
   {
