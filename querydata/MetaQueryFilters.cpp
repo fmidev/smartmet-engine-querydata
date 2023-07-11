@@ -149,7 +149,7 @@ bool filterLevelValues(const MetaData& prop, const MetaQueryOptions& options)
       return true;  // No parameters specified
 
     auto values = options.getLevelValues();
-    for (auto& value : values)
+    for (const auto& value : values)
     {
       bool found = false;
       for (const auto& flevel : prop.levels)

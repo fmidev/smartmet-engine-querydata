@@ -281,19 +281,20 @@ void RepoManager::init()
                       ANSI_FG_DEFAULT)
                   << std::endl;
 
-      auto id = itsMonitor.watch(pinfo.directory,
-                                 pinfo.pattern,
-                                 boost::bind(&RepoManager::update, this, _1, _2, _3, _4),
-                                 boost::bind(&RepoManager::error, this, _1, _2, _3, _4),
-                                 pinfo.refresh_interval_secs,
-                                 Fmi::DirectoryMonitor::CREATE | Fmi::DirectoryMonitor::DELETE |
-                                     Fmi::DirectoryMonitor::SCAN);
+      auto data_id =
+          itsMonitor.watch(pinfo.directory,
+                           pinfo.pattern,
+                           boost::bind(&RepoManager::update, this, _1, _2, _3, _4),
+                           boost::bind(&RepoManager::error, this, _1, _2, _3, _4),
+                           pinfo.refresh_interval_secs,
+                           Fmi::DirectoryMonitor::CREATE | Fmi::DirectoryMonitor::DELETE |
+                               Fmi::DirectoryMonitor::SCAN);
 
       // Save the info
 
       itsRepo.add(pinfo);
       itsProducerList.push_back(pinfo.producer);
-      itsProducerMap.insert(ProducerMap::value_type(id, pinfo.producer));
+      itsProducerMap.insert(ProducerMap::value_type(data_id, pinfo.producer));
     }
 
     itsMonitorThread = boost::thread(boost::bind(&Fmi::DirectoryMonitor::run, &itsMonitor));

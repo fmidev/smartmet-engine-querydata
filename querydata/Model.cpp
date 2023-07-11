@@ -443,7 +443,7 @@ SharedInfo Model::info() const
   }
 }
 
-void Model::release(boost::shared_ptr<NFmiFastQueryInfo> theInfo) const
+void Model::release(const boost::shared_ptr<NFmiFastQueryInfo>& theInfo) const
 {
   try
   {
@@ -496,7 +496,7 @@ std::size_t hash_value(const Model& theModel)
  */
 // ----------------------------------------------------------------------
 
-void Model::setLatLonCache(boost::shared_ptr<std::vector<NFmiPoint>> theCache)
+void Model::setLatLonCache(const boost::shared_ptr<std::vector<NFmiPoint>>& theCache)
 {
   itsQueryData->SetLatLonCache(theCache);
 }

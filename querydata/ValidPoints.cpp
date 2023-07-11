@@ -56,10 +56,9 @@ ValidPoints::ValidPoints(const Producer& producer,
                          NFmiFastQueryInfo& qinfo,
                          const std::string& cachedir,
                          std::size_t hash)
-    : itsMask(qinfo.SizeLocations(), false)
+    : itsMask(qinfo.SizeLocations(), false),
+      itsCacheFile(cachedir + '/' + producer + '-' + Fmi::to_string(hash))
 {
-  itsCacheFile = cachedir + '/' + producer + '-' + Fmi::to_string(hash);
-
   if (!boost::filesystem::is_directory(cachedir))
   {
     std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA +

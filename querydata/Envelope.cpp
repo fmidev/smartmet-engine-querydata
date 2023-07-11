@@ -20,12 +20,14 @@ WGS84Envelope::WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo>& info)
   // Calculate latlon boundary
   info->FirstParam();
 
+  // TODO: This algorithm is bugged, it will not work for arctic data where the pole is in the
+  // middle of the data
   if (info->Area() != nullptr)
   {
     // Gridded data
-    const NFmiPoint& b2Point = info->LatLon(0);
-    mRangeLon.set(b2Point.X(), b2Point.X());
-    mRangeLat.set(b2Point.Y(), b2Point.Y());
+    const NFmiPoint& point = info->LatLon(0);
+    mRangeLon.set(point.X(), point.X());
+    mRangeLat.set(point.Y(), point.Y());
     const auto nX = info->GridXNumber();
     const auto nY = info->GridYNumber();
     for (std::size_t yId = 0; yId < nY; yId++)
@@ -33,11 +35,9 @@ WGS84Envelope::WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo>& info)
       auto baseId = yId * nX;
       for (std::size_t id = baseId; id < baseId + nX; id++)
       {
-        const NFmiPoint& b2Point = info->LatLon(id);
-        mRangeLon.set(std::min(mRangeLon.getMin(), b2Point.X()),
-                      std::max(mRangeLon.getMax(), b2Point.X()));
-        mRangeLat.set(std::min(mRangeLat.getMin(), b2Point.Y()),
-                      std::max(mRangeLat.getMax(), b2Point.Y()));
+        const NFmiPoint& p = info->LatLon(id);
+        mRangeLon.set(std::min(mRangeLon.getMin(), p.X()), std::max(mRangeLon.getMax(), p.X()));
+        mRangeLat.set(std::min(mRangeLat.getMin(), p.Y()), std::max(mRangeLat.getMax(), p.Y()));
         // Only the first and the last index in the lines [1,nY-1]
         if (id == baseId and yId != 0 and yId != nY - 1)
           id += nX - 2;
@@ -50,21 +50,21 @@ WGS84Envelope::WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo>& info)
     bool first = true;
     for (info->ResetLocation(); info->NextLocation();)
     {
-      NFmiPoint b2Point = info->LatLon();
-      if (b2Point.X() != kFloatMissing && b2Point.Y() != kFloatMissing)
+      NFmiPoint point = info->LatLon();
+      if (point.X() != kFloatMissing && point.Y() != kFloatMissing)
       {
         if (first)
         {
-          mRangeLon.set(b2Point.X(), b2Point.X());
-          mRangeLat.set(b2Point.Y(), b2Point.Y());
+          mRangeLon.set(point.X(), point.X());
+          mRangeLat.set(point.Y(), point.Y());
           first = false;
         }
         else
         {
-          mRangeLon.set(std::min(mRangeLon.getMin(), b2Point.X()),
-                        std::max(mRangeLon.getMax(), b2Point.X()));
-          mRangeLat.set(std::min(mRangeLat.getMin(), b2Point.Y()),
-                        std::max(mRangeLat.getMax(), b2Point.Y()));
+          mRangeLon.set(std::min(mRangeLon.getMin(), point.X()),
+                        std::max(mRangeLon.getMax(), point.X()));
+          mRangeLat.set(std::min(mRangeLat.getMin(), point.Y()),
+                        std::max(mRangeLat.getMax(), point.Y()));
         }
       }
     }

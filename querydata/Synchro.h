@@ -49,7 +49,7 @@ class SyncGroup
  public:
   SyncGroup() = default;
 
-  SyncGroup(ProducerMap theMap);
+  explicit SyncGroup(ProducerMap theMap);
 
   void setBaseline(const ProducerMap& theUpdate);
 
@@ -65,7 +65,7 @@ class SynchronizerConfig : public Spine::ConfigBase
 {
  public:
   ~SynchronizerConfig() override = default;
-  SynchronizerConfig(const std::string& configFile);
+  explicit SynchronizerConfig(const std::string& configFile);
 
   SynchronizerConfig() = delete;
   SynchronizerConfig(const SynchronizerConfig& other) = delete;

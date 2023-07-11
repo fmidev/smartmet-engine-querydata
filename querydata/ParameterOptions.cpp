@@ -20,21 +20,21 @@ ParameterOptions::ParameterOptions(const Spine::Parameter& theParam,
                                    const bool& theNearestPointFlag,
                                    const NFmiPoint& theNearestPoint,
                                    NFmiPoint& theLastPoint,
-								   TS::LocalTimePoolPtr theLocalTimePool)
-: par(theParam),
-  producer(theProducer),
-  loc(theLocation),
-  country(theCountry),
-  place(thePlace),
-  timeformatter(theTimeFormatter),
-  timestring(theTimeString),
-  language(theLang),
-  outlocale(theLocale),
-  outzone(theZone),
-  findnearestvalidpoint(theNearestPointFlag),
-  nearestpoint(theNearestPoint),
-  lastpoint(theLastPoint),
-  localTimePool(theLocalTimePool)
+                                   const TS::LocalTimePoolPtr& theLocalTimePool)
+    : par(theParam),
+      producer(theProducer),
+      loc(theLocation),
+      country(theCountry),
+      place(thePlace),
+      timeformatter(theTimeFormatter),
+      timestring(theTimeString),
+      language(theLang),
+      outlocale(theLocale),
+      outzone(theZone),
+      findnearestvalidpoint(theNearestPointFlag),
+      nearestpoint(theNearestPoint),
+      lastpoint(theLastPoint),
+      localTimePool(theLocalTimePool)
 {
 }
 

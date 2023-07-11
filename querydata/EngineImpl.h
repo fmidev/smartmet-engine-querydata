@@ -79,7 +79,7 @@ class EngineImpl final : public Engine
  protected:
   // constructor is available only with a libconfig configuration file
   // will also start a background thread to monitor querydata directories
-  EngineImpl(const std::string& configfile);
+  explicit EngineImpl(const std::string& configfile);
 
  public:
   EngineImpl() = delete;
@@ -117,10 +117,11 @@ class EngineImpl final : public Engine
   Q get(const Producer& producer, const boost::posix_time::time_period& timePeriod) const override;
 
   // Get detailed info of current producers
-  Repository::ContentTable getProducerInfo(const std::string& timeFormat,
-                                           boost::optional<std::string> producer) const override;
+  Repository::ContentTable getProducerInfo(
+      const std::string& timeFormat, const boost::optional<std::string>& producer) const override;
   // Get info of parameters of each producer
-  Repository::ContentTable getParameterInfo(boost::optional<std::string> producer) const override;
+  Repository::ContentTable getParameterInfo(
+      const boost::optional<std::string>& producer) const override;
 
  protected:
   // Get current engine contents
