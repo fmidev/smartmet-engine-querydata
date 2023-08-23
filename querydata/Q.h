@@ -15,7 +15,6 @@
 #include "MetaData.h"
 #include "Model.h"
 #include "ParameterOptions.h"
-#include "ParameterTranslations.h"
 #include "ValidTimeList.h"
 #include <boost/date_time/posix_time/ptime.hpp>
 #include <boost/enable_shared_from_this.hpp>
@@ -23,6 +22,7 @@
 #include <boost/shared_ptr.hpp>
 #include <gis/CoordinateMatrix.h>
 #include <newbase/NFmiParameterName.h>
+#include <spine/ParameterTranslations.h>
 #include <spine/Thread.h>
 #include <timeseries/TimeSeriesInclude.h>
 #include <list>
@@ -292,7 +292,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
   bool needsGlobeWrap() const;
 
-  void setParameterTranslations(boost::shared_ptr<ParameterTranslations> translations)
+  void setParameterTranslations(boost::shared_ptr<Spine::ParameterTranslations> translations)
   {
     itsParameterTranslations = std::move(translations);
   }
@@ -323,7 +323,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
   boost::shared_ptr<ValidTimeList> itsValidTimes;  // collective over all datas
   std::size_t itsHashValue;
 
-  boost::shared_ptr<ParameterTranslations> itsParameterTranslations;
+  boost::shared_ptr<Spine::ParameterTranslations> itsParameterTranslations;
 
 };  // class QImpl
 

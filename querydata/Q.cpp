@@ -2416,7 +2416,7 @@ TS::Value WeatherText(QImpl &q,
                       const Spine::Location &loc,
                       const boost::local_time::local_date_time &ldt,
                       const std::string &lang,
-                      const ParameterTranslations &translations)
+                      const Spine::ParameterTranslations &translations)
 {
   try
   {
@@ -2759,7 +2759,7 @@ TS::Value SmartSymbolText(QImpl &q,
                           const Spine::Location &loc,
                           const boost::local_time::local_date_time &ldt,
                           const std::string &lang,
-                          const ParameterTranslations &translations)
+                          const Spine::ParameterTranslations &translations)
 {
   try
   {
@@ -2771,6 +2771,7 @@ TS::Value SmartSymbolText(QImpl &q,
       return TS::None();
 
     auto ret = translations.getTranslation("SmartSymbolText", *symbol, lang);
+
     if (!ret)
       return TS::None();
 

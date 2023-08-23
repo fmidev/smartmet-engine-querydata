@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 23.7.28
+Version: 23.8.23
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -34,7 +34,7 @@ BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
 BuildRequires: smartmet-library-timeseries-devel >= 23.7.10
 BuildRequires: smartmet-library-macgyver-devel >= 23.7.28
 BuildRequires: smartmet-library-newbase-devel >= 23.7.28
-BuildRequires: smartmet-library-spine-devel >= 23.7.28
+BuildRequires: smartmet-library-spine-devel >= 23.8.23
 Requires: %{smartmet_boost}-date-time
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
@@ -48,7 +48,7 @@ Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: smartmet-library-timeseries >= 23.7.10
 Requires: smartmet-library-macgyver >= 23.7.28
 Requires: smartmet-library-newbase >= 23.7.28
-Requires: smartmet-library-spine >= 23.7.28
+Requires: smartmet-library-spine >= 23.8.23
 #TestRequires: smartmet-utils-devel >= 23.7.7
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal35-devel
@@ -94,6 +94,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Aug 23 2023 Anssi Reponen <anssi.reponen@fmi.fi> - 23.8.23-1.fmi
+- Moved ParameterTranslations to spine
+
 * Fri Jul 28 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.7.28-1.fmi
 - Repackage due to bulk ABI changes in macgyver/newbase/spine
 

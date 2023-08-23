@@ -7,7 +7,6 @@
 #include <gis/CoordinateMatrix.h>
 #include <spine/SmartMetEngine.h>
 
-#include "ParameterTranslations.h"
 #include "Synchro.h"
 #include <macgyver/Cache.h>
 
