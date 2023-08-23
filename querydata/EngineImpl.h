@@ -7,7 +7,6 @@
 #pragma once
 
 #include "Engine.h"
-#include "ParameterTranslations.h"
 #include "Producer.h"
 #include "Repository.h"
 #include "Synchro.h"
@@ -19,6 +18,7 @@
 #include <boost/smart_ptr/atomic_shared_ptr.hpp>
 #include <gis/CoordinateMatrix.h>
 #include <macgyver/Cache.h>
+#include <spine/ParameterTranslations.h>
 #include <spine/SmartMetEngine.h>
 #include <future>
 #include <string>
@@ -74,7 +74,7 @@ class EngineImpl final : public Engine
 
   int itsActiveThreadCount;
 
-  boost::atomic_shared_ptr<ParameterTranslations> itsParameterTranslations;
+  boost::atomic_shared_ptr<Spine::ParameterTranslations> itsParameterTranslations;
 
  protected:
   // constructor is available only with a libconfig configuration file
