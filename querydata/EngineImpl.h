@@ -170,12 +170,12 @@ class EngineImpl final : public Engine
 
   ValuesPtr getValuesDefault(const Q& theQ,
                              std::size_t theValuesHash,
-                             boost::posix_time::ptime theTime) const override;
+                             Fmi::DateTime theTime) const override;
 
   ValuesPtr getValuesForParam(const Q& theQ,
                               const Spine::Parameter& theParam,
                               std::size_t theValuesHash,
-                              boost::posix_time::ptime theTime) const override;
+                              Fmi::DateTime theTime) const override;
 
   void init() override;
   void shutdown() override;

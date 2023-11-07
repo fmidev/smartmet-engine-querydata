@@ -61,7 +61,7 @@ Model::Model(const boost::filesystem::path& filename,
           BCP, "Failed to initialize NFmiQueryData object from '" + filename.string() + "'!");
 
     itsOriginTime = itsQueryData->OriginTime();
-    itsLoadTime = boost::posix_time::second_clock::universal_time();
+    itsLoadTime = Fmi::SecondClock::universal_time();
 
     // May throw if file is gone
     itsModificationTime =
@@ -108,7 +108,7 @@ Model::Model(const boost::filesystem::path& filename,
     }
 
     // Requesting the valid times repeatedly is slow if we have to do
-    // a time conversion to ptime every time - hence we optimize
+    // a time conversion to Fmi::DateTime every time - hence we optimize
 
     auto& vt = *itsValidTimeList;
     for (qinfo->ResetTime(); qinfo->NextTime();)
@@ -172,7 +172,7 @@ Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
     itsQueryInfoPool.push_front(qinfo);
 
     // Requesting the valid times repeatedly is slow if we have to do
-    // a time conversion to ptime every time - hence we optimize
+    // a time conversion to Fmi::DateTime every time - hence we optimize
 
     auto& vt = *itsValidTimeList;
     for (qinfo->ResetTime(); qinfo->NextTime();)
@@ -193,7 +193,7 @@ Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
  */
 // ----------------------------------------------------------------------
 
-const boost::posix_time::ptime& Model::originTime() const
+const Fmi::DateTime& Model::originTime() const
 {
   return itsOriginTime;
 }
@@ -204,7 +204,7 @@ const boost::posix_time::ptime& Model::originTime() const
  */
 // ----------------------------------------------------------------------
 
-const boost::posix_time::ptime& Model::loadTime() const
+const Fmi::DateTime& Model::loadTime() const
 {
   return itsLoadTime;
 }
@@ -215,7 +215,7 @@ const boost::posix_time::ptime& Model::loadTime() const
  */
 // ----------------------------------------------------------------------
 
-const boost::posix_time::ptime& Model::modificationTime() const
+const Fmi::DateTime& Model::modificationTime() const
 {
   return itsModificationTime;
 }
@@ -226,14 +226,14 @@ const boost::posix_time::ptime& Model::modificationTime() const
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime Model::expirationTime() const
+Fmi::DateTime Model::expirationTime() const
 {
   // Expected time for the next model
-  auto t1 = itsModificationTime + boost::posix_time::seconds(itsUpdateInterval);
+  auto t1 = itsModificationTime + Fmi::Seconds(itsUpdateInterval);
 
   // Minimum expiration time from wall clock
-  auto t2 = boost::posix_time::second_clock::universal_time() +
-            boost::posix_time::seconds(itsMinimumExpirationTime);
+  auto t2 = Fmi::SecondClock::universal_time() +
+            Fmi::Seconds(itsMinimumExpirationTime);
 
   // Choose the later one. t1 dominates until the next model is overdue, in
   // which case we start waiting for it in smaller minimum expiration time

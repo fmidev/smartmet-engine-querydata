@@ -2,7 +2,7 @@
 #include "Model.h"
 #include "WGS84EnvelopeFactory.h"
 #include <boost/date_time/local_time/local_time_io.hpp>
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <macgyver/DateTime.h>
 #include <boost/date_time/time_facet.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/optional.hpp>
@@ -220,7 +220,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
     }
 
     // Establish unique valid times
-    std::set<boost::posix_time::ptime> uniquetimes;
+    std::set<Fmi::DateTime> uniquetimes;
     for (auto &model : itsModels)
     {
       const auto &validtimes = model->validTimes();
@@ -407,7 +407,7 @@ const NFmiMetTime &QImpl::originTime() const
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime QImpl::modificationTime() const
+Fmi::DateTime QImpl::modificationTime() const
 {
   try
   {
@@ -430,7 +430,7 @@ boost::posix_time::ptime QImpl::modificationTime() const
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::ptime QImpl::expirationTime() const
+Fmi::DateTime QImpl::expirationTime() const
 {
   try
   {
@@ -1439,7 +1439,7 @@ bool QImpl::calcLatlonCachePoints(NFmiQueryInfo &theTargetInfo,
 // ----------------------------------------------------------------------
 
 NFmiDataMatrix<float> QImpl::calculatedValues(const Spine::Parameter &theParam,
-                                              const boost::posix_time::ptime &theInterpolatedTime)
+                                              const Fmi::DateTime &theInterpolatedTime)
 {
   try
   {
@@ -1590,7 +1590,7 @@ NFmiDataMatrix<float> QImpl::values(const NFmiMetTime &theInterpolatedTime,
 // ----------------------------------------------------------------------
 
 NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
-                                    const boost::posix_time::ptime &theInterpolatedTime,
+                                    const Fmi::DateTime &theInterpolatedTime,
                                     const NFmiDataMatrix<float> &theDEMValues,
                                     const NFmiDataMatrix<bool> &theWaterFlags)
 {
@@ -1816,7 +1816,7 @@ void QImpl::setIsSubParamUsed(bool theState)
  */
 // ----------------------------------------------------------------------
 
-std::string format_date(const boost::local_time::local_date_time &ldt,
+std::string format_date(const Fmi::LocalDateTime &ldt,
                         const std::locale &llocale,
                         const std::string &fmt)
 {
@@ -1842,7 +1842,7 @@ std::string format_date(const boost::local_time::local_date_time &ldt,
 
 TS::Value WindUMS(QImpl &q,
                   const Spine::Location &loc,
-                  const boost::local_time::local_date_time &ldt,
+                  const Fmi::LocalDateTime &ldt,
                   boost::optional<float> level = boost::none,
                   InterpolationMethod method = InterpolationMethod::SURFACE)
 {
@@ -1899,7 +1899,7 @@ TS::Value WindUMS(QImpl &q,
 
 TS::Value WindVMS(QImpl &q,
                   const Spine::Location &loc,
-                  const boost::local_time::local_date_time &ldt,
+                  const Fmi::LocalDateTime &ldt,
                   boost::optional<float> level = boost::none,
                   InterpolationMethod method = InterpolationMethod::SURFACE)
 {
@@ -1958,7 +1958,7 @@ TS::Value WindVMS(QImpl &q,
 
 TS::Value WindCompass8(QImpl &q,
                        const Spine::Location &loc,
-                       const boost::local_time::local_date_time &ldt)
+                       const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -1990,7 +1990,7 @@ TS::Value WindCompass8(QImpl &q,
 
 TS::Value WindCompass16(QImpl &q,
                         const Spine::Location &loc,
-                        const boost::local_time::local_date_time &ldt)
+                        const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2037,7 +2037,7 @@ TS::Value WindCompass16(QImpl &q,
 
 TS::Value WindCompass32(QImpl &q,
                         const Spine::Location &loc,
-                        const boost::local_time::local_date_time &ldt)
+                        const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2072,7 +2072,7 @@ TS::Value WindCompass32(QImpl &q,
 
 TS::Value Cloudiness8th(QImpl &q,
                         const Spine::Location &loc,
-                        const boost::local_time::local_date_time &ldt)
+                        const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2104,7 +2104,7 @@ TS::Value Cloudiness8th(QImpl &q,
 
 TS::Value WindChill(QImpl &q,
                     const Spine::Location &loc,
-                    const boost::local_time::local_date_time &ldt)
+                    const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2140,7 +2140,7 @@ TS::Value WindChill(QImpl &q,
 
 TS::Value SummerSimmerIndex(QImpl &q,
                             const Spine::Location &loc,
-                            const boost::local_time::local_date_time &ldt)
+                            const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2177,7 +2177,7 @@ TS::Value SummerSimmerIndex(QImpl &q,
 
 TS::Value FeelsLike(QImpl &q,
                     const Spine::Location &loc,
-                    const boost::local_time::local_date_time &ldt)
+                    const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2227,7 +2227,7 @@ TS::Value FeelsLike(QImpl &q,
 
 TS::Value ApparentTemperature(QImpl &q,
                               const Spine::Location &loc,
-                              const boost::local_time::local_date_time &ldt)
+                              const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2271,7 +2271,7 @@ TS::Value ApparentTemperature(QImpl &q,
 // ----------------------------------------------------------------------
 TS::Value Snow1hLower(QImpl &q,
                       const Spine::Location &loc,
-                      const boost::local_time::local_date_time &ldt)
+                      const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2306,7 +2306,7 @@ TS::Value Snow1hLower(QImpl &q,
 // ----------------------------------------------------------------------
 TS::Value Snow1hUpper(QImpl &q,
                       const Spine::Location &loc,
-                      const boost::local_time::local_date_time &ldt)
+                      const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2339,7 +2339,7 @@ TS::Value Snow1hUpper(QImpl &q,
 // ----------------------------------------------------------------------
 TS::Value Snow1h(QImpl &q,
                  const Spine::Location &loc,
-                 const boost::local_time::local_date_time &ldt)
+                 const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2384,7 +2384,7 @@ TS::Value Snow1h(QImpl &q,
 
 TS::Value WeatherSymbol(QImpl &q,
                         const Spine::Location &loc,
-                        const boost::local_time::local_date_time &ldt)
+                        const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2417,7 +2417,7 @@ TS::Value WeatherSymbol(QImpl &q,
 
 TS::Value WeatherText(QImpl &q,
                       const Spine::Location &loc,
-                      const boost::local_time::local_date_time &ldt,
+                      const Fmi::LocalDateTime &ldt,
                       const std::string &lang,
                       const Spine::ParameterTranslations &translations)
 {
@@ -2453,7 +2453,7 @@ TS::Value WeatherText(QImpl &q,
 
 boost::optional<int> calc_smart_symbol(QImpl &q,
                                        const NFmiPoint &latlon,
-                                       const boost::local_time::local_date_time &ldt)
+                                       const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2577,7 +2577,7 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
 
 boost::optional<int> calc_weather_number(QImpl &q,
                                          const NFmiPoint &latlon,
-                                         const boost::local_time::local_date_time &ldt)
+                                         const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2700,7 +2700,7 @@ boost::optional<int> calc_weather_number(QImpl &q,
 
 TS::Value SmartSymbolNumber(QImpl &q,
                             const Spine::Location &loc,
-                            const boost::local_time::local_date_time &ldt)
+                            const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2733,7 +2733,7 @@ TS::Value SmartSymbolNumber(QImpl &q,
 
 TS::Value WeatherNumber(QImpl &q,
                         const Spine::Location &loc,
-                        const boost::local_time::local_date_time &ldt)
+                        const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2760,7 +2760,7 @@ TS::Value WeatherNumber(QImpl &q,
 
 TS::Value SmartSymbolText(QImpl &q,
                           const Spine::Location &loc,
-                          const boost::local_time::local_date_time &ldt,
+                          const Fmi::LocalDateTime &ldt,
                           const std::string &lang,
                           const Spine::ParameterTranslations &translations)
 {
@@ -2816,7 +2816,7 @@ TS::Value GridNorth(const QImpl &q, const Spine::Location &loc)
 
 TS::Value QImpl::dataValue(const ParameterOptions &opt,
                            const NFmiPoint &latlon,
-                           const boost::local_time::local_date_time &ldt)
+                           const Fmi::LocalDateTime &ldt)
 {
   NFmiMetTime t = ldt;
 
@@ -2848,7 +2848,7 @@ TS::Value QImpl::dataValue(const ParameterOptions &opt,
 
 TS::Value QImpl::dataValueAtPressure(const ParameterOptions &opt,
                                      const NFmiPoint &latlon,
-                                     const boost::local_time::local_date_time &ldt,
+                                     const Fmi::LocalDateTime &ldt,
                                      float pressure)
 {
   TS::Value retval = TS::None();
@@ -2872,7 +2872,7 @@ TS::Value QImpl::dataValueAtPressure(const ParameterOptions &opt,
 
 TS::Value QImpl::dataValueAtHeight(const ParameterOptions &opt,
                                    const NFmiPoint &latlon,
-                                   const boost::local_time::local_date_time &ldt,
+                                   const Fmi::LocalDateTime &ldt,
                                    float height)
 {
   TS::Value retval = TS::None();
@@ -2901,7 +2901,7 @@ TS::Value QImpl::dataValueAtHeight(const ParameterOptions &opt,
 // ----------------------------------------------------------------------
 
 TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
-                                      const boost::local_time::local_date_time &ldt,
+                                      const Fmi::LocalDateTime &ldt,
                                       double levelResult)
 {
   // Some shorthand variables
@@ -2986,16 +2986,16 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     case kFmiLocalTime:
     {
       auto localtz = Fmi::TimeZoneFactory::instance().time_zone_from_string(loc.timezone);
-      boost::posix_time::ptime utc = ldt.utc_time();
-      boost::local_time::local_date_time localt(utc, localtz);
+      Fmi::DateTime utc = ldt.utc_time();
+      Fmi::LocalDateTime localt(utc, localtz);
       return opt.timeformatter.format(localt);
     }
     case kFmiUTCTime:
       return opt.timeformatter.format(ldt.utc_time());
     case kFmiEpochTime:
     {
-      boost::posix_time::ptime time_t_epoch(boost::gregorian::date(1970, 1, 1));
-      boost::posix_time::time_duration diff = ldt.utc_time() - time_t_epoch;
+      Fmi::DateTime time_t_epoch(Fmi::Date(1970, 1, 1));
+      Fmi::TimeDuration diff = ldt.utc_time() - time_t_epoch;
       return Fmi::to_string(diff.total_seconds());
     }
     case kFmiOriginTime:
@@ -3009,14 +3009,14 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
         if (!ok)
           return TS::None();
       }
-      boost::posix_time::ptime utc = originTime();
-      boost::local_time::local_date_time localt(utc, ldt.zone());
+      Fmi::DateTime utc = originTime();
+      Fmi::LocalDateTime localt(utc, ldt.zone());
       return opt.timeformatter.format(localt);
     }
     case kFmiModTime:
     {
-      boost::posix_time::ptime utc = modificationTime();
-      boost::local_time::local_date_time localt(utc, ldt.zone());
+      Fmi::DateTime utc = modificationTime();
+      Fmi::LocalDateTime localt(utc, ldt.zone());
       return opt.timeformatter.format(localt);
     }
     case kFmiDark:
@@ -3171,7 +3171,7 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
 
 // ======================================================================
 
-TS::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::local_date_time &ldt)
+TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -3358,7 +3358,7 @@ TS::Value QImpl::value(const ParameterOptions &opt, const boost::local_time::loc
 }
 
 TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
-                                 const boost::local_time::local_date_time &ldt,
+                                 const Fmi::LocalDateTime &ldt,
                                  float pressure)
 {
   try
@@ -3451,7 +3451,7 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
 }
 
 TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
-                               const boost::local_time::local_date_time &ldt,
+                               const Fmi::LocalDateTime &ldt,
                                float height)
 {
   try
@@ -3554,7 +3554,7 @@ TS::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
 
     TS::TimeSeriesPtr ret(new TS::TimeSeries(param.localTimePool));
 
-    for (const boost::local_time::local_date_time &ldt : tlist)
+    for (const Fmi::LocalDateTime &ldt : tlist)
     {
       ret->emplace_back(TS::TimedValue(ldt, value(param, ldt)));
     }
@@ -3576,7 +3576,7 @@ TS::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
 
     TS::TimeSeriesPtr ret(new TS::TimeSeries(param.localTimePool));
 
-    for (const boost::local_time::local_date_time &ldt : tlist)
+    for (const Fmi::LocalDateTime &ldt : tlist)
     {
       ret->emplace_back(TS::TimedValue(ldt, valueAtPressure(param, ldt, pressure)));
     }
@@ -3598,7 +3598,7 @@ TS::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 
     TS::TimeSeriesPtr ret(new TS::TimeSeries(param.localTimePool));
 
-    for (const boost::local_time::local_date_time &ldt : tlist)
+    for (const Fmi::LocalDateTime &ldt : tlist)
     {
       ret->emplace_back(TS::TimedValue(ldt, valueAtHeight(param, ldt, height)));
     }
@@ -4062,7 +4062,7 @@ bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
 // ----------------------------------------------------------------------
 
 Q QImpl::sample(const Spine::Parameter &theParameter,
-                const boost::posix_time::ptime &theTime,
+                const Fmi::DateTime &theTime,
                 const Fmi::SpatialReference &theCrs,
                 double theXmin,
                 double theYmin,
@@ -4169,8 +4169,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
       NFmiPoint dummy;
       boost::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
-      boost::local_time::time_zone_ptr utc(new boost::local_time::posix_time_zone("UTC"));
-      boost::local_time::local_date_time localdatetime(theTime, utc);
+      Fmi::TimeZonePtr utc(new boost::local_time::posix_time_zone("UTC"));
+      Fmi::LocalDateTime localdatetime(theTime, utc);
       TS::LocalTimePoolPtr localTimePool = nullptr;
 
       auto mylocale = std::locale::classic();

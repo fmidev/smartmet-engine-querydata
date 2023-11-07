@@ -11,7 +11,7 @@
 
 #include <newbase/NFmiPoint.h>
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <macgyver/DateTime.h>
 
 namespace SmartMet
 {
@@ -57,23 +57,23 @@ class MetaQueryOptions
 
   std::string getProducer() const;
 
-  void setOriginTime(const bp::ptime& originTime);
+  void setOriginTime(const Fmi::DateTime& originTime);
 
   bool hasOriginTime() const;
 
-  bp::ptime getOriginTime() const;
+  Fmi::DateTime getOriginTime() const;
 
-  void setFirstTime(const bp::ptime& firstTime);
+  void setFirstTime(const Fmi::DateTime& firstTime);
 
   bool hasFirstTime() const;
 
-  bp::ptime getFirstTime() const;
+  Fmi::DateTime getFirstTime() const;
 
-  void setLastTime(const bp::ptime& lastTime);
+  void setLastTime(const Fmi::DateTime& lastTime);
 
   bool hasLastTime() const;
 
-  bp::ptime getLastTime() const;
+  Fmi::DateTime getLastTime() const;
 
   void addParameter(const std::string& parameter);
 
@@ -107,11 +107,11 @@ class MetaQueryOptions
  private:
   std::string itsProducer;
 
-  bp::ptime itsOriginTime;
+  Fmi::DateTime itsOriginTime;
 
-  bp::ptime itsFirstTime;
+  Fmi::DateTime itsFirstTime;
 
-  bp::ptime itsLastTime;
+  Fmi::DateTime itsLastTime;
 
   std::list<std::string> itsParameters;
 

@@ -36,9 +36,9 @@ bool latest_model_age_ok(const Repository::SharedModels& time_models, unsigned i
   if (max_latest_age == 0)
     return true;
 
-  auto now = boost::posix_time::second_clock::universal_time();
+  auto now = Fmi::SecondClock::universal_time();
 
-  auto time_limit = now - boost::posix_time::seconds(max_latest_age);
+  auto time_limit = now - Fmi::Seconds(max_latest_age);
 
   for (auto time_model = time_models.begin(), end = time_models.end(); time_model != end;)
   {
@@ -489,7 +489,7 @@ void Repository::remove(const Producer& producer, const boost::filesystem::path&
       if (time_model->second->path() == path)
       {
         if (itsVerbose)
-          std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Deleting "
+          std::cout << Fmi::SecondClock::local_time() << " [qengine] Deleting "
                     << time_model->second->path() << std::endl;
         time_model->second->uncache();  // uncache validpoints
         models.erase(time_model);
@@ -532,7 +532,7 @@ void Repository::resize(const Producer& producer, std::size_t limit)
     while (models.size() > limit)
     {
       if (itsVerbose)
-        std::cout << boost::posix_time::second_clock::local_time()
+        std::cout << Fmi::SecondClock::local_time()
                   << " [qengine] Resize removal of " << models.begin()->second->path() << std::endl;
 
       // the oldest file is the one first sorted by origintime
@@ -559,8 +559,8 @@ void Repository::expire(const Producer& producer, std::size_t max_age)
   if (max_age == 0)
     return;
 
-  auto now = boost::posix_time::second_clock::universal_time();
-  auto time_limit = now - boost::posix_time::seconds(max_age);
+  auto now = Fmi::SecondClock::universal_time();
+  auto time_limit = now - Fmi::Seconds(max_age);
 
   try
   {
@@ -581,7 +581,7 @@ void Repository::expire(const Producer& producer, std::size_t max_age)
       else
       {
         if (itsVerbose)
-          std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Expiring "
+          std::cout << Fmi::SecondClock::local_time() << " [qengine] Expiring "
                     << time_model->second->path() << std::endl;
         time_model->second->uncache();  // uncache validpoints
         models.erase(time_model++);
@@ -914,11 +914,11 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
 
         // Time range
         qi->FirstTime();
-        boost::posix_time::ptime time1 = qi->ValidTime();
+        Fmi::DateTime time1 = qi->ValidTime();
         qi->LastTime();
-        boost::posix_time::ptime time2 = qi->ValidTime();
+        Fmi::DateTime time2 = qi->ValidTime();
         // File load time
-        boost::posix_time::ptime time3 = model->loadTime();
+        Fmi::DateTime time3 = model->loadTime();
 
         // Get the parameter list from querydatainfo
         std::list<std::string> params;
@@ -1145,7 +1145,7 @@ std::list<MetaData> Repository::getRepoMetadata(const std::string& producer) con
 }
 
 std::list<MetaData> Repository::getRepoMetadata(const std::string& producer,
-                                                const boost::posix_time::ptime& origintime) const
+                                                const Fmi::DateTime& origintime) const
 {
   try
   {
@@ -1209,7 +1209,7 @@ Repository::MetaObject Repository::getSynchroInfos() const
 
       const ProducerConfig thisConfig = itsProducerConfigs.find(prodit.first)->second;
 
-      std::vector<bp::ptime> origintimes;
+      std::vector<Fmi::DateTime> origintimes;
 
       for (const auto& modit : theseModels)
       {
@@ -1274,8 +1274,8 @@ Repository::SharedModels Repository::getAllModels(const Producer& producer) cons
 }
 
 void Repository::updateProducerStatus(const std::string& producer,
-                                      const boost::posix_time::ptime& scanTime,
-                                      const boost::posix_time::ptime& nextScanTime)
+                                      const Fmi::DateTime& scanTime,
+                                      const Fmi::DateTime& nextScanTime)
 {
   ProducerStatus& ps = itsProducerStatus[producer];
   ps.latest_scan_time = scanTime;
@@ -1283,7 +1283,7 @@ void Repository::updateProducerStatus(const std::string& producer,
 }
 
 void Repository::updateProducerStatus(const std::string& producer,
-                                      const boost::posix_time::ptime& dataLoadTime,
+                                      const Fmi::DateTime& dataLoadTime,
                                       unsigned int nFiles)
 {
   ProducerStatus& ps = itsProducerStatus[producer];

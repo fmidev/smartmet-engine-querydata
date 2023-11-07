@@ -13,7 +13,7 @@
 #include "Producer.h"
 #include "Q.h"
 
-#include <boost/date_time/posix_time/ptime.hpp>
+#include <macgyver/DateTime.h>
 #include <boost/shared_ptr.hpp>
 #include <set>
 #include <string>
@@ -31,9 +31,9 @@ namespace Querydata
 {
 struct ProducerStatus
 {
-  boost::posix_time::ptime latest_scan_time{boost::posix_time::not_a_date_time};
-  boost::posix_time::ptime next_scan_time{boost::posix_time::not_a_date_time};
-  boost::posix_time::ptime latest_data_load_time{boost::posix_time::not_a_date_time};
+  Fmi::DateTime latest_scan_time{boost::posix_time::not_a_date_time};
+  Fmi::DateTime next_scan_time{boost::posix_time::not_a_date_time};
+  Fmi::DateTime latest_data_load_time{boost::posix_time::not_a_date_time};
   unsigned int number_of_loaded_files{0};
 };
 
@@ -71,7 +71,7 @@ class Repository
 
   using ContentTable = std::pair<boost::shared_ptr<Spine::Table>, Spine::TableFormatter::Names>;
   using SharedModels = std::map<OriginTime, SharedModel>;
-  using MetaObject = std::map<std::string, std::vector<boost::posix_time::ptime> >;
+  using MetaObject = std::map<std::string, std::vector<Fmi::DateTime> >;
 
   ContentTable getProducerInfo(const ProducerList& producerlist,
                                const std::string& timeFormat) const;
@@ -90,7 +90,7 @@ class Repository
   std::list<MetaData> getRepoMetadata(const std::string& producer) const;
   // Metadata for a specific producer and origintime
   std::list<MetaData> getRepoMetadata(const std::string& producer,
-                                      const boost::posix_time::ptime& origintime) const;
+                                      const Fmi::DateTime& origintime) const;
 
   MetaObject getSynchroInfos() const;
 
@@ -98,10 +98,10 @@ class Repository
   SharedModels getAllModels(const Producer& producer) const;
 
   void updateProducerStatus(const std::string& producer,
-                            const boost::posix_time::ptime& scanTime,
-                            const boost::posix_time::ptime& nextScanTime);
+                            const Fmi::DateTime& scanTime,
+                            const Fmi::DateTime& nextScanTime);
   void updateProducerStatus(const std::string& producer,
-                            const boost::posix_time::ptime& dataLoadTime,
+                            const Fmi::DateTime& dataLoadTime,
                             unsigned int nFiles);
 
   void verbose(bool flag);

@@ -472,8 +472,8 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
       if (file_status.second == Fmi::DirectoryMonitor::SCAN)
       {
         const ProducerConfig& conf = producerConfig(producer);
-        auto scan_time = boost::posix_time::second_clock::universal_time();
-        auto next_scan_time = (scan_time + boost::posix_time::seconds(conf.refresh_interval_secs));
+        auto scan_time = Fmi::SecondClock::universal_time();
+        auto next_scan_time = (scan_time + Fmi::Seconds(conf.refresh_interval_secs));
 
         Spine::WriteLock lock(itsMutex);
         itsRepo.updateProducerStatus(producer, scan_time, next_scan_time);
@@ -589,7 +589,7 @@ void RepoManager::load(Producer producer,
   const bool try_old_repo = (oldconf && *oldconf == conf);
 
   unsigned int successful_loads = 0;
-  boost::posix_time::ptime data_load_time(boost::posix_time::not_a_date_time);
+  Fmi::DateTime data_load_time(boost::posix_time::not_a_date_time);
 
   for (const auto& filename : files)
   {
@@ -641,7 +641,7 @@ void RepoManager::load(Producer producer,
                                           conf.minimum_expires,
                                           conf.mmap);
 
-        data_load_time = boost::posix_time::second_clock::universal_time();
+        data_load_time = Fmi::SecondClock::universal_time();
       }
 
       if (itsVerbose && load_new_data)

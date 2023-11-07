@@ -33,11 +33,11 @@ class Engine;
 namespace ba = boost::asio;
 namespace bp = boost::posix_time;
 
-using ProducerMap = std::map<std::string, std::vector<bp::ptime>>;
+using ProducerMap = std::map<std::string, std::vector<Fmi::DateTime>>;
 
 struct PendingUpdate
 {
-  bp::ptime timestamp;
+  Fmi::DateTime timestamp;
 
   std::list<std::string> handlers;
 
@@ -104,7 +104,7 @@ class Synchronizer
 
   boost::optional<ProducerMap> getSynchedData(const std::string& syncGroup);
 
-  boost::optional<std::vector<bp::ptime>> getSynchedData(const std::string& syncGroup,
+  boost::optional<std::vector<Fmi::DateTime>> getSynchedData(const std::string& syncGroup,
                                                          const std::string& producer);
 
   void launch(Spine::Reactor* theReactor);

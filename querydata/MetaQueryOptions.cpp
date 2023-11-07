@@ -33,7 +33,7 @@ std::string MetaQueryOptions::getProducer() const
   return itsProducer;
 }
 
-void MetaQueryOptions::setOriginTime(const bp::ptime& originTime)
+void MetaQueryOptions::setOriginTime(const Fmi::DateTime& originTime)
 {
   try
   {
@@ -51,12 +51,12 @@ bool MetaQueryOptions::hasOriginTime() const
   return itsHasOriginTime;
 }
 
-bp::ptime MetaQueryOptions::getOriginTime() const
+Fmi::DateTime MetaQueryOptions::getOriginTime() const
 {
   return itsOriginTime;
 }
 
-void MetaQueryOptions::setFirstTime(const bp::ptime& firstTime)
+void MetaQueryOptions::setFirstTime(const Fmi::DateTime& firstTime)
 {
   try
   {
@@ -74,12 +74,12 @@ bool MetaQueryOptions::hasFirstTime() const
   return itsHasFirstTime;
 }
 
-bp::ptime MetaQueryOptions::getFirstTime() const
+Fmi::DateTime MetaQueryOptions::getFirstTime() const
 {
   return itsFirstTime;
 }
 
-void MetaQueryOptions::setLastTime(const bp::ptime& lastTime)
+void MetaQueryOptions::setLastTime(const Fmi::DateTime& lastTime)
 {
   try
   {
@@ -97,7 +97,7 @@ bool MetaQueryOptions::hasLastTime() const
   return itsHasLastTime;
 }
 
-bp::ptime MetaQueryOptions::getLastTime() const
+Fmi::DateTime MetaQueryOptions::getLastTime() const
 {
   return itsLastTime;
 }

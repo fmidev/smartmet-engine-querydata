@@ -157,7 +157,7 @@ CoordinatesPtr Engine::getWorldCoordinatesForSR(const Q& /* theQ */,
 
 ValuesPtr Engine::getValuesDefault(const Q& /* theQ */,
                                    std::size_t /* theValuesHash */,
-                                   boost::posix_time::ptime /* theTime */) const
+                                   Fmi::DateTime /* theTime */) const
 {
   REPORT_DISABLED;
 }
@@ -165,7 +165,7 @@ ValuesPtr Engine::getValuesDefault(const Q& /* theQ */,
 ValuesPtr Engine::getValuesForParam(const Q& /* theQ */,
                                     const Spine::Parameter& /* theParam */,
                                     std::size_t /* theValuesHash */,
-                                    boost::posix_time::ptime /* theTime */) const
+                                    Fmi::DateTime /* theTime */) const
 {
   REPORT_DISABLED;
 }

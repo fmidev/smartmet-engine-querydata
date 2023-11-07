@@ -13,7 +13,7 @@
 
 #include "Producer.h"
 #include "ValidTimeList.h"
-#include <boost/date_time/posix_time/ptime.hpp>
+#include <macgyver/DateTime.h>
 #include <boost/filesystem/path.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -62,10 +62,10 @@ class Model : public boost::enable_shared_from_this<Model>
 
   friend std::size_t hash_value(const Model& theModel);
 
-  const boost::posix_time::ptime& originTime() const;
-  const boost::posix_time::ptime& loadTime() const;
-  const boost::posix_time::ptime& modificationTime() const;
-  boost::posix_time::ptime expirationTime() const;
+  const Fmi::DateTime& originTime() const;
+  const Fmi::DateTime& loadTime() const;
+  const Fmi::DateTime& modificationTime() const;
+  Fmi::DateTime expirationTime() const;
 
   boost::shared_ptr<ValidTimeList> validTimes() const;
 
@@ -97,10 +97,10 @@ class Model : public boost::enable_shared_from_this<Model>
   void release(const boost::shared_ptr<NFmiFastQueryInfo>& theInfo) const;
 
   std::size_t itsHashValue = 0;
-  boost::posix_time::ptime itsOriginTime;
-  boost::posix_time::ptime itsLoadTime;
+  Fmi::DateTime itsOriginTime;
+  Fmi::DateTime itsLoadTime;
   boost::filesystem::path itsPath;
-  boost::posix_time::ptime itsModificationTime;
+  Fmi::DateTime itsModificationTime;
   Producer itsProducer;
   std::string itsLevelName;
   unsigned int itsUpdateInterval = 0;

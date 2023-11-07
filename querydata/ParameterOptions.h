@@ -17,7 +17,7 @@
 
 #include <macgyver/TimeFormatter.h>
 
-#include <boost/date_time/local_time/local_date_time.hpp>
+#include <macgyver/LocalDateTime.h>
 
 #include "Producer.h"
 

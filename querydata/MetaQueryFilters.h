@@ -4,7 +4,7 @@
 #include "MetaData.h"
 #include "MetaQueryOptions.h"
 
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <macgyver/DateTime.h>
 #include <vector>
 
 namespace SmartMet
@@ -31,7 +31,7 @@ bool filterLevelTypes(const MetaData& prop, const MetaQueryOptions& options);
 
 bool filterLevelValues(const MetaData& prop, const MetaQueryOptions& options);
 
-bool filterSynchro(const MetaData& prop, const std::vector<bp::ptime>& originTimes);
+bool filterSynchro(const MetaData& prop, const std::vector<Fmi::DateTime>& originTimes);
 
 }  // namespace Querydata
 }  // namespace Engine

@@ -32,7 +32,7 @@ BuildRequires: protobuf-devel
 BuildRequires: rpm-build
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
 BuildRequires: smartmet-library-timeseries-devel >= 23.7.28
-BuildRequires: smartmet-library-macgyver-devel >= 23.8.21
+BuildRequires: smartmet-library-macgyver-devel >= 23.11.8
 BuildRequires: smartmet-library-newbase-devel >= 23.8.30
 BuildRequires: smartmet-library-spine-devel >= 23.8.31
 Requires: %{smartmet_boost}-date-time
@@ -46,7 +46,7 @@ Requires: jsoncpp >= 1.8.4
 Requires: protobuf
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: smartmet-library-timeseries >= 23.7.28
-Requires: smartmet-library-macgyver >= 23.8.21
+Requires: smartmet-library-macgyver >= 23.11.8
 Requires: smartmet-library-newbase >= 23.8.30
 Requires: smartmet-library-spine >= 23.8.31
 #TestRequires: smartmet-utils-devel >= 23.8.23

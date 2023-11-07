@@ -1,6 +1,6 @@
 #pragma once
 
-#include <boost/date_time/posix_time/ptime.hpp>
+#include <macgyver/DateTime.h>
 #include <boost/shared_ptr.hpp>
 #include <list>
 
@@ -10,7 +10,7 @@ namespace Engine
 {
 namespace Querydata
 {
-using ValidTimeList = std::list<boost::posix_time::ptime>;
+using ValidTimeList = std::list<Fmi::DateTime>;
 }  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet

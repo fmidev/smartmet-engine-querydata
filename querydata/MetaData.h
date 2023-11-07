@@ -2,7 +2,7 @@
 
 #include "Envelope.h"
 #include "Producer.h"
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <macgyver/DateTime.h>
 
 #include <list>
 
@@ -53,9 +53,9 @@ struct MetaData
 {
   MetaData() = default;
   Producer producer;
-  boost::posix_time::ptime originTime;
-  boost::posix_time::ptime firstTime;
-  boost::posix_time::ptime lastTime;
+  Fmi::DateTime originTime;
+  Fmi::DateTime firstTime;
+  Fmi::DateTime lastTime;
   long timeStep = 0;    // Minutes
   long nTimeSteps = 0;  // number of timesteps
 

@@ -16,7 +16,7 @@
 #include "Model.h"
 #include "ParameterOptions.h"
 #include "ValidTimeList.h"
-#include <boost/date_time/posix_time/ptime.hpp>
+#include <macgyver/DateTime.h>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -77,8 +77,8 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
   // API correspondence with NFmiFastQueryInfo
 
   const NFmiMetTime& originTime() const;
-  boost::posix_time::ptime modificationTime() const;
-  boost::posix_time::ptime expirationTime() const;
+  Fmi::DateTime modificationTime() const;
+  Fmi::DateTime expirationTime() const;
   double infoVersion() const;
 
   void resetTime();
@@ -176,7 +176,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
   // Needed for metaparameters:
   NFmiDataMatrix<float> values(const Spine::Parameter& theParam,
-                               const boost::posix_time::ptime& theInterpolatedTime,
+                               const Fmi::DateTime& theInterpolatedTime,
                                const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
                                const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
 
@@ -233,7 +233,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
   // sample data into a new projection
 
   boost::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
-                                  const boost::posix_time::ptime& theTime,
+                                  const Fmi::DateTime& theTime,
                                   const Fmi::SpatialReference& theCrs,
                                   double theXmin,
                                   double theYmin,
@@ -244,12 +244,12 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
                                   const Fmi::LandCover& theLandCover);
 
   // one location, one timestep
-  TS::Value value(const ParameterOptions& opt, const boost::local_time::local_date_time& ldt);
+  TS::Value value(const ParameterOptions& opt, const Fmi::LocalDateTime& ldt);
   TS::Value valueAtPressure(const ParameterOptions& opt,
-                            const boost::local_time::local_date_time& ldt,
+                            const Fmi::LocalDateTime& ldt,
                             float pressure);
   TS::Value valueAtHeight(const ParameterOptions& opt,
-                          const boost::local_time::local_date_time& ldt,
+                          const Fmi::LocalDateTime& ldt,
                           float height);
   // one location, many timesteps
   TS::TimeSeriesPtr values(const ParameterOptions& param,
@@ -299,22 +299,22 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
  private:
   NFmiDataMatrix<float> calculatedValues(const Spine::Parameter& theParam,
-                                         const boost::posix_time::ptime& theInterpolatedTime);
+                                         const Fmi::DateTime& theInterpolatedTime);
 
   TS::Value dataIndependentValue(const ParameterOptions& opt,
-                                 const boost::local_time::local_date_time& ldt,
+                                 const Fmi::LocalDateTime& ldt,
                                  double levelResult);
 
   TS::Value dataValue(const ParameterOptions& opt,
                       const NFmiPoint& latlon,
-                      const boost::local_time::local_date_time& ldt);
+                      const Fmi::LocalDateTime& ldt);
   TS::Value dataValueAtPressure(const ParameterOptions& opt,
                                 const NFmiPoint& latlon,
-                                const boost::local_time::local_date_time& ldt,
+                                const Fmi::LocalDateTime& ldt,
                                 float pressure);
   TS::Value dataValueAtHeight(const ParameterOptions& opt,
                               const NFmiPoint& latlon,
-                              const boost::local_time::local_date_time& ldt,
+                              const Fmi::LocalDateTime& ldt,
                               float height);
 
   std::vector<SharedModel> itsModels;

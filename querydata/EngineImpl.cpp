@@ -363,7 +363,7 @@ Q EngineImpl::get(const Producer& producer) const
  */
 // ----------------------------------------------------------------------
 
-Q EngineImpl::get(const Producer& producer, const boost::posix_time::ptime& origintime) const
+Q EngineImpl::get(const Producer& producer, const Fmi::DateTime& origintime) const
 {
   try
   {
@@ -592,7 +592,7 @@ boost::posix_time::time_period EngineImpl::getProducerTimePeriod(const Producer&
     // Handle unknown producers such as observations quickly without exceptions
     if (!hasProducer(producer))
     {
-      return {boost::posix_time::ptime(), boost::posix_time::hours(0)};  // is_null will return true
+      return {Fmi::DateTime(), Fmi::Hours(0)};  // is_null will return true
     }
 
     try
@@ -600,14 +600,14 @@ boost::posix_time::time_period EngineImpl::getProducerTimePeriod(const Producer&
       auto q = get(producer);
       auto validtimes = q->validTimes();
       if (validtimes->empty())
-        return {boost::posix_time::ptime(),
-                boost::posix_time::hours(0)};  // is_null will return true
+        return {Fmi::DateTime(),
+                Fmi::Hours(0)};  // is_null will return true
 
       return {validtimes->front(), validtimes->back()};
     }
     catch (...)
     {
-      return {boost::posix_time::ptime(), boost::posix_time::hours(0)};  // is_null will return true
+      return {Fmi::DateTime(), Fmi::Hours(0)};  // is_null will return true
     }
   }
   catch (...)
@@ -993,7 +993,7 @@ void set_missing_to_nan(NFmiDataMatrix<float>& values)
  */
 // ----------------------------------------------------------------------
 
-ValuesPtr get_values(const Q& theQ, boost::posix_time::ptime theTime)
+ValuesPtr get_values(const Q& theQ, Fmi::DateTime theTime)
 {
   auto ret = std::make_shared<Values>(theQ->values(theTime));
   set_missing_to_nan(*ret);
@@ -1012,7 +1012,7 @@ ValuesPtr get_values(const Q& theQ, boost::posix_time::ptime theTime)
 
 ValuesPtr EngineImpl::getValuesDefault(const Q& theQ,
                                        std::size_t theValuesHash,
-                                       boost::posix_time::ptime theTime) const
+                                       Fmi::DateTime theTime) const
 {
   try
   {
@@ -1046,7 +1046,7 @@ ValuesPtr EngineImpl::getValuesDefault(const Q& theQ,
 
 ValuesPtr get_values(const Q& theQ,
                      const Spine::Parameter& theParam,
-                     boost::posix_time::ptime theTime)
+                     Fmi::DateTime theTime)
 {
   auto ret = std::make_shared<Values>(theQ->values(theParam, theTime));
   set_missing_to_nan(*ret);
@@ -1066,7 +1066,7 @@ ValuesPtr get_values(const Q& theQ,
 ValuesPtr EngineImpl::getValuesForParam(const Q& theQ,
                                         const Spine::Parameter& theParam,
                                         std::size_t theValuesHash,
-                                        boost::posix_time::ptime theTime) const
+                                        Fmi::DateTime theTime) const
 {
   try
   {

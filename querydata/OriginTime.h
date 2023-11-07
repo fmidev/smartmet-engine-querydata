@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <macgyver/DateTime.h>
 #include <set>
 
 namespace SmartMet
@@ -15,7 +15,7 @@ namespace Engine
 {
 namespace Querydata
 {
-using OriginTime = boost::posix_time::ptime;
+using OriginTime = Fmi::DateTime;
 using OriginTimes = std::set<OriginTime>;
 using OriginTimePeriod = boost::posix_time::time_period;
 

@@ -2,7 +2,7 @@
 #include "Engine.h"
 #include "QueryDataMessage.pb.h"
 #include <boost/bind.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <macgyver/DateTime.h>
 #include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <spine/Reactor.h>
@@ -80,7 +80,7 @@ void printList(const T& theList)
   }
 }
 
-bool isNotOld(const boost::posix_time::ptime& target,
+bool isNotOld(const Fmi::DateTime& target,
               const SmartMet::Engine::Querydata::PendingUpdate& compare)
 {
   return compare.timestamp > target;
@@ -193,7 +193,7 @@ void Synchronizer::launch(Spine::Reactor* theReactor)
       itsReactor = theReactor;
 
       // Start broadcast timer loop
-      itsTimer.expires_from_now(bp::seconds(0));
+      itsTimer.expires_from_now(Fmi::Seconds(0));
       itsTimer.async_wait(boost::bind(&Synchronizer::fire_timer, this, _1));
 
       // Start thread for async operations
@@ -252,7 +252,7 @@ boost::optional<ProducerMap> Synchronizer::getSynchedData(const std::string& syn
   }
 }
 
-boost::optional<std::vector<bp::ptime> > Synchronizer::getSynchedData(const std::string& syncGroup,
+boost::optional<std::vector<Fmi::DateTime> > Synchronizer::getSynchedData(const std::string& syncGroup,
                                                                       const std::string& producer)
 {
   try
@@ -260,13 +260,13 @@ boost::optional<std::vector<bp::ptime> > Synchronizer::getSynchedData(const std:
     Spine::WriteLock lock(itsMutex);
     auto it = itsSyncGroups.find(syncGroup);
     if (it == itsSyncGroups.end())
-      return std::vector<bp::ptime>{};  // // Unknown handler
+      return std::vector<Fmi::DateTime>{};  // // Unknown handler
 
     auto producerMap = it->second.getConsensus();
     auto it2 = producerMap.find(producer);
     if (it2 == producerMap.end())
-      return std::vector<bp::ptime>{};  // Unknown producer
-    return std::vector<bp::ptime>(it2->second);
+      return std::vector<Fmi::DateTime>{};  // Unknown producer
+    return std::vector<Fmi::DateTime>(it2->second);
   }
   catch (...)
   {
@@ -323,7 +323,7 @@ void Synchronizer::update_consensus()
     Spine::WriteLock lock(itsMutex);
 
     // Clean too old responses from the pending queue
-    auto firstValidTime = bp::microsec_clock::universal_time() - bp::seconds(BROADCAST_TIMER_DELAY);
+    auto firstValidTime = Fmi::MicrosecClock::universal_time() - Fmi::Seconds(BROADCAST_TIMER_DELAY);
     auto iterator = std::find_if(itsPendingUpdates.begin(),
                                  itsPendingUpdates.end(),
                                  boost::bind(&::isNotOld, firstValidTime, _1));
@@ -415,7 +415,7 @@ void Synchronizer::fire_timer(const boost::system::error_code& err)
       send_broadcast();
 
       // Continue broadcast loop
-      itsTimer.expires_from_now(bp::seconds(BROADCAST_TIMER_DELAY));
+      itsTimer.expires_from_now(Fmi::Seconds(BROADCAST_TIMER_DELAY));
       itsTimer.async_wait(boost::bind(&Synchronizer::fire_timer, this, _1));
     }
   }
@@ -498,7 +498,7 @@ void Synchronizer::process_message(const QueryDataMessage& incomingMessage)
 
       PendingUpdate theUpdate;
 
-      theUpdate.timestamp = bp::microsec_clock::universal_time();
+      theUpdate.timestamp = Fmi::MicrosecClock::universal_time();
 
       for (int i = 0; i < incomingMessage.prodinfos_size(); ++i)
       {
@@ -506,7 +506,7 @@ void Synchronizer::process_message(const QueryDataMessage& incomingMessage)
 
         auto osize = boost::numeric_cast<std::size_t>(info.origintimes_size());
 
-        std::vector<bp::ptime> theseTimes(osize);
+        std::vector<Fmi::DateTime> theseTimes(osize);
 
         for (std::size_t j = 0; j < osize; ++j)
         {
@@ -560,7 +560,7 @@ void SyncGroup::update(const ProducerMap& theUpdate)
       {
         // Make set intersection between the current contents and the new
         std::size_t result_length = std::max(update.second.size(), myProducerIt->second.size());
-        std::vector<bp::ptime> result(result_length);
+        std::vector<Fmi::DateTime> result(result_length);
         auto end = std::set_intersection(update.second.begin(),
                                          update.second.end(),
                                          myProducerIt->second.begin(),
