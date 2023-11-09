@@ -121,6 +121,12 @@ void Repository::add(const Producer& producer, const SharedModel& model)
 {
   try
   {
+    if (itsVerbose)
+    {
+      std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Adding "
+                << model->path() << " with hash value " << hash_value(*model) << std::endl;
+    }
+
     auto producer_model = itsProducers.find(producer);
 
     // Establish the model map for the producer
