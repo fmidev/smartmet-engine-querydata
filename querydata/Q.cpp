@@ -2,7 +2,6 @@
 #include "Model.h"
 #include "WGS84EnvelopeFactory.h"
 #include <boost/date_time/local_time/local_time_io.hpp>
-#include <macgyver/DateTime.h>
 #include <boost/date_time/time_facet.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/optional.hpp>
@@ -18,6 +17,7 @@
 #include <gis/SpatialReference.h>
 #include <macgyver/Astronomy.h>
 #include <macgyver/CharsetTools.h>
+#include <macgyver/DateTime.h>
 #include <macgyver/Exception.h>
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
@@ -113,6 +113,16 @@ const char *LevelName(FmiLevelType theLevel)
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+
+bool is_leap_year(int year)
+{
+  if (year % 4 != 0)
+    return false;
+  if (year % 100 == 0)
+    return false;
+  return true;
+}
+
 }  // namespace
 
 namespace SmartMet
@@ -1956,9 +1966,7 @@ TS::Value WindVMS(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value WindCompass8(QImpl &q,
-                       const Spine::Location &loc,
-                       const Fmi::LocalDateTime &ldt)
+TS::Value WindCompass8(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -1988,9 +1996,7 @@ TS::Value WindCompass8(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value WindCompass16(QImpl &q,
-                        const Spine::Location &loc,
-                        const Fmi::LocalDateTime &ldt)
+TS::Value WindCompass16(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2035,9 +2041,7 @@ TS::Value WindCompass16(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value WindCompass32(QImpl &q,
-                        const Spine::Location &loc,
-                        const Fmi::LocalDateTime &ldt)
+TS::Value WindCompass32(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2070,9 +2074,7 @@ TS::Value WindCompass32(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value Cloudiness8th(QImpl &q,
-                        const Spine::Location &loc,
-                        const Fmi::LocalDateTime &ldt)
+TS::Value Cloudiness8th(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2102,9 +2104,7 @@ TS::Value Cloudiness8th(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value WindChill(QImpl &q,
-                    const Spine::Location &loc,
-                    const Fmi::LocalDateTime &ldt)
+TS::Value WindChill(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2138,9 +2138,7 @@ TS::Value WindChill(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value SummerSimmerIndex(QImpl &q,
-                            const Spine::Location &loc,
-                            const Fmi::LocalDateTime &ldt)
+TS::Value SummerSimmerIndex(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2175,9 +2173,7 @@ TS::Value SummerSimmerIndex(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value FeelsLike(QImpl &q,
-                    const Spine::Location &loc,
-                    const Fmi::LocalDateTime &ldt)
+TS::Value FeelsLike(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2225,9 +2221,7 @@ TS::Value FeelsLike(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value ApparentTemperature(QImpl &q,
-                              const Spine::Location &loc,
-                              const Fmi::LocalDateTime &ldt)
+TS::Value ApparentTemperature(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2269,9 +2263,7 @@ TS::Value ApparentTemperature(QImpl &q,
  * \brief Lower limit of water to snow conversion
  */
 // ----------------------------------------------------------------------
-TS::Value Snow1hLower(QImpl &q,
-                      const Spine::Location &loc,
-                      const Fmi::LocalDateTime &ldt)
+TS::Value Snow1hLower(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2304,9 +2296,7 @@ TS::Value Snow1hLower(QImpl &q,
  * \brief Upper limit of water to snow conversion
  */
 // ----------------------------------------------------------------------
-TS::Value Snow1hUpper(QImpl &q,
-                      const Spine::Location &loc,
-                      const Fmi::LocalDateTime &ldt)
+TS::Value Snow1hUpper(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2337,9 +2327,7 @@ TS::Value Snow1hUpper(QImpl &q,
  * \brief Snow estimate if no Snow1h parameter present
  */
 // ----------------------------------------------------------------------
-TS::Value Snow1h(QImpl &q,
-                 const Spine::Location &loc,
-                 const Fmi::LocalDateTime &ldt)
+TS::Value Snow1h(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2382,9 +2370,7 @@ TS::Value Snow1h(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value WeatherSymbol(QImpl &q,
-                        const Spine::Location &loc,
-                        const Fmi::LocalDateTime &ldt)
+TS::Value WeatherSymbol(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2698,9 +2684,7 @@ boost::optional<int> calc_weather_number(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value SmartSymbolNumber(QImpl &q,
-                            const Spine::Location &loc,
-                            const Fmi::LocalDateTime &ldt)
+TS::Value SmartSymbolNumber(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2731,9 +2715,7 @@ TS::Value SmartSymbolNumber(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value WeatherNumber(QImpl &q,
-                        const Spine::Location &loc,
-                        const Fmi::LocalDateTime &ldt)
+TS::Value WeatherNumber(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2825,6 +2807,10 @@ TS::Value QImpl::dataValue(const ParameterOptions &opt,
   {
     int year = originTime().PosixTime().date().year();
     t.SetYear(boost::numeric_cast<short>(year));
+
+    // Climatology data might not be for a leap year
+    if (t.GetMonth() == 2 && t.GetDay() == 29 && !is_leap_year(year))
+      t.SetDay(28);
   }
 
   float interpolatedValue = interpolate(latlon, t, maxgap);
