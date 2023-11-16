@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 23.10.12
+Version: 23.11.16
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -31,10 +31,10 @@ BuildRequires: protobuf-compiler
 BuildRequires: protobuf-devel
 BuildRequires: rpm-build
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 23.7.28
+BuildRequires: smartmet-library-timeseries-devel >= 23.10.30
 BuildRequires: smartmet-library-macgyver-devel >= 23.11.8
-BuildRequires: smartmet-library-newbase-devel >= 23.8.30
-BuildRequires: smartmet-library-spine-devel >= 23.8.31
+BuildRequires: smartmet-library-newbase-devel >= 23.11.14
+BuildRequires: smartmet-library-spine-devel >= 23.10.20
 Requires: %{smartmet_boost}-date-time
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
@@ -45,11 +45,11 @@ Requires: gdal35-libs
 Requires: jsoncpp >= 1.8.4
 Requires: protobuf
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
-Requires: smartmet-library-timeseries >= 23.7.28
+Requires: smartmet-library-timeseries >= 23.10.30
 Requires: smartmet-library-macgyver >= 23.11.8
-Requires: smartmet-library-newbase >= 23.8.30
-Requires: smartmet-library-spine >= 23.8.31
-#TestRequires: smartmet-utils-devel >= 23.8.23
+Requires: smartmet-library-newbase >= 23.11.14
+Requires: smartmet-library-spine >= 23.10.20
+#TestRequires: smartmet-utils-devel >= 23.9.6
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal35-devel
 #TestRequires: gcc-c++
@@ -94,6 +94,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Nov 16 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.11.16-1.fmi
+- Handle climatology data without date 29.2.
+
 * Thu Oct 12 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.10.12-1.fmi
 - QImpl::levelValue: verify that level object is available
 
