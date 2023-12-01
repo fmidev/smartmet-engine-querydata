@@ -91,19 +91,7 @@ boost::posix_time::time_period Engine::getProducerTimePeriod(const Producer& /* 
   REPORT_DISABLED;
 }
 
-boost::optional<ProducerMap> Engine::getSyncProducers(const std::string& /* syncGroup */) const
-{
-  REPORT_DISABLED;
-}
-
-void Engine::startSynchronize(Spine::Reactor* /* theReactor */) {}
-
 const ProducerConfig& Engine::getProducerConfig(const std::string& /* producer */) const
-{
-  REPORT_DISABLED;
-}
-
-Repository::MetaObject Engine::getSynchroInfos() const
 {
   REPORT_DISABLED;
 }
@@ -129,17 +117,6 @@ std::list<MetaData> Engine::getEngineMetadataBasic() const
 
 std::list<MetaData> Engine::getEngineMetadataWithOptions(
     const MetaQueryOptions& /* theOptions */) const
-{
-  REPORT_DISABLED;
-}
-
-std::list<MetaData> Engine::getEngineSyncMetadataBasic(const std::string& /* syncGroup  */) const
-{
-  REPORT_DISABLED;
-}
-
-std::list<MetaData> Engine::getEngineSyncMetadataWithOptions(
-    const std::string& /* syncGroup */, const MetaQueryOptions& /* theOptions */) const
 {
   REPORT_DISABLED;
 }

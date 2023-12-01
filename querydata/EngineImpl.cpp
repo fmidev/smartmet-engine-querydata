@@ -8,7 +8,6 @@
 #include "MetaQueryFilters.h"
 #include "RepoManager.h"
 #include "Repository.h"
-#include "Synchro.h"
 #include "WGS84EnvelopeFactory.h"
 #include <boost/bind/bind.hpp>
 #include <boost/make_shared.hpp>
@@ -47,7 +46,6 @@ namespace Engine
 {
 namespace Querydata
 {
-
 // ----------------------------------------------------------------------
 /*!
  * \brief The only permitted constructor requires a configfile
@@ -95,9 +93,6 @@ void EngineImpl::init()
     // Init querydata manager
     auto repomanager = itsRepoManager.load();
     repomanager->init();
-
-    // Synchronize metadata
-    itsSynchro = boost::make_shared<Synchronizer>(this, itsConfigFile);
 
     // Wait until all initial data has been loaded
     while (!repomanager->ready() && !Spine::Reactor::isShuttingDown())
@@ -244,9 +239,6 @@ void EngineImpl::shutdown()
 
     if (repomanager != nullptr)
       repomanager->shutdown();
-
-    if (itsSynchro)
-      itsSynchro->shutdown();
   }
   catch (...)
   {
@@ -600,8 +592,7 @@ boost::posix_time::time_period EngineImpl::getProducerTimePeriod(const Producer&
       auto q = get(producer);
       auto validtimes = q->validTimes();
       if (validtimes->empty())
-        return {Fmi::DateTime(),
-                Fmi::Hours(0)};  // is_null will return true
+        return {Fmi::DateTime(), Fmi::Hours(0)};  // is_null will return true
 
       return {validtimes->front(), validtimes->back()};
     }
@@ -642,145 +633,6 @@ std::list<MetaData> EngineImpl::getEngineMetadataWithOptions(
     Spine::ReadLock lock(repomanager->itsMutex);
 
     return repomanager->itsRepo.getRepoMetadata(theOptions);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-std::list<MetaData> EngineImpl::getEngineSyncMetadataBasic(const std::string& syncGroup) const
-{
-  try
-  {
-    auto syncProducers = itsSynchro->getSynchedData(syncGroup);
-
-    if (!syncProducers)
-      return {};  // Unknown sync group
-
-    auto repomanager = itsRepoManager.load();
-
-    std::list<MetaData> repocontent;
-    {
-      Spine::ReadLock lock(repomanager->itsMutex);
-      repocontent = repomanager->itsRepo.getRepoMetadata();
-    }
-
-    if (repocontent.empty())
-      return repocontent;  // No point filtering an empty list
-
-    for (auto iter = repocontent.begin(); iter != repocontent.end();)
-    {
-      auto& producer = iter->producer;
-
-      auto syncIt = syncProducers->find(producer);
-      if (syncIt == syncProducers->end())
-      {
-        // This producer is not available in this synchronization group
-        repocontent.erase(iter++);
-        continue;
-      }
-
-      // Filter according to synchroed origin times
-      if (!filterSynchro(*iter, syncIt->second))
-      {
-        repocontent.erase(iter++);
-        continue;
-      }
-
-      ++iter;
-    }
-
-    return repocontent;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-std::list<MetaData> EngineImpl::getEngineSyncMetadataWithOptions(
-    const std::string& syncGroup, const MetaQueryOptions& options) const
-{
-  try
-  {
-    auto syncProducers = itsSynchro->getSynchedData(syncGroup);
-    auto repomanager = itsRepoManager.load();
-
-    if (!syncProducers)
-      return {};  // Unknown sync group
-
-    std::list<MetaData> repocontent;
-    {
-      Spine::ReadLock lock(repomanager->itsMutex);
-      repocontent = repomanager->itsRepo.getRepoMetadata(options);
-    }
-
-    if (repocontent.empty())
-      return repocontent;  // No point filtering an empty list
-
-    for (auto iter = repocontent.begin(); iter != repocontent.end();)
-    {
-      auto& producer = iter->producer;
-      auto syncIt = syncProducers->find(producer);
-      if (syncIt == syncProducers->end())
-      {
-        // This producer is not available in this synchronization group
-        repocontent.erase(iter++);
-        continue;
-      }
-
-      // Filter according to synchroed origin times
-      if (!filterSynchro(*iter, syncIt->second))
-      {
-        repocontent.erase(iter++);
-        continue;
-      }
-
-      ++iter;
-    }
-
-    return repocontent;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-Repository::MetaObject EngineImpl::getSynchroInfos() const
-{
-  try
-  {
-    auto repomanager = itsRepoManager.load();
-
-    Spine::ReadLock lock(repomanager->itsMutex);
-
-    return repomanager->itsRepo.getSynchroInfos();
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-boost::optional<ProducerMap> EngineImpl::getSyncProducers(const std::string& syncGroup) const
-{
-  try
-  {
-    return itsSynchro->getSynchedData(syncGroup);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-void EngineImpl::startSynchronize(Spine::Reactor* theReactor)
-{
-  try
-  {
-    itsSynchro->launch(theReactor);
   }
   catch (...)
   {
@@ -1044,9 +896,7 @@ ValuesPtr EngineImpl::getValuesDefault(const Q& theQ,
  */
 // ----------------------------------------------------------------------
 
-ValuesPtr get_values(const Q& theQ,
-                     const Spine::Parameter& theParam,
-                     Fmi::DateTime theTime)
+ValuesPtr get_values(const Q& theQ, const Spine::Parameter& theParam, Fmi::DateTime theTime)
 {
   auto ret = std::make_shared<Values>(theQ->values(theParam, theTime));
   set_missing_to_nan(*ret);

@@ -40,12 +40,8 @@ vpath %.h $(SUBNAME)
 vpath %.o $(objdir)
 
 # The files to be compiled
-PB_SRCS = $(wildcard *.proto)
-COMPILED_PB_SRCS = $(patsubst %.proto, $(SUBNAME)/%.pb.cpp, $(PB_SRCS))
-COMPILED_PB_HDRS = $(patsubst %.proto, $(SUBNAME)/%.pb.h, $(PB_SRCS))
-
-SRCS = $(filter-out %.pb.cpp, $(wildcard $(SUBNAME)/*.cpp)) $(COMPILED_PB_SRCS)
-HDRS = $(filter-out %.pb.h, $(wildcard $(SUBNAME)/*.h)) $(COMPILED_PB_HDRS)
+SRCS = $(wildcard $(SUBNAME)/*.cpp)
+HDRS = $(wildcard $(SUBNAME)/*.h)
 OBJS = $(patsubst %.cpp, obj/%.o, $(notdir $(SRCS)))
 
 .PHONY: rpm
@@ -69,7 +65,6 @@ $(LIBFILE): $(SRCS) $(OBJS)
 
 clean:
 	rm -f $(LIBFILE) $(OBJS) *~ $(SUBNAME)/*~
-	rm -f $(SUBNAME)/QueryDataMessage.pb.cpp $(SUBNAME)/QueryDataMessage.pb.h
 	rm -rf obj
 
 format:
@@ -88,7 +83,7 @@ install:
 objdir:
 	@mkdir -p $(objdir)
 
-rpm: clean protoc $(SPEC).spec
+rpm: clean $(SPEC).spec
 	rm -f $(SPEC).tar.gz # Clean a possible leftover from previous attempt
 	tar -czvf $(SPEC).tar.gz --exclude test --exclude-vcs --transform "s,^,$(SPEC)/," *
 	rpmbuild -tb $(SPEC).tar.gz
@@ -100,14 +95,6 @@ obj/%.o: %.cpp
 	$(CXX) $(CFLAGS) $(INCLUDES) -c -MD -MF $(patsubst obj/%.o, obj/%.d, $@) -MT $@ -o $@ $<
 
 obj/Engine.o: CFLAGS += -Wno-deprecated-declarations
-
-protoc: $(COMPILED_PB_SRCS)
-
-querydata/%.pb.cpp: %.proto; mkdir -p tmp
-	protoc --cpp_out=tmp QueryDataMessage.proto
-	mv tmp/QueryDataMessage.pb.h $(SUBNAME)/
-	mv tmp/QueryDataMessage.pb.cc $(SUBNAME)/QueryDataMessage.pb.cpp
-	rm -rf tmp 
 
 test:
 	@echo Querydata engine has no automatically runnable tests as for now

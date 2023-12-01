@@ -9,7 +9,6 @@
 #include "Engine.h"
 #include "Producer.h"
 #include "Repository.h"
-#include "Synchro.h"
 #include <boost/atomic.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
@@ -53,14 +52,7 @@ struct RepoManager;
 class EngineImpl final : public Engine
 {
  private:
-  friend class Synchronizer;
-
   boost::atomic_shared_ptr<RepoManager> itsRepoManager;
-
-  boost::shared_ptr<Synchronizer> itsSynchro;
-
-  // get QEngine synchronization information
-  Repository::MetaObject getSynchroInfos() const override;
 
   const std::string itsConfigFile;
 
@@ -145,20 +137,7 @@ class EngineImpl final : public Engine
   std::list<MetaData> getEngineMetadataWithOptions(
       const MetaQueryOptions& theOptions) const override;
 
-  // Get synchronized engine metadata
-  std::list<MetaData> getEngineSyncMetadataBasic(const std::string& syncGroup) const override;
-
-  // Get synchronized engine metadata with options
-  std::list<MetaData> getEngineSyncMetadataWithOptions(
-      const std::string& syncGroup, const MetaQueryOptions& theOptions) const override;
-
  public:
-  // Get synchronized producers for given synchronization group
-  boost::optional<ProducerMap> getSyncProducers(const std::string& syncGroup) const override;
-
-  // Start synchronization with other QEngines
-  void startSynchronize(Spine::Reactor* theReactor) override;
-
   // get producer's configuration
   const ProducerConfig& getProducerConfig(const std::string& producer) const override;
 

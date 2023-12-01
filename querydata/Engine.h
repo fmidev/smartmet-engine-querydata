@@ -5,10 +5,8 @@
 #include "RepoManager.h"
 #include "Repository.h"
 #include <gis/CoordinateMatrix.h>
-#include <spine/SmartMetEngine.h>
-
-#include "Synchro.h"
 #include <macgyver/Cache.h>
+#include <spine/SmartMetEngine.h>
 
 using CoordinatesPtr = std::shared_ptr<Fmi::CoordinateMatrix>;
 
@@ -135,35 +133,6 @@ class Engine : public Spine::SmartMetEngine
     return getEngineMetadataWithOptions(theOptions);
   }
 
-  /**
-   *  @brief Get synchronized engine metadata
-   */
-  inline std::list<MetaData> getEngineSyncMetadata(const std::string& syncGroup) const
-  {
-    return getEngineSyncMetadataBasic(syncGroup);
-  }
-
-  /**
-   *  @brief Get synchronized engine metadata with options
-   */
-  inline std::list<MetaData> getEngineSyncMetadata(const std::string& syncGroup,
-                                                   const MetaQueryOptions& theOptions) const
-  {
-    return getEngineSyncMetadataWithOptions(syncGroup, theOptions);
-  }
-
-  virtual Repository::MetaObject getSynchroInfos() const;
-
-  /**
-   *  @brief Get synchronized producers for given synchronization group
-   */
-  virtual boost::optional<ProducerMap> getSyncProducers(const std::string& syncGroup) const;
-
-  /**
-   *  @brief Start synchronization with other QEngines
-   */
-  virtual void startSynchronize(Spine::Reactor* theReactor);
-
   virtual const ProducerConfig& getProducerConfig(const std::string& producer) const;
 
   inline CoordinatesPtr getWorldCoordinates(const Q& theQ) const
@@ -176,9 +145,7 @@ class Engine : public Spine::SmartMetEngine
     return getWorldCoordinatesForSR(theQ, theSR);
   }
 
-  inline ValuesPtr getValues(const Q& theQ,
-                             std::size_t theValuesHash,
-                             Fmi::DateTime theTime) const
+  inline ValuesPtr getValues(const Q& theQ, std::size_t theValuesHash, Fmi::DateTime theTime) const
   {
     return getValuesDefault(theQ, theValuesHash, theTime);
   }
@@ -204,11 +171,6 @@ class Engine : public Spine::SmartMetEngine
 
   virtual std::list<MetaData> getEngineMetadataWithOptions(
       const MetaQueryOptions& theOptions) const;
-
-  virtual std::list<MetaData> getEngineSyncMetadataBasic(const std::string& syncGroup) const;
-
-  virtual std::list<MetaData> getEngineSyncMetadataWithOptions(
-      const std::string& syncGroup, const MetaQueryOptions& theOptions) const;
 
   virtual CoordinatesPtr getWorldCoordinatesDefault(const Q& theQ) const;
 
