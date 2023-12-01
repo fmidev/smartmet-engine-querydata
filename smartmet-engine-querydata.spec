@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 23.11.16
+Version: 23.12.1
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -26,14 +26,11 @@ BuildRequires: gcc-c++
 BuildRequires: gdal35-devel
 BuildRequires: jsoncpp-devel >= 1.8.4
 BuildRequires: make
-BuildRequires: protobuf
-BuildRequires: protobuf-compiler
-BuildRequires: protobuf-devel
 BuildRequires: rpm-build
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 23.10.30
-BuildRequires: smartmet-library-macgyver-devel >= 23.11.8
-BuildRequires: smartmet-library-newbase-devel >= 23.11.14
+BuildRequires: smartmet-library-timeseries-devel >= 23.11.21
+BuildRequires: smartmet-library-macgyver-devel >= 23.11.21
+BuildRequires: smartmet-library-newbase-devel >= 23.11.21
 BuildRequires: smartmet-library-spine-devel >= 23.10.20
 Requires: %{smartmet_boost}-date-time
 Requires: %{smartmet_boost}-filesystem
@@ -43,11 +40,10 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal35-libs
 Requires: jsoncpp >= 1.8.4
-Requires: protobuf
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
-Requires: smartmet-library-timeseries >= 23.10.30
-Requires: smartmet-library-macgyver >= 23.11.8
-Requires: smartmet-library-newbase >= 23.11.14
+Requires: smartmet-library-timeseries >= 23.11.21
+Requires: smartmet-library-macgyver >= 23.11.21
+Requires: smartmet-library-newbase >= 23.11.21
 Requires: smartmet-library-spine >= 23.10.20
 #TestRequires: smartmet-utils-devel >= 23.9.6
 #TestRequires: jsoncpp-devel >= 1.8.4
@@ -94,6 +90,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Dec  1 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.12.1-1.fmi
+- Removed backend synchronization as obsolete (BRAINSTORM-2807)
+
 * Thu Nov 16 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.11.16-1.fmi
 - Handle climatology data without date 29.2.
 
