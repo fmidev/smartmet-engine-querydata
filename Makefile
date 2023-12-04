@@ -26,7 +26,6 @@ LIBS += -L$(libdir) \
 	-lboost_iostreams \
 	-lboost_serialization \
 	-lboost_system \
-	-lprotobuf \
 	-lbz2 -lz
 
 # What to install
@@ -66,6 +65,8 @@ $(LIBFILE): $(SRCS) $(OBJS)
 clean:
 	rm -f $(LIBFILE) $(OBJS) *~ $(SUBNAME)/*~
 	rm -rf obj
+	# Not used any more, but make sure that these are removed
+	rm -f querydata/QueryDataMessage.pb.cpp querydata/QueryDataMessage.pb.h
 
 format:
 	clang-format -i -style=file $(SUBNAME)/*.h $(SUBNAME)/*.cpp examples/*.cpp
