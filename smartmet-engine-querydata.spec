@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 23.12.1
+Version: 23.12.4
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Dec  4 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.12.4-1.fmi
+- Fix build after removing protobuf dependency
+
 * Fri Dec  1 2023 Mika Heiskanen <mika.heiskanen@fmi.fi> - 23.12.1-1.fmi
 - Removed backend synchronization as obsolete (BRAINSTORM-2807)
 
