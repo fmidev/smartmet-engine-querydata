@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 23.12.4
+Version: 24.1.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,10 +29,10 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 23.11.21
-BuildRequires: smartmet-library-macgyver-devel >= 23.11.21
+BuildRequires: smartmet-library-timeseries-devel >= 24.1.4
+BuildRequires: smartmet-library-macgyver-devel >= 24.1.17
 BuildRequires: smartmet-library-newbase-devel >= 23.11.21
-BuildRequires: smartmet-library-spine-devel >= 23.10.20
+BuildRequires: smartmet-library-spine-devel >= 23.12.5
 Requires: %{smartmet_boost}-date-time
 Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
@@ -43,10 +43,10 @@ Requires: gdal35-libs
 Requires: jsoncpp >= 1.8.4
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 23.11.21
-Requires: smartmet-library-macgyver >= 23.11.21
+Requires: smartmet-library-timeseries >= 24.1.4
+Requires: smartmet-library-macgyver >= 24.1.17
 Requires: smartmet-library-newbase >= 23.11.21
-Requires: smartmet-library-spine >= 23.10.20
+Requires: smartmet-library-spine >= 23.12.5
 #TestRequires: smartmet-utils-devel >= 23.9.6
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal35-devel
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Jan 19 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.1.19-1.fmi
+- Fixed fmisid, stationlongitude and stationlatitude to work for locations which have a fmisid (BRAINSTORM-2840)
+
 * Mon Dec  4 2023 Andris Pavēnis <andris.pavenis@fmi.fi> 23.12.4-1.fmi
 - Fix build after removing protobuf dependency
 
