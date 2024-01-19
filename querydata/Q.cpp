@@ -3134,6 +3134,23 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       // so that we can have e.g. fmisid identifier for observations in query which
       // has both observations and forecasts
     case kFmiFMISID:
+    {
+      if (loc.fmisid)
+        return *loc.fmisid;
+      return TS::None();
+    }
+    case kFmiStationLongitude:
+    {
+      if (loc.fmisid)
+        return loc.longitude;
+      return TS::None();
+    }
+    case kFmiStationLatitude:
+    {
+      if (loc.fmisid)
+        return loc.latitude;
+      return TS::None();
+    }
     case kFmiWmoStationNumber:
     case kFmiLPNN:
     case kFmiRWSID:
