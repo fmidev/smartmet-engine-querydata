@@ -29,9 +29,9 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 24.2.20
+BuildRequires: smartmet-library-timeseries-devel >= 24.2.23
 BuildRequires: smartmet-library-macgyver-devel >= 24.1.17
-BuildRequires: smartmet-library-newbase-devel >= 24.1.30
+BuildRequires: smartmet-library-newbase-devel >= 24.2.23
 BuildRequires: smartmet-library-spine-devel >= 24.2.8
 Requires: %{smartmet_boost}-date-time
 Requires: %{smartmet_boost}-filesystem
@@ -43,9 +43,9 @@ Requires: gdal35-libs
 Requires: jsoncpp >= 1.8.4
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 24.2.20
+Requires: smartmet-library-timeseries >= 24.2.23
 Requires: smartmet-library-macgyver >= 24.1.17
-Requires: smartmet-library-newbase >= 24.1.30
+Requires: smartmet-library-newbase >= 24.2.23
 Requires: smartmet-library-spine >= 24.2.8
 #TestRequires: smartmet-utils-devel >= 23.9.6
 #TestRequires: jsoncpp-devel >= 1.8.4
