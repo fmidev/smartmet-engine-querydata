@@ -7,7 +7,6 @@
 #include "Repository.h"
 #include "MetaQueryFilters.h"
 #include <boost/algorithm/string/join.hpp>
-#include <boost/date_time/posix_time/posix_time_io.hpp>
 #include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <newbase/NFmiFastQueryInfo.h>
@@ -123,7 +122,7 @@ void Repository::add(const Producer& producer, const SharedModel& model)
   {
     if (itsVerbose)
     {
-      std::cout << boost::posix_time::second_clock::local_time() << " [qengine] Adding "
+      std::cout << Fmi::SecondClock::local_time() << " [qengine] Adding "
                 << model->path() << " with hash value " << hash_value(*model) << std::endl;
     }
 

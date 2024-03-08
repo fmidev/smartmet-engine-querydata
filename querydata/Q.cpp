@@ -1,8 +1,6 @@
 #include "Q.h"
 #include "Model.h"
 #include "WGS84EnvelopeFactory.h"
-#include <boost/date_time/local_time/local_time_io.hpp>
-#include <boost/date_time/time_facet.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/optional.hpp>
 #include <boost/range/algorithm/sort.hpp>
@@ -1832,11 +1830,8 @@ std::string format_date(const Fmi::LocalDateTime &ldt,
 {
   try
   {
-    using tfacet = boost::date_time::time_facet<boost::local_time::local_date_time, char>;
-    std::ostringstream os;
-    os.imbue(std::locale(llocale, new tfacet(fmt.c_str())));
-    os << ldt;
-    return Fmi::latin1_to_utf8(os.str());
+    const std::string tmp = Fmi::date_time::format_time(llocale, fmt, ldt);
+    return Fmi::latin1_to_utf8(tmp);
   }
   catch (...)
   {
