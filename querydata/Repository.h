@@ -31,9 +31,9 @@ namespace Querydata
 {
 struct ProducerStatus
 {
-  Fmi::DateTime latest_scan_time{boost::posix_time::not_a_date_time};
-  Fmi::DateTime next_scan_time{boost::posix_time::not_a_date_time};
-  Fmi::DateTime latest_data_load_time{boost::posix_time::not_a_date_time};
+  Fmi::DateTime latest_scan_time{Fmi::DateTime::NOT_A_DATE_TIME};
+  Fmi::DateTime next_scan_time{Fmi::DateTime::NOT_A_DATE_TIME};
+  Fmi::DateTime latest_data_load_time{Fmi::DateTime::NOT_A_DATE_TIME};
   unsigned int number_of_loaded_files{0};
 };
 
@@ -65,7 +65,7 @@ class Repository
   // Must not use aliases for these!
   Q get(const Producer& producer) const;
   Q get(const Producer& producer, const OriginTime& origintime) const;
-  Q get(const Producer& producer, const boost::posix_time::time_period& timeperiod) const;
+  Q get(const Producer& producer, const Fmi::TimePeriod& timeperiod) const;
 
   Q getAll(const Producer& producer) const;
 

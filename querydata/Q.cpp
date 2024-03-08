@@ -282,13 +282,13 @@ MetaData QImpl::metaData()
     if (qi.FirstTime())
       meta.firstTime = qi.ValidTime();
     else
-      meta.firstTime = boost::posix_time::not_a_date_time;
+      meta.firstTime = Fmi::DateTime::NOT_A_DATE_TIME;
 
     // Get querydata last time
     if (qi.LastTime())
       meta.lastTime = qi.ValidTime();
     else
-      meta.lastTime = boost::posix_time::not_a_date_time;
+      meta.lastTime = Fmi::DateTime::NOT_A_DATE_TIME;
 
     // Get querydata timestep
     if (qi.FirstTime() && qi.NextTime())
@@ -2939,7 +2939,8 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     case kFmiTZ:
     {
       if (ldt.zone())
-        return ldt.zone()->std_zone_name();
+        //return ldt.zone()->std_zone_name(); // Not present in new Date library
+        return ldt.abbrev();
       return TS::None();
     }
     case kFmiLocalTZ:
@@ -2991,7 +2992,7 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
         // Search first valid time after the desired time, and choose that origintime
         bool ok = false;
         for (resetTime(); !ok && nextTime();)
-          ok = (validTime() > ldt.utc_time());
+          ok = (Fmi::DateTime(validTime()) > ldt.utc_time());
         if (!ok)
           return TS::None();
       }
@@ -4172,7 +4173,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
       NFmiPoint dummy;
       boost::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
-      Fmi::TimeZonePtr utc(new boost::local_time::posix_time_zone("UTC"));
+      Fmi::TimeZonePtr utc("utc");
       Fmi::LocalDateTime localdatetime(theTime, utc);
       TS::LocalTimePoolPtr localTimePool = nullptr;
 

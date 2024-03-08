@@ -19,8 +19,6 @@ namespace Engine
 {
 namespace Querydata
 {
-namespace bp = boost::posix_time;
-
 class MetaQueryOptions
 {
  public:

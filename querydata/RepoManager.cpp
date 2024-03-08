@@ -589,7 +589,7 @@ void RepoManager::load(Producer producer,
   const bool try_old_repo = (oldconf && *oldconf == conf);
 
   unsigned int successful_loads = 0;
-  Fmi::DateTime data_load_time(boost::posix_time::not_a_date_time);
+  Fmi::DateTime data_load_time(Fmi::DateTime::NOT_A_DATE_TIME);
 
   for (const auto& filename : files)
   {

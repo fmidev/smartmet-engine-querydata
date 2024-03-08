@@ -52,8 +52,8 @@ bool latest_model_age_ok(const Repository::SharedModels& time_models, unsigned i
 
 // Boost time_period is null if the duration is null, hence the intersects method does not work as
 // we want
-bool periods_overlap(const boost::posix_time::time_period& period1,
-                     const boost::posix_time::time_period& period2)
+bool periods_overlap(const Fmi::TimePeriod& period1,
+                     const Fmi::TimePeriod& period2)
 {
   const auto& t1 = period1.begin();
   const auto& t2 = period1.end();
@@ -410,7 +410,7 @@ Q Repository::getAll(const Producer& producer) const
  */
 // ----------------------------------------------------------------------
 
-Q Repository::get(const Producer& producer, const boost::posix_time::time_period& timeperiod) const
+Q Repository::get(const Producer& producer, const Fmi::TimePeriod& timeperiod) const
 {
   try
   {
@@ -441,7 +441,7 @@ Q Repository::get(const Producer& producer, const boost::posix_time::time_period
     {
       // Now check if the model overlaps the desired time period
       auto validtimes = otime_model.second->validTimes();
-      auto period = boost::posix_time::time_period(validtimes->front(), validtimes->back());
+      auto period = Fmi::TimePeriod(validtimes->front(), validtimes->back());
 
       if (periods_overlap(period, timeperiod))
       {

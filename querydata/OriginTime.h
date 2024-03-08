@@ -17,7 +17,7 @@ namespace Querydata
 {
 using OriginTime = Fmi::DateTime;
 using OriginTimes = std::set<OriginTime>;
-using OriginTimePeriod = boost::posix_time::time_period;
+using OriginTimePeriod = Fmi::TimePeriod;
 
 }  // namespace Querydata
 }  // namespace Engine

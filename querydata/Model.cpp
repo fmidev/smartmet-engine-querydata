@@ -65,7 +65,7 @@ Model::Model(const boost::filesystem::path& filename,
 
     // May throw if file is gone
     itsModificationTime =
-        boost::posix_time::from_time_t(boost::filesystem::last_write_time(filename));
+        Fmi::date_time::from_time_t(boost::filesystem::last_write_time(filename));
 
     // Unique hash value for this model
 

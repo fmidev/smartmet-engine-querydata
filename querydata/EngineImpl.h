@@ -106,7 +106,7 @@ class EngineImpl final : public Engine
 
   Q get(const Producer& producer, const OriginTime& origintime) const override;
 
-  Q get(const Producer& producer, const boost::posix_time::time_period& timePeriod) const override;
+  Q get(const Producer& producer, const Fmi::TimePeriod& timePeriod) const override;
 
   // Get detailed info of current producers
   Repository::ContentTable getProducerInfo(
@@ -127,7 +127,7 @@ class EngineImpl final : public Engine
  public:
   // Get producer data period
 
-  boost::posix_time::time_period getProducerTimePeriod(const Producer& producer) const override;
+  Fmi::TimePeriod getProducerTimePeriod(const Producer& producer) const override;
 
  protected:
   // Get engine metadata

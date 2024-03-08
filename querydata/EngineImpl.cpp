@@ -378,7 +378,7 @@ Q EngineImpl::get(const Producer& producer, const Fmi::DateTime& origintime) con
  */
 // ----------------------------------------------------------------------
 
-Q EngineImpl::get(const Producer& producer, const boost::posix_time::time_period& timePeriod) const
+Q EngineImpl::get(const Producer& producer, const Fmi::TimePeriod& timePeriod) const
 {
   try
   {
@@ -577,7 +577,7 @@ Repository::ContentTable EngineImpl::getEngineContentsForProducer(
  */
 // ----------------------------------------------------------------------
 
-boost::posix_time::time_period EngineImpl::getProducerTimePeriod(const Producer& producer) const
+Fmi::TimePeriod EngineImpl::getProducerTimePeriod(const Producer& producer) const
 {
   try
   {

@@ -69,7 +69,7 @@ Q Engine::get(const Producer& /* producer */, const OriginTime& /* origintime */
 }
 
 Q Engine::get(const Producer& /* producer */,
-              const boost::posix_time::time_period& /* timePeriod */) const
+              const Fmi::TimePeriod& /* timePeriod */) const
 {
   REPORT_DISABLED;
 }
@@ -86,7 +86,7 @@ Repository::ContentTable Engine::getParameterInfo(
   REPORT_DISABLED;
 }
 
-boost::posix_time::time_period Engine::getProducerTimePeriod(const Producer& /* producer */) const
+Fmi::TimePeriod Engine::getProducerTimePeriod(const Producer& /* producer */) const
 {
   REPORT_DISABLED;
 }

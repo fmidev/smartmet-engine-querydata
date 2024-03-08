@@ -85,7 +85,7 @@ class Engine : public Spine::SmartMetEngine
   /**
    *   @brief data accessor: specific valid time period, possibly extracted from a multifile
    */
-  virtual Q get(const Producer& producer, const boost::posix_time::time_period& timePeriod) const;
+  virtual Q get(const Producer& producer, const Fmi::TimePeriod& timePeriod) const;
 
   /**
    *  @brief Get detailed info of current producers
@@ -118,7 +118,7 @@ class Engine : public Spine::SmartMetEngine
   /**
    *  @brief  Get producer data period
    */
-  virtual boost::posix_time::time_period getProducerTimePeriod(const Producer& producer) const;
+  virtual Fmi::TimePeriod getProducerTimePeriod(const Producer& producer) const;
 
   /**
    *  @brief Get engine metadata
