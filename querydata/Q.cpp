@@ -4168,7 +4168,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
       NFmiPoint dummy;
       boost::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
-      Fmi::TimeZonePtr utc("utc");
+      Fmi::TimeZonePtr utc("Etc/UTC");
       Fmi::LocalDateTime localdatetime(theTime, utc);
       TS::LocalTimePoolPtr localTimePool = nullptr;
 
