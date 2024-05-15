@@ -16,7 +16,6 @@ LIBS += \
 	-lsmartmet-macgyver \
 	-lsmartmet-gis \
 	$(CONFIGPP_LIBS) \
-	-lboost_date_time \
 	-lboost_thread \
 	-lboost_filesystem \
 	-lboost_regex \
