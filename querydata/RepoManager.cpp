@@ -317,7 +317,7 @@ void RepoManager::expirationLoop()
   {
     // Wait 30 seconds. TODO: use condition variable
     for (int i = 0; i < 10 * 30 && !Spine::Reactor::isShuttingDown(); i++)
-      boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+      boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
 
     if (Spine::Reactor::isShuttingDown())
       break;
@@ -522,7 +522,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
           ok = true;
       }
       if (!ok)
-        boost::this_thread::sleep(boost::posix_time::milliseconds(50));
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(50));
     }
 
     // Abort if there is a shut down request

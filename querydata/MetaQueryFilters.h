@@ -13,8 +13,6 @@ namespace Engine
 {
 namespace Querydata
 {
-namespace bp = boost::posix_time;
-
 bool filterProducer(const MetaData& prop, const MetaQueryOptions& options);
 
 bool filterOriginTime(const MetaData& prop, const MetaQueryOptions& options);

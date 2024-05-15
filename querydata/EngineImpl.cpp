@@ -97,7 +97,7 @@ void EngineImpl::init()
     // Wait until all initial data has been loaded
     while (!repomanager->ready() && !Spine::Reactor::isShuttingDown())
     {
-      boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+      boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
     }
 
     // Then clean the old serialized validpoint files safely
@@ -182,7 +182,7 @@ void EngineImpl::configFileWatch()
           // Wait until all initial data has been loaded
           while (!newrepomanager->ready() && !Spine::Reactor::isShuttingDown())
           {
-            boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
           }
 
           newrepomanager->removeOldManager();
