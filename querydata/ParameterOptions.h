@@ -41,8 +41,7 @@ struct ParameterOptions
                    const std::string& theZone,
                    const bool& theNearestPointFlag,
                    const NFmiPoint& theNearestPoint,
-                   NFmiPoint& theLastPoint,
-                   const TS::LocalTimePoolPtr& theLocalTimePool);
+                   NFmiPoint& theLastPoint);
 
   const Spine::Parameter& par;
   const Producer& producer;
@@ -57,7 +56,6 @@ struct ParameterOptions
   const bool& findnearestvalidpoint;
   const NFmiPoint& nearestpoint;
   NFmiPoint& lastpoint;
-  TS::LocalTimePoolPtr localTimePool;
 };
 
 }  // namespace Querydata

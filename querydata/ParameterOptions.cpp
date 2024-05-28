@@ -19,8 +19,7 @@ ParameterOptions::ParameterOptions(const Spine::Parameter& theParam,
                                    const std::string& theZone,
                                    const bool& theNearestPointFlag,
                                    const NFmiPoint& theNearestPoint,
-                                   NFmiPoint& theLastPoint,
-                                   const TS::LocalTimePoolPtr& theLocalTimePool)
+                                   NFmiPoint& theLastPoint)
     : par(theParam),
       producer(theProducer),
       loc(theLocation),
@@ -33,8 +32,7 @@ ParameterOptions::ParameterOptions(const Spine::Parameter& theParam,
       outzone(theZone),
       findnearestvalidpoint(theNearestPointFlag),
       nearestpoint(theNearestPoint),
-      lastpoint(theLastPoint),
-      localTimePool(theLocalTimePool)
+      lastpoint(theLastPoint)
 {
 }
 
