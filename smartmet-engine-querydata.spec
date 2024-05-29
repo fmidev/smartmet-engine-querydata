@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 24.5.28
+Version: 24.5.29
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -91,6 +91,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed May 29 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.29-1.fmi
+- Fix uninitialized shared ptr from previous release
+
 * Tue May 28 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.28-1.fmi
 - Remove uses of LocalTimePool
 
