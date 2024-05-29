@@ -3658,7 +3658,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
 {
   try
   {
-    TS::TimeSeriesGroupPtr ret;
+    TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
 
     for (const auto &mask : indexmask)
     {
