@@ -19,7 +19,7 @@
 #include <macgyver/DateTime.h>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <gis/CoordinateMatrix.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/ParameterTranslations.h>
@@ -59,9 +59,9 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
   QImpl& operator=(QImpl&& other) = delete;
 
   // Avoid using this as much as possible
-  boost::shared_ptr<NFmiFastQueryInfo> info();
+  std::shared_ptr<NFmiFastQueryInfo> info();
 
-  boost::shared_ptr<ValidTimeList> validTimes() const;
+  std::shared_ptr<ValidTimeList> validTimes() const;
 
   const std::string& levelName() const;
   FmiLevelType levelType() const;
@@ -232,7 +232,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
   // sample data into a new projection
 
-  boost::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
+  std::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
                                   const Fmi::DateTime& theTime,
                                   const Fmi::SpatialReference& theCrs,
                                   double theXmin,
@@ -292,7 +292,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
   bool needsGlobeWrap() const;
 
-  void setParameterTranslations(boost::shared_ptr<Spine::ParameterTranslations> translations)
+  void setParameterTranslations(std::shared_ptr<Spine::ParameterTranslations> translations)
   {
     itsParameterTranslations = std::move(translations);
   }
@@ -319,15 +319,15 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
   std::vector<SharedModel> itsModels;
   std::vector<SharedInfo> itsInfos;  // used only in destructor and MultiInfo constructor
-  boost::shared_ptr<NFmiFastQueryInfo> itsInfo;    // or NFmiMultiQueryInfo
-  boost::shared_ptr<ValidTimeList> itsValidTimes;  // collective over all datas
+  std::shared_ptr<NFmiFastQueryInfo> itsInfo;    // or NFmiMultiQueryInfo
+  std::shared_ptr<ValidTimeList> itsValidTimes;  // collective over all datas
   std::size_t itsHashValue;
 
-  boost::shared_ptr<Spine::ParameterTranslations> itsParameterTranslations;
+  std::shared_ptr<Spine::ParameterTranslations> itsParameterTranslations;
 
 };  // class QImpl
 
-using Q = boost::shared_ptr<QImpl>;
+using Q = std::shared_ptr<QImpl>;
 using QList = std::list<Q>;
 
 std::size_t hash_value(const Q& theQ);

@@ -91,13 +91,13 @@ class Engine : public Spine::SmartMetEngine
    *  @brief Get detailed info of current producers
    */
   virtual Repository::ContentTable getProducerInfo(
-      const std::string& timeFormat, const boost::optional<std::string>& producer) const;
+      const std::string& timeFormat, const std::optional<std::string>& producer) const;
 
   /**
    *  @brief Get info of parameters of each producer
    */
   virtual Repository::ContentTable getParameterInfo(
-      const boost::optional<std::string>& producer) const;
+      const std::optional<std::string>& producer) const;
 
   /**
    *  @brief Get current engine contents

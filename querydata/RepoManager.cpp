@@ -339,7 +339,7 @@ void RepoManager::expirationLoop()
  */
 // ----------------------------------------------------------------------
 
-void RepoManager::setOldManager(boost::shared_ptr<RepoManager> oldmanager)
+void RepoManager::setOldManager(std::shared_ptr<RepoManager> oldmanager)
 {
   itsOldRepoManager = std::move(oldmanager);
 }
@@ -573,7 +573,7 @@ void RepoManager::load(Producer producer,
   const ProducerConfig& conf = producerConfig(producer);
 
   // Try establishing old config
-  boost::optional<ProducerConfig> oldconf;
+  std::optional<ProducerConfig> oldconf;
   try
   {
     if (itsOldRepoManager)
@@ -628,7 +628,7 @@ void RepoManager::load(Producer producer,
         if (itsVerbose)
           std::cout << Spine::log_time_str() + " QENGINE LOAD " + filename.string() << std::endl;
 
-        model = boost::make_shared<Model>(filename,
+        model = std::make_shared<Model>(filename,
                                           itsValidPointsCacheDir,
                                           conf.producer,
                                           conf.leveltype,

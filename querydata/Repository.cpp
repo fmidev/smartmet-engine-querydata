@@ -304,7 +304,7 @@ Q Repository::get(const Producer& producer) const
     // newest origintime is at the end
     auto last = --models.end();
 
-    return boost::make_shared<QImpl>(last->second);
+    return std::make_shared<QImpl>(last->second);
   }
   catch (...)
   {
@@ -335,18 +335,18 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
     {
       // newest origintime is at the end
       auto iter = --models.end();
-      return boost::make_shared<QImpl>(iter->second);
+      return std::make_shared<QImpl>(iter->second);
     }
     if (origintime.is_neg_infinity())
     {
       // oldest origintime is at the beginning
       auto iter = models.begin();
-      return boost::make_shared<QImpl>(iter->second);
+      return std::make_shared<QImpl>(iter->second);
     }
 
     auto iter = models.find(origintime);
     if (iter != models.end())
-      return boost::make_shared<QImpl>(iter->second);
+      return std::make_shared<QImpl>(iter->second);
 
     throw Fmi::Exception(BCP,
                          "Repository get: No data available for producer '" + producer +
@@ -382,7 +382,7 @@ Q Repository::getAll(const Producer& producer) const
     // Construct a vector of datas with similar grids only
 
     std::vector<SharedModel> okmodels;
-    boost::optional<std::size_t> hash;
+    std::optional<std::size_t> hash;
 
     for (const auto& otime_model : models)
     {
@@ -395,7 +395,7 @@ Q Repository::getAll(const Producer& producer) const
 
     // Construct a view of the data
 
-    return boost::make_shared<QImpl>(okmodels);
+    return std::make_shared<QImpl>(okmodels);
   }
   catch (...)
   {
@@ -434,7 +434,7 @@ Q Repository::get(const Producer& producer, const Fmi::TimePeriod& timeperiod) c
     // Construct a vector of datas with similar grids only and which cover the given time period
 
     std::vector<SharedModel> okmodels;
-    boost::optional<std::size_t> hash;
+    std::optional<std::size_t> hash;
 
     for (const auto& otime_model : models)
     {
@@ -457,7 +457,7 @@ Q Repository::get(const Producer& producer, const Fmi::TimePeriod& timeperiod) c
     if (okmodels.empty())
       return getAll(producer);  // Attempt to interpolate instead
 
-    return boost::make_shared<QImpl>(okmodels);
+    return std::make_shared<QImpl>(okmodels);
   }
   catch (...)
   {
@@ -684,7 +684,7 @@ Repository::ContentTable Repository::getProducerInfo(const ProducerList& produce
 {
   try
   {
-    boost::shared_ptr<Spine::Table> resultTable(new Spine::Table);
+    std::shared_ptr<Spine::Table> resultTable(new Spine::Table);
 
     static Spine::TableFormatter::Names headers{"#",
                                                 "Producer",
@@ -819,7 +819,7 @@ Repository::ContentTable Repository::getParameterInfo(const ProducerList& produc
 {
   try
   {
-    boost::shared_ptr<Spine::Table> resultTable(new Spine::Table);
+    std::shared_ptr<Spine::Table> resultTable(new Spine::Table);
 
     static Spine::TableFormatter::Names headers{"#", "ParamId", "ParamName", "Producers"};
 
@@ -898,7 +898,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
 
     std::unique_ptr<Fmi::TimeFormatter> timeFormatter(Fmi::TimeFormatter::create(timeFormat));
 
-    boost::shared_ptr<Spine::Table> resultTable(new Spine::Table);
+    std::shared_ptr<Spine::Table> resultTable(new Spine::Table);
 
     int row = 0;
 

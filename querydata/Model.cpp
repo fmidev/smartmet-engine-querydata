@@ -81,8 +81,8 @@ Model::Model(const boost::filesystem::path& filename,
 
     // We need an info object to intialize some data members
 
-    boost::shared_ptr<NFmiFastQueryInfo> qinfo =
-        boost::make_shared<NFmiFastQueryInfo>(itsQueryData.get());
+    std::shared_ptr<NFmiFastQueryInfo> qinfo =
+        std::make_shared<NFmiFastQueryInfo>(itsQueryData.get());
 
     // Might as well pool it for subsequent use
 
@@ -104,7 +104,7 @@ Model::Model(const boost::filesystem::path& filename,
       }
 
       itsValidPoints =
-          boost::make_shared<ValidPoints>(itsProducer, itsPath, *qinfo, validpointscachedir, hash);
+          std::make_shared<ValidPoints>(itsProducer, itsPath, *qinfo, validpointscachedir, hash);
     }
 
     // Requesting the valid times repeatedly is slow if we have to do
@@ -129,7 +129,7 @@ Model::Model(const boost::filesystem::path& filename,
  */
 // ----------------------------------------------------------------------
 
-Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
+Model::Model(const Model& theModel, std::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
     : itsHashValue(theHash)  // decided externally on purpose
       ,
       itsOriginTime(theModel.itsOriginTime),
@@ -157,15 +157,15 @@ Model::Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, st
  */
 // ----------------------------------------------------------------------
 
-Model::Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
+Model::Model(std::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
     : itsHashValue(theHash), itsValidTimeList(new ValidTimeList()), itsQueryData(std::move(theData))
 {
   try
   {
     // We need an info object to intialize some data members
 
-    boost::shared_ptr<NFmiFastQueryInfo> qinfo =
-        boost::make_shared<NFmiFastQueryInfo>(itsQueryData.get());
+    std::shared_ptr<NFmiFastQueryInfo> qinfo =
+        std::make_shared<NFmiFastQueryInfo>(itsQueryData.get());
 
     // Might as well pool it for subsequent use
 
@@ -409,7 +409,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
  */
 // ----------------------------------------------------------------------
 
-boost::shared_ptr<ValidTimeList> Model::validTimes() const
+std::shared_ptr<ValidTimeList> Model::validTimes() const
 {
   return itsValidTimeList;
 }
@@ -427,7 +427,7 @@ SharedInfo Model::info() const
     Spine::WriteLock lock(itsQueryInfoPoolMutex);
     if (itsQueryInfoPool.empty())
     {
-      auto qinfo = boost::make_shared<NFmiFastQueryInfo>(itsQueryData.get());
+      auto qinfo = std::make_shared<NFmiFastQueryInfo>(itsQueryData.get());
       qinfo->First();  // reset for first use
       return qinfo;
     }
@@ -443,7 +443,7 @@ SharedInfo Model::info() const
   }
 }
 
-void Model::release(const boost::shared_ptr<NFmiFastQueryInfo>& theInfo) const
+void Model::release(const std::shared_ptr<NFmiFastQueryInfo>& theInfo) const
 {
   try
   {
@@ -496,7 +496,7 @@ std::size_t hash_value(const Model& theModel)
  */
 // ----------------------------------------------------------------------
 
-void Model::setLatLonCache(const boost::shared_ptr<std::vector<NFmiPoint>>& theCache)
+void Model::setLatLonCache(const std::shared_ptr<std::vector<NFmiPoint>>& theCache)
 {
   itsQueryData->SetLatLonCache(theCache);
 }
@@ -507,7 +507,7 @@ void Model::setLatLonCache(const boost::shared_ptr<std::vector<NFmiPoint>>& theC
  */
 // ----------------------------------------------------------------------
 
-boost::shared_ptr<std::vector<NFmiPoint>> Model::makeLatLonCache()
+std::shared_ptr<std::vector<NFmiPoint>> Model::makeLatLonCache()
 {
   return itsQueryData->LatLonCache();
 }

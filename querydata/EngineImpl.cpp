@@ -11,7 +11,7 @@
 #include "WGS84EnvelopeFactory.h"
 #include <boost/bind/bind.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/thread.hpp>
 #include <gis/CoordinateTransformation.h>
 #include <gis/OGR.h>
@@ -53,10 +53,10 @@ namespace Querydata
 // ----------------------------------------------------------------------
 
 EngineImpl::EngineImpl(const std::string& configfile)
-    : itsRepoManager(boost::make_shared<RepoManager>(configfile)),
+    : itsRepoManager(std::make_shared<RepoManager>(configfile)),
       itsConfigFile(configfile),
       itsActiveThreadCount(0),
-      itsParameterTranslations(boost::make_shared<Spine::ParameterTranslations>()),
+      itsParameterTranslations(std::make_shared<Spine::ParameterTranslations>()),
       lastConfigErrno(EINPROGRESS)
 {
 }
@@ -79,7 +79,7 @@ void EngineImpl::init()
     config.readFile(itsConfigFile.c_str());
     Spine::expandVariables(config);
 
-    itsParameterTranslations = boost::make_shared<Spine::ParameterTranslations>(config);
+    itsParameterTranslations = std::make_shared<Spine::ParameterTranslations>(config);
 
     // Init caches
     int coordinate_cache_size = 100;
@@ -171,8 +171,8 @@ void EngineImpl::configFileWatch()
         if (!Spine::Reactor::isShuttingDown())
         {
           // Generate new repomanager according to new configs
-          boost::shared_ptr<RepoManager> newrepomanager =
-              boost::make_shared<RepoManager>(itsConfigFile);
+          std::shared_ptr<RepoManager> newrepomanager =
+              std::make_shared<RepoManager>(itsConfigFile);
 
           // The old manager can be used to initialize common data faster
           auto oldrepomanager = itsRepoManager.load();
@@ -470,7 +470,7 @@ Producer EngineImpl::find(const ProducerList& producerlist,
 // ----------------------------------------------------------------------
 
 Repository::ContentTable EngineImpl::getProducerInfo(
-    const std::string& timeFormat, const boost::optional<std::string>& producer) const
+    const std::string& timeFormat, const std::optional<std::string>& producer) const
 {
   try
   {
@@ -498,7 +498,7 @@ Repository::ContentTable EngineImpl::getProducerInfo(
 // ----------------------------------------------------------------------
 
 Repository::ContentTable EngineImpl::getParameterInfo(
-    const boost::optional<std::string>& producer) const
+    const std::optional<std::string>& producer) const
 {
   try
   {

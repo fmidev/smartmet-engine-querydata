@@ -1,7 +1,7 @@
 #pragma once
 
 #include <macgyver/DateTime.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <list>
 
 namespace SmartMet

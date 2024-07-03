@@ -12,8 +12,8 @@
 #include <boost/atomic.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/make_shared.hpp>
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <optional>
+#include <memory>
 #include <boost/smart_ptr/atomic_shared_ptr.hpp>
 #include <gis/CoordinateMatrix.h>
 #include <macgyver/Cache.h>
@@ -110,10 +110,10 @@ class EngineImpl final : public Engine
 
   // Get detailed info of current producers
   Repository::ContentTable getProducerInfo(
-      const std::string& timeFormat, const boost::optional<std::string>& producer) const override;
+      const std::string& timeFormat, const std::optional<std::string>& producer) const override;
   // Get info of parameters of each producer
   Repository::ContentTable getParameterInfo(
-      const boost::optional<std::string>& producer) const override;
+      const std::optional<std::string>& producer) const override;
 
  protected:
   // Get current engine contents

@@ -22,7 +22,7 @@ class WGS84Envelope
   ~WGS84Envelope() = default;
   WGS84Envelope();
   explicit WGS84Envelope(const WGS84Envelope& other);
-  explicit WGS84Envelope(const boost::shared_ptr<NFmiFastQueryInfo>& info);
+  explicit WGS84Envelope(const std::shared_ptr<NFmiFastQueryInfo>& info);
   WGS84Envelope& operator=(const WGS84Envelope& other);
 
   WGS84Envelope(WGS84Envelope&& other) = delete;

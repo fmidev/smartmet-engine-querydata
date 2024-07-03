@@ -14,7 +14,7 @@
 #include "Q.h"
 
 #include <macgyver/DateTime.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -69,7 +69,7 @@ class Repository
 
   Q getAll(const Producer& producer) const;
 
-  using ContentTable = std::pair<boost::shared_ptr<Spine::Table>, Spine::TableFormatter::Names>;
+  using ContentTable = std::pair<std::shared_ptr<Spine::Table>, Spine::TableFormatter::Names>;
   using SharedModels = std::map<OriginTime, SharedModel>;
   using MetaObject = std::map<std::string, std::vector<Fmi::DateTime> >;
 
