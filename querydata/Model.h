@@ -15,7 +15,6 @@
 #include "ValidTimeList.h"
 #include <macgyver/DateTime.h>
 #include <boost/filesystem/path.hpp>
-#include <boost/make_shared.hpp>
 #include <memory>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <spine/Thread.h>
@@ -37,7 +36,7 @@ class ValidPoints;
 class Model : public boost::enable_shared_from_this<Model>
 {
  public:
-  Model(const boost::filesystem::path& filename,
+  Model(const std::filesystem::path& filename,
         const std::string& validpointscachedir,
         Producer producer,
         std::string levelname,
@@ -69,7 +68,7 @@ class Model : public boost::enable_shared_from_this<Model>
 
   std::shared_ptr<ValidTimeList> validTimes() const;
 
-  const boost::filesystem::path& path() const;
+  const std::filesystem::path& path() const;
   const Producer& producer() const;
 
   const std::string& levelName() const;
@@ -99,7 +98,7 @@ class Model : public boost::enable_shared_from_this<Model>
   std::size_t itsHashValue = 0;
   Fmi::DateTime itsOriginTime;
   Fmi::DateTime itsLoadTime;
-  boost::filesystem::path itsPath;
+  std::filesystem::path itsPath;
   Fmi::DateTime itsModificationTime;
   Producer itsProducer;
   std::string itsLevelName;

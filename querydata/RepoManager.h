@@ -13,6 +13,7 @@
 #include <macgyver/Cache.h>
 #include <macgyver/DirectoryMonitor.h>
 #include <spine/Thread.h>
+#include <filesystem>
 #include <memory>
 
 namespace SmartMet
@@ -22,7 +23,7 @@ namespace Engine
 namespace Querydata
 {
 // Collection of files
-using Files = std::vector<boost::filesystem::path>;
+using Files = std::vector<std::filesystem::path>;
 
 struct RepoManager
 {
@@ -44,12 +45,12 @@ struct RepoManager
   // callback requests
 
   void update(Fmi::DirectoryMonitor::Watcher id,
-              const boost::filesystem::path& dir,
+              const std::filesystem::path& dir,
               const boost::regex& pattern,
               const Fmi::DirectoryMonitor::Status& status);
 
   void error(Fmi::DirectoryMonitor::Watcher id,
-             const boost::filesystem::path& dir,
+             const std::filesystem::path& dir,
              const boost::regex& pattern,
              const std::string& message);
 

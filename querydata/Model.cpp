@@ -8,6 +8,7 @@
 #include "ValidPoints.h"
 #include <boost/filesystem/operations.hpp>
 #include <macgyver/Exception.h>
+#include <macgyver/FileSystem.h>
 #include <macgyver/Hash.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiGeoTools.h>
@@ -31,7 +32,7 @@ namespace Querydata
  */
 // ----------------------------------------------------------------------
 
-Model::Model(const boost::filesystem::path& filename,
+Model::Model(const std::filesystem::path& filename,
              const std::string& validpointscachedir,
              Producer producer,
              std::string levelname,
@@ -64,8 +65,8 @@ Model::Model(const boost::filesystem::path& filename,
     itsLoadTime = Fmi::SecondClock::universal_time();
 
     // May throw if file is gone
-    itsModificationTime =
-        Fmi::date_time::from_time_t(boost::filesystem::last_write_time(filename));
+    const std::optional<time_t> lmt = Fmi::last_write_time(filename);
+    itsModificationTime = Fmi::date_time::from_time_t(lmt ? *lmt : 0);
 
     // Unique hash value for this model
 
@@ -250,7 +251,7 @@ Fmi::DateTime Model::expirationTime() const
  */
 // ----------------------------------------------------------------------
 
-const boost::filesystem::path& Model::path() const
+const std::filesystem::path& Model::path() const
 {
   return itsPath;
 }

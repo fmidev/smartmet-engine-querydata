@@ -746,6 +746,15 @@ void QImpl::resetParam()
   }
 }
 
+void QImpl::setParameterTranslations(const std::shared_ptr<Spine::ParameterTranslations>& translations)
+{
+  if (!translations)
+    throw Fmi::Exception(BCP, "empty std::shared_ptr<>");
+  itsParameterTranslations = translations;
+}
+
+
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Advance the parameter iterator
@@ -1840,7 +1849,7 @@ std::string format_date(const Fmi::LocalDateTime &ldt,
 TS::Value WindUMS(QImpl &q,
                   const Spine::Location &loc,
                   const Fmi::LocalDateTime &ldt,
-                  std::optional<float> level = boost::none,
+                  std::optional<float> level = std::nullopt,
                   InterpolationMethod method = InterpolationMethod::SURFACE)
 {
   try
@@ -1897,7 +1906,7 @@ TS::Value WindUMS(QImpl &q,
 TS::Value WindVMS(QImpl &q,
                   const Spine::Location &loc,
                   const Fmi::LocalDateTime &ldt,
-                  std::optional<float> level = boost::none,
+                  std::optional<float> level = std::nullopt,
                   InterpolationMethod method = InterpolationMethod::SURFACE)
 {
   try
@@ -3334,9 +3343,9 @@ TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::LocalDateTime &ld
       }
     }
 
-    if (boost::get<double>(&retval) != nullptr)
+    if (const auto* ptr = std::get_if<double>(&retval))
     {
-      if (*(boost::get<double>(&retval)) == kFloatMissing)
+      if (*ptr == kFloatMissing)
         retval = TS::None();
     }
 
@@ -3427,9 +3436,9 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
       }
     }
 
-    if (boost::get<double>(&retval) != nullptr)
+    if (const auto* ptr = std::get_if<double>(&retval))
     {
-      if (*(boost::get<double>(&retval)) == kFloatMissing)
+      if (*ptr == kFloatMissing)
         retval = TS::None();
     }
 
@@ -3521,9 +3530,9 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
       }
     }
 
-    if (boost::get<double>(&retval) != nullptr)
+    if (const auto* ptr = std::get_if<double>(&retval))
     {
-      if (*(boost::get<double>(&retval)) == kFloatMissing)
+      if (*ptr == kFloatMissing)
         retval = TS::None();
     }
 
@@ -4171,8 +4180,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                                      dummy);
 
             auto result = value(options, localdatetime);
-            if (boost::get<double>(&result) != nullptr)
-              dstinfo.FloatValue(*boost::get<double>(&result));
+            if (const auto* ptr = std::get_if<double>(&result))
+              dstinfo.FloatValue(*ptr);
           }
         }
       }

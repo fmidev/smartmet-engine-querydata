@@ -11,11 +11,11 @@
 #include "Repository.h"
 #include <boost/atomic.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/make_shared.hpp>
 #include <optional>
 #include <memory>
 #include <boost/smart_ptr/atomic_shared_ptr.hpp>
 #include <gis/CoordinateMatrix.h>
+#include <macgyver/AtomicSharedPtr.h>
 #include <macgyver/Cache.h>
 #include <spine/ParameterTranslations.h>
 #include <spine/SmartMetEngine.h>
@@ -52,7 +52,7 @@ struct RepoManager;
 class EngineImpl final : public Engine
 {
  private:
-  boost::atomic_shared_ptr<RepoManager> itsRepoManager;
+  Fmi::AtomicSharedPtr<RepoManager> itsRepoManager;
 
   const std::string itsConfigFile;
 
@@ -66,7 +66,7 @@ class EngineImpl final : public Engine
 
   int itsActiveThreadCount;
 
-  boost::atomic_shared_ptr<Spine::ParameterTranslations> itsParameterTranslations;
+  Fmi::AtomicSharedPtr<Spine::ParameterTranslations> itsParameterTranslations;
 
  protected:
   // constructor is available only with a libconfig configuration file

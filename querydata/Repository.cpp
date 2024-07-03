@@ -471,7 +471,7 @@ Q Repository::get(const Producer& producer, const Fmi::TimePeriod& timeperiod) c
  */
 // ----------------------------------------------------------------------
 
-void Repository::remove(const Producer& producer, const boost::filesystem::path& path)
+void Repository::remove(const Producer& producer, const std::filesystem::path& path)
 {
   try
   {
@@ -1235,7 +1235,7 @@ Repository::MetaObject Repository::getSynchroInfos() const
 }
 
 SharedModel Repository::getModel(const Producer& producer,
-                                 const boost::filesystem::path& path) const
+                                 const std::filesystem::path& path) const
 {
   try
   {

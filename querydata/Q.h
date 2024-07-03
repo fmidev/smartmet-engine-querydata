@@ -17,8 +17,6 @@
 #include "ParameterOptions.h"
 #include "ValidTimeList.h"
 #include <macgyver/DateTime.h>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/make_shared.hpp>
 #include <memory>
 #include <gis/CoordinateMatrix.h>
 #include <newbase/NFmiParameterName.h>
@@ -292,10 +290,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
   bool needsGlobeWrap() const;
 
-  void setParameterTranslations(std::shared_ptr<Spine::ParameterTranslations> translations)
-  {
-    itsParameterTranslations = std::move(translations);
-  }
+  void setParameterTranslations(const std::shared_ptr<Spine::ParameterTranslations>& translations);
 
  private:
   NFmiDataMatrix<float> calculatedValues(const Spine::Parameter& theParam,

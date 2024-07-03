@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Range.h"
-#include <boost/move/unique_ptr.hpp>
+#include <memory>
 #include <newbase/NFmiFastQueryInfo.h>
 
 namespace SmartMet
@@ -14,7 +14,7 @@ class WGS84Envelope
 {
  public:
   using Shared = std::shared_ptr<WGS84Envelope>;
-  using Unique = boost::movelib::unique_ptr<WGS84Envelope>;
+  using Unique = std::unique_ptr<WGS84Envelope>;
   using RangeLon = Range;
   using RangeLat = Range;
 

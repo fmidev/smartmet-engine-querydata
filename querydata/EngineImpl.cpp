@@ -10,7 +10,6 @@
 #include "Repository.h"
 #include "WGS84EnvelopeFactory.h"
 #include <boost/bind/bind.hpp>
-#include <boost/make_shared.hpp>
 #include <memory>
 #include <boost/thread.hpp>
 #include <gis/CoordinateTransformation.h>
@@ -19,6 +18,7 @@
 #include <json/reader.h>
 #include <macgyver/AnsiEscapeCodes.h>
 #include <macgyver/Exception.h>
+#include <macgyver/FileSystem.h>
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
 #include <spine/ConfigTools.h>
@@ -73,13 +73,13 @@ void EngineImpl::init()
     libconfig::Config config;
 
     // Enable sensible relative include paths
-    boost::filesystem::path p = itsConfigFile;
+    std::filesystem::path p = itsConfigFile;
     p.remove_filename();
     config.setIncludeDir(p.c_str());
     config.readFile(itsConfigFile.c_str());
     Spine::expandVariables(config);
 
-    itsParameterTranslations = std::make_shared<Spine::ParameterTranslations>(config);
+    itsParameterTranslations.store(std::make_shared<Spine::ParameterTranslations>(config));
 
     // Init caches
     int coordinate_cache_size = 100;
@@ -126,7 +126,7 @@ void EngineImpl::init()
 // ----------------------------------------------------------------------
 void EngineImpl::configFileWatch()
 {
-  boost::system::error_code ec;
+  std::error_code ec;
   std::time_t filetime = getConfigModTime();
 
   while (!Spine::Reactor::isShuttingDown())
@@ -134,7 +134,7 @@ void EngineImpl::configFileWatch()
     boost::this_thread::sleep_for(boost::chrono::seconds(1));
 
     // If file was deleted, skip and go waiting until it is back
-    if (!boost::filesystem::exists(itsConfigFile, ec))
+    if (!std::filesystem::exists(itsConfigFile, ec))
     {
       if (filetime > 0)
       {
@@ -146,10 +146,12 @@ void EngineImpl::configFileWatch()
       continue;
     }
 
-    std::time_t newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
+    std::optional<std::time_t> newfiletime = Fmi::last_write_time(itsConfigFile);
+    if (not newfiletime)
+      throw Fmi::Exception(BCP, "Failed to get configuration file modification time");
 
     // Was the file modified?
-    if (newfiletime != filetime && !Spine::Reactor::isShuttingDown())
+    if (*newfiletime != filetime && !Spine::Reactor::isShuttingDown())
     {
       // File changed
       // Go into cooling period of waiting a few seconds and checking again
@@ -158,14 +160,14 @@ void EngineImpl::configFileWatch()
 
       try
       {
-        while (newfiletime != filetime && !Spine::Reactor::isShuttingDown())
+        while (*newfiletime != filetime && !Spine::Reactor::isShuttingDown())
         {
           std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
                            " updated, rereading"
                     << std::endl;
-          filetime = newfiletime;
+          filetime = *newfiletime;
           boost::this_thread::sleep_for(boost::chrono::seconds(3));
-          newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
+          newfiletime = Fmi::last_write_time(itsConfigFile);
         }
 
         if (!Spine::Reactor::isShuttingDown())
@@ -208,7 +210,8 @@ void EngineImpl::configFileWatch()
         std::cerr << std::string{"Error reading new config: "} + e.what() + "\n";
       }
 
-      filetime = newfiletime;  // Update time even if there is an error
+      filetime = newfiletime ? *newfiletime : std::time(nullptr);
+      // Update time even if there is an error
       // We don't want to reread a damaged file continuously
     }
   }

@@ -34,11 +34,11 @@
 #include "ValidPoints.h"
 #include <boost/bind/bind.hpp>
 #include <boost/filesystem.hpp>
-#include <boost/make_shared.hpp>
 #include <macgyver/AnsiEscapeCodes.h>
 #include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/TypeName.h>
+#include <macgyver/FileSystem.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/ConfigTools.h>
@@ -46,6 +46,7 @@
 #include <spine/Exceptions.h>
 #include <spine/Reactor.h>
 #include <cassert>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <string>
@@ -155,7 +156,7 @@ RepoManager::RepoManager(const std::string& configfile)
       itsMaxThreadCount(10),  // default if not configured
       itsThreadCount(0)
 {
-  boost::system::error_code ec;
+  std::error_code ec;
 
   try
   {
@@ -170,14 +171,14 @@ RepoManager::RepoManager(const std::string& configfile)
     {
       // Save the modification time of config to track config changes by other modules
       // Ignoring errors for now, should be caught when reading the file
-      std::time_t modtime = boost::filesystem::last_write_time(configfile, ec);
+      const std::optional<std::time_t> modtime = Fmi::last_write_time(configfile);
       // There is a slight race condition here: time is recorded before the actual config is read
       // If config changes between these two calls, we actually have old timestamp
       // To minimize the effects, modification time is recorded before reading. May cause almost
       // immediate reread if config file is changing rapidly
 
       // Enable sensible relative include paths
-      boost::filesystem::path p = configfile;
+      std::filesystem::path p = configfile;
       p.remove_filename();
       itsConfig.setIncludeDir(p.c_str());
 
@@ -238,7 +239,8 @@ RepoManager::RepoManager(const std::string& configfile)
         itsConfigList.push_back(pinfo);
       }
 
-      this->configModTime = modtime;
+      if (modtime)
+        this->configModTime = *modtime;
 
       updateTasks->on_task_error([](const std::string& /* unused */)
                                  { Fmi::Exception::Trace(BCP, "Operation failed").printError(); });
@@ -274,7 +276,7 @@ void RepoManager::init()
       // Note: watcher indexes start from 0, so we can index the producer
       // with a vector to find out which producer the callback instructs to update.
 
-      if (!boost::filesystem::exists(pinfo.directory))
+      if (!std::filesystem::exists(pinfo.directory))
         std::cerr << (Spine::log_time_str() + ANSI_FG_RED + " [querydata] Producer '" +
                       pinfo.producer + "' path '" + pinfo.directory.string() + "' is missing" +
                       ANSI_FG_DEFAULT)
@@ -420,7 +422,7 @@ Fmi::DirectoryMonitor::Watcher RepoManager::id(const Producer& producer) const
 // ----------------------------------------------------------------------
 
 void RepoManager::error(Fmi::DirectoryMonitor::Watcher /* id */,
-                        const boost::filesystem::path& dir,
+                        const std::filesystem::path& dir,
                         const boost::regex& /* pattern */,
                         const std::string& message)
 {
@@ -454,7 +456,7 @@ void RepoManager::error(Fmi::DirectoryMonitor::Watcher /* id */,
 // ----------------------------------------------------------------------
 
 void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
-                         const boost::filesystem::path& /* dir */,
+                         const std::filesystem::path& /* dir */,
                          const boost::regex& /* pattern */,
                          const Fmi::DirectoryMonitor::Status& status)
 {
@@ -732,8 +734,8 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
 
 void RepoManager::cleanValidPointsCache()
 {
-  if (!boost::filesystem::exists(itsValidPointsCacheDir) ||
-      !boost::filesystem::is_directory(itsValidPointsCacheDir))
+  if (!std::filesystem::exists(itsValidPointsCacheDir) ||
+      !std::filesystem::is_directory(itsValidPointsCacheDir))
     return;
 
   std::set<std::string> cachefiles;
@@ -751,8 +753,8 @@ void RepoManager::cleanValidPointsCache()
     return;
 
   // boost::system::error_code ec;
-  boost::filesystem::directory_iterator end_itr;
-  for (boost::filesystem::directory_iterator itr(itsValidPointsCacheDir); itr != end_itr; ++itr)
+  std::filesystem::directory_iterator end_itr;
+  for (std::filesystem::directory_iterator itr(itsValidPointsCacheDir); itr != end_itr; ++itr)
   {
     if (SmartMet::Spine::Reactor::isShuttingDown())
       return;
@@ -768,7 +770,7 @@ void RepoManager::cleanValidPointsCache()
                         " [querydata] Deleting redundant valid points cache file '" + filename +
                         "'" + ANSI_FG_DEFAULT)
                     << std::endl;
-          boost::filesystem::remove(filename);
+          std::filesystem::remove(filename);
         }
         else
         {

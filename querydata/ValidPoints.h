@@ -33,7 +33,7 @@ class ValidPoints
  public:
   ValidPoints() = delete;
   ValidPoints(const Producer& producer,
-              const boost::filesystem::path& path,
+              const std::filesystem::path& path,
               NFmiFastQueryInfo& qinfo,
               const std::string& cachedir,
               std::size_t hash);
