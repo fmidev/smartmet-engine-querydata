@@ -17,7 +17,6 @@ LIBS += \
 	-lsmartmet-gis \
 	$(CONFIGPP_LIBS) \
 	-lboost_thread \
-	-lboost_filesystem \
 	-lboost_regex \
 	-lboost_iostreams \
 	-lboost_system \

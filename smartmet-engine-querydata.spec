@@ -33,7 +33,6 @@ BuildRequires: smartmet-library-timeseries-devel >= 24.5.28
 BuildRequires: smartmet-library-macgyver-devel >= 24.5.6
 BuildRequires: smartmet-library-newbase-devel >= 24.5.6
 BuildRequires: smartmet-library-spine-devel >= 24.5.6
-Requires: %{smartmet_boost}-filesystem
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system

@@ -14,7 +14,7 @@
 #include "Producer.h"
 #include "ValidTimeList.h"
 #include <macgyver/DateTime.h>
-#include <boost/filesystem/path.hpp>
+#include <filesystem>
 #include <memory>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <spine/Thread.h>

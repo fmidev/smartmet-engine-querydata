@@ -31,7 +31,7 @@ extern "C"
 
 #include <boost/atomic.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
 using namespace std;
 using namespace SmartMet::Engine::Querydata;
@@ -302,7 +302,7 @@ int main(int argc, char* argv[])
   // Also, shared_ptr:s don't work well in debugger ...
 
   // Generate a temporary config file to modify
-  boost::filesystem::path configfile((boost::filesystem::path(__FILE__).filename()).string() +
+  std::filesystem::path configfile((std::filesystem::path(__FILE__).filename()).string() +
                                      "_autogentest.conf");
   cout << "Test configuration will be written to " << configfile.string() << endl << endl;
 
@@ -424,7 +424,7 @@ int main(int argc, char* argv[])
         if (test == deleted)
         {
           conff.close();
-          boost::filesystem::remove(configfile);
+          std::filesystem::remove(configfile);
         }
 
         if (test == rewrite)
@@ -541,7 +541,7 @@ int main(int argc, char* argv[])
     exit(errors.size());
   }
   // Should we remove the config ???
-  boost::filesystem::remove(configfile);
+  std::filesystem::remove(configfile);
   cout << endl << "All tests ok." << endl;
   if (engine != nullptr)
     delete engine;
