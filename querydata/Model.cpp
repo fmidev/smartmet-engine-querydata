@@ -65,8 +65,7 @@ Model::Model(const std::filesystem::path& filename,
     itsLoadTime = Fmi::SecondClock::universal_time();
 
     // May throw if file is gone
-    const std::optional<time_t> lmt = Fmi::last_write_time(filename);
-    itsModificationTime = Fmi::date_time::from_time_t(lmt ? *lmt : 0);
+    itsModificationTime = Fmi::date_time::from_time_t(Fmi::last_write_time(filename));
 
     // Unique hash value for this model
 

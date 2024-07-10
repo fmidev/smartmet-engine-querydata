@@ -171,7 +171,7 @@ RepoManager::RepoManager(const std::string& configfile)
     {
       // Save the modification time of config to track config changes by other modules
       // Ignoring errors for now, should be caught when reading the file
-      const std::optional<std::time_t> modtime = Fmi::last_write_time(configfile);
+      const std::time_t modtime = Fmi::last_write_time(configfile, ec);
       // There is a slight race condition here: time is recorded before the actual config is read
       // If config changes between these two calls, we actually have old timestamp
       // To minimize the effects, modification time is recorded before reading. May cause almost
@@ -239,8 +239,8 @@ RepoManager::RepoManager(const std::string& configfile)
         itsConfigList.push_back(pinfo);
       }
 
-      if (modtime)
-        this->configModTime = *modtime;
+      if (!ec)
+        this->configModTime = modtime;
 
       updateTasks->on_task_error([](const std::string& /* unused */)
                                  { Fmi::Exception::Trace(BCP, "Operation failed").printError(); });

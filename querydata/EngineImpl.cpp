@@ -146,12 +146,10 @@ void EngineImpl::configFileWatch()
       continue;
     }
 
-    std::optional<std::time_t> newfiletime = Fmi::last_write_time(itsConfigFile);
-    if (not newfiletime)
-      throw Fmi::Exception(BCP, "Failed to get configuration file modification time");
+    std::time_t newfiletime = Fmi::last_write_time(itsConfigFile, ec);
 
     // Was the file modified?
-    if (*newfiletime != filetime && !Spine::Reactor::isShuttingDown())
+    if (!ec && newfiletime != filetime && !Spine::Reactor::isShuttingDown())
     {
       // File changed
       // Go into cooling period of waiting a few seconds and checking again
@@ -160,14 +158,14 @@ void EngineImpl::configFileWatch()
 
       try
       {
-        while (*newfiletime != filetime && !Spine::Reactor::isShuttingDown())
+        while (newfiletime != filetime && !Spine::Reactor::isShuttingDown())
         {
           std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
                            " updated, rereading"
                     << std::endl;
-          filetime = *newfiletime;
+          filetime = newfiletime;
           boost::this_thread::sleep_for(boost::chrono::seconds(3));
-          newfiletime = Fmi::last_write_time(itsConfigFile);
+          newfiletime = Fmi::last_write_time(itsConfigFile, ec);
         }
 
         if (!Spine::Reactor::isShuttingDown())
@@ -210,7 +208,7 @@ void EngineImpl::configFileWatch()
         std::cerr << std::string{"Error reading new config: "} + e.what() + "\n";
       }
 
-      filetime = newfiletime ? *newfiletime : std::time(nullptr);
+      filetime = ec ? std::time(nullptr) : newfiletime;
       // Update time even if there is an error
       // We don't want to reread a damaged file continuously
     }
