@@ -10,8 +10,7 @@
 #include "Repository.h"
 #include "WGS84EnvelopeFactory.h"
 #include <boost/bind/bind.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <boost/thread.hpp>
 #include <gis/CoordinateTransformation.h>
 #include <gis/OGR.h>
@@ -19,6 +18,7 @@
 #include <json/reader.h>
 #include <macgyver/AnsiEscapeCodes.h>
 #include <macgyver/Exception.h>
+#include <macgyver/FileSystem.h>
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
 #include <spine/ConfigTools.h>
@@ -53,10 +53,10 @@ namespace Querydata
 // ----------------------------------------------------------------------
 
 EngineImpl::EngineImpl(const std::string& configfile)
-    : itsRepoManager(boost::make_shared<RepoManager>(configfile)),
+    : itsRepoManager(std::make_shared<RepoManager>(configfile)),
       itsConfigFile(configfile),
       itsActiveThreadCount(0),
-      itsParameterTranslations(boost::make_shared<Spine::ParameterTranslations>()),
+      itsParameterTranslations(std::make_shared<Spine::ParameterTranslations>()),
       lastConfigErrno(EINPROGRESS)
 {
 }
@@ -73,13 +73,13 @@ void EngineImpl::init()
     libconfig::Config config;
 
     // Enable sensible relative include paths
-    boost::filesystem::path p = itsConfigFile;
+    std::filesystem::path p = itsConfigFile;
     p.remove_filename();
     config.setIncludeDir(p.c_str());
     config.readFile(itsConfigFile.c_str());
     Spine::expandVariables(config);
 
-    itsParameterTranslations = boost::make_shared<Spine::ParameterTranslations>(config);
+    itsParameterTranslations.store(std::make_shared<Spine::ParameterTranslations>(config));
 
     // Init caches
     int coordinate_cache_size = 100;
@@ -126,7 +126,7 @@ void EngineImpl::init()
 // ----------------------------------------------------------------------
 void EngineImpl::configFileWatch()
 {
-  boost::system::error_code ec;
+  std::error_code ec;
   std::time_t filetime = getConfigModTime();
 
   while (!Spine::Reactor::isShuttingDown())
@@ -134,7 +134,7 @@ void EngineImpl::configFileWatch()
     boost::this_thread::sleep_for(boost::chrono::seconds(1));
 
     // If file was deleted, skip and go waiting until it is back
-    if (!boost::filesystem::exists(itsConfigFile, ec))
+    if (!std::filesystem::exists(itsConfigFile, ec))
     {
       if (filetime > 0)
       {
@@ -146,10 +146,10 @@ void EngineImpl::configFileWatch()
       continue;
     }
 
-    std::time_t newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
+    std::time_t newfiletime = Fmi::last_write_time(itsConfigFile, ec);
 
     // Was the file modified?
-    if (newfiletime != filetime && !Spine::Reactor::isShuttingDown())
+    if (!ec && newfiletime != filetime && !Spine::Reactor::isShuttingDown())
     {
       // File changed
       // Go into cooling period of waiting a few seconds and checking again
@@ -165,14 +165,14 @@ void EngineImpl::configFileWatch()
                     << std::endl;
           filetime = newfiletime;
           boost::this_thread::sleep_for(boost::chrono::seconds(3));
-          newfiletime = boost::filesystem::last_write_time(itsConfigFile, ec);
+          newfiletime = Fmi::last_write_time(itsConfigFile, ec);
         }
 
         if (!Spine::Reactor::isShuttingDown())
         {
           // Generate new repomanager according to new configs
-          boost::shared_ptr<RepoManager> newrepomanager =
-              boost::make_shared<RepoManager>(itsConfigFile);
+          std::shared_ptr<RepoManager> newrepomanager =
+              std::make_shared<RepoManager>(itsConfigFile);
 
           // The old manager can be used to initialize common data faster
           auto oldrepomanager = itsRepoManager.load();
@@ -208,7 +208,8 @@ void EngineImpl::configFileWatch()
         std::cerr << std::string{"Error reading new config: "} + e.what() + "\n";
       }
 
-      filetime = newfiletime;  // Update time even if there is an error
+      filetime = ec ? std::time(nullptr) : newfiletime;
+      // Update time even if there is an error
       // We don't want to reread a damaged file continuously
     }
   }
@@ -470,7 +471,7 @@ Producer EngineImpl::find(const ProducerList& producerlist,
 // ----------------------------------------------------------------------
 
 Repository::ContentTable EngineImpl::getProducerInfo(
-    const std::string& timeFormat, const boost::optional<std::string>& producer) const
+    const std::string& timeFormat, const std::optional<std::string>& producer) const
 {
   try
   {
@@ -498,7 +499,7 @@ Repository::ContentTable EngineImpl::getProducerInfo(
 // ----------------------------------------------------------------------
 
 Repository::ContentTable EngineImpl::getParameterInfo(
-    const boost::optional<std::string>& producer) const
+    const std::optional<std::string>& producer) const
 {
   try
   {

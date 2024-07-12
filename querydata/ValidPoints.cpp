@@ -35,8 +35,8 @@ void ValidPoints::uncache() const
     return;
 
   // We ignore errors on purpose
-  boost::system::error_code ec;
-  boost::filesystem::remove(itsCacheFile, ec);
+  std::error_code ec;
+  std::filesystem::remove(itsCacheFile, ec);
 }
 
 // ----------------------------------------------------------------------
@@ -52,26 +52,26 @@ void ValidPoints::uncache() const
 // ----------------------------------------------------------------------
 
 ValidPoints::ValidPoints(const Producer& producer,
-                         const boost::filesystem::path& path,
+                         const std::filesystem::path& path,
                          NFmiFastQueryInfo& qinfo,
                          const std::string& cachedir,
                          std::size_t hash)
     : itsMask(qinfo.SizeLocations(), false),
       itsCacheFile(cachedir + '/' + producer + '-' + Fmi::to_string(hash))
 {
-  if (!boost::filesystem::is_directory(cachedir))
+  if (!std::filesystem::is_directory(cachedir))
   {
     std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA +
                   " [querydata] Creating valid points cache directory '" + cachedir + "'" +
                   ANSI_FG_DEFAULT)
               << std::endl;
-    boost::filesystem::create_directories(cachedir);
+    std::filesystem::create_directories(cachedir);
   }
 
   // Try using a cached file first
   try
   {
-    if (boost::filesystem::exists(itsCacheFile))
+    if (std::filesystem::exists(itsCacheFile))
     {
       std::ifstream file(itsCacheFile);
       boost::archive::binary_iarchive archive(file);
@@ -136,7 +136,7 @@ ValidPoints::ValidPoints(const Producer& producer,
       std::ofstream file(tmpfile);
       boost::archive::binary_oarchive archive(file);
       archive& BOOST_SERIALIZATION_NVP(itsMask);
-      boost::filesystem::rename(tmpfile, itsCacheFile);
+      std::filesystem::rename(tmpfile, itsCacheFile);
     }
     catch (std::exception& ex)
     {

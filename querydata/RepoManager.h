@@ -13,6 +13,7 @@
 #include <macgyver/Cache.h>
 #include <macgyver/DirectoryMonitor.h>
 #include <spine/Thread.h>
+#include <filesystem>
 #include <memory>
 
 namespace SmartMet
@@ -22,7 +23,7 @@ namespace Engine
 namespace Querydata
 {
 // Collection of files
-using Files = std::vector<boost::filesystem::path>;
+using Files = std::vector<std::filesystem::path>;
 
 struct RepoManager
 {
@@ -44,12 +45,12 @@ struct RepoManager
   // callback requests
 
   void update(Fmi::DirectoryMonitor::Watcher id,
-              const boost::filesystem::path& dir,
+              const std::filesystem::path& dir,
               const boost::regex& pattern,
               const Fmi::DirectoryMonitor::Status& status);
 
   void error(Fmi::DirectoryMonitor::Watcher id,
-             const boost::filesystem::path& dir,
+             const std::filesystem::path& dir,
              const boost::regex& pattern,
              const std::string& message);
 
@@ -89,7 +90,7 @@ struct RepoManager
   std::time_t configModTime;  // Timestamp of configuration file loaded
   inline std::time_t getConfigModTime() const { return configModTime; }
 
-  void setOldManager(boost::shared_ptr<RepoManager> oldmanager);
+  void setOldManager(std::shared_ptr<RepoManager> oldmanager);
   void removeOldManager();
 
   Fmi::Cache::CacheStats getCacheStats() const { return itsLatLonCache.statistics(); }
@@ -105,13 +106,13 @@ struct RepoManager
   int itsMaxThreadCount;
   boost::atomic<int> itsThreadCount;
 
-  using LatLonCache = Fmi::Cache::Cache<std::size_t, boost::shared_ptr<std::vector<NFmiPoint>>>;
+  using LatLonCache = Fmi::Cache::Cache<std::size_t, std::shared_ptr<std::vector<NFmiPoint>>>;
   LatLonCache itsLatLonCache;
 
   std::string itsValidPointsCacheDir = "/var/smartmet/querydata/validpoints";
   bool itsCleanValidPointsCacheDir{false};
 
-  boost::shared_ptr<RepoManager> itsOldRepoManager;
+  std::shared_ptr<RepoManager> itsOldRepoManager;
 };
 
 }  // namespace Querydata

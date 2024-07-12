@@ -75,13 +75,13 @@ Q Engine::get(const Producer& /* producer */,
 }
 
 Repository::ContentTable Engine::getProducerInfo(
-    const std::string& /* timeFormat */, const boost::optional<std::string>& /* producer */) const
+    const std::string& /* timeFormat */, const std::optional<std::string>& /* producer */) const
 {
   REPORT_DISABLED;
 }
 
 Repository::ContentTable Engine::getParameterInfo(
-    const boost::optional<std::string>& /* producer */) const
+    const std::optional<std::string>& /* producer */) const
 {
   REPORT_DISABLED;
 }

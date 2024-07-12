@@ -47,7 +47,7 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
       }
 
       else if (name == "directory")
-        pinfo.directory = boost::filesystem::path(static_cast<const char *>(setting[i]));
+        pinfo.directory = std::filesystem::path(static_cast<const char *>(setting[i]));
 
       else if (name == "pattern")
       {

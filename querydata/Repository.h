@@ -14,7 +14,7 @@
 #include "Q.h"
 
 #include <macgyver/DateTime.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -45,7 +45,7 @@ class Repository
   void add(const ProducerConfig& config);
   void add(const Producer& producer, const SharedModel& model);
 
-  void remove(const Producer& producer, const boost::filesystem::path& path);
+  void remove(const Producer& producer, const std::filesystem::path& path);
   void resize(const Producer& producer, std::size_t limit);
   void expire(const Producer& producer, std::size_t max_age);
 
@@ -69,7 +69,7 @@ class Repository
 
   Q getAll(const Producer& producer) const;
 
-  using ContentTable = std::pair<boost::shared_ptr<Spine::Table>, Spine::TableFormatter::Names>;
+  using ContentTable = std::pair<std::shared_ptr<Spine::Table>, Spine::TableFormatter::Names>;
   using SharedModels = std::map<OriginTime, SharedModel>;
   using MetaObject = std::map<std::string, std::vector<Fmi::DateTime> >;
 
@@ -94,7 +94,7 @@ class Repository
 
   MetaObject getSynchroInfos() const;
 
-  SharedModel getModel(const Producer& producer, const boost::filesystem::path& path) const;
+  SharedModel getModel(const Producer& producer, const std::filesystem::path& path) const;
   SharedModels getAllModels(const Producer& producer) const;
 
   void updateProducerStatus(const std::string& producer,
