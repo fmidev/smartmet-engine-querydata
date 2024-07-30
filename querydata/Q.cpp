@@ -4198,7 +4198,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     Fmi::hash_combine(hash, Fmi::hash_value(theYmax));
     Fmi::hash_combine(hash, theCrs.hashValue());
 
-    auto model = std::make_shared<Model>(*itsModels[0], data, hash);
+    auto model = Model::create(*itsModels[0], data, hash);
     return std::make_shared<QImpl>(model);
   }
   catch (...)

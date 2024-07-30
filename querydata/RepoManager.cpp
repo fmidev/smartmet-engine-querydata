@@ -630,17 +630,17 @@ void RepoManager::load(Producer producer,
         if (itsVerbose)
           std::cout << Spine::log_time_str() + " QENGINE LOAD " + filename.string() << std::endl;
 
-        model = std::make_shared<Model>(filename,
-                                          itsValidPointsCacheDir,
-                                          conf.producer,
-                                          conf.leveltype,
-                                          conf.isclimatology,
-                                          conf.isfullgrid,
-                                          conf.isstaticgrid,
-                                          conf.isrelativeuv,
-                                          conf.update_interval,
-                                          conf.minimum_expires,
-                                          conf.mmap);
+        model = Model::create(filename,
+                              itsValidPointsCacheDir,
+                              conf.producer,
+                              conf.leveltype,
+                              conf.isclimatology,
+                              conf.isfullgrid,
+                              conf.isstaticgrid,
+                              conf.isrelativeuv,
+                              conf.update_interval,
+                              conf.minimum_expires,
+                              conf.mmap);
 
         data_load_time = Fmi::SecondClock::universal_time();
       }

@@ -6,7 +6,6 @@
 
 #include "Model.h"
 #include "ValidPoints.h"
-#include <boost/filesystem/operations.hpp>
 #include <macgyver/Exception.h>
 #include <macgyver/FileSystem.h>
 #include <macgyver/Hash.h>
@@ -32,7 +31,8 @@ namespace Querydata
  */
 // ----------------------------------------------------------------------
 
-Model::Model(const std::filesystem::path& filename,
+Model::Model(Private,
+             const std::filesystem::path& filename,
              const std::string& validpointscachedir,
              Producer producer,
              std::string levelname,
@@ -123,13 +123,45 @@ Model::Model(const std::filesystem::path& filename,
   }
 }
 
+std::shared_ptr<Model> Model::create(
+        const std::filesystem::path& filename,
+        const std::string& validpointscachedir,
+        Producer producer,
+        std::string levelname,
+        bool climatology,
+        bool full,
+        bool staticgrid,
+        bool relativeuv,
+        unsigned int update_interval,
+        unsigned int minimum_expiration_time,
+        bool mmap)
+{
+  return std::make_shared<Model>(Private(),
+                                 filename,
+                                 validpointscachedir,
+                                 producer,
+                                 levelname,
+                                 climatology,
+                                 full,
+                                 staticgrid,
+                                 relativeuv,
+                                 update_interval,
+                                 minimum_expiration_time,
+                                 mmap);
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Construct a model from a filtered one
  */
 // ----------------------------------------------------------------------
 
-Model::Model(const Model& theModel, std::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
+Model::Model(
+      Private,
+      const Model& theModel,
+      std::shared_ptr<NFmiQueryData> theData,
+      std::size_t theHash)
+
     : itsHashValue(theHash)  // decided externally on purpose
       ,
       itsOriginTime(theModel.itsOriginTime),
@@ -149,6 +181,14 @@ Model::Model(const Model& theModel, std::shared_ptr<NFmiQueryData> theData, std:
 {
 }
 
+std::shared_ptr<Model> Model::create(
+        const Model& theModel,
+        std::shared_ptr<NFmiQueryData> theData,
+        std::size_t theHash)
+{
+  return std::make_shared<Model>(Private(), theModel, std::move(theData), theHash);
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Construct a model without querydata file
@@ -157,7 +197,11 @@ Model::Model(const Model& theModel, std::shared_ptr<NFmiQueryData> theData, std:
  */
 // ----------------------------------------------------------------------
 
-Model::Model(std::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
+Model::Model(
+      Private,
+      std::shared_ptr<NFmiQueryData> theData,
+      std::size_t theHash)
+
     : itsHashValue(theHash), itsValidTimeList(new ValidTimeList()), itsQueryData(std::move(theData))
 {
   try
@@ -185,6 +229,13 @@ Model::Model(std::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
+}
+
+std::shared_ptr<Model> Model::create(
+        std::shared_ptr<NFmiQueryData> theData,
+        std::size_t theHash)
+{
+  return std::make_shared<Model>(Private(), std::move(theData), theHash);
 }
 
 // ----------------------------------------------------------------------

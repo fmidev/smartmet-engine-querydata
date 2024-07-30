@@ -35,8 +35,10 @@ class ValidPoints;
 
 class Model : public boost::enable_shared_from_this<Model>
 {
+  struct Private { explicit Private() = default; }; // Dummy structure to disable public constructors
  public:
-  Model(const std::filesystem::path& filename,
+  Model(Private,
+        const std::filesystem::path& filename,
         const std::string& validpointscachedir,
         Producer producer,
         std::string levelname,
@@ -48,9 +50,34 @@ class Model : public boost::enable_shared_from_this<Model>
         unsigned int minimum_expiration_time,
         bool mmap);
 
-  Model(const Model& theModel, std::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
+  Model(Private,
+        const Model& theModel,
+        std::shared_ptr<NFmiQueryData> theData,
+        std::size_t theHash);
 
-  Model(std::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
+  Model(Private, std::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
+
+  static std::shared_ptr<Model> create(
+        const std::filesystem::path& filename,
+        const std::string& validpointscachedir,
+        Producer producer,
+        std::string levelname,
+        bool climatology,
+        bool full,
+        bool staticgrid,
+        bool relativeuv,
+        unsigned int update_interval,
+        unsigned int minimum_expiration_time,
+        bool mmap);
+
+  static std::shared_ptr<Model> create(
+        const Model& theModel,
+        std::shared_ptr<NFmiQueryData> theData,
+        std::size_t theHash);
+
+  static std::shared_ptr<Model> create(
+        std::shared_ptr<NFmiQueryData> theData,
+        std::size_t theHash);
 
   ~Model() = default;
   Model() = delete;
