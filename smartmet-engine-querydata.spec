@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 24.7.30
-Release: 2%{?dist}.fmi
+Version: 24.8.1
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -29,10 +29,10 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 24.7.12
-BuildRequires: smartmet-library-macgyver-devel >= 24.7.12
+BuildRequires: smartmet-library-timeseries-devel >= 24.7.22
+BuildRequires: smartmet-library-macgyver-devel >= 24.7.31
 BuildRequires: smartmet-library-newbase-devel >= 24.7.12
-BuildRequires: smartmet-library-spine-devel >= 24.7.12
+BuildRequires: smartmet-library-spine-devel >= 24.7.30
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -41,11 +41,11 @@ Requires: gdal35-libs
 Requires: jsoncpp >= 1.8.4
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 24.7.12
-Requires: smartmet-library-macgyver >= 24.7.12
+Requires: smartmet-library-timeseries >= 24.7.22
+Requires: smartmet-library-macgyver >= 24.7.31
 Requires: smartmet-library-newbase >= 24.7.12
-Requires: smartmet-library-spine >= 24.7.12
-#TestRequires: smartmet-utils-devel >= 23.9.6
+Requires: smartmet-library-spine >= 24.7.30
+#TestRequires: smartmet-utils-devel >= 24.7.19
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal35-devel
 #TestRequires: gcc-c++
@@ -90,7 +90,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
-* Tue Jul 30 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.30-2.fmi
+* Thu Aug  1 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.8.1-1.fmi
+- Allow DEM and LandCover data to be missing when resampling data
+
+* Tue Jul 30 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.30-1.fmi
 - Model: update use of std::enable_shared_from_this
 
 * Mon Jul 22 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.22-1.fmi
