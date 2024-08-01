@@ -2,7 +2,6 @@
 #include "Model.h"
 #include "WGS84EnvelopeFactory.h"
 #include <boost/math/constants/constants.hpp>
-#include <optional>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
@@ -29,6 +28,7 @@
 #include <timeseries/ParameterFactory.h>
 #include <cassert>
 #include <ogr_spatialref.h>
+#include <optional>
 #include <stdexcept>
 
 namespace
@@ -746,14 +746,13 @@ void QImpl::resetParam()
   }
 }
 
-void QImpl::setParameterTranslations(const std::shared_ptr<Spine::ParameterTranslations>& translations)
+void QImpl::setParameterTranslations(
+    const std::shared_ptr<Spine::ParameterTranslations> &translations)
 {
   if (!translations)
     throw Fmi::Exception(BCP, "empty std::shared_ptr<>");
   itsParameterTranslations = translations;
 }
-
-
 
 // ----------------------------------------------------------------------
 /*!
@@ -2434,8 +2433,8 @@ TS::Value WeatherText(QImpl &q,
 // ----------------------------------------------------------------------
 
 std::optional<int> calc_smart_symbol(QImpl &q,
-                                       const NFmiPoint &latlon,
-                                       const Fmi::LocalDateTime &ldt)
+                                     const NFmiPoint &latlon,
+                                     const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2558,8 +2557,8 @@ std::optional<int> calc_smart_symbol(QImpl &q,
 // ----------------------------------------------------------------------
 
 std::optional<int> calc_weather_number(QImpl &q,
-                                         const NFmiPoint &latlon,
-                                         const Fmi::LocalDateTime &ldt)
+                                       const NFmiPoint &latlon,
+                                       const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2935,7 +2934,7 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     case kFmiTZ:
     {
       if (ldt.zone())
-        //return ldt.zone()->std_zone_name(); // Not present in new Date library
+        // return ldt.zone()->std_zone_name(); // Not present in new Date library
         return ldt.abbrev();
       return TS::None();
     }
@@ -3343,7 +3342,7 @@ TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::LocalDateTime &ld
       }
     }
 
-    if (const auto* ptr = std::get_if<double>(&retval))
+    if (const auto *ptr = std::get_if<double>(&retval))
     {
       if (*ptr == kFloatMissing)
         retval = TS::None();
@@ -3436,7 +3435,7 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
       }
     }
 
-    if (const auto* ptr = std::get_if<double>(&retval))
+    if (const auto *ptr = std::get_if<double>(&retval))
     {
       if (*ptr == kFloatMissing)
         retval = TS::None();
@@ -3530,7 +3529,7 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
       }
     }
 
-    if (const auto* ptr = std::get_if<double>(&retval))
+    if (const auto *ptr = std::get_if<double>(&retval))
     {
       if (*ptr == kFloatMissing)
         retval = TS::None();
@@ -4045,8 +4044,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                 double theXmax,
                 double theYmax,
                 double theResolution,
-                const Fmi::DEM &theDem,
-                const Fmi::LandCover &theLandCover)
+                const std::shared_ptr<Fmi::DEM> &theDem,
+                const std::shared_ptr<Fmi::LandCover> &theLandCover)
 {
   try
   {
@@ -4108,7 +4107,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     NFmiFastQueryInfo dstinfo(data.get());
     dstinfo.First();  // sets the only param and time active
 
-    if ((itsModels[0]->levelName() == "surface") &&
+    if (theDem && theLandCover && (itsModels[0]->levelName() == "surface") &&
         (theParameter.type() == Spine::Parameter::Type::Landscaped))
     {
       // Landscaping; temperature or dewpoint
@@ -4122,7 +4121,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
       calcLatlonCachePoints(dstinfo, locCache);
 
       if (loadDEMAndWaterFlags(
-              theDem, theLandCover, theResolution, locCache, demMatrix, waterFlagMatrix))
+              *theDem, *theLandCover, theResolution, locCache, demMatrix, waterFlagMatrix))
         valueMatrix = landscapeCachedInterpolation(locCache, timeCache, demMatrix, waterFlagMatrix);
       else
         // Target grid does not intersect the native grid
@@ -4158,9 +4157,15 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
           auto latlon = dstinfo.LatLon();
 
           if (theParameter.name() == "dem")
-            dstinfo.FloatValue(theDem.elevation(latlon.X(), latlon.Y(), theResolution));
+          {
+            if (theDem)
+              dstinfo.FloatValue(theDem->elevation(latlon.X(), latlon.Y(), theResolution));
+          }
           else if (theParameter.name() == "covertype")
-            dstinfo.FloatValue(theLandCover.coverType(latlon.X(), latlon.Y()));
+          {
+            if (theLandCover)
+              dstinfo.FloatValue(theLandCover->coverType(latlon.X(), latlon.Y()));
+          }
           else
           {
             Spine::Location loc(latlon.X(), latlon.Y());
@@ -4180,7 +4185,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                                      dummy);
 
             auto result = value(options, localdatetime);
-            if (const auto* ptr = std::get_if<double>(&result))
+            if (const auto *ptr = std::get_if<double>(&result))
               dstinfo.FloatValue(*ptr);
           }
         }

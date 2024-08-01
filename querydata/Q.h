@@ -16,14 +16,14 @@
 #include "Model.h"
 #include "ParameterOptions.h"
 #include "ValidTimeList.h"
-#include <macgyver/DateTime.h>
-#include <memory>
 #include <gis/CoordinateMatrix.h>
+#include <macgyver/DateTime.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/ParameterTranslations.h>
 #include <spine/Thread.h>
 #include <timeseries/TimeSeriesInclude.h>
 #include <list>
+#include <memory>
 
 class NFmiArea;
 class NFmiMetTime;
@@ -231,24 +231,22 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
   // sample data into a new projection
 
   std::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
-                                  const Fmi::DateTime& theTime,
-                                  const Fmi::SpatialReference& theCrs,
-                                  double theXmin,
-                                  double theYmin,
-                                  double theXmax,
-                                  double theYmax,
-                                  double theResolution,
-                                  const Fmi::DEM& theDem,
-                                  const Fmi::LandCover& theLandCover);
+                                const Fmi::DateTime& theTime,
+                                const Fmi::SpatialReference& theCrs,
+                                double theXmin,
+                                double theYmin,
+                                double theXmax,
+                                double theYmax,
+                                double theResolution,
+                                const std::shared_ptr<Fmi::DEM>& theDem,
+                                const std::shared_ptr<Fmi::LandCover>& theLandCover);
 
   // one location, one timestep
   TS::Value value(const ParameterOptions& opt, const Fmi::LocalDateTime& ldt);
   TS::Value valueAtPressure(const ParameterOptions& opt,
                             const Fmi::LocalDateTime& ldt,
                             float pressure);
-  TS::Value valueAtHeight(const ParameterOptions& opt,
-                          const Fmi::LocalDateTime& ldt,
-                          float height);
+  TS::Value valueAtHeight(const ParameterOptions& opt, const Fmi::LocalDateTime& ldt, float height);
   // one location, many timesteps
   TS::TimeSeriesPtr values(const ParameterOptions& param,
                            const TS::TimeSeriesGenerator::LocalTimeList& tlist);
@@ -313,8 +311,8 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
                               float height);
 
   std::vector<SharedModel> itsModels;
-  std::vector<SharedInfo> itsInfos;  // used only in destructor and MultiInfo constructor
-  std::shared_ptr<NFmiFastQueryInfo> itsInfo;    // or NFmiMultiQueryInfo
+  std::vector<SharedInfo> itsInfos;            // used only in destructor and MultiInfo constructor
+  std::shared_ptr<NFmiFastQueryInfo> itsInfo;  // or NFmiMultiQueryInfo
   std::shared_ptr<ValidTimeList> itsValidTimes;  // collective over all datas
   std::size_t itsHashValue;
 
