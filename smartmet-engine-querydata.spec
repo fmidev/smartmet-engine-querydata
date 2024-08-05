@@ -17,8 +17,8 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %define smartmet_boost boost
 %endif
 
-%define smartmet_fmt_min 8.1.1
-%define smartmet_fmt_max 8.2.0
+%define smartmet_fmt_min 11.0.0
+%define smartmet_fmt_max 12.0.0
 
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: bzip2-devel
@@ -39,7 +39,7 @@ Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
 Requires: gdal38-libs
 Requires: jsoncpp >= 1.8.4
-Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
+Requires: fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
 Requires: zlib
 Requires: smartmet-library-timeseries >= 24.7.22
 Requires: smartmet-library-macgyver >= 24.7.31
