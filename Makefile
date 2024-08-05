@@ -12,7 +12,7 @@ enginedir = $(datadir)/smartmet/engines
 
 DEFINES = -DUNIX -D_REENTRANT
 
-LIBS += -L$(libdir) \
+LIBS += $(PREFIX_LDFLAGS) \
 	$(REQUIRED_LIBS) \
 	-lsmartmet-timeseries \
 	-lsmartmet-spine \
@@ -21,7 +21,6 @@ LIBS += -L$(libdir) \
 	-lsmartmet-macgyver \
 	-lboost_regex \
 	-lboost_thread \
-	-lboost_filesystem \
 	-lboost_iostreams \
 	-lboost_serialization \
 	-lboost_system \

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <boost/filesystem/path.hpp>
 #include <boost/regex.hpp>
 #include <libconfig.h++>
+#include <filesystem>
 #include <list>
 #include <set>
 #include <string>
@@ -57,7 +57,7 @@ struct ProducerConfig
 
   Producer producer;
   std::set<std::string> aliases;
-  boost::filesystem::path directory;
+  std::filesystem::path directory;
   boost::regex pattern;
   std::string pattern_str;  // because boost::regex has no operator==
   std::string type = "grid";

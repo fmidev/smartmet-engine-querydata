@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 24.5.29
+Version: 24.8.1
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,11 +29,10 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 24.5.28
-BuildRequires: smartmet-library-macgyver-devel >= 24.5.6
-BuildRequires: smartmet-library-newbase-devel >= 24.5.6
-BuildRequires: smartmet-library-spine-devel >= 24.5.6
-Requires: %{smartmet_boost}-filesystem
+BuildRequires: smartmet-library-timeseries-devel >= 24.7.22
+BuildRequires: smartmet-library-macgyver-devel >= 24.7.31
+BuildRequires: smartmet-library-newbase-devel >= 24.7.12
+BuildRequires: smartmet-library-spine-devel >= 24.7.30
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -42,11 +41,11 @@ Requires: gdal38-libs
 Requires: jsoncpp >= 1.8.4
 Requires: fmt >= %{smartmet_fmt_min}, fmt < %{smartmet_fmt_max}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 24.5.28
-Requires: smartmet-library-macgyver >= 24.5.6
-Requires: smartmet-library-newbase >= 24.5.6
-Requires: smartmet-library-spine >= 24.5.6
-#TestRequires: smartmet-utils-devel >= 23.9.6
+Requires: smartmet-library-timeseries >= 24.7.22
+Requires: smartmet-library-macgyver >= 24.7.31
+Requires: smartmet-library-newbase >= 24.7.12
+Requires: smartmet-library-spine >= 24.7.30
+#TestRequires: smartmet-utils-devel >= 24.7.19
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal38-devel
 #TestRequires: gcc-c++
@@ -91,6 +90,18 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu Aug  1 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.8.1-1.fmi
+- Allow DEM and LandCover data to be missing when resampling data
+
+* Tue Jul 30 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.30-1.fmi
+- Model: update use of std::enable_shared_from_this
+
+* Mon Jul 22 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.22-1.fmi
+- Rebuild due to smartmet-library-macgyver ABI changes
+
+* Fri Jul 12 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.7.12-1.fmi
+- Replace many boost library types with C++ standard library ones
+
 * Wed May 29 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.5.29-1.fmi
 - Fix uninitialized shared ptr from previous release
 

@@ -16,16 +16,14 @@
 #include "Model.h"
 #include "ParameterOptions.h"
 #include "ValidTimeList.h"
-#include <macgyver/DateTime.h>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
 #include <gis/CoordinateMatrix.h>
+#include <macgyver/DateTime.h>
 #include <newbase/NFmiParameterName.h>
 #include <spine/ParameterTranslations.h>
 #include <spine/Thread.h>
 #include <timeseries/TimeSeriesInclude.h>
 #include <list>
+#include <memory>
 
 class NFmiArea;
 class NFmiMetTime;
@@ -59,9 +57,9 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
   QImpl& operator=(QImpl&& other) = delete;
 
   // Avoid using this as much as possible
-  boost::shared_ptr<NFmiFastQueryInfo> info();
+  std::shared_ptr<NFmiFastQueryInfo> info();
 
-  boost::shared_ptr<ValidTimeList> validTimes() const;
+  std::shared_ptr<ValidTimeList> validTimes() const;
 
   const std::string& levelName() const;
   FmiLevelType levelType() const;
@@ -232,25 +230,23 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
   // sample data into a new projection
 
-  boost::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
-                                  const Fmi::DateTime& theTime,
-                                  const Fmi::SpatialReference& theCrs,
-                                  double theXmin,
-                                  double theYmin,
-                                  double theXmax,
-                                  double theYmax,
-                                  double theResolution,
-                                  const Fmi::DEM& theDem,
-                                  const Fmi::LandCover& theLandCover);
+  std::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
+                                const Fmi::DateTime& theTime,
+                                const Fmi::SpatialReference& theCrs,
+                                double theXmin,
+                                double theYmin,
+                                double theXmax,
+                                double theYmax,
+                                double theResolution,
+                                const std::shared_ptr<Fmi::DEM>& theDem,
+                                const std::shared_ptr<Fmi::LandCover>& theLandCover);
 
   // one location, one timestep
   TS::Value value(const ParameterOptions& opt, const Fmi::LocalDateTime& ldt);
   TS::Value valueAtPressure(const ParameterOptions& opt,
                             const Fmi::LocalDateTime& ldt,
                             float pressure);
-  TS::Value valueAtHeight(const ParameterOptions& opt,
-                          const Fmi::LocalDateTime& ldt,
-                          float height);
+  TS::Value valueAtHeight(const ParameterOptions& opt, const Fmi::LocalDateTime& ldt, float height);
   // one location, many timesteps
   TS::TimeSeriesPtr values(const ParameterOptions& param,
                            const TS::TimeSeriesGenerator::LocalTimeList& tlist);
@@ -292,10 +288,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
   bool needsGlobeWrap() const;
 
-  void setParameterTranslations(boost::shared_ptr<Spine::ParameterTranslations> translations)
-  {
-    itsParameterTranslations = std::move(translations);
-  }
+  void setParameterTranslations(const std::shared_ptr<Spine::ParameterTranslations>& translations);
 
  private:
   NFmiDataMatrix<float> calculatedValues(const Spine::Parameter& theParam,
@@ -318,16 +311,16 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
                               float height);
 
   std::vector<SharedModel> itsModels;
-  std::vector<SharedInfo> itsInfos;  // used only in destructor and MultiInfo constructor
-  boost::shared_ptr<NFmiFastQueryInfo> itsInfo;    // or NFmiMultiQueryInfo
-  boost::shared_ptr<ValidTimeList> itsValidTimes;  // collective over all datas
+  std::vector<SharedInfo> itsInfos;            // used only in destructor and MultiInfo constructor
+  std::shared_ptr<NFmiFastQueryInfo> itsInfo;  // or NFmiMultiQueryInfo
+  std::shared_ptr<ValidTimeList> itsValidTimes;  // collective over all datas
   std::size_t itsHashValue;
 
-  boost::shared_ptr<Spine::ParameterTranslations> itsParameterTranslations;
+  std::shared_ptr<Spine::ParameterTranslations> itsParameterTranslations;
 
 };  // class QImpl
 
-using Q = boost::shared_ptr<QImpl>;
+using Q = std::shared_ptr<QImpl>;
 using QList = std::list<Q>;
 
 std::size_t hash_value(const Q& theQ);

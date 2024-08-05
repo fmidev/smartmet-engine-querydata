@@ -2,7 +2,6 @@
 #include "Model.h"
 #include "WGS84EnvelopeFactory.h"
 #include <boost/math/constants/constants.hpp>
-#include <boost/optional.hpp>
 #include <boost/range/algorithm/sort.hpp>
 #include <boost/range/algorithm/unique.hpp>
 #include <boost/range/algorithm_ext/erase.hpp>
@@ -29,6 +28,7 @@
 #include <timeseries/ParameterFactory.h>
 #include <cassert>
 #include <ogr_spatialref.h>
+#include <optional>
 #include <stdexcept>
 
 namespace
@@ -208,7 +208,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
       itsInfos.push_back(model->info());
 
     if (itsInfos.size() > 1)
-      itsInfo = boost::make_shared<NFmiMultiQueryInfo>(itsInfos);
+      itsInfo = std::make_shared<NFmiMultiQueryInfo>(itsInfos);
     else
       itsInfo = itsInfos[0];
 
@@ -242,7 +242,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
  */
 // ----------------------------------------------------------------------
 
-boost::shared_ptr<NFmiFastQueryInfo> QImpl::info()
+std::shared_ptr<NFmiFastQueryInfo> QImpl::info()
 {
   return itsInfo;
 }
@@ -453,7 +453,7 @@ Fmi::DateTime QImpl::expirationTime() const
  */
 // ----------------------------------------------------------------------
 
-boost::shared_ptr<ValidTimeList> QImpl::validTimes() const
+std::shared_ptr<ValidTimeList> QImpl::validTimes() const
 {
   return itsValidTimes;
 }
@@ -744,6 +744,14 @@ void QImpl::resetParam()
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
+}
+
+void QImpl::setParameterTranslations(
+    const std::shared_ptr<Spine::ParameterTranslations> &translations)
+{
+  if (!translations)
+    throw Fmi::Exception(BCP, "empty std::shared_ptr<>");
+  itsParameterTranslations = translations;
 }
 
 // ----------------------------------------------------------------------
@@ -1840,7 +1848,7 @@ std::string format_date(const Fmi::LocalDateTime &ldt,
 TS::Value WindUMS(QImpl &q,
                   const Spine::Location &loc,
                   const Fmi::LocalDateTime &ldt,
-                  boost::optional<float> level = boost::none,
+                  std::optional<float> level = std::nullopt,
                   InterpolationMethod method = InterpolationMethod::SURFACE)
 {
   try
@@ -1897,7 +1905,7 @@ TS::Value WindUMS(QImpl &q,
 TS::Value WindVMS(QImpl &q,
                   const Spine::Location &loc,
                   const Fmi::LocalDateTime &ldt,
-                  boost::optional<float> level = boost::none,
+                  std::optional<float> level = std::nullopt,
                   InterpolationMethod method = InterpolationMethod::SURFACE)
 {
   try
@@ -2424,9 +2432,9 @@ TS::Value WeatherText(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-boost::optional<int> calc_smart_symbol(QImpl &q,
-                                       const NFmiPoint &latlon,
-                                       const Fmi::LocalDateTime &ldt)
+std::optional<int> calc_smart_symbol(QImpl &q,
+                                     const NFmiPoint &latlon,
+                                     const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2548,9 +2556,9 @@ boost::optional<int> calc_smart_symbol(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-boost::optional<int> calc_weather_number(QImpl &q,
-                                         const NFmiPoint &latlon,
-                                         const Fmi::LocalDateTime &ldt)
+std::optional<int> calc_weather_number(QImpl &q,
+                                       const NFmiPoint &latlon,
+                                       const Fmi::LocalDateTime &ldt)
 {
   try
   {
@@ -2926,7 +2934,7 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     case kFmiTZ:
     {
       if (ldt.zone())
-        //return ldt.zone()->std_zone_name(); // Not present in new Date library
+        // return ldt.zone()->std_zone_name(); // Not present in new Date library
         return ldt.abbrev();
       return TS::None();
     }
@@ -3334,9 +3342,9 @@ TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::LocalDateTime &ld
       }
     }
 
-    if (boost::get<double>(&retval) != nullptr)
+    if (const auto *ptr = std::get_if<double>(&retval))
     {
-      if (*(boost::get<double>(&retval)) == kFloatMissing)
+      if (*ptr == kFloatMissing)
         retval = TS::None();
     }
 
@@ -3427,9 +3435,9 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
       }
     }
 
-    if (boost::get<double>(&retval) != nullptr)
+    if (const auto *ptr = std::get_if<double>(&retval))
     {
-      if (*(boost::get<double>(&retval)) == kFloatMissing)
+      if (*ptr == kFloatMissing)
         retval = TS::None();
     }
 
@@ -3521,9 +3529,9 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
       }
     }
 
-    if (boost::get<double>(&retval) != nullptr)
+    if (const auto *ptr = std::get_if<double>(&retval))
     {
-      if (*(boost::get<double>(&retval)) == kFloatMissing)
+      if (*ptr == kFloatMissing)
         retval = TS::None();
     }
 
@@ -4036,8 +4044,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                 double theXmax,
                 double theYmax,
                 double theResolution,
-                const Fmi::DEM &theDem,
-                const Fmi::LandCover &theLandCover)
+                const std::shared_ptr<Fmi::DEM> &theDem,
+                const std::shared_ptr<Fmi::LandCover> &theLandCover)
 {
   try
   {
@@ -4092,14 +4100,14 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     // Then create the new querydata
 
     NFmiFastQueryInfo newinfo(pdesc, tdesc, hdesc, vdesc);
-    boost::shared_ptr<NFmiQueryData> data(NFmiQueryDataUtil::CreateEmptyData(newinfo));
+    std::shared_ptr<NFmiQueryData> data(NFmiQueryDataUtil::CreateEmptyData(newinfo));
     if (data.get() == nullptr)
       throw Fmi::Exception(BCP, "Failed to create querydata by sampling");
 
     NFmiFastQueryInfo dstinfo(data.get());
     dstinfo.First();  // sets the only param and time active
 
-    if ((itsModels[0]->levelName() == "surface") &&
+    if (theDem && theLandCover && (itsModels[0]->levelName() == "surface") &&
         (theParameter.type() == Spine::Parameter::Type::Landscaped))
     {
       // Landscaping; temperature or dewpoint
@@ -4113,7 +4121,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
       calcLatlonCachePoints(dstinfo, locCache);
 
       if (loadDEMAndWaterFlags(
-              theDem, theLandCover, theResolution, locCache, demMatrix, waterFlagMatrix))
+              *theDem, *theLandCover, theResolution, locCache, demMatrix, waterFlagMatrix))
         valueMatrix = landscapeCachedInterpolation(locCache, timeCache, demMatrix, waterFlagMatrix);
       else
         // Target grid does not intersect the native grid
@@ -4135,7 +4143,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
       // Now we need all kinds of extra variables because of the damned API
 
       NFmiPoint dummy;
-      boost::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
+      std::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
       Fmi::TimeZonePtr utc("Etc/UTC");
       Fmi::LocalDateTime localdatetime(theTime, utc);
 
@@ -4149,9 +4157,15 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
           auto latlon = dstinfo.LatLon();
 
           if (theParameter.name() == "dem")
-            dstinfo.FloatValue(theDem.elevation(latlon.X(), latlon.Y(), theResolution));
+          {
+            if (theDem)
+              dstinfo.FloatValue(theDem->elevation(latlon.X(), latlon.Y(), theResolution));
+          }
           else if (theParameter.name() == "covertype")
-            dstinfo.FloatValue(theLandCover.coverType(latlon.X(), latlon.Y()));
+          {
+            if (theLandCover)
+              dstinfo.FloatValue(theLandCover->coverType(latlon.X(), latlon.Y()));
+          }
           else
           {
             Spine::Location loc(latlon.X(), latlon.Y());
@@ -4171,8 +4185,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                                      dummy);
 
             auto result = value(options, localdatetime);
-            if (boost::get<double>(&result) != nullptr)
-              dstinfo.FloatValue(*boost::get<double>(&result));
+            if (const auto *ptr = std::get_if<double>(&result))
+              dstinfo.FloatValue(*ptr);
           }
         }
       }
@@ -4189,8 +4203,8 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     Fmi::hash_combine(hash, Fmi::hash_value(theYmax));
     Fmi::hash_combine(hash, theCrs.hashValue());
 
-    auto model = boost::make_shared<Model>(*itsModels[0], data, hash);
-    return boost::make_shared<QImpl>(model);
+    auto model = Model::create(*itsModels[0], data, hash);
+    return std::make_shared<QImpl>(model);
   }
   catch (...)
   {

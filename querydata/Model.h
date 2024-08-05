@@ -14,9 +14,8 @@
 #include "Producer.h"
 #include "ValidTimeList.h"
 #include <macgyver/DateTime.h>
-#include <boost/filesystem/path.hpp>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <filesystem>
+#include <memory>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <spine/Thread.h>
 #include <list>
@@ -24,7 +23,7 @@
 class NFmiPoint;
 class NFmiQueryData;
 
-using SharedInfo = boost::shared_ptr<NFmiFastQueryInfo>;
+using SharedInfo = std::shared_ptr<NFmiFastQueryInfo>;
 
 namespace SmartMet
 {
@@ -36,8 +35,10 @@ class ValidPoints;
 
 class Model : public boost::enable_shared_from_this<Model>
 {
+  struct Private { explicit Private() = default; }; // Dummy structure to disable public constructors
  public:
-  Model(const boost::filesystem::path& filename,
+  Model(Private,
+        const std::filesystem::path& filename,
         const std::string& validpointscachedir,
         Producer producer,
         std::string levelname,
@@ -49,9 +50,34 @@ class Model : public boost::enable_shared_from_this<Model>
         unsigned int minimum_expiration_time,
         bool mmap);
 
-  Model(const Model& theModel, boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
+  Model(Private,
+        const Model& theModel,
+        std::shared_ptr<NFmiQueryData> theData,
+        std::size_t theHash);
 
-  Model(boost::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
+  Model(Private, std::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
+
+  static std::shared_ptr<Model> create(
+        const std::filesystem::path& filename,
+        const std::string& validpointscachedir,
+        Producer producer,
+        std::string levelname,
+        bool climatology,
+        bool full,
+        bool staticgrid,
+        bool relativeuv,
+        unsigned int update_interval,
+        unsigned int minimum_expiration_time,
+        bool mmap);
+
+  static std::shared_ptr<Model> create(
+        const Model& theModel,
+        std::shared_ptr<NFmiQueryData> theData,
+        std::size_t theHash);
+
+  static std::shared_ptr<Model> create(
+        std::shared_ptr<NFmiQueryData> theData,
+        std::size_t theHash);
 
   ~Model() = default;
   Model() = delete;
@@ -67,9 +93,9 @@ class Model : public boost::enable_shared_from_this<Model>
   const Fmi::DateTime& modificationTime() const;
   Fmi::DateTime expirationTime() const;
 
-  boost::shared_ptr<ValidTimeList> validTimes() const;
+  std::shared_ptr<ValidTimeList> validTimes() const;
 
-  const boost::filesystem::path& path() const;
+  const std::filesystem::path& path() const;
   const Producer& producer() const;
 
   const std::string& levelName() const;
@@ -83,8 +109,8 @@ class Model : public boost::enable_shared_from_this<Model>
   std::size_t gridHashValue() const;
 
   // Deprecated in WGS84 branch
-  void setLatLonCache(const boost::shared_ptr<std::vector<NFmiPoint>>& theCache);
-  boost::shared_ptr<std::vector<NFmiPoint>> makeLatLonCache();
+  void setLatLonCache(const std::shared_ptr<std::vector<NFmiPoint>>& theCache);
+  std::shared_ptr<std::vector<NFmiPoint>> makeLatLonCache();
 
   void uncache() const;
 
@@ -94,12 +120,12 @@ class Model : public boost::enable_shared_from_this<Model>
   friend class Repository;
   friend struct RepoManager;
   SharedInfo info() const;
-  void release(const boost::shared_ptr<NFmiFastQueryInfo>& theInfo) const;
+  void release(const std::shared_ptr<NFmiFastQueryInfo>& theInfo) const;
 
   std::size_t itsHashValue = 0;
   Fmi::DateTime itsOriginTime;
   Fmi::DateTime itsLoadTime;
-  boost::filesystem::path itsPath;
+  std::filesystem::path itsPath;
   Fmi::DateTime itsModificationTime;
   Producer itsProducer;
   std::string itsLevelName;
@@ -110,8 +136,8 @@ class Model : public boost::enable_shared_from_this<Model>
   bool itsStaticGrid = false;
   bool itsRelativeUV = false;
 
-  boost::shared_ptr<ValidPoints> itsValidPoints;
-  boost::shared_ptr<ValidTimeList> itsValidTimeList;
+  std::shared_ptr<ValidPoints> itsValidPoints;
+  std::shared_ptr<ValidTimeList> itsValidTimeList;
 
   // Constructing NFmiFastQueryInfo may be slow if there are many
   // time steps or many locations - hence we pool the used infos.
@@ -123,10 +149,10 @@ class Model : public boost::enable_shared_from_this<Model>
 
   // The actual reference to the data is after the pool above to make
   // sure the destruction order makes sense.
-  boost::shared_ptr<NFmiQueryData> itsQueryData;
+  std::shared_ptr<NFmiQueryData> itsQueryData;
 };
 
-using SharedModel = boost::shared_ptr<Model>;
+using SharedModel = std::shared_ptr<Model>;
 using SharedModelList = std::list<SharedModel>;
 using SharedModelTimeList = std::list<std::pair<SharedModel, ValidTimeList>>;
 
