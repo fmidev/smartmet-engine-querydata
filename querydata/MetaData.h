@@ -85,6 +85,8 @@ struct MetaData
   std::list<ModelLevel> levels;
   std::list<ModelParameter> parameters;
   WGS84Envelope wgs84Envelope;
+
+  std::list<Fmi::DateTime> times;
 };
 
 }  // namespace Querydata

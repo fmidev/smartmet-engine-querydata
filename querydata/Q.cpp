@@ -294,6 +294,15 @@ MetaData QImpl::metaData()
       meta.timeStep = 0;
     }
 
+    // Get querydata validtimes
+    std::list<Fmi::DateTime> times;
+    qi.ResetTime();
+    while (qi.NextTime())
+    {
+      times.emplace_back(qi.ValidTime());
+    }
+    meta.times = times;
+
     // Get querydata timesteps size
     meta.nTimeSteps = qi.SizeTimes();
 
