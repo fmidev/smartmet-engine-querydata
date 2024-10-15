@@ -1409,29 +1409,6 @@ float QImpl::cachedInterpolation(const NFmiLocationCache &theLocationCache,
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Perform landscaped cached interpolation
- */
-// ----------------------------------------------------------------------
-
-NFmiDataMatrix<float> QImpl::landscapeCachedInterpolation(
-    const NFmiDataMatrix<NFmiLocationCache> &theLocationCache,
-    const NFmiTimeCache &theTimeCache,
-    const NFmiDataMatrix<float> &theDEMValues,
-    const NFmiDataMatrix<bool> &theWaterFlags)
-{
-  try
-  {
-    return itsInfo->LandscapeCachedInterpolation(
-        theLocationCache, theTimeCache, theDEMValues, theWaterFlags);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
  * \brief Perform fast interpolation with cached location information
  */
 // ----------------------------------------------------------------------
@@ -1467,8 +1444,6 @@ NFmiDataMatrix<float> QImpl::calculatedValues(const Spine::Parameter &theParam,
     const auto ny = grid->YNumber();
 
     NFmiDataMatrix<float> ret(nx, ny, kFloatMissing);
-
-    // Note: Landscaping has no effect at grid points
 
     switch (theParam.number())
     {
@@ -1550,19 +1525,13 @@ NFmiDataMatrix<float> QImpl::calculatedValues(const Spine::Parameter &theParam,
 // ----------------------------------------------------------------------
 /*!
  * \brief Extract values at grid points
- * \param theDemValues DEM values for landscaping (an empty matrix by default)
- * \param theWaterFlags Water flags for landscaping (an empty matrix by default)
  */
 // ----------------------------------------------------------------------
 
-NFmiDataMatrix<float> QImpl::values(const NFmiDataMatrix<float> &theDEMValues,
-                                    const NFmiDataMatrix<bool> &theWaterFlags)
+NFmiDataMatrix<float> QImpl::values()
 {
   try
   {
-    if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
-      return itsInfo->LandscapeValues(theDEMValues, theWaterFlags);
-
     return itsInfo->Values();
   }
   catch (...)
@@ -1575,20 +1544,13 @@ NFmiDataMatrix<float> QImpl::values(const NFmiDataMatrix<float> &theDEMValues,
 /*!
  * \brief Extract time interpolated values at grid points
  * \param theInterpolatedTime The desired time
- * \param theDemValues DEM values for landscaping (an empty matrix by default)
- * \param theWaterFlags Water flags for landscaping (an empty matrix by default)
  */
 // ----------------------------------------------------------------------
 
-NFmiDataMatrix<float> QImpl::values(const NFmiMetTime &theInterpolatedTime,
-                                    const NFmiDataMatrix<float> &theDEMValues,
-                                    const NFmiDataMatrix<bool> &theWaterFlags)
+NFmiDataMatrix<float> QImpl::values(const NFmiMetTime &theInterpolatedTime)
 {
   try
   {
-    if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
-      return itsInfo->LandscapeValues(theInterpolatedTime, theDEMValues, theWaterFlags);
-
     return itsInfo->Values(theInterpolatedTime);
   }
   catch (...)
@@ -1601,27 +1563,22 @@ NFmiDataMatrix<float> QImpl::values(const NFmiMetTime &theInterpolatedTime,
 /*!
  * \brief Extract time interpolated values at grid points
  * \param theInterpolatedTime The desired time
- * \param theDemValues DEM values for landscaping (an empty matrix by default)
- * \param theWaterFlags Water flags for landscaping (an empty matrix by default)
  */
 // ----------------------------------------------------------------------
 
 NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
-                                    const Fmi::DateTime &theInterpolatedTime,
-                                    const NFmiDataMatrix<float> &theDEMValues,
-                                    const NFmiDataMatrix<bool> &theWaterFlags)
+                                    const Fmi::DateTime &theInterpolatedTime)
 {
   try
   {
     switch (theParam.type())
     {
       case Spine::Parameter::Type::Data:
-      case Spine::Parameter::Type::Landscaped:
       {
         if (!param(theParam.number()))
           throw Fmi::Exception(BCP,
                                "Parameter " + theParam.name() + " is not available in the data");
-        return values(theInterpolatedTime, theDEMValues, theWaterFlags);
+        return values(theInterpolatedTime);
       }
       case Spine::Parameter::Type::DataDerived:
       case Spine::Parameter::Type::DataIndependent:
@@ -1636,12 +1593,6 @@ NFmiDataMatrix<float> QImpl::values(const Spine::Parameter &theParam,
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Interpolate values
- */
-// ----------------------------------------------------------------------
 
 // ----------------------------------------------------------------------
 /*!
@@ -1670,23 +1621,10 @@ NFmiDataMatrix<float> QImpl::values(const Fmi::CoordinateMatrix &theLatlonMatrix
  */
 // ----------------------------------------------------------------------
 
-NFmiDataMatrix<float> QImpl::croppedValues(
-    int x1,
-    int y1,
-    int x2,
-    int y2,
-    const NFmiDataMatrix<float> &theDEMValues,  // DEM values for landscaping
-                                                // (an empty matrix by
-                                                // default)
-    const NFmiDataMatrix<bool> &theWaterFlags   // Water flags for landscaping
-                                                // (an empty matrix by default)
-) const
+NFmiDataMatrix<float> QImpl::croppedValues(int x1, int y1, int x2, int y2) const
 {
   try
   {
-    if ((theDEMValues.NX() > 0) && (theWaterFlags.NX() > 0))
-      return itsInfo->LandscapeCroppedValues(x1, y1, x2, y2, theDEMValues, theWaterFlags);
-
     return itsInfo->CroppedValues(x1, y1, x2, y2);
   }
   catch (...)
@@ -2121,8 +2059,7 @@ TS::Value WindChill(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTi
     if (!q.param(kFmiTemperature))
       return TS::None();
 
-    float t2m = q.info()->LandscapeInterpolatedValue(
-        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (wspd == kFloatMissing || t2m == kFloatMissing)
       return TS::None();
@@ -2156,8 +2093,7 @@ TS::Value SummerSimmerIndex(QImpl &q, const Spine::Location &loc, const Fmi::Loc
     if (!q.param(kFmiTemperature))
       return TS::None();
 
-    float t2m = q.info()->LandscapeInterpolatedValue(
-        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (rh == kFloatMissing || t2m == kFloatMissing)
       return TS::None();
@@ -2196,8 +2132,7 @@ TS::Value FeelsLike(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTi
     if (!q.param(kFmiTemperature))
       return TS::None();
 
-    float t2m = q.info()->LandscapeInterpolatedValue(
-        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
       return TS::None();
@@ -2244,8 +2179,7 @@ TS::Value ApparentTemperature(QImpl &q, const Spine::Location &loc, const Fmi::L
     if (!q.param(kFmiTemperature))
       return TS::None();
 
-    float t2m = q.info()->LandscapeInterpolatedValue(
-        loc.dem, iswater(loc), NFmiPoint(loc.longitude, loc.latitude), t);
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
 
     if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
       return TS::None();
@@ -3195,27 +3129,6 @@ TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::LocalDateTime &ld
 
     switch (opt.par.type())
     {
-      case Spine::Parameter::Type::Landscaped:
-      {
-        // We can landscape only surface data
-        if (itsModels[0]->levelName() == "surface")
-        {
-          if (param(opt.par.number()))
-          {
-            time(ldt);
-
-            bool water = Fmi::LandCover::isOpenWater(loc.covertype);
-            // DEM data is more accurate
-            if (loc.dem == 0)
-              water = true;
-
-            retval = itsInfo->LandscapeInterpolatedValue(loc.dem, water, latlon, ldt);
-          }
-          break;
-        }
-        // normal handling continues below
-      }
-      // fall through
       case Spine::Parameter::Type::Data:
       {
         opt.lastpoint = latlon;
@@ -3383,7 +3296,6 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
 
     switch (opt.par.type())
     {
-      case Spine::Parameter::Type::Landscaped:
       case Spine::Parameter::Type::Data:
       {
         opt.lastpoint = latlon;
@@ -3476,7 +3388,6 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
 
     switch (opt.par.type())
     {
-      case Spine::Parameter::Type::Landscaped:
       case Spine::Parameter::Type::Data:
       {
         opt.lastpoint = latlon;
@@ -3902,145 +3813,6 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Load dem values and water flags for native (sub)grid or for given locations.
- * 		  Returns false if there's no valid location (within the native grid)
- */
-// ----------------------------------------------------------------------
-
-bool QImpl::loadDEMAndWaterFlags(const Fmi::DEM &theDem,
-                                 const Fmi::LandCover &theLandCover,
-                                 double theResolution,
-                                 const NFmiDataMatrix<NFmiLocationCache> &theLocationCache,
-                                 NFmiDataMatrix<float> &theDemMatrix,
-                                 NFmiDataMatrix<bool> &theWaterFlagMatrix,
-                                 int x1,
-                                 int y1,
-                                 int x2,
-                                 int y2) const
-{
-  try
-  {
-    if (!isGrid())
-      throw Fmi::Exception(BCP, "Can only be used for gridded data!");
-
-    // Resolution must be given with locations
-
-    if (theResolution < 0)
-      throw Fmi::Exception(BCP, "Resolution must be nonnegative!");
-
-    if (theResolution < 0.01)
-    {
-      if (theResolution > 0)
-        throw Fmi::Exception(BCP, "Resolutions below 10 meters are not supported!");
-
-      if (theLocationCache.NX() > 0)
-        throw Fmi::Exception(BCP, "Nonzero resolution must be given with locations!");
-    }
-
-    const NFmiGrid &nativeGrid = grid();
-
-    if (theLocationCache.NX() > 0)
-    {
-      // Load dem values and waterflags for given locations (target grid)
-      //
-      bool intersectsGrid = false;
-      int nx = theLocationCache.NX();
-      int ny = theLocationCache.NY();
-
-      theDemMatrix.Resize(nx, ny);
-      theWaterFlagMatrix.Resize(nx, ny);
-
-      for (int i = 0; (i < nx); i++)
-        for (int j = 0; (j < ny); j++)
-        {
-          auto const &loc = theLocationCache[i][j];
-
-          if (loc.itsLocationIndex != static_cast<unsigned long>(-1))
-          {
-            auto latlon = nativeGrid.GridToLatLon(loc.itsGridPoint);
-            auto dem = theDem.elevation(latlon.X(), latlon.Y(), theResolution);
-
-            theDemMatrix[i][j] = dem;
-            theWaterFlagMatrix[i][j] =
-                ((dem == 0) ||
-                 Fmi::LandCover::isOpenWater(theLandCover.coverType(latlon.X(), latlon.Y())));
-
-            intersectsGrid = true;
-          }
-          else
-          {
-            theDemMatrix[i][j] = kFloatMissing;
-            theWaterFlagMatrix[i][j] = false;
-          }
-        }
-
-      return intersectsGrid;
-    }
-
-    // Load dem values and waterflags for native grid points.
-    //
-    // When cropping, extend the subgrid dimensions by 1 if possible to be get values for the last
-    // column and row
-    // (landscaping requires neighbour gridpoints to be available)
-
-    int nativeGridSizeX = nativeGrid.XNumber();
-    int nativeGridSizeY = nativeGrid.YNumber();
-    int nx;
-    int ny;
-
-    if ((x1 != 0) || (y1 != 0) || (x2 != 0) || (y2 != 0))
-    {
-      if (!((x1 >= 0) && (x1 < x2) && (y1 >= 0) && (y1 < y2) && (x2 < nativeGridSizeX) &&
-            (y2 < nativeGridSizeY)))
-        throw Fmi::Exception(BCP, "Cropping is invalid or outside the grid!");
-
-      if (x2 < (nativeGridSizeX - 1))
-        x2++;
-      if (y2 < (nativeGridSizeY - 1))
-        y2++;
-
-      nx = x2 - x1 + 1;
-      ny = y2 - y1 + 1;
-    }
-    else
-    {
-      nx = nativeGridSizeX;
-      x1 = 0, x2 = nativeGridSizeX - 1;
-      ny = nativeGridSizeY;
-      y1 = 0;
-      y2 = nativeGridSizeY - 1;
-    }
-
-    // Default resolution is the grid resolution
-
-    if (theResolution == 0)
-      theResolution = (nativeGrid.Area()->WorldXYWidth() / nativeGridSizeX) / 1000;
-
-    theDemMatrix.Resize(nx, ny);
-    theWaterFlagMatrix.Resize(nx, ny);
-
-    for (int i = x1, i0 = 0; (i <= x2); i++, i0++)
-      for (int j = y1, j0 = 0; (j <= y2); j++, j0++)
-      {
-        auto latlon = nativeGrid.GridToLatLon(i, j);
-        auto dem = theDem.elevation(latlon.X(), latlon.Y(), theResolution);
-
-        theDemMatrix[i0][j0] = dem;
-        theWaterFlagMatrix[i0][j0] =
-            ((dem == 0) ||
-             Fmi::LandCover::isOpenWater(theLandCover.coverType(latlon.X(), latlon.Y())));
-      }
-
-    return true;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
  * \brief Sample the data to create a new Q object
  */
 // ----------------------------------------------------------------------
@@ -4052,9 +3824,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                 double theYmin,
                 double theXmax,
                 double theYmax,
-                double theResolution,
-                const std::shared_ptr<Fmi::DEM> &theDem,
-                const std::shared_ptr<Fmi::LandCover> &theLandCover)
+                double theResolution)
 {
   try
   {
@@ -4116,88 +3886,41 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     NFmiFastQueryInfo dstinfo(data.get());
     dstinfo.First();  // sets the only param and time active
 
-    if (theDem && theLandCover && (itsModels[0]->levelName() == "surface") &&
-        (theParameter.type() == Spine::Parameter::Type::Landscaped))
+    // Now we need all kinds of extra variables because of the damned API
+
+    NFmiPoint dummy;
+    std::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
+    Fmi::TimeZonePtr utc("Etc/UTC");
+    Fmi::LocalDateTime localdatetime(theTime, utc);
+
+    auto mylocale = std::locale::classic();
+
+    for (dstinfo.ResetLevel(); dstinfo.NextLevel();)
     {
-      // Landscaping; temperature or dewpoint
-      //
-      NFmiDataMatrix<NFmiLocationCache> locCache;
-      NFmiTimeCache timeCache = itsInfo->CalcTimeCache(NFmiMetTime(theTime));
-      NFmiDataMatrix<float> valueMatrix;
-      NFmiDataMatrix<float> demMatrix;
-      NFmiDataMatrix<bool> waterFlagMatrix;
-
-      calcLatlonCachePoints(dstinfo, locCache);
-
-      if (loadDEMAndWaterFlags(
-              *theDem, *theLandCover, theResolution, locCache, demMatrix, waterFlagMatrix))
-        valueMatrix = landscapeCachedInterpolation(locCache, timeCache, demMatrix, waterFlagMatrix);
-      else
-        // Target grid does not intersect the native grid
-        valueMatrix.Resize(locCache.NX(), locCache.NY(), kFloatMissing);
-
-      int nx = valueMatrix.NX();
-      int n;
-
-      for (dstinfo.ResetLocation(), n = 0; dstinfo.NextLocation(); n++)
+      itsInfo->Level(*dstinfo.Level());
+      for (dstinfo.ResetLocation(); dstinfo.NextLocation();)
       {
-        int i = n % nx;
-        int j = n / nx;
+        auto latlon = dstinfo.LatLon();
 
-        dstinfo.FloatValue(valueMatrix[i][j]);
-      }
-    }
-    else
-    {
-      // Now we need all kinds of extra variables because of the damned API
+        Spine::Location loc(latlon.X(), latlon.Y());
 
-      NFmiPoint dummy;
-      std::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
-      Fmi::TimeZonePtr utc("Etc/UTC");
-      Fmi::LocalDateTime localdatetime(theTime, utc);
+        ParameterOptions options(theParameter,
+                                 Producer(),
+                                 loc,
+                                 "",
+                                 "",
+                                 *timeformatter,
+                                 "",
+                                 "",
+                                 mylocale,
+                                 "",
+                                 false,
+                                 NFmiPoint(),
+                                 dummy);
 
-      auto mylocale = std::locale::classic();
-
-      for (dstinfo.ResetLevel(); dstinfo.NextLevel();)
-      {
-        itsInfo->Level(*dstinfo.Level());
-        for (dstinfo.ResetLocation(); dstinfo.NextLocation();)
-        {
-          auto latlon = dstinfo.LatLon();
-
-          if (theParameter.name() == "dem")
-          {
-            if (theDem)
-              dstinfo.FloatValue(theDem->elevation(latlon.X(), latlon.Y(), theResolution));
-          }
-          else if (theParameter.name() == "covertype")
-          {
-            if (theLandCover)
-              dstinfo.FloatValue(theLandCover->coverType(latlon.X(), latlon.Y()));
-          }
-          else
-          {
-            Spine::Location loc(latlon.X(), latlon.Y());
-
-            ParameterOptions options(theParameter,
-                                     Producer(),
-                                     loc,
-                                     "",
-                                     "",
-                                     *timeformatter,
-                                     "",
-                                     "",
-                                     mylocale,
-                                     "",
-                                     false,
-                                     NFmiPoint(),
-                                     dummy);
-
-            auto result = value(options, localdatetime);
-            if (const auto *ptr = std::get_if<double>(&result))
-              dstinfo.FloatValue(*ptr);
-          }
-        }
+        auto result = value(options, localdatetime);
+        if (const auto *ptr = std::get_if<double>(&result))
+          dstinfo.FloatValue(*ptr);
       }
     }
 

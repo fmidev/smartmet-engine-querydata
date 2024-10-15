@@ -154,29 +154,16 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
   float cachedInterpolation(const NFmiLocationCache& theLocationCache);
   float cachedInterpolation(const NFmiLocationCache& theLocationCache,
                             const NFmiTimeCache& theTimeCache);
-  NFmiDataMatrix<float> landscapeCachedInterpolation(
-      const NFmiDataMatrix<NFmiLocationCache>& theLocationCache,
-      const NFmiTimeCache& theTimeCache,  // Unset value (NoValue())
-                                          // for native (currently
-                                          // active) time
-      const NFmiDataMatrix<float>& theDEMValues,
-      const NFmiDataMatrix<bool>& theWaterFlags);
   bool calcLatlonCachePoints(NFmiQueryInfo& theTargetInfo,
                              NFmiDataMatrix<NFmiLocationCache>& theLocationCache);
 
   // Generic access to grid values:
-  NFmiDataMatrix<float> values(const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
-                               const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
-
-  NFmiDataMatrix<float> values(const NFmiMetTime& theInterpolatedTime,
-                               const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
-                               const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
+  NFmiDataMatrix<float> values();
+  NFmiDataMatrix<float> values(const NFmiMetTime& theInterpolatedTime);
 
   // Needed for metaparameters:
   NFmiDataMatrix<float> values(const Spine::Parameter& theParam,
-                               const Fmi::DateTime& theInterpolatedTime,
-                               const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
-                               const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>());
+                               const Fmi::DateTime& theInterpolatedTime);
 
   // For arbitrary coordinates:
 
@@ -185,13 +172,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
                                float P = kFloatMissing,
                                float H = kFloatMissing);
 
-  NFmiDataMatrix<float> croppedValues(
-      int x1,
-      int y1,
-      int x2,
-      int y2,
-      const NFmiDataMatrix<float>& theDEMValues = NFmiDataMatrix<float>(),
-      const NFmiDataMatrix<bool>& theWaterFlags = NFmiDataMatrix<bool>()) const;
+  NFmiDataMatrix<float> croppedValues(int x1, int y1, int x2, int y2) const;
 
   NFmiDataMatrix<float> pressureValues(const NFmiMetTime& theInterpolatedTime,
                                        float wantedPressureLevel);
@@ -214,20 +195,6 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
                                      float wantedHeightLevel,
                                      bool relative_uv);
 
-  // Gridded landscaping; Load dem values and water flags for native (sub)grid or for given
-  // locations
-
-  bool loadDEMAndWaterFlags(const Fmi::DEM& theDEM,
-                            const Fmi::LandCover& theLandCover,
-                            double theResolution,
-                            const NFmiDataMatrix<NFmiLocationCache>& theLocationCache,
-                            NFmiDataMatrix<float>& theDemMatrix,
-                            NFmiDataMatrix<bool>& theWaterFlagMatrix,
-                            int x1 = 0,
-                            int y1 = 0,
-                            int x2 = 0,
-                            int y2 = 0) const;
-
   // sample data into a new projection
 
   std::shared_ptr<QImpl> sample(const Spine::Parameter& theParameter,
@@ -237,9 +204,7 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
                                 double theYmin,
                                 double theXmax,
                                 double theYmax,
-                                double theResolution,
-                                const std::shared_ptr<Fmi::DEM>& theDem,
-                                const std::shared_ptr<Fmi::LandCover>& theLandCover);
+                                double theResolution);
 
   // one location, one timestep
   TS::Value value(const ParameterOptions& opt, const Fmi::LocalDateTime& ldt);
