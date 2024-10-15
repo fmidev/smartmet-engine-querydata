@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 24.9.2
+Version: 24.10.15
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,10 +29,10 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 24.8.7
-BuildRequires: smartmet-library-macgyver-devel >= 24.8.7
-BuildRequires: smartmet-library-newbase-devel >= 24.8.7
-BuildRequires: smartmet-library-spine-devel >= 24.8.7
+BuildRequires: smartmet-library-timeseries-devel >= 24.10.15
+BuildRequires: smartmet-library-macgyver-devel >= 24.10.4
+BuildRequires: smartmet-library-newbase-devel >= 24.10.15
+BuildRequires: smartmet-library-spine-devel >= 24.10.15
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -41,11 +41,11 @@ Requires: gdal38-libs
 Requires: jsoncpp >= 1.8.4
 Requires: fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 24.8.7
-Requires: smartmet-library-macgyver >= 24.8.7
-Requires: smartmet-library-newbase >= 24.8.7
-Requires: smartmet-library-spine >= 24.8.7
-#TestRequires: smartmet-utils-devel >= 24.8.7
+Requires: smartmet-library-timeseries >= 24.10.15
+Requires: smartmet-library-macgyver >= 24.10.4
+Requires: smartmet-library-newbase >= 24.10.15
+Requires: smartmet-library-spine >= 24.10.15
+#TestRequires: smartmet-utils-devel >= 24.9.10
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal38-devel
 #TestRequires: gcc-c++
@@ -90,6 +90,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Oct 15 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.10.15-1.fmi
+- Removed support for landscaped parameters as obsolete
+
 * Mon Sep  2 2024 Pertti Kinnia <pertti.kinnia@fmi.fi> 24.9.2-1.fmi
 - Added list of validtimes to metadata (BRAINSTORM-3016)
 
