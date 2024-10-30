@@ -167,6 +167,9 @@ class EngineImpl final : public Engine
   void configFileWatch();           // A function in separate thread checking the config file
   Fmi::Cache::CacheStatistics getCacheStats() const override;  // Get cache statistics
 
+  std::unique_ptr<SmartMet::Spine::Table> requestQEngineStatus(const Spine::HTTP::Request& theRequest) const;
+  std::unique_ptr<SmartMet::Spine::Table> requestProducerInfo(const Spine::HTTP::Request& theRequest) const;
+  std::unique_ptr<SmartMet::Spine::Table> requestParameterInfo(const Spine::HTTP::Request& theRequest) const;
 };  // class EngineImpl
 
 }  // namespace Querydata

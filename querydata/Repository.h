@@ -69,7 +69,7 @@ class Repository
 
   Q getAll(const Producer& producer) const;
 
-  using ContentTable = std::pair<std::shared_ptr<Spine::Table>, Spine::TableFormatter::Names>;
+  using ContentTable = std::unique_ptr<Spine::Table>;
   using SharedModels = std::map<OriginTime, SharedModel>;
   using MetaObject = std::map<std::string, std::vector<Fmi::DateTime> >;
 

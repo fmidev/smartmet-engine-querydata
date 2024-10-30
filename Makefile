@@ -93,7 +93,7 @@ rpm: clean $(SPEC).spec
 obj/%.o: %.cpp
 	$(CXX) $(CFLAGS) $(INCLUDES) -c -MD -MF $(patsubst obj/%.o, obj/%.d, $@) -MT $@ -o $@ $<
 
-obj/Engine.o: CFLAGS += -Wno-deprecated-declarations
+obj/Engine.o obj/EngineImpl.o: CFLAGS += -Wno-deprecated-declarations
 
 test:
 	@echo Querydata engine has no automatically runnable tests as for now

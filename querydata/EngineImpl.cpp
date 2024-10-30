@@ -111,6 +111,18 @@ void EngineImpl::init()
 
     // Start watcher thread to watch for configuration changes
     configFileWatcher = boost::thread(&EngineImpl::configFileWatch, this);
+
+    SmartMet::Spine::Reactor* reactor = SmartMet::Spine::Reactor::instance;
+    if (reactor)
+    {
+      using namespace std::placeholders;
+      reactor->addAdminTableRequestHandler(this, "qengine", false,
+        std::bind(&EngineImpl::requestQEngineStatus, this, _2), "Available querydata");
+      reactor->addAdminTableRequestHandler(this, "producerinfo", false,
+        std::bind(&EngineImpl::requestProducerInfo, this, _2), "Querydata producers");
+      reactor->addAdminTableRequestHandler(this, "parameterinfo", false,
+        std::bind(&EngineImpl::requestParameterInfo, this, _2), "Querydata parameters");
+    }
   }
   catch (...)
   {
@@ -966,6 +978,52 @@ Fmi::Cache::CacheStatistics EngineImpl::getCacheStats() const
   ret["Querydata::coordinate_cache"] = itsCoordinateCache.statistics();
   return ret;
 }
+
+
+std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestQEngineStatus(const Spine::HTTP::Request& theRequest) const
+try
+{
+  std::unique_ptr<SmartMet::Spine::Table> result(new SmartMet::Spine::Table);
+  const std::string producer = Spine::optional_string(theRequest.getParameter("producer"), "");
+  const std::string projectionFormat = Spine::optional_string(theRequest.getParameter("projformat"), "newbase");
+  const std::string timeFormat = Spine::optional_string(theRequest.getParameter("timeformat"), "sql");
+  std::unique_ptr<Spine::Table> statusResult = getEngineContents(producer, timeFormat, projectionFormat);
+  return statusResult;
+}
+catch (...)
+{
+  throw Fmi::Exception::Trace(BCP, "Operation failed!");
+}
+
+
+std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestProducerInfo(const Spine::HTTP::Request& theRequest) const
+try
+{
+  std::unique_ptr<SmartMet::Spine::Table> result(new SmartMet::Spine::Table);
+  const auto producer = theRequest.getParameter("producer");
+  const std::string timeFormat = Spine::optional_string(theRequest.getParameter("timeformat"), "sql");
+  std::unique_ptr<Spine::Table> qengineProducerInfo = getProducerInfo(timeFormat, producer);
+  return qengineProducerInfo;
+}
+catch (...)
+{
+  throw Fmi::Exception::Trace(BCP, "Operation failed!");
+}
+
+
+std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestParameterInfo(const Spine::HTTP::Request& theRequest) const
+try
+{
+  std::unique_ptr<SmartMet::Spine::Table> result(new SmartMet::Spine::Table);
+  const auto producer = theRequest.getParameter("producer");
+  std::unique_ptr<Spine::Table> qengineParameterInfo = getParameterInfo(producer);
+  return qengineParameterInfo;
+}
+catch (...)
+{
+  throw Fmi::Exception::Trace(BCP, "Operation failed!");
+}
+
 
 Engine* EngineImpl::create(const std::string& configfile)
 {

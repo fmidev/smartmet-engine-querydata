@@ -684,7 +684,7 @@ Repository::ContentTable Repository::getProducerInfo(const ProducerList& produce
 {
   try
   {
-    std::shared_ptr<Spine::Table> resultTable(new Spine::Table);
+    std::unique_ptr<Spine::Table> resultTable(new Spine::Table);
 
     static Spine::TableFormatter::Names headers{"#",
                                                 "Producer",
@@ -807,7 +807,8 @@ Repository::ContentTable Repository::getProducerInfo(const ProducerList& produce
       row++;
     }
 
-    return std::make_pair(resultTable, headers);
+    resultTable->setNames(headers);
+    return resultTable;
   }
   catch (...)
   {
@@ -819,7 +820,7 @@ Repository::ContentTable Repository::getParameterInfo(const ProducerList& produc
 {
   try
   {
-    std::shared_ptr<Spine::Table> resultTable(new Spine::Table);
+    std::unique_ptr<Spine::Table> resultTable(new Spine::Table);
 
     static Spine::TableFormatter::Names headers{"#", "ParamId", "ParamName", "Producers"};
 
@@ -861,7 +862,8 @@ Repository::ContentTable Repository::getParameterInfo(const ProducerList& produc
       parameter_no++;
     }
 
-    return std::make_pair(resultTable, headers);
+    resultTable->setNames(headers);
+    return resultTable;
   }
   catch (...)
   {
@@ -898,7 +900,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
 
     std::unique_ptr<Fmi::TimeFormatter> timeFormatter(Fmi::TimeFormatter::create(timeFormat));
 
-    std::shared_ptr<Spine::Table> resultTable(new Spine::Table);
+    std::unique_ptr<Spine::Table> resultTable(new Spine::Table);
 
     int row = 0;
 
@@ -1033,7 +1035,9 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
       headers.push_back(p);
     }
 
-    return std::make_pair(resultTable, headers);
+    resultTable->setNames(headers);
+
+    return resultTable;
   }
   catch (...)
   {
