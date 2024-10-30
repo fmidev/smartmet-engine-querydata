@@ -9,7 +9,6 @@
 #include "RepoManager.h"
 #include "Repository.h"
 #include "WGS84EnvelopeFactory.h"
-#include <boost/bind/bind.hpp>
 #include <memory>
 #include <boost/thread.hpp>
 #include <gis/CoordinateTransformation.h>
@@ -115,13 +114,13 @@ void EngineImpl::init()
     SmartMet::Spine::Reactor* reactor = SmartMet::Spine::Reactor::instance;
     if (reactor)
     {
-      using namespace std::placeholders;
+      namespace p = std::placeholders;
       reactor->addAdminTableRequestHandler(this, "qengine", false,
-        std::bind(&EngineImpl::requestQEngineStatus, this, _2), "Available querydata");
+        std::bind(&EngineImpl::requestQEngineStatus, this, p::_2), "Available querydata");
       reactor->addAdminTableRequestHandler(this, "producerinfo", false,
-        std::bind(&EngineImpl::requestProducerInfo, this, _2), "Querydata producers");
+        std::bind(&EngineImpl::requestProducerInfo, this, p::_2), "Querydata producers");
       reactor->addAdminTableRequestHandler(this, "parameterinfo", false,
-        std::bind(&EngineImpl::requestParameterInfo, this, _2), "Querydata parameters");
+        std::bind(&EngineImpl::requestParameterInfo, this, p::_2), "Querydata parameters");
     }
   }
   catch (...)
