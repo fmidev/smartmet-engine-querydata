@@ -117,9 +117,9 @@ void EngineImpl::init()
       namespace p = std::placeholders;
       reactor->addAdminTableRequestHandler(this, "qengine", false,
         std::bind(&EngineImpl::requestQEngineStatus, this, p::_2), "Available querydata");
-      reactor->addAdminTableRequestHandler(this, "producerinfo", false,
+      reactor->addAdminTableRequestHandler(this, "producers", false,
         std::bind(&EngineImpl::requestProducerInfo, this, p::_2), "Querydata producers");
-      reactor->addAdminTableRequestHandler(this, "parameterinfo", false,
+      reactor->addAdminTableRequestHandler(this, "parameters", false,
         std::bind(&EngineImpl::requestParameterInfo, this, p::_2), "Querydata parameters");
     }
   }
