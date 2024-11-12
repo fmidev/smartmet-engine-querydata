@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 24.11.8
+Version: 24.11.12
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -31,8 +31,8 @@ BuildRequires: zlib-devel
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
 BuildRequires: smartmet-library-timeseries-devel >= 24.11.8
 BuildRequires: smartmet-library-macgyver-devel >= 24.10.28
-BuildRequires: smartmet-library-newbase-devel >= 24.10.15
-BuildRequires: smartmet-library-spine-devel >= 24.11.8
+BuildRequires: smartmet-library-newbase-devel >= 24.11.6
+BuildRequires: smartmet-library-spine-devel >= 24.11.11
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -43,8 +43,8 @@ Requires: fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
 Requires: zlib
 Requires: smartmet-library-timeseries >= 24.11.8
 Requires: smartmet-library-macgyver >= 24.10.28
-Requires: smartmet-library-newbase >= 24.10.15
-Requires: smartmet-library-spine >= 24.11.8
+Requires: smartmet-library-newbase >= 24.11.6
+Requires: smartmet-library-spine >= 24.11.11
 #TestRequires: smartmet-utils-devel >= 24.9.10
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal38-devel
@@ -90,6 +90,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Nov 12 2024 Mika Heiskanen <mika.heiskanen@fmi.fi> - 24.11.12-1.fmi
+- Improved Q API speed when UTC times are only needed
+
 * Fri Nov  8 2024 Andris Pavēnis <andris.pavenis@fmi.fi> 24.11.8-1.fmi
 - Register admin requests to SmartMet::Spine::Reactor
 
