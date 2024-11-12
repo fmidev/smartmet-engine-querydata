@@ -1794,7 +1794,7 @@ std::string format_date(const Fmi::LocalDateTime &ldt,
 
 TS::Value WindUMS(QImpl &q,
                   const Spine::Location &loc,
-                  const Fmi::LocalDateTime &ldt,
+                  const Fmi::DateTime &dt,
                   std::optional<float> level = std::nullopt,
                   InterpolationMethod method = InterpolationMethod::SURFACE)
 {
@@ -1815,9 +1815,9 @@ TS::Value WindUMS(QImpl &q,
       return TS::None();
 
     auto u = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
-                    : q.interpolate(latlon, ldt, maxgap));
+                           ? q.interpolateAtPressure(latlon, dt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, dt, maxgap, *level))
+                    : q.interpolate(latlon, dt, maxgap));
 
     if (angle == 0)
       return u;
@@ -1826,9 +1826,9 @@ TS::Value WindUMS(QImpl &q,
       return TS::None();
 
     auto v = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
-                    : q.interpolate(latlon, ldt, maxgap));
+                           ? q.interpolateAtPressure(latlon, dt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, dt, maxgap, *level))
+                    : q.interpolate(latlon, dt, maxgap));
 
     if (u == kFloatMissing || v == kFloatMissing)
       return TS::None();
@@ -1851,7 +1851,7 @@ TS::Value WindUMS(QImpl &q,
 
 TS::Value WindVMS(QImpl &q,
                   const Spine::Location &loc,
-                  const Fmi::LocalDateTime &ldt,
+                  const Fmi::DateTime &dt,
                   std::optional<float> level = std::nullopt,
                   InterpolationMethod method = InterpolationMethod::SURFACE)
 {
@@ -1871,12 +1871,10 @@ TS::Value WindVMS(QImpl &q,
     if (!q.param(kFmiWindVMS))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-
     auto v = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
-                    : q.interpolate(latlon, ldt, maxgap));
+                           ? q.interpolateAtPressure(latlon, dt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, dt, maxgap, *level))
+                    : q.interpolate(latlon, dt, maxgap));
 
     if (angle == 0)
       return v;
@@ -1885,9 +1883,9 @@ TS::Value WindVMS(QImpl &q,
       return TS::None();
 
     auto u = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
-                    : q.interpolate(latlon, ldt, maxgap));
+                           ? q.interpolateAtPressure(latlon, dt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, dt, maxgap, *level))
+                    : q.interpolate(latlon, dt, maxgap));
 
     if (u == kFloatMissing || v == kFloatMissing)
       return TS::None();
@@ -1908,7 +1906,7 @@ TS::Value WindVMS(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value WindCompass8(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value WindCompass8(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
@@ -1917,8 +1915,7 @@ TS::Value WindCompass8(QImpl &q, const Spine::Location &loc, const Fmi::LocalDat
     if (!q.param(kFmiWindDirection))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (value == kFloatMissing)
       return TS::None();
@@ -1938,7 +1935,7 @@ TS::Value WindCompass8(QImpl &q, const Spine::Location &loc, const Fmi::LocalDat
  */
 // ----------------------------------------------------------------------
 
-TS::Value WindCompass16(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value WindCompass16(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
@@ -1962,8 +1959,7 @@ TS::Value WindCompass16(QImpl &q, const Spine::Location &loc, const Fmi::LocalDa
     if (!q.param(kFmiWindDirection))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (value == kFloatMissing)
       return TS::None();
@@ -1983,7 +1979,7 @@ TS::Value WindCompass16(QImpl &q, const Spine::Location &loc, const Fmi::LocalDa
  */
 // ----------------------------------------------------------------------
 
-TS::Value WindCompass32(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value WindCompass32(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
@@ -1995,8 +1991,7 @@ TS::Value WindCompass32(QImpl &q, const Spine::Location &loc, const Fmi::LocalDa
     if (!q.param(kFmiWindDirection))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (value == kFloatMissing)
       return TS::None();
@@ -2016,15 +2011,14 @@ TS::Value WindCompass32(QImpl &q, const Spine::Location &loc, const Fmi::LocalDa
  */
 // ----------------------------------------------------------------------
 
-TS::Value Cloudiness8th(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value Cloudiness8th(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
     if (!q.param(kFmiTotalCloudCover))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (value == kFloatMissing)
       return TS::None();
@@ -2046,20 +2040,19 @@ TS::Value Cloudiness8th(QImpl &q, const Spine::Location &loc, const Fmi::LocalDa
  */
 // ----------------------------------------------------------------------
 
-TS::Value WindChill(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value WindChill(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
     if (!q.param(kFmiWindSpeedMS))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (!q.param(kFmiTemperature))
       return TS::None();
 
-    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (wspd == kFloatMissing || t2m == kFloatMissing)
       return TS::None();
@@ -2079,21 +2072,19 @@ TS::Value WindChill(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTi
  */
 // ----------------------------------------------------------------------
 
-TS::Value SummerSimmerIndex(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value SummerSimmerIndex(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
     if (!q.param(kFmiHumidity))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-
-    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (!q.param(kFmiTemperature))
       return TS::None();
 
-    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (rh == kFloatMissing || t2m == kFloatMissing)
       return TS::None();
@@ -2113,26 +2104,24 @@ TS::Value SummerSimmerIndex(QImpl &q, const Spine::Location &loc, const Fmi::Loc
  */
 // ----------------------------------------------------------------------
 
-TS::Value FeelsLike(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value FeelsLike(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
     if (!q.param(kFmiHumidity))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-
-    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
       return TS::None();
 
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (!q.param(kFmiTemperature))
       return TS::None();
 
-    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
       return TS::None();
@@ -2140,7 +2129,7 @@ TS::Value FeelsLike(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTi
     // We permit radiation to be missing
     float rad = kFloatMissing;
     if (q.param(kFmiRadiationGlobal))
-      rad = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+      rad = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     float ret = FmiFeelsLikeTemperature(wspd, rh, t2m, rad);
 
@@ -2160,26 +2149,24 @@ TS::Value FeelsLike(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTi
  */
 // ----------------------------------------------------------------------
 
-TS::Value ApparentTemperature(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value ApparentTemperature(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
     if (!q.param(kFmiHumidity))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-
-    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
       return TS::None();
 
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (!q.param(kFmiTemperature))
       return TS::None();
 
-    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
       return TS::None();
@@ -2201,16 +2188,14 @@ TS::Value ApparentTemperature(QImpl &q, const Spine::Location &loc, const Fmi::L
  * \brief Lower limit of water to snow conversion
  */
 // ----------------------------------------------------------------------
-TS::Value Snow1hLower(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value Snow1hLower(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
     if (!q.param(kFmiPrecipitation1h))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-
-    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     // FmiSnowLowerLimit fails if input is 'nan', check here.
 
@@ -2234,16 +2219,14 @@ TS::Value Snow1hLower(QImpl &q, const Spine::Location &loc, const Fmi::LocalDate
  * \brief Upper limit of water to snow conversion
  */
 // ----------------------------------------------------------------------
-TS::Value Snow1hUpper(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value Snow1hUpper(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
     if (!q.param(kFmiPrecipitation1h))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-
-    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     // FmiSnowUpperLimit fails if input is 'nan', check here.
     if (prec1h == kFloatMissing)
@@ -2265,7 +2248,7 @@ TS::Value Snow1hUpper(QImpl &q, const Spine::Location &loc, const Fmi::LocalDate
  * \brief Snow estimate if no Snow1h parameter present
  */
 // ----------------------------------------------------------------------
-TS::Value Snow1h(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value Snow1h(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
@@ -2276,19 +2259,17 @@ TS::Value Snow1h(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime 
     if (!q.param(kFmiTemperature))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-
-    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (!q.param(kFmiWindSpeedMS))
       return TS::None();
 
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (!q.param(kFmiPrecipitation1h))
       return TS::None();
 
-    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (t2m == kFloatMissing || wspd == kFloatMissing || prec1h == kFloatMissing)
       return TS::None();
@@ -2308,21 +2289,19 @@ TS::Value Snow1h(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime 
  */
 // ----------------------------------------------------------------------
 
-TS::Value WeatherSymbol(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value WeatherSymbol(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
     if (!q.param(kFmiWeatherSymbol3))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-
-    float symbol = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float symbol = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
     if (symbol == kFloatMissing)
       return kFloatMissing;
 
     Fmi::Astronomy::solar_position_t sp =
-        Fmi::Astronomy::solar_position(t, loc.longitude, loc.latitude);
+        Fmi::Astronomy::solar_position(dt, loc.longitude, loc.latitude);
     if (sp.dark())
       return 100 + symbol;
     return symbol;
@@ -2341,7 +2320,7 @@ TS::Value WeatherSymbol(QImpl &q, const Spine::Location &loc, const Fmi::LocalDa
 
 TS::Value WeatherText(QImpl &q,
                       const Spine::Location &loc,
-                      const Fmi::LocalDateTime &ldt,
+                      const Fmi::DateTime &dt,
                       const std::string &lang,
                       const Spine::ParameterTranslations &translations)
 {
@@ -2350,9 +2329,7 @@ TS::Value WeatherText(QImpl &q,
     if (!q.param(kFmiWeatherSymbol3))
       return TS::None();
 
-    NFmiMetTime t(ldt);
-
-    float w = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    float w = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), dt, maxgap);
 
     if (w == kFloatMissing)
       return TS::None();
@@ -2375,9 +2352,7 @@ TS::Value WeatherText(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-std::optional<int> calc_smart_symbol(QImpl &q,
-                                     const NFmiPoint &latlon,
-                                     const Fmi::LocalDateTime &ldt)
+std::optional<int> calc_smart_symbol(QImpl &q, const NFmiPoint &latlon, const Fmi::DateTime &dt)
 {
   try
   {
@@ -2386,9 +2361,7 @@ std::optional<int> calc_smart_symbol(QImpl &q,
     if (!q.param(kFmiTotalCloudCover))
       return {};
 
-    NFmiMetTime t(ldt);
-
-    const auto n = q.interpolate(latlon, t, maxgap);
+    const auto n = q.interpolate(latlon, dt, maxgap);
 
     if (n == kFloatMissing)
       return {};
@@ -2397,7 +2370,7 @@ std::optional<int> calc_smart_symbol(QImpl &q,
 
     if (q.param(kFmiProbabilityThunderstorm))
     {
-      const auto thunder = q.interpolate(latlon, t, maxgap);
+      const auto thunder = q.interpolate(latlon, dt, maxgap);
 
       if (thunder >= thunder_limit1 && thunder != kFloatMissing)
       {
@@ -2411,7 +2384,7 @@ std::optional<int> calc_smart_symbol(QImpl &q,
     if (!q.param(kFmiPrecipitation1h))
       return {};
 
-    const auto rain = q.interpolate(latlon, t, maxgap);
+    const auto rain = q.interpolate(latlon, dt, maxgap);
 
     if (rain == kFloatMissing)
       return {};
@@ -2422,7 +2395,7 @@ std::optional<int> calc_smart_symbol(QImpl &q,
 
       if (q.param(kFmiFogIntensity))
       {
-        const auto fog = q.interpolate(latlon, t, maxgap);
+        const auto fog = q.interpolate(latlon, dt, maxgap);
         if (fog > 0 && fog != kFloatMissing)
           return 9;  // fog
       }
@@ -2442,7 +2415,7 @@ std::optional<int> calc_smart_symbol(QImpl &q,
     // Since we have precipitation, we always need precipitation form
     int rform = static_cast<int>(kFloatMissing);
     if (q.param(kFmiPotentialPrecipitationForm) || q.param(kFmiPrecipitationForm))
-      rform = static_cast<int>(q.interpolate(latlon, t, maxgap));
+      rform = static_cast<int>(q.interpolate(latlon, dt, maxgap));
 
     if (rform == static_cast<int>(kFloatMissing))
       return {};
@@ -2472,7 +2445,7 @@ std::optional<int> calc_smart_symbol(QImpl &q,
       // Now we need precipitation type too
       int rtype = 1;  // large scale by default
       if (q.param(kFmiPotentialPrecipitationType) || q.param(kFmiPrecipitationType))
-        rtype = static_cast<int>(q.interpolate(latlon, t, maxgap));
+        rtype = static_cast<int>(q.interpolate(latlon, dt, maxgap));
 
       if (rtype == 2)            // convective
         return 21 + 3 * nclass;  // 21, 24, 27 for showers
@@ -2499,18 +2472,14 @@ std::optional<int> calc_smart_symbol(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-std::optional<int> calc_weather_number(QImpl &q,
-                                       const NFmiPoint &latlon,
-                                       const Fmi::LocalDateTime &ldt)
+std::optional<int> calc_weather_number(QImpl &q, const NFmiPoint &latlon, const Fmi::DateTime &dt)
 {
   try
   {
-    NFmiMetTime t(ldt);
-
     // Cloudiness is optional
     float n = kFloatMissing;
     if (q.param(kFmiTotalCloudCover))
-      n = q.interpolate(latlon, t, maxgap);
+      n = q.interpolate(latlon, dt, maxgap);
 
     int n_class = 9;  // missing
     if (n == kFloatMissing)
@@ -2537,7 +2506,7 @@ std::optional<int> calc_weather_number(QImpl &q,
     // Precipitation is optional
     float rain = kFloatMissing;
     if (q.param(kFmiPrecipitation1h))
-      rain = q.interpolate(latlon, t, maxgap);
+      rain = q.interpolate(latlon, dt, maxgap);
 
     int rain_class = 9;  // missing
     if (rain == kFloatMissing)
@@ -2562,21 +2531,21 @@ std::optional<int> calc_weather_number(QImpl &q,
     // Precipitation form is optional
     float rform = kFloatMissing;
     if (q.param(kFmiPotentialPrecipitationForm) || q.param(kFmiPrecipitationForm))
-      rform = q.interpolate(latlon, t, maxgap);
+      rform = q.interpolate(latlon, dt, maxgap);
 
     int rform_class = (rform == kFloatMissing ? 9 : static_cast<int>(rform));
 
     // Precipitation type is optional
     float rtype = kFloatMissing;
     if (q.param(kFmiPotentialPrecipitationType) || q.param(kFmiPrecipitationType))
-      rtype = q.interpolate(latlon, t, maxgap);
+      rtype = q.interpolate(latlon, dt, maxgap);
 
     int rtype_class = (rtype == kFloatMissing ? 9 : static_cast<int>(rtype));
 
     // Thunder is optional
     float thunder = kFloatMissing;
     if (q.param(kFmiProbabilityThunderstorm))
-      thunder = q.interpolate(latlon, t, maxgap);
+      thunder = q.interpolate(latlon, dt, maxgap);
 
     int thunder_class = 9;
     if (thunder == kFloatMissing)
@@ -2591,7 +2560,7 @@ std::optional<int> calc_weather_number(QImpl &q,
     // Fog is optional
     float fog = kFloatMissing;
     if (q.param(kFmiFogIntensity))
-      fog = q.interpolate(latlon, t, maxgap);
+      fog = q.interpolate(latlon, dt, maxgap);
 
     int fog_class = (fog == kFloatMissing ? 9 : static_cast<int>(fog));
 
@@ -2622,20 +2591,20 @@ std::optional<int> calc_weather_number(QImpl &q,
  */
 // ----------------------------------------------------------------------
 
-TS::Value SmartSymbolNumber(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value SmartSymbolNumber(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
     NFmiPoint latlon(loc.longitude, loc.latitude);
 
-    auto symbol = calc_smart_symbol(q, latlon, ldt);
+    auto symbol = calc_smart_symbol(q, latlon, dt);
 
     if (!symbol || *symbol == kFloatMissing)
       return TS::None();
 
     // Add day/night information
     Fmi::Astronomy::solar_position_t sp =
-        Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+        Fmi::Astronomy::solar_position(dt, loc.longitude, loc.latitude);
 
     if (sp.dark())
       return 100 + *symbol;
@@ -2653,13 +2622,13 @@ TS::Value SmartSymbolNumber(QImpl &q, const Spine::Location &loc, const Fmi::Loc
  */
 // ----------------------------------------------------------------------
 
-TS::Value WeatherNumber(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+TS::Value WeatherNumber(QImpl &q, const Spine::Location &loc, const Fmi::DateTime &dt)
 {
   try
   {
     NFmiPoint latlon(loc.longitude, loc.latitude);
 
-    auto number = calc_weather_number(q, latlon, ldt);
+    auto number = calc_weather_number(q, latlon, dt);
 
     if (!number)
       return TS::None();
@@ -2680,7 +2649,7 @@ TS::Value WeatherNumber(QImpl &q, const Spine::Location &loc, const Fmi::LocalDa
 
 TS::Value SmartSymbolText(QImpl &q,
                           const Spine::Location &loc,
-                          const Fmi::LocalDateTime &ldt,
+                          const Fmi::DateTime &dt,
                           const std::string &lang,
                           const Spine::ParameterTranslations &translations)
 {
@@ -2688,7 +2657,7 @@ TS::Value SmartSymbolText(QImpl &q,
   {
     NFmiPoint latlon(loc.longitude, loc.latitude);
 
-    auto symbol = calc_smart_symbol(q, latlon, ldt);
+    auto symbol = calc_smart_symbol(q, latlon, dt);
 
     if (!symbol)
       return TS::None();
@@ -2736,11 +2705,12 @@ TS::Value GridNorth(const QImpl &q, const Spine::Location &loc)
 
 TS::Value QImpl::dataValue(const ParameterOptions &opt,
                            const NFmiPoint &latlon,
-                           const Fmi::LocalDateTime &ldt)
+                           const Fmi::DateTime &dt)
 {
-  NFmiMetTime t = ldt;
-
   // Change the year if the data contains climatology
+
+  NFmiMetTime t = dt;
+
   if (isClimatology())
   {
     int year = originTime().PosixTime().date().year();
@@ -2772,21 +2742,19 @@ TS::Value QImpl::dataValue(const ParameterOptions &opt,
 
 TS::Value QImpl::dataValueAtPressure(const ParameterOptions &opt,
                                      const NFmiPoint &latlon,
-                                     const Fmi::LocalDateTime &ldt,
+                                     const Fmi::DateTime &dt,
                                      float pressure)
 {
   TS::Value retval = TS::None();
 
-  NFmiMetTime t = ldt;
-
-  float interpolatedValue = interpolateAtPressure(latlon, t, pressure, maxgap);
+  float interpolatedValue = interpolateAtPressure(latlon, dt, pressure, maxgap);
 
   // If we got no value and the proper flag is on,
   // find the nearest point with valid values and use
   // the values from that point
 
   if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
-    interpolatedValue = interpolateAtPressure(opt.nearestpoint, t, pressure, maxgap);
+    interpolatedValue = interpolateAtPressure(opt.nearestpoint, dt, pressure, maxgap);
 
   if (interpolatedValue != kFloatMissing)
     retval = interpolatedValue;
@@ -2796,21 +2764,19 @@ TS::Value QImpl::dataValueAtPressure(const ParameterOptions &opt,
 
 TS::Value QImpl::dataValueAtHeight(const ParameterOptions &opt,
                                    const NFmiPoint &latlon,
-                                   const Fmi::LocalDateTime &ldt,
+                                   const Fmi::DateTime &dt,
                                    float height)
 {
   TS::Value retval = TS::None();
 
-  NFmiMetTime t = ldt;
-
-  float interpolatedValue = interpolateAtHeight(latlon, t, height, maxgap);
+  float interpolatedValue = interpolateAtHeight(latlon, dt, height, maxgap);
 
   // If we got no value and the proper flag is on,
   // find the nearest point with valid values and use
   // the values from that point
 
   if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
-    interpolatedValue = interpolateAtHeight(opt.nearestpoint, t, height, maxgap);
+    interpolatedValue = interpolateAtHeight(opt.nearestpoint, dt, height, maxgap);
 
   if (interpolatedValue != kFloatMissing)
     retval = interpolatedValue;
@@ -3113,7 +3079,7 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
 
 // ======================================================================
 
-TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::LocalDateTime &ldt)
+TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::DateTime &dt)
 {
   try
   {
@@ -3129,11 +3095,13 @@ TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::LocalDateTime &ld
 
     switch (opt.par.type())
     {
+      case Spine::Parameter::Type::DataIndependent:  // ignored in UTC time
+        break;
       case Spine::Parameter::Type::Data:
       {
         opt.lastpoint = latlon;
         if (param(opt.par.number()))
-          retval = dataValue(opt, latlon, ldt);
+          retval = dataValue(opt, latlon, dt);
         break;
       }
       case Spine::Parameter::Type::DataDerived:
@@ -3158,108 +3126,103 @@ TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::LocalDateTime &ld
           }
           case kFmiWindCompass8:
           {
-            retval = WindCompass8(*this, loc, ldt);
+            retval = WindCompass8(*this, loc, dt);
             break;
           }
           case kFmiWindCompass16:
           {
-            retval = WindCompass16(*this, loc, ldt);
+            retval = WindCompass16(*this, loc, dt);
             break;
           }
           case kFmiWindCompass32:
           {
-            retval = WindCompass32(*this, loc, ldt);
+            retval = WindCompass32(*this, loc, dt);
             break;
           }
           case kFmiCloudiness8th:
           {
-            retval = Cloudiness8th(*this, loc, ldt);
+            retval = Cloudiness8th(*this, loc, dt);
             break;
           }
           case kFmiWindChill:
           {
-            retval = WindChill(*this, loc, ldt);
+            retval = WindChill(*this, loc, dt);
             break;
           }
           case kFmiSummerSimmerIndex:
           {
-            retval = SummerSimmerIndex(*this, loc, ldt);
+            retval = SummerSimmerIndex(*this, loc, dt);
             break;
           }
           case kFmiFeelsLike:
           {
-            retval = FeelsLike(*this, loc, ldt);
+            retval = FeelsLike(*this, loc, dt);
             break;
           }
           case kFmiApparentTemperature:
           {
-            retval = ApparentTemperature(*this, loc, ldt);
+            retval = ApparentTemperature(*this, loc, dt);
             break;
           }
           case kFmiWeather:
           {
-            retval = WeatherText(*this, loc, ldt, opt.language, *itsParameterTranslations);
+            retval = WeatherText(*this, loc, dt, opt.language, *itsParameterTranslations);
             break;
           }
           case kFmiWeatherSymbol:
           {
-            retval = WeatherSymbol(*this, loc, ldt);
+            retval = WeatherSymbol(*this, loc, dt);
             break;
           }
           case kFmiSmartSymbol:
           {
-            retval = SmartSymbolNumber(*this, loc, ldt);
+            retval = SmartSymbolNumber(*this, loc, dt);
             break;
           }
           case kFmiSmartSymbolText:
           {
-            retval = SmartSymbolText(*this, loc, ldt, opt.language, *itsParameterTranslations);
+            retval = SmartSymbolText(*this, loc, dt, opt.language, *itsParameterTranslations);
             break;
           }
           case kFmiWeatherNumber:
           {
-            retval = WeatherNumber(*this, loc, ldt);
+            retval = WeatherNumber(*this, loc, dt);
             break;
           }
           case kFmiSnow1hLower:
           {
-            retval = Snow1hLower(*this, loc, ldt);
+            retval = Snow1hLower(*this, loc, dt);
             break;
           }
           case kFmiSnow1hUpper:
           {
-            retval = Snow1hUpper(*this, loc, ldt);
+            retval = Snow1hUpper(*this, loc, dt);
             break;
           }
           case kFmiSnow1h:
           {
-            retval = Snow1h(*this, loc, ldt);
+            retval = Snow1h(*this, loc, dt);
             break;
           }
           case kFmiWindUMS:
           {
             if (isRelativeUV())
-              retval = WindUMS(*this, loc, ldt);
+              retval = WindUMS(*this, loc, dt);
             else if (param(kFmiWindUMS))
-              retval = dataValue(opt, latlon, ldt);
+              retval = dataValue(opt, latlon, dt);
             break;
           }
           case kFmiWindVMS:
           {
             if (isRelativeUV())
-              retval = WindVMS(*this, loc, ldt);
+              retval = WindVMS(*this, loc, dt);
             else if (param(kFmiWindVMS))
-              retval = dataValue(opt, latlon, ldt);
+              retval = dataValue(opt, latlon, dt);
             break;
           }
           default:
             throw Fmi::Exception(BCP, "Unknown DataDerived parameter '" + opt.par.name() + "'!");
         }
-        break;
-      }
-      case Spine::Parameter::Type::DataIndependent:
-      {
-        retval = dataIndependentValue(opt, ldt, levelValue());
         break;
       }
     }
@@ -3278,8 +3241,31 @@ TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::LocalDateTime &ld
   }
 }
 
+TS::Value QImpl::value(const ParameterOptions &opt, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    if (opt.par.type() != Spine::Parameter::Type::DataIndependent)
+      return value(opt, ldt.utc_time());
+
+    auto retval = dataIndependentValue(opt, ldt, levelValue());
+
+    if (const auto *ptr = std::get_if<double>(&retval))
+    {
+      if (*ptr == kFloatMissing)
+        retval = TS::None();
+    }
+
+    return retval;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
 TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
-                                 const Fmi::LocalDateTime &ldt,
+                                 const Fmi::DateTime &dt,
                                  float pressure)
 {
   try
@@ -3302,9 +3288,7 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
 
         if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
         {
-          NFmiMetTime t = ldt;
-
-          float interpolatedValue = interpolateAtPressure(latlon, t, pressure, maxgap);
+          float interpolatedValue = interpolateAtPressure(latlon, dt, pressure, maxgap);
 
           // If we got no value and the proper flag is on,
           // find the nearest point with valid values and use
@@ -3312,7 +3296,7 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
 
           if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
           {
-            interpolatedValue = interpolateAtPressure(opt.nearestpoint, t, pressure, maxgap);
+            interpolatedValue = interpolateAtPressure(opt.nearestpoint, dt, pressure, maxgap);
             if (interpolatedValue != kFloatMissing)
               opt.lastpoint = opt.nearestpoint;
           }
@@ -3341,17 +3325,17 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
           {
             if (isRelativeUV())
               retval = (num == kFmiWindUMS
-                            ? WindUMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE)
-                            : WindVMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE));
+                            ? WindUMS(*this, loc, dt, pressure, InterpolationMethod::PRESSURE)
+                            : WindVMS(*this, loc, dt, pressure, InterpolationMethod::PRESSURE));
             else
-              retval = dataValueAtPressure(opt, latlon, ldt, pressure);
+              retval = dataValueAtPressure(opt, latlon, dt, pressure);
           }
         }
         break;
       }
       case Spine::Parameter::Type::DataIndependent:
       {
-        retval = dataIndependentValue(opt, ldt, pressure);
+        retval = dataIndependentValue(opt, dt, pressure);
         break;
       }
     }
@@ -3370,9 +3354,7 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
   }
 }
 
-TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
-                               const Fmi::LocalDateTime &ldt,
-                               float height)
+TS::Value QImpl::valueAtHeight(const ParameterOptions &opt, const Fmi::DateTime &dt, float height)
 {
   try
   {
@@ -3394,9 +3376,7 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
 
         if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
         {
-          NFmiMetTime t = ldt;
-
-          float interpolatedValue = interpolateAtHeight(latlon, t, height, maxgap);
+          float interpolatedValue = interpolateAtHeight(latlon, dt, height, maxgap);
 
           // If we got no value and the proper flag is on,
           // find the nearest point with valid values and use
@@ -3404,7 +3384,7 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
 
           if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
           {
-            interpolatedValue = interpolateAtHeight(opt.nearestpoint, t, height, maxgap);
+            interpolatedValue = interpolateAtHeight(opt.nearestpoint, dt, height, maxgap);
             if (interpolatedValue != kFloatMissing)
               opt.lastpoint = opt.nearestpoint;
           }
@@ -3433,10 +3413,10 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
           {
             if (isRelativeUV())
               retval = (num == kFmiWindUMS
-                            ? WindUMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT)
-                            : WindVMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT));
+                            ? WindUMS(*this, loc, dt, height, InterpolationMethod::HEIGHT)
+                            : WindVMS(*this, loc, dt, height, InterpolationMethod::HEIGHT));
             else
-              retval = dataValueAtHeight(opt, latlon, ldt, height);
+              retval = dataValueAtHeight(opt, latlon, dt, height);
           }
         }
 
@@ -3444,7 +3424,7 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
       }
       case Spine::Parameter::Type::DataIndependent:
       {
-        retval = dataIndependentValue(opt, ldt, height);
+        retval = dataIndependentValue(opt, dt, height);
         break;
       }
     }
@@ -3493,7 +3473,7 @@ TS::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
 
     for (const Fmi::LocalDateTime &ldt : tlist)
     {
-      ret->emplace_back(TS::TimedValue(ldt, valueAtPressure(param, ldt, pressure)));
+      ret->emplace_back(TS::TimedValue(ldt, valueAtPressure(param, ldt.utc_time(), pressure)));
     }
 
     return ret;
@@ -3513,7 +3493,7 @@ TS::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
 
     for (const Fmi::LocalDateTime &ldt : tlist)
     {
-      ret->emplace_back(TS::TimedValue(ldt, valueAtHeight(param, ldt, height)));
+      ret->emplace_back(TS::TimedValue(ldt, valueAtHeight(param, ldt.utc_time(), height)));
     }
 
     return ret;
@@ -3890,8 +3870,6 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
     NFmiPoint dummy;
     std::shared_ptr<Fmi::TimeFormatter> timeformatter(Fmi::TimeFormatter::create("iso"));
-    Fmi::TimeZonePtr utc("Etc/UTC");
-    Fmi::LocalDateTime localdatetime(theTime, utc);
 
     auto mylocale = std::locale::classic();
 
@@ -3918,7 +3896,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                                  NFmiPoint(),
                                  dummy);
 
-        auto result = value(options, localdatetime);
+        auto result = value(options, theTime);
         if (const auto *ptr = std::get_if<double>(&result))
           dstinfo.FloatValue(*ptr);
       }

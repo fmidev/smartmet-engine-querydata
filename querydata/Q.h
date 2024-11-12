@@ -206,12 +206,15 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
                                 double theYmax,
                                 double theResolution);
 
-  // one location, one timestep
+  // one location, one timestep, not enabled for data independent requests
+  TS::Value value(const ParameterOptions& opt, const Fmi::DateTime& dt);
+
+  // ... enabled for data independent requests
   TS::Value value(const ParameterOptions& opt, const Fmi::LocalDateTime& ldt);
-  TS::Value valueAtPressure(const ParameterOptions& opt,
-                            const Fmi::LocalDateTime& ldt,
-                            float pressure);
-  TS::Value valueAtHeight(const ParameterOptions& opt, const Fmi::LocalDateTime& ldt, float height);
+
+  TS::Value valueAtPressure(const ParameterOptions& opt, const Fmi::DateTime& dt, float pressure);
+  TS::Value valueAtHeight(const ParameterOptions& opt, const Fmi::DateTime& dt, float height);
+
   // one location, many timesteps
   TS::TimeSeriesPtr values(const ParameterOptions& param,
                            const TS::TimeSeriesGenerator::LocalTimeList& tlist);
@@ -265,14 +268,14 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
 
   TS::Value dataValue(const ParameterOptions& opt,
                       const NFmiPoint& latlon,
-                      const Fmi::LocalDateTime& ldt);
+                      const Fmi::DateTime& dt);
   TS::Value dataValueAtPressure(const ParameterOptions& opt,
                                 const NFmiPoint& latlon,
-                                const Fmi::LocalDateTime& ldt,
+                                const Fmi::DateTime& dt,
                                 float pressure);
   TS::Value dataValueAtHeight(const ParameterOptions& opt,
                               const NFmiPoint& latlon,
-                              const Fmi::LocalDateTime& ldt,
+                              const Fmi::DateTime& dt,
                               float height);
 
   std::vector<SharedModel> itsModels;
