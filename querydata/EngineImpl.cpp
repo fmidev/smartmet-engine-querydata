@@ -9,7 +9,6 @@
 #include "RepoManager.h"
 #include "Repository.h"
 #include "WGS84EnvelopeFactory.h"
-#include <memory>
 #include <boost/thread.hpp>
 #include <gis/CoordinateTransformation.h>
 #include <gis/OGR.h>
@@ -28,6 +27,7 @@
 #include <exception>
 #include <iomanip>
 #include <libconfig.h++>
+#include <memory>
 #include <ogr_spatialref.h>
 #include <system_error>
 
@@ -115,12 +115,23 @@ void EngineImpl::init()
     if (reactor)
     {
       namespace p = std::placeholders;
-      reactor->addAdminTableRequestHandler(this, "qengine", false,
-        std::bind(&EngineImpl::requestQEngineStatus, this, p::_2), "Available querydata");
-      reactor->addAdminTableRequestHandler(this, "producers", false,
-        std::bind(&EngineImpl::requestProducerInfo, this, p::_2), "Querydata producers");
-      reactor->addAdminTableRequestHandler(this, "parameters", false,
-        std::bind(&EngineImpl::requestParameterInfo, this, p::_2), "Querydata parameters");
+      reactor->addAdminTableRequestHandler(
+          this,
+          "qengine",
+          false,
+          std::bind(&EngineImpl::requestQEngineStatus, this, p::_2),
+          "Available querydata");
+      reactor->addAdminTableRequestHandler(this,
+                                           "producers",
+                                           false,
+                                           std::bind(&EngineImpl::requestProducerInfo, this, p::_2),
+                                           "Querydata producers");
+      reactor->addAdminTableRequestHandler(
+          this,
+          "parameters",
+          false,
+          std::bind(&EngineImpl::requestParameterInfo, this, p::_2),
+          "Querydata parameters");
     }
   }
   catch (...)
@@ -774,24 +785,35 @@ CoordinatesPtr EngineImpl::getWorldCoordinatesForSR(const Q& theQ,
 {
   try
   {
-    // Hash value of original WorldXY coordinates
+    // Fixed hash value of original WorldXY coordinates
     auto qhash = theQ->gridHashValue();
-
-    // Hash value of projected coordinates
-    auto projhash = qhash;
 
     // Return original world XY directly with get_world_xy if spatial
     // references match This is absolutely necessary to avoid gaps in
     // WMS tiles since with proj(invproj(p)) may differ significantly
     // from p outside the valid area of the projection.
+    //
+    // Begin calculation of hash value for projected coordinates
 
     const auto& dataSR = theQ->info()->SpatialReference();
+    auto projhash = qhash;
+
+#if 1
+    // The SpatialReference class now explicitly does a WKT export
+    // in the constructor. Since instances are cached, the operation
+    // is no longer expensive, and the SR hashValue is now based on it.
+    if (dataSR.hashValue() != theSR.hashValue())
+      Fmi::hash_combine(projhash, theSR.hashValue());
+
+#else
+    // The old hashValue was based on the PROJ string, and small differences
+    // in them could cause problems.
+
     auto datawkt = Fmi::OGR::exportToSimpleWkt(dataSR);
-
     auto reqwkt = Fmi::OGR::exportToSimpleWkt(theSR);
-
     if (datawkt != reqwkt)
       Fmi::hash_combine(projhash, theSR.hashValue());
+#endif
 
     if (qhash == projhash)
       return getWorldCoordinates(theQ);
@@ -978,15 +1000,18 @@ Fmi::Cache::CacheStatistics EngineImpl::getCacheStats() const
   return ret;
 }
 
-
-std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestQEngineStatus(const Spine::HTTP::Request& theRequest) const
+std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestQEngineStatus(
+    const Spine::HTTP::Request& theRequest) const
 try
 {
   std::unique_ptr<SmartMet::Spine::Table> result(new SmartMet::Spine::Table);
   const std::string producer = Spine::optional_string(theRequest.getParameter("producer"), "");
-  const std::string projectionFormat = Spine::optional_string(theRequest.getParameter("projformat"), "newbase");
-  const std::string timeFormat = Spine::optional_string(theRequest.getParameter("timeformat"), "sql");
-  std::unique_ptr<Spine::Table> statusResult = getEngineContents(producer, timeFormat, projectionFormat);
+  const std::string projectionFormat =
+      Spine::optional_string(theRequest.getParameter("projformat"), "newbase");
+  const std::string timeFormat =
+      Spine::optional_string(theRequest.getParameter("timeformat"), "sql");
+  std::unique_ptr<Spine::Table> statusResult =
+      getEngineContents(producer, timeFormat, projectionFormat);
   return statusResult;
 }
 catch (...)
@@ -994,13 +1019,14 @@ catch (...)
   throw Fmi::Exception::Trace(BCP, "Operation failed!");
 }
 
-
-std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestProducerInfo(const Spine::HTTP::Request& theRequest) const
+std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestProducerInfo(
+    const Spine::HTTP::Request& theRequest) const
 try
 {
   std::unique_ptr<SmartMet::Spine::Table> result(new SmartMet::Spine::Table);
   const auto producer = theRequest.getParameter("producer");
-  const std::string timeFormat = Spine::optional_string(theRequest.getParameter("timeformat"), "sql");
+  const std::string timeFormat =
+      Spine::optional_string(theRequest.getParameter("timeformat"), "sql");
   std::unique_ptr<Spine::Table> qengineProducerInfo = getProducerInfo(timeFormat, producer);
   return qengineProducerInfo;
 }
@@ -1009,8 +1035,8 @@ catch (...)
   throw Fmi::Exception::Trace(BCP, "Operation failed!");
 }
 
-
-std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestParameterInfo(const Spine::HTTP::Request& theRequest) const
+std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestParameterInfo(
+    const Spine::HTTP::Request& theRequest) const
 try
 {
   std::unique_ptr<SmartMet::Spine::Table> result(new SmartMet::Spine::Table);
@@ -1022,7 +1048,6 @@ catch (...)
 {
   throw Fmi::Exception::Trace(BCP, "Operation failed!");
 }
-
 
 Engine* EngineImpl::create(const std::string& configfile)
 {
