@@ -3069,9 +3069,12 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       return GridNorth(*this, loc);
     case kFmiHour:
       return Fmi::to_string(ldt.local_time().time_of_day().hours());
+
       // The following parameters are added for for obsengine compability reasons
       // so that we can have e.g. fmisid identifier for observations in query which
-      // has both observations and forecasts
+      // has both observations and forecasts.
+      // Later on support was added for pointwise querydata.
+
     case kFmiFMISID:
     {
       if (loc.fmisid)
@@ -3082,22 +3085,37 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     {
       if (loc.fmisid)
         return loc.longitude;
+      if (!isGrid())
+        return latLon().X();
       return TS::None();
     }
     case kFmiStationLatitude:
     {
       if (loc.fmisid)
         return loc.latitude;
+      if (!isGrid())
+        return latLon().Y();
       return TS::None();
     }
+    case kFmiStationName:
+    {
+      if (isGrid())
+        return TS::None();
+      return info()->Location()->GetName().CharPtr();
+    }
     case kFmiWmoStationNumber:
+    {
+      if (!isGrid())
+        return info()->Location()->GetIdent();
+      return TS::None();
+    }
+
     case kFmiLPNN:
     case kFmiRWSID:
     case kFmiStationary:
     case kFmiDistance:
     case kFmiDirection:
     case kFmiSensorNo:
-    case kFmiStationName:
       return TS::None();
     default:
       break;
