@@ -114,22 +114,25 @@ void EngineImpl::init()
     SmartMet::Spine::Reactor* reactor = SmartMet::Spine::Reactor::instance;
     if (reactor)
     {
+      using AdminRequestAccess = SmartMet::Spine::Reactor::AdminRequestAccess;
       namespace p = std::placeholders;
+
       reactor->addAdminTableRequestHandler(
           this,
           "qengine",
-          false,
+          AdminRequestAccess::Public,
           std::bind(&EngineImpl::requestQEngineStatus, this, p::_2),
           "Available querydata");
+
       reactor->addAdminTableRequestHandler(this,
                                            "producers",
-                                           false,
+                                           AdminRequestAccess::Public,
                                            std::bind(&EngineImpl::requestProducerInfo, this, p::_2),
                                            "Querydata producers");
       reactor->addAdminTableRequestHandler(
           this,
           "parameters",
-          false,
+          AdminRequestAccess::Public,
           std::bind(&EngineImpl::requestParameterInfo, this, p::_2),
           "Querydata parameters");
     }
