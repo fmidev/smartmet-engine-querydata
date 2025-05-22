@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 25.2.18
+Version: 25.5.22
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,10 +29,10 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 25.2.18
-BuildRequires: smartmet-library-macgyver-devel >= 25.2.18
-BuildRequires: smartmet-library-newbase-devel >= 25.2.18
-BuildRequires: smartmet-library-spine-devel >= 25.2.18
+BuildRequires: smartmet-library-timeseries-devel >= 25.5.22
+BuildRequires: smartmet-library-macgyver-devel >= 25.5.22
+BuildRequires: smartmet-library-newbase-devel >= 25.3.20
+BuildRequires: smartmet-library-spine-devel >= 25.5.13
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -41,10 +41,10 @@ Requires: gdal310-libs
 Requires: jsoncpp >= 1.8.4
 Requires: fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 25.2.18
-Requires: smartmet-library-macgyver >= 25.2.18
-Requires: smartmet-library-newbase >= 25.2.18
-Requires: smartmet-library-spine >= 25.2.18
+Requires: smartmet-library-timeseries >= 25.5.22
+Requires: smartmet-library-macgyver >= 25.5.22
+Requires: smartmet-library-newbase >= 25.3.20
+Requires: smartmet-library-spine >= 25.5.13
 #TestRequires: smartmet-utils-devel >= 25.2.18
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal310-devel
@@ -90,6 +90,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Thu May 22 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.5.22-1.fmi
+- Repackaged to hide dark() implementation details
+
 * Tue Feb 18 2025 Andris Pavēnis <andris.pavenis@fmi.fi> 25.2.18-1.fmi
 - Update to gdal-3.10, geos-3.13 and proj-9.5
 
