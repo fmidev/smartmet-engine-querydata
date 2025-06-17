@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 25.5.22
+Version: 25.6.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -29,8 +29,8 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: fmt-devel >= %{smartmet_fmt_min}, fmt-devel < %{smartmet_fmt_max}
-BuildRequires: smartmet-library-timeseries-devel >= 25.5.22
-BuildRequires: smartmet-library-macgyver-devel >= 25.5.22
+BuildRequires: smartmet-library-timeseries-devel >= 25.6.9
+BuildRequires: smartmet-library-macgyver-devel >= 25.5.30
 BuildRequires: smartmet-library-newbase-devel >= 25.3.20
 BuildRequires: smartmet-library-spine-devel >= 25.5.13
 Requires: %{smartmet_boost}-iostreams
@@ -41,8 +41,8 @@ Requires: gdal310-libs
 Requires: jsoncpp >= 1.8.4
 Requires: fmt-libs >= %{smartmet_fmt_min}, fmt-libs < %{smartmet_fmt_max}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 25.5.22
-Requires: smartmet-library-macgyver >= 25.5.22
+Requires: smartmet-library-timeseries >= 25.6.9
+Requires: smartmet-library-macgyver >= 25.5.30
 Requires: smartmet-library-newbase >= 25.3.20
 Requires: smartmet-library-spine >= 25.5.13
 #TestRequires: smartmet-utils-devel >= 25.2.18
@@ -90,6 +90,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Tue Jun 17 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.6.17-1.fmi
+- Improved support for point querydata parameters: wmo, lpnn, rwsid, distance, direction, stationtype
+
 * Thu May 22 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.5.22-1.fmi
 - Repackaged to hide dark() implementation details
 
