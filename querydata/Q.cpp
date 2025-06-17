@@ -3075,12 +3075,6 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       // has both observations and forecasts.
       // Later on support was added for pointwise querydata.
 
-    case kFmiFMISID:
-    {
-      if (loc.fmisid)
-        return *loc.fmisid;
-      return TS::None();
-    }
     case kFmiStationLongitude:
     {
       if (loc.fmisid)
@@ -3103,18 +3097,43 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
         return TS::None();
       return info()->Location()->GetName().CharPtr();
     }
+    case kFmiFMISID:
+    {
+      if (loc.fmisid)
+        return *loc.fmisid;
+      if (!isGrid())
+        return info()->Location()->GetIdent();
+      return TS::None();
+    }
     case kFmiWmoStationNumber:
+    case kFmiLPNN:
+    case kFmiRWSID:
     {
       if (!isGrid())
         return info()->Location()->GetIdent();
       return TS::None();
     }
 
-    case kFmiLPNN:
-    case kFmiRWSID:
-    case kFmiStationary:
     case kFmiDistance:
+    {
+      if (isGrid())
+        return TS::None();
+      return info()->Location()->Distance(NFmiPoint(loc.longitude, loc.latitude));
+    }
     case kFmiDirection:
+    {
+      if (isGrid())
+        return TS::None();
+      auto dir = info()->Location()->Direction(NFmiPoint(loc.longitude, loc.latitude));
+      if (dir < 0)
+        dir += 360;
+      return dir;
+    }
+    case kFmiStationType:
+      return TS::None();
+
+    case kFmiStationary:
+      return TS::None();
     case kFmiSensorNo:
       return TS::None();
     default:
