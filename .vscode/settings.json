@@ -1,0 +1,8 @@
+{
+    "C_Cpp.default.includePath": [
+        "/usr/gdal35/include",
+        "querydata",
+        "/usr/include/smartmet",
+        "/usr/libconfig17/include"
+    ]
+}
