@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 25.6.17
+Version: 25.9.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -36,10 +36,10 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: %{smartmet_fmt_devel}
-BuildRequires: smartmet-library-timeseries-devel >= 25.6.9
-BuildRequires: smartmet-library-macgyver-devel >= 25.5.30
+BuildRequires: smartmet-library-timeseries-devel >= 25.8.1
+BuildRequires: smartmet-library-macgyver-devel >= 25.9.4
 BuildRequires: smartmet-library-newbase-devel >= 25.3.20
-BuildRequires: smartmet-library-spine-devel >= 25.5.13
+BuildRequires: smartmet-library-spine-devel >= 25.9.16
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -48,11 +48,11 @@ Requires: gdal310-libs
 Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 25.6.9
-Requires: smartmet-library-macgyver >= 25.5.30
+Requires: smartmet-library-timeseries >= 25.8.1
+Requires: smartmet-library-macgyver >= 25.9.4
 Requires: smartmet-library-newbase >= 25.3.20
-Requires: smartmet-library-spine >= 25.5.13
-#TestRequires: smartmet-utils-devel >= 25.2.18
+Requires: smartmet-library-spine >= 25.9.16
+#TestRequires: smartmet-utils-devel >= 25.8.19
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal310-devel
 #TestRequires: gcc-c++
@@ -97,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Sep 17 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.9.17-1.fmi
+- Added titles for info queries
+
 * Tue Jun 17 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.6.17-1.fmi
 - Improved support for point querydata parameters: wmo, lpnn, rwsid, distance, direction, stationtype
 
