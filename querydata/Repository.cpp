@@ -51,8 +51,7 @@ bool latest_model_age_ok(const Repository::SharedModels& time_models, unsigned i
 
 // Boost time_period is null if the duration is null, hence the intersects method does not work as
 // we want
-bool periods_overlap(const Fmi::TimePeriod& period1,
-                     const Fmi::TimePeriod& period2)
+bool periods_overlap(const Fmi::TimePeriod& period1, const Fmi::TimePeriod& period2)
 {
   const auto& t1 = period1.begin();
   const auto& t2 = period1.end();
@@ -122,8 +121,8 @@ void Repository::add(const Producer& producer, const SharedModel& model)
   {
     if (itsVerbose)
     {
-      std::cout << Fmi::SecondClock::local_time() << " [qengine] Adding "
-                << model->path() << " with hash value " << hash_value(*model) << std::endl;
+      std::cout << Fmi::SecondClock::local_time() << " [qengine] Adding " << model->path()
+                << " with hash value " << hash_value(*model) << std::endl;
     }
 
     auto producer_model = itsProducers.find(producer);
@@ -537,8 +536,8 @@ void Repository::resize(const Producer& producer, std::size_t limit)
     while (models.size() > limit)
     {
       if (itsVerbose)
-        std::cout << Fmi::SecondClock::local_time()
-                  << " [qengine] Resize removal of " << models.begin()->second->path() << std::endl;
+        std::cout << Fmi::SecondClock::local_time() << " [qengine] Resize removal of "
+                  << models.begin()->second->path() << std::endl;
 
       // the oldest file is the one first sorted by origintime
       models.begin()->second->uncache();  // uncache validpoints
@@ -686,6 +685,8 @@ Repository::ContentTable Repository::getProducerInfo(const ProducerList& produce
   {
     std::unique_ptr<Spine::Table> resultTable(new Spine::Table);
 
+    resultTable->setTitle("Querydata producer information");
+
     static Spine::TableFormatter::Names headers{"#",
                                                 "Producer",
                                                 "LastScanTime",
@@ -822,6 +823,8 @@ Repository::ContentTable Repository::getParameterInfo(const ProducerList& produc
   {
     std::unique_ptr<Spine::Table> resultTable(new Spine::Table);
 
+    resultTable->setTitle("Querydata parameter information");
+
     static Spine::TableFormatter::Names headers{"#", "ParamId", "ParamName", "Producers"};
 
     NFmiEnumConverter converter;
@@ -901,6 +904,8 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
     std::unique_ptr<Fmi::TimeFormatter> timeFormatter(Fmi::TimeFormatter::create(timeFormat));
 
     std::unique_ptr<Spine::Table> resultTable(new Spine::Table);
+
+    resultTable->setTitle("Available querydata");
 
     int row = 0;
 
@@ -1238,8 +1243,7 @@ Repository::MetaObject Repository::getSynchroInfos() const
   }
 }
 
-SharedModel Repository::getModel(const Producer& producer,
-                                 const std::filesystem::path& path) const
+SharedModel Repository::getModel(const Producer& producer, const std::filesystem::path& path) const
 {
   try
   {

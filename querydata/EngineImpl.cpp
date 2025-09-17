@@ -1007,14 +1007,15 @@ std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestQEngineStatus(
     const Spine::HTTP::Request& theRequest) const
 try
 {
-  std::unique_ptr<SmartMet::Spine::Table> result(new SmartMet::Spine::Table);
   const std::string producer = Spine::optional_string(theRequest.getParameter("producer"), "");
   const std::string projectionFormat =
       Spine::optional_string(theRequest.getParameter("projformat"), "newbase");
   const std::string timeFormat =
       Spine::optional_string(theRequest.getParameter("timeformat"), "sql");
+
   std::unique_ptr<Spine::Table> statusResult =
       getEngineContents(producer, timeFormat, projectionFormat);
+
   return statusResult;
 }
 catch (...)
@@ -1026,7 +1027,6 @@ std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestProducerInfo(
     const Spine::HTTP::Request& theRequest) const
 try
 {
-  std::unique_ptr<SmartMet::Spine::Table> result(new SmartMet::Spine::Table);
   const auto producer = theRequest.getParameter("producer");
   const std::string timeFormat =
       Spine::optional_string(theRequest.getParameter("timeformat"), "sql");
@@ -1042,7 +1042,6 @@ std::unique_ptr<SmartMet::Spine::Table> EngineImpl::requestParameterInfo(
     const Spine::HTTP::Request& theRequest) const
 try
 {
-  std::unique_ptr<SmartMet::Spine::Table> result(new SmartMet::Spine::Table);
   const auto producer = theRequest.getParameter("producer");
   std::unique_ptr<Spine::Table> qengineParameterInfo = getParameterInfo(producer);
   return qengineParameterInfo;
