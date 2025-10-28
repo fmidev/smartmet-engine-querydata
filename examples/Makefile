@@ -19,7 +19,6 @@ LIBS += \
 	-lboost_thread \
 	-lboost_regex \
 	-lboost_iostreams \
-	-lboost_system \
 	-lboost_atomic \
 	-lbz2 -lz -lpthread -ldl
 

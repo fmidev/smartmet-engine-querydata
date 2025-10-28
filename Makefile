@@ -23,7 +23,6 @@ LIBS += $(PREFIX_LDFLAGS) \
 	-lboost_thread \
 	-lboost_iostreams \
 	-lboost_serialization \
-	-lboost_system \
 	-lbz2 -lz
 
 # What to install
