@@ -333,11 +333,11 @@ MetaData QImpl::metaData()
     qi.ResetLevel();
     while (qi.NextLevel())
     {
-      const NFmiLevel &l = *qi.Level();
+      const NFmiLevel &lev = *qi.Level();
 
-      const auto *type = ::LevelName(l.LevelType());
-      const auto *name = l.GetName().CharPtr();
-      levels.emplace_back(type, name, l.LevelValue());
+      const auto *type = ::LevelName(lev.LevelType());
+      const auto *name = lev.GetName().CharPtr();
+      levels.emplace_back(type, name, lev.LevelValue());
     }
 
     meta.levels = levels;
