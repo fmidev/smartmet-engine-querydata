@@ -143,7 +143,7 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
   catch (...)
   {
     std::string nm;
-    if (name.length() > 0)
+    if (!name.empty())
       nm = " element " + name;
     throw Fmi::Exception::Trace(BCP, "Operation failed for producer " + producer + nm);
   }
