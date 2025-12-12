@@ -88,7 +88,7 @@ struct RepoManager
   Repository itsRepo;
 
   std::time_t configModTime;  // Timestamp of configuration file loaded
-  inline std::time_t getConfigModTime() const { return configModTime; }
+  std::time_t getConfigModTime() const { return configModTime; }
 
   void setOldManager(std::shared_ptr<RepoManager> oldmanager);
   void removeOldManager();

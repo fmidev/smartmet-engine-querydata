@@ -102,15 +102,15 @@ class Engine : public Spine::SmartMetEngine
   /**
    *  @brief Get current engine contents
    */
-  inline Repository::ContentTable getEngineContents(const std::string& timeFormat,
-                                                    const std::string& projectionFormat) const
+  Repository::ContentTable getEngineContents(const std::string& timeFormat,
+                                             const std::string& projectionFormat) const
   {
     return getEngineContentsForAllProducers(timeFormat, projectionFormat);
   }
 
-  inline Repository::ContentTable getEngineContents(const std::string& producer,
-                                                    const std::string& timeFormat,
-                                                    const std::string& projectionFormat) const
+  Repository::ContentTable getEngineContents(const std::string& producer,
+                                             const std::string& timeFormat,
+                                             const std::string& projectionFormat) const
   {
     return getEngineContentsForProducer(producer, timeFormat, projectionFormat);
   }
@@ -123,39 +123,37 @@ class Engine : public Spine::SmartMetEngine
   /**
    *  @brief Get engine metadata
    */
-  inline std::list<MetaData> getEngineMetadata() const { return getEngineMetadataBasic(); }
+  std::list<MetaData> getEngineMetadata() const { return getEngineMetadataBasic(); }
 
   /**
    *  @brief Get engine metadata with options
    */
-  inline std::list<MetaData> getEngineMetadata(const MetaQueryOptions& theOptions) const
+  std::list<MetaData> getEngineMetadata(const MetaQueryOptions& theOptions) const
   {
     return getEngineMetadataWithOptions(theOptions);
   }
 
   virtual const ProducerConfig& getProducerConfig(const std::string& producer) const;
 
-  inline CoordinatesPtr getWorldCoordinates(const Q& theQ) const
+  CoordinatesPtr getWorldCoordinates(const Q& theQ) const
   {
     return getWorldCoordinatesDefault(theQ);
   }
 
-  inline CoordinatesPtr getWorldCoordinates(const Q& theQ, const Fmi::SpatialReference& theSR) const
+  CoordinatesPtr getWorldCoordinates(const Q& theQ, const Fmi::SpatialReference& theSR) const
   {
     return getWorldCoordinatesForSR(theQ, theSR);
   }
 
-  inline ValuesPtr getValues(const Q& theQ,
-                             std::size_t theValuesHash,
-                             const Fmi::DateTime& theTime) const
+  ValuesPtr getValues(const Q& theQ, std::size_t theValuesHash, const Fmi::DateTime& theTime) const
   {
     return getValuesDefault(theQ, theValuesHash, theTime);
   }
 
-  inline ValuesPtr getValues(const Q& theQ,
-                             const Spine::Parameter& theParam,
-                             std::size_t theValuesHash,
-                             const Fmi::DateTime& theTime) const
+  ValuesPtr getValues(const Q& theQ,
+                      const Spine::Parameter& theParam,
+                      std::size_t theValuesHash,
+                      const Fmi::DateTime& theTime) const
   {
     return getValuesForParam(theQ, theParam, theValuesHash, theTime);
   }

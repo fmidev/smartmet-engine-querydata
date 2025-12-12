@@ -1,8 +1,8 @@
 #pragma once
 
 #include <boost/regex.hpp>
-#include <libconfig.h++>
 #include <filesystem>
+#include <libconfig.h++>
 #include <list>
 #include <set>
 #include <string>
@@ -81,7 +81,7 @@ struct ProducerConfig
   // status query might see a new file in some backends and an older one in others. There
   // would be no common content, which may mess up production.
 
-  inline bool operator==(const ProducerConfig& c) const
+  bool operator==(const ProducerConfig& c) const
   {
     return c.isfullgrid == isfullgrid && c.isstaticgrid == isstaticgrid &&
            c.isclimatology == isclimatology && c.isforecast == isforecast &&
@@ -93,7 +93,7 @@ struct ProducerConfig
            c.aliases == aliases && c.producer == producer && c.isrelativeuv == isrelativeuv &&
            c.mmap == mmap;
   }
-  inline bool operator!=(const ProducerConfig& c) const { return !operator==(c); }
+  bool operator!=(const ProducerConfig& c) const { return !operator==(c); }
 
   // Monitor index:
 };
