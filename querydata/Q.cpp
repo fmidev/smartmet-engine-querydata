@@ -3916,7 +3916,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
 
     NFmiFastQueryInfo newinfo(pdesc, tdesc, hdesc, vdesc);
     std::shared_ptr<NFmiQueryData> data(NFmiQueryDataUtil::CreateEmptyData(newinfo));
-    if (data.get() == nullptr)
+    if (data == nullptr)
       throw Fmi::Exception(BCP, "Failed to create querydata by sampling");
 
     NFmiFastQueryInfo dstinfo(data.get());
