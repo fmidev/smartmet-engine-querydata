@@ -31,8 +31,15 @@
 #include <optional>
 #include <stdexcept>
 
+namespace SmartMet
+{
+namespace Engine
+{
+namespace Querydata
+{
 namespace
 {
+
 // SmartSymbol / WeatherNumber calculation limits
 
 const float thunder_limit1 = 30;
@@ -62,7 +69,7 @@ enum class InterpolationMethod
   SURFACE
 };
 
-const char *LevelName(FmiLevelType theLevel)
+const char *level_name(FmiLevelType theLevel)
 {
   try
   {
@@ -121,15 +128,6 @@ bool is_leap_year(int year)
   return true;
 }
 
-}  // namespace
-
-namespace SmartMet
-{
-namespace Engine
-{
-namespace Querydata
-{
-
 // Max interpolation gap
 const int maxgap = 6 * 60;
 
@@ -139,6 +137,7 @@ const int maxgap = 6 * 60;
  */
 // ----------------------------------------------------------------------
 
+#if 0
 bool iswater(const Spine::Location &theLocation)
 {
   try
@@ -153,6 +152,972 @@ bool iswater(const Spine::Location &theLocation)
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
   }
 }
+#endif
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Time formatter
+ */
+// ----------------------------------------------------------------------
+
+std::string format_date(const Fmi::LocalDateTime &ldt,
+                        const std::locale &llocale,
+                        const std::string &fmt)
+{
+  try
+  {
+    const std::string tmp = Fmi::date_time::format_time(llocale, fmt, ldt);
+    return Fmi::latin1_to_utf8(tmp);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief WindUMS with true north orientation
+ */
+// ----------------------------------------------------------------------
+
+TS::Value WindUMS(QImpl &q,
+                  const Spine::Location &loc,
+                  const Fmi::LocalDateTime &ldt,
+                  std::optional<float> level = std::nullopt,
+                  InterpolationMethod method = InterpolationMethod::SURFACE)
+{
+  try
+  {
+    Fmi::CoordinateTransformation transformation("WGS84", q.SpatialReference());
+    auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
+
+    if (!opt_angle)
+      return TS::None();
+
+    auto angle = *opt_angle * boost::math::double_constants::degree;
+
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+    // auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
+
+    if (!q.param(kFmiWindUMS))
+      return TS::None();
+
+    auto u = (level ? (method == InterpolationMethod::PRESSURE
+                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                    : q.interpolate(latlon, ldt, maxgap));
+
+    if (angle == 0)
+      return u;
+
+    if (!q.param(kFmiWindVMS))
+      return TS::None();
+
+    auto v = (level ? (method == InterpolationMethod::PRESSURE
+                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                    : q.interpolate(latlon, ldt, maxgap));
+
+    if (u == kFloatMissing || v == kFloatMissing)
+      return TS::None();
+
+    // Unrotate U by the given angle
+
+    return u * cos(-angle) + v * sin(-angle);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief WindVMS with true north orientation
+ */
+// ----------------------------------------------------------------------
+
+TS::Value WindVMS(QImpl &q,
+                  const Spine::Location &loc,
+                  const Fmi::LocalDateTime &ldt,
+                  std::optional<float> level = std::nullopt,
+                  InterpolationMethod method = InterpolationMethod::SURFACE)
+{
+  try
+  {
+    Fmi::CoordinateTransformation transformation("WGS84", q.SpatialReference());
+    auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
+
+    if (!opt_angle)
+      return TS::None();
+
+    auto angle = *opt_angle * boost::math::double_constants::degree;
+
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+    // auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
+
+    if (!q.param(kFmiWindVMS))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+
+    auto v = (level ? (method == InterpolationMethod::PRESSURE
+                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                    : q.interpolate(latlon, ldt, maxgap));
+
+    if (angle == 0)
+      return v;
+
+    if (!q.param(kFmiWindUMS))
+      return TS::None();
+
+    auto u = (level ? (method == InterpolationMethod::PRESSURE
+                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
+                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                    : q.interpolate(latlon, ldt, maxgap));
+
+    if (u == kFloatMissing || v == kFloatMissing)
+      return TS::None();
+
+    // Unrotate V by the given angle
+
+    return v * cos(-angle) - u * sin(-angle);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief WindCompass 8th
+ */
+// ----------------------------------------------------------------------
+
+TS::Value WindCompass8(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    std::vector<std::string> names{"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+
+    if (!q.param(kFmiWindDirection))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (value == kFloatMissing)
+      return TS::None();
+
+    int i = static_cast<int>((value + 22.5) / 45) % 8;
+    return names.at(i);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief WindCompass 16th
+ */
+// ----------------------------------------------------------------------
+
+TS::Value WindCompass16(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    std::vector<std::string> names{"N",
+                                   "NNE",
+                                   "NE",
+                                   "ENE",
+                                   "E",
+                                   "ESE",
+                                   "SE",
+                                   "SSE",
+                                   "S",
+                                   "SSW",
+                                   "SW",
+                                   "WSW",
+                                   "W",
+                                   "WNW",
+                                   "NW",
+                                   "NNW"};
+
+    if (!q.param(kFmiWindDirection))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (value == kFloatMissing)
+      return TS::None();
+
+    int i = static_cast<int>((value + 11.25) / 22.5) % 16;
+    return names.at(i);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief WindCompass 32th
+ */
+// ----------------------------------------------------------------------
+
+TS::Value WindCompass32(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    std::vector<std::string> names{"N", "NbE", "NNE", "NEbN", "NE", "NEbE", "ENE", "EbN",
+                                   "E", "EbS", "ESE", "SEbE", "SE", "SEbS", "SSE", "SbE",
+                                   "S", "SbW", "SSW", "SWbS", "SW", "SWbW", "WSW", "WbS",
+                                   "W", "WbN", "WNW", "NWbW", "NW", "NWbN", "NNW", "NbW"};
+
+    if (!q.param(kFmiWindDirection))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (value == kFloatMissing)
+      return TS::None();
+
+    int i = static_cast<int>((value + 5.625) / 11.25) % 32;
+    return names.at(i);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Cloudiness8th
+ */
+// ----------------------------------------------------------------------
+
+TS::Value Cloudiness8th(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    if (!q.param(kFmiTotalCloudCover))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (value == kFloatMissing)
+      return TS::None();
+
+    // This is the synoptic interpretation of 8s
+
+    int n = boost::numeric_cast<int>(ceil(value / 12.5));
+    return n;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief WindChill
+ */
+// ----------------------------------------------------------------------
+
+TS::Value WindChill(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    if (!q.param(kFmiWindSpeedMS))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (!q.param(kFmiTemperature))
+      return TS::None();
+
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (wspd == kFloatMissing || t2m == kFloatMissing)
+      return TS::None();
+
+    float chill = FmiWindChill(wspd, t2m);
+    return chill;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief SummerSimmerIndex
+ */
+// ----------------------------------------------------------------------
+
+TS::Value SummerSimmerIndex(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    if (!q.param(kFmiHumidity))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+
+    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (!q.param(kFmiTemperature))
+      return TS::None();
+
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (rh == kFloatMissing || t2m == kFloatMissing)
+      return TS::None();
+
+    float ssi = FmiSummerSimmerIndex(rh, t2m);
+    return ssi;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief FeelsLike temperature
+ */
+// ----------------------------------------------------------------------
+
+TS::Value FeelsLike(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    if (!q.param(kFmiHumidity))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+
+    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (!q.param(kFmiWindSpeedMS))
+      return TS::None();
+
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (!q.param(kFmiTemperature))
+      return TS::None();
+
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
+      return TS::None();
+
+    // We permit radiation to be missing
+    float rad = kFloatMissing;
+    if (q.param(kFmiRadiationGlobal))
+      rad = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    float ret = FmiFeelsLikeTemperature(wspd, rh, t2m, rad);
+
+    if (ret == kFloatMissing)
+      return TS::None();
+    return ret;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Apparent Temperature
+ */
+// ----------------------------------------------------------------------
+
+TS::Value ApparentTemperature(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    if (!q.param(kFmiHumidity))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+
+    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (!q.param(kFmiWindSpeedMS))
+      return TS::None();
+
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (!q.param(kFmiTemperature))
+      return TS::None();
+
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
+      return TS::None();
+
+    float ret = FmiApparentTemperature(wspd, rh, t2m);
+
+    if (ret == kFloatMissing)
+      return TS::None();
+    return ret;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Lower limit of water to snow conversion
+ */
+// ----------------------------------------------------------------------
+TS::Value Snow1hLower(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    if (!q.param(kFmiPrecipitation1h))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+
+    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    // FmiSnowLowerLimit fails if input is 'nan', check here.
+
+    if (prec1h == kFloatMissing)
+    {
+      return TS::None();
+    }
+    float ret = FmiSnowLowerLimit(prec1h);
+    if (ret == kFloatMissing)
+      return TS::None();
+    return ret;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Upper limit of water to snow conversion
+ */
+// ----------------------------------------------------------------------
+TS::Value Snow1hUpper(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    if (!q.param(kFmiPrecipitation1h))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+
+    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    // FmiSnowUpperLimit fails if input is 'nan', check here.
+    if (prec1h == kFloatMissing)
+      return TS::None();
+
+    float ret = FmiSnowUpperLimit(prec1h);
+    if (ret == kFloatMissing)
+      return TS::None();
+    return ret;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Snow estimate if no Snow1h parameter present
+ */
+// ----------------------------------------------------------------------
+TS::Value Snow1h(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    // Use the actual Snow1h if it is present
+    if (q.param(kFmiSnow1h))
+      return q.param(kFmiSnow1h);
+
+    if (!q.param(kFmiTemperature))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+
+    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (!q.param(kFmiWindSpeedMS))
+      return TS::None();
+
+    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (!q.param(kFmiPrecipitation1h))
+      return TS::None();
+
+    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (t2m == kFloatMissing || wspd == kFloatMissing || prec1h == kFloatMissing)
+      return TS::None();
+
+    float snow1h = prec1h * FmiSnowWaterRatio(t2m, wspd);  // Can this be kFLoatMissing???
+    return snow1h;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief WeatherSymbol = WeatherSymbol3 + 100*Dark
+ */
+// ----------------------------------------------------------------------
+
+TS::Value WeatherSymbol(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    if (!q.param(kFmiWeatherSymbol3))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+
+    float symbol = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+    if (symbol == kFloatMissing)
+      return kFloatMissing;
+
+    Fmi::Astronomy::solar_position_t sp =
+        Fmi::Astronomy::solar_position(t, loc.longitude, loc.latitude);
+    if (sp.dark())
+      return 100 + symbol;
+    return symbol;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Weather text
+ */
+// ----------------------------------------------------------------------
+
+TS::Value WeatherText(QImpl &q,
+                      const Spine::Location &loc,
+                      const Fmi::LocalDateTime &ldt,
+                      const std::string &lang,
+                      const Spine::ParameterTranslations &translations)
+{
+  try
+  {
+    if (!q.param(kFmiWeatherSymbol3))
+      return TS::None();
+
+    NFmiMetTime t(ldt);
+
+    float w = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
+
+    if (w == kFloatMissing)
+      return TS::None();
+
+    auto ret = translations.getTranslation("WeatherText", static_cast<int>(w), lang);
+    if (!ret)
+      return TS::None();
+
+    return *ret;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Calculate the smart weather symbol if possible
+ */
+// ----------------------------------------------------------------------
+
+std::optional<int> calc_smart_symbol(QImpl &q,
+                                     const NFmiPoint &latlon,
+                                     const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    // Cloudiness is almost always needed
+
+    if (!q.param(kFmiTotalCloudCover))
+      return {};
+
+    NFmiMetTime t(ldt);
+
+    const auto n = q.interpolate(latlon, t, maxgap);
+
+    if (n == kFloatMissing)
+      return {};
+
+    // The first parameter we need always is POT. We allow it to be missing though.
+
+    if (q.param(kFmiProbabilityThunderstorm))
+    {
+      const auto thunder = q.interpolate(latlon, t, maxgap);
+
+      if (thunder >= thunder_limit1 && thunder != kFloatMissing)
+      {
+        int nclass = (n < cloud_limit6 ? 0 : (n < cloud_limit8 ? 1 : 2));
+        return 71 + 3 * nclass;  // 71,74,77
+      }
+    }
+
+    // No thunder (or not available). Then we always need precipitation rate
+
+    if (!q.param(kFmiPrecipitation1h))
+      return {};
+
+    const auto rain = q.interpolate(latlon, t, maxgap);
+
+    if (rain == kFloatMissing)
+      return {};
+
+    if (rain < rain_limit1)
+    {
+      // No precipitation. Now we need only fog/cloudiness
+
+      if (q.param(kFmiFogIntensity))
+      {
+        const auto fog = q.interpolate(latlon, t, maxgap);
+        if (fog > 0 && fog != kFloatMissing)
+          return 9;  // fog
+      }
+
+      // no rain, no fog (or not available), only cloudiness
+      if (n < cloud_limit2)
+        return 1;  // clear
+      if (n < cloud_limit3)
+        return 2;  // mostly clear
+      if (n < cloud_limit6)
+        return 4;  // partly cloudy
+      if (n < cloud_limit8)
+        return 6;  // mostly cloudy
+      return 7;    // overcast
+    }
+
+    // Since we have precipitation, we always need precipitation form
+    int rform = static_cast<int>(kFloatMissing);
+    if (q.param(kFmiPotentialPrecipitationForm) || q.param(kFmiPrecipitationForm))
+      rform = static_cast<int>(q.interpolate(latlon, t, maxgap));
+
+    if (rform == static_cast<int>(kFloatMissing))
+      return {};
+
+    if (rform == 0)  // drizzle
+      return 11;
+
+    if (rform == 4)  // freezing drizzle
+      return 14;
+
+    if (rform == 5)  // freezing rain
+      return 17;
+
+    if (rform == 7 || rform == 8)  // snow or ice particles
+      return 57;                   // convert to plain snowfall + cloudy
+
+    // only water, sleet and snow left. Cloudiness limits
+    // are the same for them, precipitation limits are not.
+
+    int nclass = (n < cloud_limit6 ? 0 : (n < cloud_limit8 ? 1 : 2));
+
+    if (rform == 6)  // hail
+      return 61 + 3 * nclass;
+
+    if (rform == 1)  // water
+    {
+      // Now we need precipitation type too
+      int rtype = 1;  // large scale by default
+      if (q.param(kFmiPotentialPrecipitationType) || q.param(kFmiPrecipitationType))
+        rtype = static_cast<int>(q.interpolate(latlon, t, maxgap));
+
+      if (rtype == 2)            // convective
+        return 21 + 3 * nclass;  // 21, 24, 27 for showers
+
+      // rtype=1:large scale precipitation (or rtype is missing)
+      int rclass = (rain < rain_limit3 ? 0 : (rain < rain_limit6 ? 1 : 2));
+      return 31 + 3 * nclass + rclass;  // 31-39 for precipitation
+    }
+
+    // rform=2:sleet and rform=3:snow map to 41-49 and 51-59 respectively
+
+    int rclass = (rain < rain_limit3 ? 0 : (rain < rain_limit4 ? 1 : 2));
+    return (10 * rform + 21 + 3 * nclass + rclass);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Calculate the weather number used as basis for SmartSymbol
+ */
+// ----------------------------------------------------------------------
+
+std::optional<int> calc_weather_number(QImpl &q,
+                                       const NFmiPoint &latlon,
+                                       const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    NFmiMetTime t(ldt);
+
+    // Cloudiness is optional
+    float n = kFloatMissing;
+    if (q.param(kFmiTotalCloudCover))
+      n = q.interpolate(latlon, t, maxgap);
+
+    int n_class = 9;  // missing
+    if (n == kFloatMissing)
+      n_class = 9;
+    else if (n < cloud_limit1)
+      n_class = 0;
+    else if (n < cloud_limit2)
+      n_class = 1;
+    else if (n < cloud_limit3)
+      n_class = 2;
+    else if (n < cloud_limit4)
+      n_class = 3;
+    else if (n < cloud_limit5)
+      n_class = 4;
+    else if (n < cloud_limit6)
+      n_class = 5;
+    else if (n < cloud_limit7)
+      n_class = 6;
+    else if (n < cloud_limit8)
+      n_class = 7;
+    else
+      n_class = 8;
+
+    // Precipitation is optional
+    float rain = kFloatMissing;
+    if (q.param(kFmiPrecipitation1h))
+      rain = q.interpolate(latlon, t, maxgap);
+
+    int rain_class = 9;  // missing
+    if (rain == kFloatMissing)
+      rain_class = 9;
+    else if (rain < rain_limit1)
+      rain_class = 0;
+    else if (rain < rain_limit2)
+      rain_class = 1;
+    else if (rain < rain_limit3)
+      rain_class = 2;
+    else if (rain < rain_limit4)
+      rain_class = 3;
+    else if (rain < rain_limit5)
+      rain_class = 4;
+    else if (rain < rain_limit6)
+      rain_class = 5;
+    else if (rain < rain_limit7)
+      rain_class = 6;
+    else
+      rain_class = 7;
+
+    // Precipitation form is optional
+    float rform = kFloatMissing;
+    if (q.param(kFmiPotentialPrecipitationForm) || q.param(kFmiPrecipitationForm))
+      rform = q.interpolate(latlon, t, maxgap);
+
+    int rform_class = (rform == kFloatMissing ? 9 : static_cast<int>(rform));
+
+    // Precipitation type is optional
+    float rtype = kFloatMissing;
+    if (q.param(kFmiPotentialPrecipitationType) || q.param(kFmiPrecipitationType))
+      rtype = q.interpolate(latlon, t, maxgap);
+
+    int rtype_class = (rtype == kFloatMissing ? 9 : static_cast<int>(rtype));
+
+    // Thunder is optional
+    float thunder = kFloatMissing;
+    if (q.param(kFmiProbabilityThunderstorm))
+      thunder = q.interpolate(latlon, t, maxgap);
+
+    int thunder_class = 9;
+    if (thunder == kFloatMissing)
+      thunder_class = 9;
+    else if (thunder < thunder_limit1)
+      thunder_class = 0;
+    else if (thunder < thunder_limit2)
+      thunder_class = 1;
+    else
+      thunder_class = 2;
+
+    // Fog is optional
+    float fog = kFloatMissing;
+    if (q.param(kFmiFogIntensity))
+      fog = q.interpolate(latlon, t, maxgap);
+
+    int fog_class = (fog == kFloatMissing ? 9 : static_cast<int>(fog));
+
+    // Build the number
+    const int version = 1;
+    const int cloud_class = 0;  // not available yet
+
+    // clang-format off
+    return (10000000 * version +
+            1000000 * thunder_class +
+            100000 * rform_class +
+            10000 * rtype_class +
+            1000 * rain_class +
+            100 * fog_class +
+            10 * n_class +
+            cloud_class);
+    // clang-format on
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}  // namespace Querydata
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief SmartSymbol
+ */
+// ----------------------------------------------------------------------
+
+TS::Value SmartSymbolNumber(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+
+    auto symbol = calc_smart_symbol(q, latlon, ldt);
+
+    if (!symbol || *symbol == kFloatMissing)
+      return TS::None();
+
+    // Add day/night information
+    Fmi::Astronomy::solar_position_t sp =
+        Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
+
+    if (sp.dark())
+      return 100 + *symbol;
+    return *symbol;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief WeatherNumber
+ */
+// ----------------------------------------------------------------------
+
+TS::Value WeatherNumber(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
+{
+  try
+  {
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+
+    auto number = calc_weather_number(q, latlon, ldt);
+
+    if (!number)
+      return TS::None();
+
+    return *number;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Symbol text
+ */
+// ----------------------------------------------------------------------
+
+TS::Value SmartSymbolText(QImpl &q,
+                          const Spine::Location &loc,
+                          const Fmi::LocalDateTime &ldt,
+                          const std::string &lang,
+                          const Spine::ParameterTranslations &translations)
+{
+  try
+  {
+    NFmiPoint latlon(loc.longitude, loc.latitude);
+
+    auto symbol = calc_smart_symbol(q, latlon, ldt);
+
+    if (!symbol)
+      return TS::None();
+
+    auto ret = translations.getTranslation("SmartSymbolText", *symbol, lang);
+
+    if (!ret)
+      return TS::None();
+
+    return *ret;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Grid north deviation
+ */
+// ----------------------------------------------------------------------
+
+TS::Value GridNorth(const QImpl &q, const Spine::Location &loc)
+{
+  try
+  {
+    Fmi::CoordinateTransformation transformation("WGS84", q.SpatialReference());
+    auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
+    if (!opt_angle)
+      return TS::None();
+    return *opt_angle;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+}  // namespace
 
 // ----------------------------------------------------------------------
 /*!
@@ -335,7 +1300,7 @@ MetaData QImpl::metaData()
     {
       const NFmiLevel &lev = *qi.Level();
 
-      const auto *type = ::LevelName(lev.LevelType());
+      const auto *type = level_name(lev.LevelType());
       const auto *name = lev.GetName().CharPtr();
       levels.emplace_back(type, name, lev.LevelValue());
     }
@@ -1758,969 +2723,6 @@ void QImpl::setIsSubParamUsed(bool theState)
   try
   {
     itsInfo->SetIsSubParamUsed(theState);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Time formatter
- */
-// ----------------------------------------------------------------------
-
-std::string format_date(const Fmi::LocalDateTime &ldt,
-                        const std::locale &llocale,
-                        const std::string &fmt)
-{
-  try
-  {
-    const std::string tmp = Fmi::date_time::format_time(llocale, fmt, ldt);
-    return Fmi::latin1_to_utf8(tmp);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief WindUMS with true north orientation
- */
-// ----------------------------------------------------------------------
-
-TS::Value WindUMS(QImpl &q,
-                  const Spine::Location &loc,
-                  const Fmi::LocalDateTime &ldt,
-                  std::optional<float> level = std::nullopt,
-                  InterpolationMethod method = InterpolationMethod::SURFACE)
-{
-  try
-  {
-    Fmi::CoordinateTransformation transformation("WGS84", q.SpatialReference());
-    auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
-
-    if (!opt_angle)
-      return TS::None();
-
-    auto angle = *opt_angle * boost::math::double_constants::degree;
-
-    NFmiPoint latlon(loc.longitude, loc.latitude);
-    // auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
-
-    if (!q.param(kFmiWindUMS))
-      return TS::None();
-
-    auto u = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
-                    : q.interpolate(latlon, ldt, maxgap));
-
-    if (angle == 0)
-      return u;
-
-    if (!q.param(kFmiWindVMS))
-      return TS::None();
-
-    auto v = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
-                    : q.interpolate(latlon, ldt, maxgap));
-
-    if (u == kFloatMissing || v == kFloatMissing)
-      return TS::None();
-
-    // Unrotate U by the given angle
-
-    return u * cos(-angle) + v * sin(-angle);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief WindVMS with true north orientation
- */
-// ----------------------------------------------------------------------
-
-TS::Value WindVMS(QImpl &q,
-                  const Spine::Location &loc,
-                  const Fmi::LocalDateTime &ldt,
-                  std::optional<float> level = std::nullopt,
-                  InterpolationMethod method = InterpolationMethod::SURFACE)
-{
-  try
-  {
-    Fmi::CoordinateTransformation transformation("WGS84", q.SpatialReference());
-    auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
-
-    if (!opt_angle)
-      return TS::None();
-
-    auto angle = *opt_angle * boost::math::double_constants::degree;
-
-    NFmiPoint latlon(loc.longitude, loc.latitude);
-    // auto angle = q.area().TrueNorthAzimuth(latlon).ToRad();
-
-    if (!q.param(kFmiWindVMS))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-
-    auto v = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
-                    : q.interpolate(latlon, ldt, maxgap));
-
-    if (angle == 0)
-      return v;
-
-    if (!q.param(kFmiWindUMS))
-      return TS::None();
-
-    auto u = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
-                    : q.interpolate(latlon, ldt, maxgap));
-
-    if (u == kFloatMissing || v == kFloatMissing)
-      return TS::None();
-
-    // Unrotate V by the given angle
-
-    return v * cos(-angle) - u * sin(-angle);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief WindCompass 8th
- */
-// ----------------------------------------------------------------------
-
-TS::Value WindCompass8(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    std::vector<std::string> names{"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
-
-    if (!q.param(kFmiWindDirection))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (value == kFloatMissing)
-      return TS::None();
-
-    int i = static_cast<int>((value + 22.5) / 45) % 8;
-    return names.at(i);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief WindCompass 16th
- */
-// ----------------------------------------------------------------------
-
-TS::Value WindCompass16(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    std::vector<std::string> names{"N",
-                                   "NNE",
-                                   "NE",
-                                   "ENE",
-                                   "E",
-                                   "ESE",
-                                   "SE",
-                                   "SSE",
-                                   "S",
-                                   "SSW",
-                                   "SW",
-                                   "WSW",
-                                   "W",
-                                   "WNW",
-                                   "NW",
-                                   "NNW"};
-
-    if (!q.param(kFmiWindDirection))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (value == kFloatMissing)
-      return TS::None();
-
-    int i = static_cast<int>((value + 11.25) / 22.5) % 16;
-    return names.at(i);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief WindCompass 32th
- */
-// ----------------------------------------------------------------------
-
-TS::Value WindCompass32(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    std::vector<std::string> names{"N", "NbE", "NNE", "NEbN", "NE", "NEbE", "ENE", "EbN",
-                                   "E", "EbS", "ESE", "SEbE", "SE", "SEbS", "SSE", "SbE",
-                                   "S", "SbW", "SSW", "SWbS", "SW", "SWbW", "WSW", "WbS",
-                                   "W", "WbN", "WNW", "NWbW", "NW", "NWbN", "NNW", "NbW"};
-
-    if (!q.param(kFmiWindDirection))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (value == kFloatMissing)
-      return TS::None();
-
-    int i = static_cast<int>((value + 5.625) / 11.25) % 32;
-    return names.at(i);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Cloudiness8th
- */
-// ----------------------------------------------------------------------
-
-TS::Value Cloudiness8th(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    if (!q.param(kFmiTotalCloudCover))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-    float value = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (value == kFloatMissing)
-      return TS::None();
-
-    // This is the synoptic interpretation of 8s
-
-    int n = boost::numeric_cast<int>(ceil(value / 12.5));
-    return n;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief WindChill
- */
-// ----------------------------------------------------------------------
-
-TS::Value WindChill(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    if (!q.param(kFmiWindSpeedMS))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (!q.param(kFmiTemperature))
-      return TS::None();
-
-    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (wspd == kFloatMissing || t2m == kFloatMissing)
-      return TS::None();
-
-    float chill = FmiWindChill(wspd, t2m);
-    return chill;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief SummerSimmerIndex
- */
-// ----------------------------------------------------------------------
-
-TS::Value SummerSimmerIndex(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    if (!q.param(kFmiHumidity))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-
-    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (!q.param(kFmiTemperature))
-      return TS::None();
-
-    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (rh == kFloatMissing || t2m == kFloatMissing)
-      return TS::None();
-
-    float ssi = FmiSummerSimmerIndex(rh, t2m);
-    return ssi;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief FeelsLike temperature
- */
-// ----------------------------------------------------------------------
-
-TS::Value FeelsLike(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    if (!q.param(kFmiHumidity))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-
-    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (!q.param(kFmiWindSpeedMS))
-      return TS::None();
-
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (!q.param(kFmiTemperature))
-      return TS::None();
-
-    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
-      return TS::None();
-
-    // We permit radiation to be missing
-    float rad = kFloatMissing;
-    if (q.param(kFmiRadiationGlobal))
-      rad = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    float ret = FmiFeelsLikeTemperature(wspd, rh, t2m, rad);
-
-    if (ret == kFloatMissing)
-      return TS::None();
-    return ret;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Apparent Temperature
- */
-// ----------------------------------------------------------------------
-
-TS::Value ApparentTemperature(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    if (!q.param(kFmiHumidity))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-
-    float rh = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (!q.param(kFmiWindSpeedMS))
-      return TS::None();
-
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (!q.param(kFmiTemperature))
-      return TS::None();
-
-    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (rh == kFloatMissing || t2m == kFloatMissing || wspd == kFloatMissing)
-      return TS::None();
-
-    float ret = FmiApparentTemperature(wspd, rh, t2m);
-
-    if (ret == kFloatMissing)
-      return TS::None();
-    return ret;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Lower limit of water to snow conversion
- */
-// ----------------------------------------------------------------------
-TS::Value Snow1hLower(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    if (!q.param(kFmiPrecipitation1h))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-
-    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    // FmiSnowLowerLimit fails if input is 'nan', check here.
-
-    if (prec1h == kFloatMissing)
-    {
-      return TS::None();
-    }
-    float ret = FmiSnowLowerLimit(prec1h);
-    if (ret == kFloatMissing)
-      return TS::None();
-    return ret;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Upper limit of water to snow conversion
- */
-// ----------------------------------------------------------------------
-TS::Value Snow1hUpper(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    if (!q.param(kFmiPrecipitation1h))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-
-    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    // FmiSnowUpperLimit fails if input is 'nan', check here.
-    if (prec1h == kFloatMissing)
-      return TS::None();
-
-    float ret = FmiSnowUpperLimit(prec1h);
-    if (ret == kFloatMissing)
-      return TS::None();
-    return ret;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Snow estimate if no Snow1h parameter present
- */
-// ----------------------------------------------------------------------
-TS::Value Snow1h(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    // Use the actual Snow1h if it is present
-    if (q.param(kFmiSnow1h))
-      return q.param(kFmiSnow1h);
-
-    if (!q.param(kFmiTemperature))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-
-    float t2m = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (!q.param(kFmiWindSpeedMS))
-      return TS::None();
-
-    float wspd = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (!q.param(kFmiPrecipitation1h))
-      return TS::None();
-
-    float prec1h = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (t2m == kFloatMissing || wspd == kFloatMissing || prec1h == kFloatMissing)
-      return TS::None();
-
-    float snow1h = prec1h * FmiSnowWaterRatio(t2m, wspd);  // Can this be kFLoatMissing???
-    return snow1h;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief WeatherSymbol = WeatherSymbol3 + 100*Dark
- */
-// ----------------------------------------------------------------------
-
-TS::Value WeatherSymbol(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    if (!q.param(kFmiWeatherSymbol3))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-
-    float symbol = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-    if (symbol == kFloatMissing)
-      return kFloatMissing;
-
-    Fmi::Astronomy::solar_position_t sp =
-        Fmi::Astronomy::solar_position(t, loc.longitude, loc.latitude);
-    if (sp.dark())
-      return 100 + symbol;
-    return symbol;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Weather text
- */
-// ----------------------------------------------------------------------
-
-TS::Value WeatherText(QImpl &q,
-                      const Spine::Location &loc,
-                      const Fmi::LocalDateTime &ldt,
-                      const std::string &lang,
-                      const Spine::ParameterTranslations &translations)
-{
-  try
-  {
-    if (!q.param(kFmiWeatherSymbol3))
-      return TS::None();
-
-    NFmiMetTime t(ldt);
-
-    float w = q.interpolate(NFmiPoint(loc.longitude, loc.latitude), t, maxgap);
-
-    if (w == kFloatMissing)
-      return TS::None();
-
-    auto ret = translations.getTranslation("WeatherText", static_cast<int>(w), lang);
-    if (!ret)
-      return TS::None();
-
-    return *ret;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Calculate the smart weather symbol if possible
- */
-// ----------------------------------------------------------------------
-
-std::optional<int> calc_smart_symbol(QImpl &q,
-                                     const NFmiPoint &latlon,
-                                     const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    // Cloudiness is almost always needed
-
-    if (!q.param(kFmiTotalCloudCover))
-      return {};
-
-    NFmiMetTime t(ldt);
-
-    const auto n = q.interpolate(latlon, t, maxgap);
-
-    if (n == kFloatMissing)
-      return {};
-
-    // The first parameter we need always is POT. We allow it to be missing though.
-
-    if (q.param(kFmiProbabilityThunderstorm))
-    {
-      const auto thunder = q.interpolate(latlon, t, maxgap);
-
-      if (thunder >= thunder_limit1 && thunder != kFloatMissing)
-      {
-        int nclass = (n < cloud_limit6 ? 0 : (n < cloud_limit8 ? 1 : 2));
-        return 71 + 3 * nclass;  // 71,74,77
-      }
-    }
-
-    // No thunder (or not available). Then we always need precipitation rate
-
-    if (!q.param(kFmiPrecipitation1h))
-      return {};
-
-    const auto rain = q.interpolate(latlon, t, maxgap);
-
-    if (rain == kFloatMissing)
-      return {};
-
-    if (rain < rain_limit1)
-    {
-      // No precipitation. Now we need only fog/cloudiness
-
-      if (q.param(kFmiFogIntensity))
-      {
-        const auto fog = q.interpolate(latlon, t, maxgap);
-        if (fog > 0 && fog != kFloatMissing)
-          return 9;  // fog
-      }
-
-      // no rain, no fog (or not available), only cloudiness
-      if (n < cloud_limit2)
-        return 1;  // clear
-      if (n < cloud_limit3)
-        return 2;  // mostly clear
-      if (n < cloud_limit6)
-        return 4;  // partly cloudy
-      if (n < cloud_limit8)
-        return 6;  // mostly cloudy
-      return 7;    // overcast
-    }
-
-    // Since we have precipitation, we always need precipitation form
-    int rform = static_cast<int>(kFloatMissing);
-    if (q.param(kFmiPotentialPrecipitationForm) || q.param(kFmiPrecipitationForm))
-      rform = static_cast<int>(q.interpolate(latlon, t, maxgap));
-
-    if (rform == static_cast<int>(kFloatMissing))
-      return {};
-
-    if (rform == 0)  // drizzle
-      return 11;
-
-    if (rform == 4)  // freezing drizzle
-      return 14;
-
-    if (rform == 5)  // freezing rain
-      return 17;
-
-    if (rform == 7 || rform == 8)  // snow or ice particles
-      return 57;                   // convert to plain snowfall + cloudy
-
-    // only water, sleet and snow left. Cloudiness limits
-    // are the same for them, precipitation limits are not.
-
-    int nclass = (n < cloud_limit6 ? 0 : (n < cloud_limit8 ? 1 : 2));
-
-    if (rform == 6)  // hail
-      return 61 + 3 * nclass;
-
-    if (rform == 1)  // water
-    {
-      // Now we need precipitation type too
-      int rtype = 1;  // large scale by default
-      if (q.param(kFmiPotentialPrecipitationType) || q.param(kFmiPrecipitationType))
-        rtype = static_cast<int>(q.interpolate(latlon, t, maxgap));
-
-      if (rtype == 2)            // convective
-        return 21 + 3 * nclass;  // 21, 24, 27 for showers
-
-      // rtype=1:large scale precipitation (or rtype is missing)
-      int rclass = (rain < rain_limit3 ? 0 : (rain < rain_limit6 ? 1 : 2));
-      return 31 + 3 * nclass + rclass;  // 31-39 for precipitation
-    }
-
-    // rform=2:sleet and rform=3:snow map to 41-49 and 51-59 respectively
-
-    int rclass = (rain < rain_limit3 ? 0 : (rain < rain_limit4 ? 1 : 2));
-    return (10 * rform + 21 + 3 * nclass + rclass);
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Calculate the weather number used as basis for SmartSymbol
- */
-// ----------------------------------------------------------------------
-
-std::optional<int> calc_weather_number(QImpl &q,
-                                       const NFmiPoint &latlon,
-                                       const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    NFmiMetTime t(ldt);
-
-    // Cloudiness is optional
-    float n = kFloatMissing;
-    if (q.param(kFmiTotalCloudCover))
-      n = q.interpolate(latlon, t, maxgap);
-
-    int n_class = 9;  // missing
-    if (n == kFloatMissing)
-      n_class = 9;
-    else if (n < cloud_limit1)
-      n_class = 0;
-    else if (n < cloud_limit2)
-      n_class = 1;
-    else if (n < cloud_limit3)
-      n_class = 2;
-    else if (n < cloud_limit4)
-      n_class = 3;
-    else if (n < cloud_limit5)
-      n_class = 4;
-    else if (n < cloud_limit6)
-      n_class = 5;
-    else if (n < cloud_limit7)
-      n_class = 6;
-    else if (n < cloud_limit8)
-      n_class = 7;
-    else
-      n_class = 8;
-
-    // Precipitation is optional
-    float rain = kFloatMissing;
-    if (q.param(kFmiPrecipitation1h))
-      rain = q.interpolate(latlon, t, maxgap);
-
-    int rain_class = 9;  // missing
-    if (rain == kFloatMissing)
-      rain_class = 9;
-    else if (rain < rain_limit1)
-      rain_class = 0;
-    else if (rain < rain_limit2)
-      rain_class = 1;
-    else if (rain < rain_limit3)
-      rain_class = 2;
-    else if (rain < rain_limit4)
-      rain_class = 3;
-    else if (rain < rain_limit5)
-      rain_class = 4;
-    else if (rain < rain_limit6)
-      rain_class = 5;
-    else if (rain < rain_limit7)
-      rain_class = 6;
-    else
-      rain_class = 7;
-
-    // Precipitation form is optional
-    float rform = kFloatMissing;
-    if (q.param(kFmiPotentialPrecipitationForm) || q.param(kFmiPrecipitationForm))
-      rform = q.interpolate(latlon, t, maxgap);
-
-    int rform_class = (rform == kFloatMissing ? 9 : static_cast<int>(rform));
-
-    // Precipitation type is optional
-    float rtype = kFloatMissing;
-    if (q.param(kFmiPotentialPrecipitationType) || q.param(kFmiPrecipitationType))
-      rtype = q.interpolate(latlon, t, maxgap);
-
-    int rtype_class = (rtype == kFloatMissing ? 9 : static_cast<int>(rtype));
-
-    // Thunder is optional
-    float thunder = kFloatMissing;
-    if (q.param(kFmiProbabilityThunderstorm))
-      thunder = q.interpolate(latlon, t, maxgap);
-
-    int thunder_class = 9;
-    if (thunder == kFloatMissing)
-      thunder_class = 9;
-    else if (thunder < thunder_limit1)
-      thunder_class = 0;
-    else if (thunder < thunder_limit2)
-      thunder_class = 1;
-    else
-      thunder_class = 2;
-
-    // Fog is optional
-    float fog = kFloatMissing;
-    if (q.param(kFmiFogIntensity))
-      fog = q.interpolate(latlon, t, maxgap);
-
-    int fog_class = (fog == kFloatMissing ? 9 : static_cast<int>(fog));
-
-    // Build the number
-    const int version = 1;
-    const int cloud_class = 0;  // not available yet
-
-    // clang-format off
-    return (10000000 * version +
-            1000000 * thunder_class +
-            100000 * rform_class +
-            10000 * rtype_class +
-            1000 * rain_class +
-            100 * fog_class +
-            10 * n_class +
-            cloud_class);
-    // clang-format on
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}  // namespace Querydata
-
-// ----------------------------------------------------------------------
-/*!
- * \brief SmartSymbol
- */
-// ----------------------------------------------------------------------
-
-TS::Value SmartSymbolNumber(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    NFmiPoint latlon(loc.longitude, loc.latitude);
-
-    auto symbol = calc_smart_symbol(q, latlon, ldt);
-
-    if (!symbol || *symbol == kFloatMissing)
-      return TS::None();
-
-    // Add day/night information
-    Fmi::Astronomy::solar_position_t sp =
-        Fmi::Astronomy::solar_position(ldt, loc.longitude, loc.latitude);
-
-    if (sp.dark())
-      return 100 + *symbol;
-    return *symbol;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief WeatherNumber
- */
-// ----------------------------------------------------------------------
-
-TS::Value WeatherNumber(QImpl &q, const Spine::Location &loc, const Fmi::LocalDateTime &ldt)
-{
-  try
-  {
-    NFmiPoint latlon(loc.longitude, loc.latitude);
-
-    auto number = calc_weather_number(q, latlon, ldt);
-
-    if (!number)
-      return TS::None();
-
-    return *number;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Symbol text
- */
-// ----------------------------------------------------------------------
-
-TS::Value SmartSymbolText(QImpl &q,
-                          const Spine::Location &loc,
-                          const Fmi::LocalDateTime &ldt,
-                          const std::string &lang,
-                          const Spine::ParameterTranslations &translations)
-{
-  try
-  {
-    NFmiPoint latlon(loc.longitude, loc.latitude);
-
-    auto symbol = calc_smart_symbol(q, latlon, ldt);
-
-    if (!symbol)
-      return TS::None();
-
-    auto ret = translations.getTranslation("SmartSymbolText", *symbol, lang);
-
-    if (!ret)
-      return TS::None();
-
-    return *ret;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Grid north deviation
- */
-// ----------------------------------------------------------------------
-
-TS::Value GridNorth(const QImpl &q, const Spine::Location &loc)
-{
-  try
-  {
-    Fmi::CoordinateTransformation transformation("WGS84", q.SpatialReference());
-    auto opt_angle = Fmi::OGR::gridNorth(transformation, loc.longitude, loc.latitude);
-    if (!opt_angle)
-      return TS::None();
-    return *opt_angle;
   }
   catch (...)
   {
