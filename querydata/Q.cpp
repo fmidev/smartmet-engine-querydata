@@ -2094,7 +2094,7 @@ float QImpl::levelValue() const
 {
   try
   {
-    auto *level = itsInfo->Level();
+    const auto *level = itsInfo->Level();
     if (!level)
       throw Fmi::Exception(BCP, "INTERNAL ERROR: Level not available");
     return level->LevelValue();
