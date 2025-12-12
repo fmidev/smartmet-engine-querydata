@@ -123,18 +123,17 @@ Model::Model(Private,
   }
 }
 
-std::shared_ptr<Model> Model::create(
-        const std::filesystem::path& filename,
-        const std::string& validpointscachedir,
-        Producer producer,
-        std::string levelname,
-        bool climatology,
-        bool full,
-        bool staticgrid,
-        bool relativeuv,
-        unsigned int update_interval,
-        unsigned int minimum_expiration_time,
-        bool mmap)
+std::shared_ptr<Model> Model::create(const std::filesystem::path& filename,
+                                     const std::string& validpointscachedir,
+                                     const Producer& producer,
+                                     const std::string& levelname,
+                                     bool climatology,
+                                     bool full,
+                                     bool staticgrid,
+                                     bool relativeuv,
+                                     unsigned int update_interval,
+                                     unsigned int minimum_expiration_time,
+                                     bool mmap)
 {
   return std::make_shared<Model>(Private(),
                                  filename,
@@ -156,11 +155,10 @@ std::shared_ptr<Model> Model::create(
  */
 // ----------------------------------------------------------------------
 
-Model::Model(
-      Private,
-      const Model& theModel,
-      std::shared_ptr<NFmiQueryData> theData,
-      std::size_t theHash)
+Model::Model(Private,
+             const Model& theModel,
+             std::shared_ptr<NFmiQueryData> theData,
+             std::size_t theHash)
 
     : itsHashValue(theHash)  // decided externally on purpose
       ,
@@ -181,10 +179,9 @@ Model::Model(
 {
 }
 
-std::shared_ptr<Model> Model::create(
-        const Model& theModel,
-        std::shared_ptr<NFmiQueryData> theData,
-        std::size_t theHash)
+std::shared_ptr<Model> Model::create(const Model& theModel,
+                                     std::shared_ptr<NFmiQueryData> theData,
+                                     std::size_t theHash)
 {
   return std::make_shared<Model>(Private(), theModel, std::move(theData), theHash);
 }
@@ -197,10 +194,7 @@ std::shared_ptr<Model> Model::create(
  */
 // ----------------------------------------------------------------------
 
-Model::Model(
-      Private,
-      std::shared_ptr<NFmiQueryData> theData,
-      std::size_t theHash)
+Model::Model(Private, std::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
 
     : itsHashValue(theHash), itsValidTimeList(new ValidTimeList()), itsQueryData(std::move(theData))
 {
@@ -231,9 +225,7 @@ Model::Model(
   }
 }
 
-std::shared_ptr<Model> Model::create(
-        std::shared_ptr<NFmiQueryData> theData,
-        std::size_t theHash)
+std::shared_ptr<Model> Model::create(std::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
 {
   return std::make_shared<Model>(Private(), std::move(theData), theHash);
 }
@@ -283,8 +275,7 @@ Fmi::DateTime Model::expirationTime() const
   auto t1 = itsModificationTime + Fmi::Seconds(itsUpdateInterval);
 
   // Minimum expiration time from wall clock
-  auto t2 = Fmi::SecondClock::universal_time() +
-            Fmi::Seconds(itsMinimumExpirationTime);
+  auto t2 = Fmi::SecondClock::universal_time() + Fmi::Seconds(itsMinimumExpirationTime);
 
   // Choose the later one. t1 dominates until the next model is overdue, in
   // which case we start waiting for it in smaller minimum expiration time

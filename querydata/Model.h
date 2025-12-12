@@ -14,11 +14,11 @@
 #include "Producer.h"
 #include "ValidTimeList.h"
 #include <macgyver/DateTime.h>
-#include <filesystem>
-#include <memory>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <spine/Thread.h>
+#include <filesystem>
 #include <list>
+#include <memory>
 
 class NFmiPoint;
 class NFmiQueryData;
@@ -35,7 +35,10 @@ class ValidPoints;
 
 class Model : public boost::enable_shared_from_this<Model>
 {
-  struct Private { explicit Private() = default; }; // Dummy structure to disable public constructors
+  struct Private
+  {
+    explicit Private() = default;
+  };  // Dummy structure to disable public constructors
  public:
   Model(Private,
         const std::filesystem::path& filename,
@@ -57,27 +60,23 @@ class Model : public boost::enable_shared_from_this<Model>
 
   Model(Private, std::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
 
-  static std::shared_ptr<Model> create(
-        const std::filesystem::path& filename,
-        const std::string& validpointscachedir,
-        Producer producer,
-        std::string levelname,
-        bool climatology,
-        bool full,
-        bool staticgrid,
-        bool relativeuv,
-        unsigned int update_interval,
-        unsigned int minimum_expiration_time,
-        bool mmap);
+  static std::shared_ptr<Model> create(const std::filesystem::path& filename,
+                                       const std::string& validpointscachedir,
+                                       const Producer& producer,
+                                       const std::string& levelname,
+                                       bool climatology,
+                                       bool full,
+                                       bool staticgrid,
+                                       bool relativeuv,
+                                       unsigned int update_interval,
+                                       unsigned int minimum_expiration_time,
+                                       bool mmap);
 
-  static std::shared_ptr<Model> create(
-        const Model& theModel,
-        std::shared_ptr<NFmiQueryData> theData,
-        std::size_t theHash);
+  static std::shared_ptr<Model> create(const Model& theModel,
+                                       std::shared_ptr<NFmiQueryData> theData,
+                                       std::size_t theHash);
 
-  static std::shared_ptr<Model> create(
-        std::shared_ptr<NFmiQueryData> theData,
-        std::size_t theHash);
+  static std::shared_ptr<Model> create(std::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
 
   ~Model() = default;
   Model() = delete;
