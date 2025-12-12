@@ -3605,7 +3605,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       TS::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(lonlat, *timeseries);
     }
 
     return ret;
@@ -3660,7 +3660,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       TS::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(lonlat, *timeseries);
     }
 
     return ret;
@@ -3715,7 +3715,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       TS::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(lonlat, *timeseries);
     }
 
     return ret;
@@ -3758,7 +3758,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(lonlat, *timeseries);
     }
 
     return ret;
@@ -3797,7 +3797,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(lonlat, *timeseries);
     }
 
     return ret;
@@ -3836,7 +3836,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->emplace_back(TS::LonLatTimeSeries(lonlat, *timeseries));
+      ret->emplace_back(lonlat, *timeseries);
     }
 
     return ret;
