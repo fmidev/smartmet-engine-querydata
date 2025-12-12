@@ -145,7 +145,9 @@ class Engine : public Spine::SmartMetEngine
     return getWorldCoordinatesForSR(theQ, theSR);
   }
 
-  inline ValuesPtr getValues(const Q& theQ, std::size_t theValuesHash, Fmi::DateTime theTime) const
+  inline ValuesPtr getValues(const Q& theQ,
+                             std::size_t theValuesHash,
+                             const Fmi::DateTime& theTime) const
   {
     return getValuesDefault(theQ, theValuesHash, theTime);
   }
@@ -153,7 +155,7 @@ class Engine : public Spine::SmartMetEngine
   inline ValuesPtr getValues(const Q& theQ,
                              const Spine::Parameter& theParam,
                              std::size_t theValuesHash,
-                             Fmi::DateTime theTime) const
+                             const Fmi::DateTime& theTime) const
   {
     return getValuesForParam(theQ, theParam, theValuesHash, theTime);
   }
@@ -179,12 +181,12 @@ class Engine : public Spine::SmartMetEngine
 
   virtual ValuesPtr getValuesDefault(const Q& theQ,
                                      std::size_t theValuesHash,
-                                     Fmi::DateTime theTime) const;
+                                     const Fmi::DateTime& theTime) const;
 
   virtual ValuesPtr getValuesForParam(const Q& theQ,
                                       const Spine::Parameter& theParam,
                                       std::size_t theValuesHash,
-                                      Fmi::DateTime theTime) const;
+                                      const Fmi::DateTime& theTime) const;
 
   void init() override;
 

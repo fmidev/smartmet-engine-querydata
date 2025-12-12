@@ -879,7 +879,7 @@ void set_missing_to_nan(NFmiDataMatrix<float>& values)
  */
 // ----------------------------------------------------------------------
 
-ValuesPtr get_values(const Q& theQ, Fmi::DateTime theTime)
+ValuesPtr get_values(const Q& theQ, const Fmi::DateTime& theTime)
 {
   auto ret = std::make_shared<Values>(theQ->values(theTime));
   set_missing_to_nan(*ret);
@@ -898,7 +898,7 @@ ValuesPtr get_values(const Q& theQ, Fmi::DateTime theTime)
 
 ValuesPtr EngineImpl::getValuesDefault(const Q& theQ,
                                        std::size_t theValuesHash,
-                                       Fmi::DateTime theTime) const
+                                       const Fmi::DateTime& theTime) const
 {
   try
   {
@@ -930,7 +930,7 @@ ValuesPtr EngineImpl::getValuesDefault(const Q& theQ,
  */
 // ----------------------------------------------------------------------
 
-ValuesPtr get_values(const Q& theQ, const Spine::Parameter& theParam, Fmi::DateTime theTime)
+ValuesPtr get_values(const Q& theQ, const Spine::Parameter& theParam, const Fmi::DateTime& theTime)
 {
   auto ret = std::make_shared<Values>(theQ->values(theParam, theTime));
   set_missing_to_nan(*ret);
@@ -950,7 +950,7 @@ ValuesPtr get_values(const Q& theQ, const Spine::Parameter& theParam, Fmi::DateT
 ValuesPtr EngineImpl::getValuesForParam(const Q& theQ,
                                         const Spine::Parameter& theParam,
                                         std::size_t theValuesHash,
-                                        Fmi::DateTime theTime) const
+                                        const Fmi::DateTime& theTime) const
 {
   try
   {

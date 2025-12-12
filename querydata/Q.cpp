@@ -3929,7 +3929,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
     Fmi::TimeZonePtr utc("Etc/UTC");
     Fmi::LocalDateTime localdatetime(theTime, utc);
 
-    auto mylocale = std::locale::classic();
+    const auto &mylocale = std::locale::classic();
 
     for (dstinfo.ResetLevel(); dstinfo.NextLevel();)
     {

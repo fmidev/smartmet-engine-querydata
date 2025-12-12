@@ -147,17 +147,17 @@ class EngineImpl final : public Engine
 
   ValuesPtr getValuesDefault(const Q& theQ,
                              std::size_t theValuesHash,
-                             Fmi::DateTime theTime) const override;
+                             const Fmi::DateTime& theTime) const override;
 
   ValuesPtr getValuesForParam(const Q& theQ,
                               const Spine::Parameter& theParam,
                               std::size_t theValuesHash,
-                              Fmi::DateTime theTime) const override;
+                              const Fmi::DateTime& theTime) const override;
 
   void init() override;
   void shutdown() override;
   std::time_t getConfigModTime();
-  boost::atomic<int> lastConfigErrno;
+  boost::atomic<int> lastConfigErrno = 0;
   int getLastConfigErrno();
 
  private:
