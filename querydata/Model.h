@@ -40,7 +40,7 @@ class Model : public boost::enable_shared_from_this<Model>
     explicit Private() = default;
   };  // Dummy structure to disable public constructors
  public:
-  Model(Private,
+  Model(Private /* unused */,
         const std::filesystem::path& filename,
         const std::string& validpointscachedir,
         Producer producer,
@@ -53,7 +53,7 @@ class Model : public boost::enable_shared_from_this<Model>
         unsigned int minimum_expiration_time,
         bool mmap);
 
-  Model(Private,
+  Model(Private /* unused */,
         const Model& theModel,
         std::shared_ptr<NFmiQueryData> theData,
         std::size_t theHash);

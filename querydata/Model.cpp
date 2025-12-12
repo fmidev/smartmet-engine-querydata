@@ -31,7 +31,7 @@ namespace Querydata
  */
 // ----------------------------------------------------------------------
 
-Model::Model(Private,
+Model::Model(Private /* unused */,
              const std::filesystem::path& filename,
              const std::string& validpointscachedir,
              Producer producer,
@@ -155,7 +155,7 @@ std::shared_ptr<Model> Model::create(const std::filesystem::path& filename,
  */
 // ----------------------------------------------------------------------
 
-Model::Model(Private,
+Model::Model(Private /* unused */,
              const Model& theModel,
              std::shared_ptr<NFmiQueryData> theData,
              std::size_t theHash)
@@ -194,7 +194,7 @@ std::shared_ptr<Model> Model::create(const Model& theModel,
  */
 // ----------------------------------------------------------------------
 
-Model::Model(Private, std::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
+Model::Model(Private /* unused */, std::shared_ptr<NFmiQueryData> theData, std::size_t theHash)
 
     : itsHashValue(theHash), itsValidTimeList(new ValidTimeList()), itsQueryData(std::move(theData))
 {
