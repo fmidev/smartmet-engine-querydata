@@ -33,18 +33,172 @@
 
 #define CHECK_LATEST_MODEL_AGE true
 
-namespace
-{
-auto badcoord = std::make_pair(std::numeric_limits<double>::quiet_NaN(),
-                               std::numeric_limits<double>::quiet_NaN());
-}
-
 namespace SmartMet
 {
 namespace Engine
 {
 namespace Querydata
 {
+namespace
+{
+const auto badcoord = std::make_pair(std::numeric_limits<double>::quiet_NaN(),
+                                     std::numeric_limits<double>::quiet_NaN());
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Mark the given coordinate cell as bad
+ */
+// ----------------------------------------------------------------------
+
+#if 0
+void mark_cell_bad(Fmi::CoordinateMatrix& theCoords, const NFmiPoint& theCoord)
+{
+  try
+  {
+    if (theCoord.X() == kFloatMissing || theCoord.Y() == kFloatMissing ||
+        std::isnan(theCoord.X()) || std::isnan(theCoord.Y()))
+
+      return;
+
+    if (theCoord.X() >= 0 && theCoord.X() < theCoords.width() - 1 && theCoord.Y() >= 0 &&
+        theCoord.Y() < theCoords.height() - 1)
+    {
+      auto i = static_cast<std::size_t>(theCoord.X());
+      auto j = static_cast<std::size_t>(theCoord.Y());
+      theCoords(i + 0, j + 0) = badcoord;
+      theCoords(i + 1, j + 0) = badcoord;
+      // Marking two vertices bad is enough to invalidate the cell
+      // theCoords(i+0,j+1])= badcoord;
+      // theCoords(i+1],+1])= badcoord;
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+#endif
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Project coordinates
+ */
+// ----------------------------------------------------------------------
+
+CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
+                                   const Q& theQ,
+                                   const Fmi::SpatialReference& theSR)
+{
+  try
+  {
+    // Copy the original coordinates for projection
+
+    Fmi::CoordinateTransformation transformation(theQ->SpatialReference(), theSR);
+    auto coords = std::make_shared<Fmi::CoordinateMatrix>(*theCoords);
+
+    coords->transform(transformation);
+
+    // If the target SR is geographic, we must discard the grid cells containing
+    // the north or south poles since the cell vertex coordinates wrap around
+    // the world. The more difficult alternative would be to divide the cell into
+    // 4 triangles from the poles and contour the triangles.
+
+    // We also have to check whether some grid cells cross the 180th meridian
+    // and discard them
+
+    // If the target SR is no geographic, we discard all very elongated cells
+    // since they are likely spanning the world
+
+    // TODO: Should probably be removed in favour of the grid analyzer
+
+#if 0    
+    if (theSR.isGeographic() != 0)
+    {
+      auto& c = *coords;
+
+      const auto& grid = theQ->grid();
+      auto northpole = grid.LatLonToGrid(0, 90);
+      mark_cell_bad(c, northpole);
+      auto southpole = grid.LatLonToGrid(0, -90);
+      mark_cell_bad(c, southpole);
+
+      const auto nx = c.width();
+      const auto ny = c.height();
+
+      for (std::size_t j = 0; j < ny; j++)
+        for (std::size_t i = 0; i + 1 < nx; i++)
+        {
+          double lon1 = c.x(i, j);
+          double lon2 = c.x(i + 1, j);
+          if (lon1 != kFloatMissing && lon2 != kFloatMissing && std::abs(lon1 - lon2) > 180)
+            c.set(i, j, badcoord);
+        }
+    }
+#endif
+
+    return coords;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Change all kFloatMissing values to NaN
+ */
+// ----------------------------------------------------------------------
+
+void set_missing_to_nan(NFmiDataMatrix<float>& values)
+{
+  const std::size_t nx = values.NX();
+  const std::size_t ny = values.NY();
+  if (nx == 0 || ny == 0)
+    return;
+
+  const auto nan = std::numeric_limits<float>::quiet_NaN();
+
+  // Unfortunately NFmiDataMatrix is a vector of vectors, memory
+  // access patterns are not optimal
+
+  for (std::size_t i = 0; i < nx; i++)
+  {
+    auto& tmp = values[i];
+    for (std::size_t j = 0; j < ny; j++)
+      if (tmp[j] == kFloatMissing)
+        tmp[j] = nan;
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Get data values and change kFloatMissing to NaN
+ */
+// ----------------------------------------------------------------------
+
+ValuesPtr get_values(const Q& theQ, const Fmi::DateTime& theTime)
+{
+  auto ret = std::make_shared<Values>(theQ->values(theTime));
+  set_missing_to_nan(*ret);
+  return ret;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Get data values and change kFloatMissing to NaN
+ */
+// ----------------------------------------------------------------------
+
+ValuesPtr get_values(const Q& theQ, const Spine::Parameter& theParam, const Fmi::DateTime& theTime)
+{
+  auto ret = std::make_shared<Values>(theQ->values(theParam, theTime));
+  set_missing_to_nan(*ret);
+  return ret;
+}
+
+}  // namespace
+
 // ----------------------------------------------------------------------
 /*!
  * \brief The only permitted constructor requires a configfile
@@ -682,104 +836,6 @@ const ProducerConfig& EngineImpl::getProducerConfig(const std::string& producer)
   }
 }
 
-// ----------------------------------------------------------------------
-/*!
- * \brief Mark the given coordinate cell as bad
- */
-// ----------------------------------------------------------------------
-
-void mark_cell_bad(Fmi::CoordinateMatrix& theCoords, const NFmiPoint& theCoord)
-{
-  try
-  {
-    if (theCoord.X() == kFloatMissing || theCoord.Y() == kFloatMissing ||
-        std::isnan(theCoord.X()) || std::isnan(theCoord.Y()))
-
-      return;
-
-    if (theCoord.X() >= 0 && theCoord.X() < theCoords.width() - 1 && theCoord.Y() >= 0 &&
-        theCoord.Y() < theCoords.height() - 1)
-    {
-      auto i = static_cast<std::size_t>(theCoord.X());
-      auto j = static_cast<std::size_t>(theCoord.Y());
-      theCoords(i + 0, j + 0) = badcoord;
-      theCoords(i + 1, j + 0) = badcoord;
-      // Marking two vertices bad is enough to invalidate the cell
-      // theCoords(i+0,j+1])= badcoord;
-      // theCoords(i+1],+1])= badcoord;
-    }
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Project coordinates
- */
-// ----------------------------------------------------------------------
-
-CoordinatesPtr project_coordinates(const CoordinatesPtr& theCoords,
-                                   const Q& theQ,
-                                   const Fmi::SpatialReference& theSR)
-{
-  try
-  {
-    // Copy the original coordinates for projection
-
-    Fmi::CoordinateTransformation transformation(theQ->SpatialReference(), theSR);
-    auto coords = std::make_shared<Fmi::CoordinateMatrix>(*theCoords);
-
-    coords->transform(transformation);
-
-    // If the target SR is geographic, we must discard the grid cells containing
-    // the north or south poles since the cell vertex coordinates wrap around
-    // the world. The more difficult alternative would be to divide the cell into
-    // 4 triangles from the poles and contour the triangles.
-
-    // We also have to check whether some grid cells cross the 180th meridian
-    // and discard them
-
-    // If the target SR is no geographic, we discard all very elongated cells
-    // since they are likely spanning the world
-
-    // TODO: Should probably be removed in favour of the grid analyzer
-
-#if 0    
-    if (theSR.isGeographic() != 0)
-    {
-      auto& c = *coords;
-
-      const auto& grid = theQ->grid();
-      auto northpole = grid.LatLonToGrid(0, 90);
-      mark_cell_bad(c, northpole);
-      auto southpole = grid.LatLonToGrid(0, -90);
-      mark_cell_bad(c, southpole);
-
-      const auto nx = c.width();
-      const auto ny = c.height();
-
-      for (std::size_t j = 0; j < ny; j++)
-        for (std::size_t i = 0; i + 1 < nx; i++)
-        {
-          double lon1 = c.x(i, j);
-          double lon2 = c.x(i + 1, j);
-          if (lon1 != kFloatMissing && lon2 != kFloatMissing && std::abs(lon1 - lon2) > 180)
-            c.set(i, j, badcoord);
-        }
-    }
-#endif
-
-    return coords;
-  }
-  catch (...)
-  {
-    throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
 CoordinatesPtr EngineImpl::getWorldCoordinatesForSR(const Q& theQ,
                                                     const Fmi::SpatialReference& theSR) const
 {
@@ -848,46 +904,6 @@ CoordinatesPtr EngineImpl::getWorldCoordinatesDefault(const Q& theQ) const
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Change all kFloatMissing values to NaN
- */
-// ----------------------------------------------------------------------
-
-void set_missing_to_nan(NFmiDataMatrix<float>& values)
-{
-  const std::size_t nx = values.NX();
-  const std::size_t ny = values.NY();
-  if (nx == 0 || ny == 0)
-    return;
-
-  const auto nan = std::numeric_limits<float>::quiet_NaN();
-
-  // Unfortunately NFmiDataMatrix is a vector of vectors, memory
-  // access patterns are not optimal
-
-  for (std::size_t i = 0; i < nx; i++)
-  {
-    auto& tmp = values[i];
-    for (std::size_t j = 0; j < ny; j++)
-      if (tmp[j] == kFloatMissing)
-        tmp[j] = nan;
-  }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Get data values and change kFloatMissing to NaN
- */
-// ----------------------------------------------------------------------
-
-ValuesPtr get_values(const Q& theQ, const Fmi::DateTime& theTime)
-{
-  auto ret = std::make_shared<Values>(theQ->values(theTime));
-  set_missing_to_nan(*ret);
-  return ret;
-}
-
-// ----------------------------------------------------------------------
-/*!
  * \brief Get the data values
  *
  * Retrieval is done asynchronously through a shared future so that for
@@ -922,19 +938,6 @@ ValuesPtr EngineImpl::getValuesDefault(const Q& theQ,
     throw Fmi::Exception::Trace(BCP, "Failed to retrieve data")
         .addParameter("time", Fmi::to_iso_extended_string(theTime));
   }
-}
-
-// ----------------------------------------------------------------------
-/*!
- * \brief Get data values and change kFloatMissing to NaN
- */
-// ----------------------------------------------------------------------
-
-ValuesPtr get_values(const Q& theQ, const Spine::Parameter& theParam, const Fmi::DateTime& theTime)
-{
-  auto ret = std::make_shared<Values>(theQ->values(theParam, theTime));
-  set_missing_to_nan(*ret);
-  return ret;
 }
 
 // ----------------------------------------------------------------------
