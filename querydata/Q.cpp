@@ -3130,10 +3130,7 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       return dir;
     }
     case kFmiStationType:
-      return TS::None();
-
     case kFmiStationary:
-      return TS::None();
     case kFmiSensorNo:
       return TS::None();
     default:
