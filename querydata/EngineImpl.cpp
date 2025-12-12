@@ -41,8 +41,10 @@ namespace Querydata
 {
 namespace
 {
+#if 0
 const auto badcoord = std::make_pair(std::numeric_limits<double>::quiet_NaN(),
                                      std::numeric_limits<double>::quiet_NaN());
+#endif
 
 // ----------------------------------------------------------------------
 /*!
