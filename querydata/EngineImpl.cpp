@@ -163,7 +163,7 @@ void EngineImpl::configFileWatch()
       if (filetime > 0)
       {
         std::cout << "Querydata config " << itsConfigFile
-                  << " removed - current configuration kept until new file appears" << std::endl;
+                  << " removed - current configuration kept until new file appears\n";
         filetime = 0;
         lastConfigErrno = ENOENT;
       }
@@ -185,8 +185,7 @@ void EngineImpl::configFileWatch()
         while (newfiletime != filetime && !Spine::Reactor::isShuttingDown())
         {
           std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
-                           " updated, rereading"
-                    << std::endl;
+                           " updated, rereading\n";
           filetime = newfiletime;
           boost::this_thread::sleep_for(boost::chrono::seconds(3));
           newfiletime = Fmi::last_write_time(itsConfigFile, ec);
@@ -216,8 +215,7 @@ void EngineImpl::configFileWatch()
             // Update current repomanager
             itsRepoManager.store(newrepomanager);
             std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
-                             " update done"
-                      << std::endl;
+                             " update done\n";
             lastConfigErrno = 0;
             // Before poll cycling again, wait to avoid constant reload if the file changes many
             // times
@@ -1061,7 +1059,7 @@ Engine* EngineImpl::create(const std::string& configfile)
       {
         std::cout << Spine::log_time_str() << ' ' << ANSI_FG_RED << name
                   << ": configuration file not specified or its name is empty string: "
-                  << "engine disabled." << ANSI_FG_DEFAULT << std::endl;
+                  << "engine disabled." << ANSI_FG_DEFAULT << '\n';
         return true;
       }
 
@@ -1069,7 +1067,7 @@ Engine* EngineImpl::create(const std::string& configfile)
       const bool result = cfg.get_optional_config_param<bool>("disabled", false);
       if (result)
         std::cout << Spine::log_time_str() << ' ' << ANSI_FG_RED << name << ": engine disabled"
-                  << ANSI_FG_DEFAULT << std::endl;
+                  << ANSI_FG_DEFAULT << '\n';
       return result;
     }();
 

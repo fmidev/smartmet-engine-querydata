@@ -64,7 +64,7 @@ ValidPoints::ValidPoints(const Producer& producer,
     std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA +
                   " [querydata] Creating valid points cache directory '" + cachedir + "'" +
                   ANSI_FG_DEFAULT)
-              << std::endl;
+              << '\n';
     std::filesystem::create_directories(cachedir);
   }
 

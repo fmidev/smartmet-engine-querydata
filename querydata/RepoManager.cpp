@@ -33,12 +33,11 @@
 #include "Repository.h"
 #include "ValidPoints.h"
 #include <boost/bind/bind.hpp>
-#include <filesystem>
 #include <macgyver/AnsiEscapeCodes.h>
 #include <macgyver/Exception.h>
+#include <macgyver/FileSystem.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/TypeName.h>
-#include <macgyver/FileSystem.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
 #include <spine/ConfigTools.h>
@@ -46,6 +45,7 @@
 #include <spine/Exceptions.h>
 #include <spine/Reactor.h>
 #include <cassert>
+#include <filesystem>
 #include <memory>
 #include <set>
 #include <sstream>
@@ -136,7 +136,7 @@ RepoManager::~RepoManager()
   }
   catch (...)
   {
-    std::cout << Fmi::Exception::Trace(BCP, "EXCEPTION IN DESTRUCTOR!") << std::endl;
+    std::cout << Fmi::Exception::Trace(BCP, "EXCEPTION IN DESTRUCTOR!") << '\n';
   }
 }
 
@@ -204,7 +204,7 @@ RepoManager::RepoManager(const std::string& configfile)
             << (Spine::log_time_str() + ANSI_FG_MAGENTA +
                 " [querydata] valid_points_cache_dir setting is empty, cache will not be created!" +
                 ANSI_FG_DEFAULT)
-            << std::endl;
+            << '\n';
 
       itsRepo.verbose(itsVerbose);
 
@@ -223,7 +223,7 @@ RepoManager::RepoManager(const std::string& configfile)
       if (prods.getLength() == 0)
         std::cerr << (Spine::log_time_str() + ANSI_FG_YELLOW + " [querydata] producer list empty" +
                       ANSI_FG_DEFAULT)
-                  << std::endl;
+                  << '\n';
 
       for (int i = 0; i < prods.getLength(); ++i)
       {
@@ -280,7 +280,7 @@ void RepoManager::init()
         std::cerr << (Spine::log_time_str() + ANSI_FG_RED + " [querydata] Producer '" +
                       pinfo.producer + "' path '" + pinfo.directory.string() + "' is missing" +
                       ANSI_FG_DEFAULT)
-                  << std::endl;
+                  << '\n';
 
       auto data_id =
           itsMonitor.watch(pinfo.directory,
@@ -429,7 +429,7 @@ void RepoManager::error(Fmi::DirectoryMonitor::Watcher /* id */,
   try
   {
     std::cout << ANSI_FG_RED << "Error in directory " << dir << " : " << message << ANSI_FG_DEFAULT
-              << std::endl;
+              << '\n';
   }
   catch (...)
   {
@@ -540,7 +540,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
 
 #if 0
 	std::cerr << ANSI_FG_GREEN << "Threads: " << itsThreadCount
-			  << " " << filename << ANSI_FG_DEFAULT << std::endl;
+			  << " " << filename << ANSI_FG_DEFAULT << '\n';
 #endif
     updateTasks->handle_finished();
     updateTasks->add("RepoManager::load", std::bind(&RepoManager::load, this, producer, additions));
@@ -628,7 +628,7 @@ void RepoManager::load(Producer producer,
       if (load_new_data)
       {
         if (itsVerbose)
-          std::cout << Spine::log_time_str() + " QENGINE LOAD " + filename.string() << std::endl;
+          std::cout << Spine::log_time_str() + " QENGINE LOAD " + filename.string() << '\n';
 
         model = Model::create(filename,
                               itsValidPointsCacheDir,
@@ -769,7 +769,7 @@ void RepoManager::cleanValidPointsCache()
           std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA +
                         " [querydata] Deleting redundant valid points cache file '" + filename +
                         "'" + ANSI_FG_DEFAULT)
-                    << std::endl;
+                    << '\n';
           std::filesystem::remove(filename);
         }
         else
@@ -777,7 +777,7 @@ void RepoManager::cleanValidPointsCache()
           std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA +
                         " [querydata] Redundant valid points cache file detected '" + filename +
                         "', consider deleting it!" + ANSI_FG_DEFAULT)
-                    << std::endl;
+                    << '\n';
         }
       }
     }

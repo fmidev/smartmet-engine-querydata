@@ -122,7 +122,7 @@ void Repository::add(const Producer& producer, const SharedModel& model)
     if (itsVerbose)
     {
       std::cout << Fmi::SecondClock::local_time() << " [qengine] Adding " << model->path()
-                << " with hash value " << hash_value(*model) << std::endl;
+                << " with hash value " << hash_value(*model) << '\n';
     }
 
     auto producer_model = itsProducers.find(producer);
@@ -162,7 +162,7 @@ void Repository::add(const Producer& producer, const SharedModel& model)
             << iter->second->path()
             << " by "
             << model->path()
-            << " due to later modification time" << std::endl;
+                  << " due to later modification time\n";
 #endif
         // Replace old data with new one
         iter->second = model;
@@ -494,7 +494,7 @@ void Repository::remove(const Producer& producer, const std::filesystem::path& p
       {
         if (itsVerbose)
           std::cout << Fmi::SecondClock::local_time() << " [qengine] Deleting "
-                    << time_model->second->path() << std::endl;
+                    << time_model->second->path() << '\n';
         time_model->second->uncache();  // uncache validpoints
         models.erase(time_model);
         break;
@@ -537,7 +537,7 @@ void Repository::resize(const Producer& producer, std::size_t limit)
     {
       if (itsVerbose)
         std::cout << Fmi::SecondClock::local_time() << " [qengine] Resize removal of "
-                  << models.begin()->second->path() << std::endl;
+                  << models.begin()->second->path() << '\n';
 
       // the oldest file is the one first sorted by origintime
       models.begin()->second->uncache();  // uncache validpoints
@@ -586,7 +586,7 @@ void Repository::expire(const Producer& producer, std::size_t max_age)
       {
         if (itsVerbose)
           std::cout << Fmi::SecondClock::local_time() << " [qengine] Expiring "
-                    << time_model->second->path() << std::endl;
+                    << time_model->second->path() << '\n';
         time_model->second->uncache();  // uncache validpoints
         models.erase(time_model++);
       }
