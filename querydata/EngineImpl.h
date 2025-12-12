@@ -10,16 +10,16 @@
 #include "Producer.h"
 #include "Repository.h"
 #include <boost/atomic.hpp>
-#include <filesystem>
-#include <optional>
-#include <memory>
 #include <boost/smart_ptr/atomic_shared_ptr.hpp>
 #include <gis/CoordinateMatrix.h>
 #include <macgyver/AtomicSharedPtr.h>
 #include <macgyver/Cache.h>
 #include <spine/ParameterTranslations.h>
 #include <spine/SmartMetEngine.h>
+#include <filesystem>
 #include <future>
+#include <memory>
+#include <optional>
 #include <string>
 #include <system_error>
 
@@ -63,8 +63,6 @@ class EngineImpl final : public Engine
   // Cached querydata values
   using ValuesCache = Fmi::Cache::Cache<std::size_t, std::shared_future<ValuesPtr>>;
   mutable ValuesCache itsValuesCache;
-
-  int itsActiveThreadCount;
 
   Fmi::AtomicSharedPtr<Spine::ParameterTranslations> itsParameterTranslations;
 
@@ -167,9 +165,12 @@ class EngineImpl final : public Engine
   void configFileWatch();           // A function in separate thread checking the config file
   Fmi::Cache::CacheStatistics getCacheStats() const override;  // Get cache statistics
 
-  std::unique_ptr<SmartMet::Spine::Table> requestQEngineStatus(const Spine::HTTP::Request& theRequest) const;
-  std::unique_ptr<SmartMet::Spine::Table> requestProducerInfo(const Spine::HTTP::Request& theRequest) const;
-  std::unique_ptr<SmartMet::Spine::Table> requestParameterInfo(const Spine::HTTP::Request& theRequest) const;
+  std::unique_ptr<SmartMet::Spine::Table> requestQEngineStatus(
+      const Spine::HTTP::Request& theRequest) const;
+  std::unique_ptr<SmartMet::Spine::Table> requestProducerInfo(
+      const Spine::HTTP::Request& theRequest) const;
+  std::unique_ptr<SmartMet::Spine::Table> requestParameterInfo(
+      const Spine::HTTP::Request& theRequest) const;
 };  // class EngineImpl
 
 }  // namespace Querydata

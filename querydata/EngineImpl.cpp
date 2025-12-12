@@ -54,7 +54,6 @@ namespace Querydata
 EngineImpl::EngineImpl(const std::string& configfile)
     : itsRepoManager(std::make_shared<RepoManager>(configfile)),
       itsConfigFile(configfile),
-      itsActiveThreadCount(0),
       itsParameterTranslations(std::make_shared<Spine::ParameterTranslations>()),
       lastConfigErrno(EINPROGRESS)
 {
