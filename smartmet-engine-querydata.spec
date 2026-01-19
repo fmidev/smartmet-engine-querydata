@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 25.12.29
+Version: 26.1.19
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -37,9 +37,9 @@ BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: smartmet-library-timeseries-devel >= 25.12.29
-BuildRequires: smartmet-library-macgyver-devel >= 25.12.2
-BuildRequires: smartmet-library-newbase-devel >= 25.3.20
-BuildRequires: smartmet-library-spine-devel >= 25.12.12
+BuildRequires: smartmet-library-macgyver-devel >= 26.1.8
+BuildRequires: smartmet-library-newbase-devel >= 26.1.7
+BuildRequires: smartmet-library-spine-devel >= 26.1.8
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -49,9 +49,9 @@ Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
 Requires: smartmet-library-timeseries >= 25.12.29
-Requires: smartmet-library-macgyver >= 25.12.2
-Requires: smartmet-library-newbase >= 25.3.20
-Requires: smartmet-library-spine >= 25.12.12
+Requires: smartmet-library-macgyver >= 26.1.8
+Requires: smartmet-library-newbase >= 26.1.7
+Requires: smartmet-library-spine >= 26.1.8
 #TestRequires: smartmet-utils-devel >= 25.11.27
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal310-devel
@@ -97,6 +97,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Jan 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.1.19-1.fmi
+- Do not just throw for all calls if the engine is disabled, instead return empty metadata
+
 * Mon Dec 29 2025 Mika Heiskanen <mika.heiskanen@fmi.fi> - 25.12.29-1.fmi
 - Silenced several compiler warnings
 
