@@ -21,7 +21,7 @@ Engine::~Engine() = default;
 
 const ProducerList& Engine::producers() const
 {
-  REPORT_DISABLED;
+  return {};
 }
 
 OriginTimes Engine::origintimes(const Producer& /* producer */) const
@@ -31,7 +31,7 @@ OriginTimes Engine::origintimes(const Producer& /* producer */) const
 
 bool Engine::hasProducer(const Producer& /* producer */) const
 {
-  REPORT_DISABLED;
+  return false;
 }
 
 CacheReportingStruct Engine::getCacheSizes() const
@@ -111,13 +111,13 @@ Repository::ContentTable Engine::getEngineContentsForProducer(
 
 std::list<MetaData> Engine::getEngineMetadataBasic() const
 {
-  REPORT_DISABLED;
+  return {};
 }
 
 std::list<MetaData> Engine::getEngineMetadataWithOptions(
     const MetaQueryOptions& /* theOptions */) const
 {
-  REPORT_DISABLED;
+  return {};
 }
 
 CoordinatesPtr Engine::getWorldCoordinatesDefault(const Q& /* theQ */) const
