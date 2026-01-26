@@ -30,7 +30,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires: %{smartmet_boost}-devel
 BuildRequires: bzip2-devel
 BuildRequires: gcc-c++
-BuildRequires: gdal310-devel
+BuildRequires: gdal312-devel
 BuildRequires: jsoncpp-devel >= 1.8.4
 BuildRequires: make
 BuildRequires: rpm-build
@@ -44,7 +44,7 @@ Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
 Requires: %{smartmet_boost}-thread
-Requires: gdal310-libs
+Requires: gdal312-libs
 Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
@@ -54,7 +54,7 @@ Requires: smartmet-library-newbase >= 26.1.7
 Requires: smartmet-library-spine >= 26.1.8
 #TestRequires: smartmet-utils-devel >= 25.11.27
 #TestRequires: jsoncpp-devel >= 1.8.4
-#TestRequires: gdal310-devel
+#TestRequires: gdal312-devel
 #TestRequires: gcc-c++
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
@@ -67,7 +67,7 @@ SmartMet querydata engine
 Summary: SmartMet %{SPECNAME} development headers
 Group: SmartMet/Development
 Provides: %{SPECNAME}-devel
-Requires: gdal310-devel
+Requires: gdal312-devel
 Requires: %{SPECNAME} = %{version}-%{release}
 
 Obsoletes: smartmet-brainstorm-qengine-devel < 16.11.1
