@@ -15,13 +15,18 @@
 
 using namespace SmartMet::Engine::Querydata;
 
+namespace
+{
+  const ProducerList emptyProducerList;
+}
+
 Engine::Engine() = default;
 
 Engine::~Engine() = default;
 
 const ProducerList& Engine::producers() const
 {
-  return {};
+  return emptyProducerList;
 }
 
 OriginTimes Engine::origintimes(const Producer& /* producer */) const
