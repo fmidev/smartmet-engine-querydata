@@ -1,58 +1,27 @@
-Table of Contents
-=================
+# smartmet-engine-querydata
 
-  * [SMartMet Server](#SmartMet Server)
-  * [Introduction](#introduction)
-  * [Configuration](#configuration)
-  * [Docker](#docker)
+Part of [SmartMet Server](https://github.com/fmidev/smartmet-server). See the [SmartMet Server documentation](https://github.com/fmidev/smartmet-server) for a full overview of the ecosystem.
 
-# SmartMet Server
+## Overview
 
-[SmartMet Server](https://github.com/fmidev/smartmet-server) is a data
-and procut server for MetOcean data. It provides high capacity and
-high availability data and product server for MetOcean data. The
-server is written in C++.
+The querydata engine (QEngine) provides shared access to gridded weather forecast data in QueryData format. It memory-maps data from NFS, supports spatial and temporal interpolation, DEM-based temperature correction, and automatic selection of the best data source for a requested region.
 
-# Introduction 
+## Configuration
 
-In the SmartMet Server, the engines provide shared access to the data
-and the plugins provide APIs based on the services provided by the
-engines.
-
-The querydata engine referred to as QEngine provides access to the grid
-data. QEngine supports the QueryData format for data, but it has ready
-tools to convert the data in GRIB, NetCDFand HDF format to QueryData.
-
-QEngine memory-maps the data from NFS. It supports both spatial and
-temporal interpolation and nearest point selection. The used method
-depends on the parameter. QEngine selects the best data source for the
-requested region.
-
-QEngine has several Post-processing capabilities. It can correct the
-data based on accurate DEM (up to 30 meter resolution) and also based
-on land/water information.  Correlation done to the temperature is
-based on the difference between model and real taking into account of
-the following factors, namely, topography, land/water information,
-used to give more weight on corresponding grid points in
-interpolation. QEngine can calculate derivative parameters such as
-FeelsLike, sunset, day length, etc.
-
-# Configuration
-
-## Generic settings
+### Generic settings
 
 * `verbose = true/false` - in verbose mode the engine will report newly loaded data
 * `maxthreads = N` - the number of threads used to read data on start up
 * `valid_points_cache_dir = "path"` - directory where to cache information on the grids
 * `clean_valid_points_cache_dir = true/false` - whether to automatically clean the above directory on start up or not
 
-## Cache settings
+### Cache settings
 
 * `cache.values_size = N` - how many processed grids to cache, default is 5000
 * `cache.coordinates_size = N` - how many projected grid coordinates to cache, default is 100
 * `cache.lat_lon_size = N` - how many latlon grids to cache, default is 500
 
-## Overriding generic settings
+### Overriding generic settings
 
 Settings can be overridden for groups of hosts using an `overrides` group. Sample configuration:
 
@@ -71,7 +40,7 @@ overrides:
 )
 ```
 
-## Disabling engine
+### Disabling engine
 
 QEngine can be loaded but disabled when only required to satisfy externel symbols in plugins, but not actually used
 due to plugin configuration. There are several ways to specify, that QEngine is disabled:
@@ -81,7 +50,7 @@ due to plugin configuration. There are several ways to specify, that QEngine is 
 ** empty string is provided as the value of the `configfile` setting in engine section
 A log message is generated in case of disabled engine
 
-## Producers
+### Producers
 
 The `producers` setting will list the producers in the order they will be used for finding a producer for the requested coordinates if no producer is otherwise set in the request. Producers may be grouped using an `alias` command to limit the search.
 
@@ -137,7 +106,7 @@ For historical reasons durations can be specified using ISO8601 or as simple off
 * 0, 0m, 0h (zero offset with or without units)
 * (+|-){N}{unit} where N is a positive integer and unit is one of 'm' (minutes), 'h' (hours), 'w' (weeks) or 'y' (years). If the units are omitted, minutes will be used.
 
-## Translations for specific weather parameters
+### Translations for specific weather parameters
 
 The Querydata Engine enables converting a numeric WeatherSymbol3 to a textual WeatherText parameter on the fly. The code assumes the translations are defined in the configuration for specific ISO2 language codes as follows:
 
@@ -171,8 +140,16 @@ translations:
 
 Unfortunately the translations for the more modern SmartSymbol are still hardcoded into the C++ code.
 
-## Docker
+### Docker
 
 SmartMet Server can be dockerized. This [tutorial](docs/docker.md)
 explains how to explains how to configure the querydata engine
 (QEngine) of the SmartMet Server when using Docker.
+
+## License
+
+MIT — see [LICENSE](LICENSE)
+
+## Contributing
+
+Bug reports and pull requests are welcome on [GitHub](../../issues).
