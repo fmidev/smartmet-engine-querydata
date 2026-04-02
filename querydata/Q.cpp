@@ -1528,11 +1528,11 @@ bool QImpl::isRelativeUV() const
  */
 // ----------------------------------------------------------------------
 
-NFmiPoint QImpl::validPoint(const NFmiPoint &theLatLon, double theMaxDist) const
+NFmiPoint QImpl::validPoint(const NFmiPoint &theLatLon, double theMaxDist, const NFmiMetTime &theTime) const
 {
   try
   {
-    return itsModels[0]->validPoint(theLatLon, theMaxDist);
+    return itsModels[0]->validPoint(theLatLon, theMaxDist, theTime);
   }
   catch (...)
   {
@@ -2761,9 +2761,13 @@ TS::Value QImpl::dataValue(const ParameterOptions &opt,
 
   if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
   {
-    interpolatedValue = interpolate(opt.nearestpoint, t, maxgap);
-    if (interpolatedValue != kFloatMissing)
-      opt.lastpoint = opt.nearestpoint;
+    NFmiPoint nearestValidPt = validPoint(latlon, opt.maxdist, t);
+    if (nearestValidPt.X() != kFloatMissing)
+    {
+      interpolatedValue = interpolate(nearestValidPt, t, maxgap);
+      if (interpolatedValue != kFloatMissing)
+        opt.lastpoint = nearestValidPt;
+    }
   }
 
   if (interpolatedValue == kFloatMissing)
@@ -2788,7 +2792,11 @@ TS::Value QImpl::dataValueAtPressure(const ParameterOptions &opt,
   // the values from that point
 
   if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
-    interpolatedValue = interpolateAtPressure(opt.nearestpoint, t, pressure, maxgap);
+  {
+    NFmiPoint nearestValidPt = validPoint(latlon, opt.maxdist, t);
+    if (nearestValidPt.X() != kFloatMissing)
+      interpolatedValue = interpolateAtPressure(nearestValidPt, t, pressure, maxgap);
+  }
 
   if (interpolatedValue != kFloatMissing)
     retval = interpolatedValue;
@@ -2812,7 +2820,11 @@ TS::Value QImpl::dataValueAtHeight(const ParameterOptions &opt,
   // the values from that point
 
   if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
-    interpolatedValue = interpolateAtHeight(opt.nearestpoint, t, height, maxgap);
+  {
+    NFmiPoint nearestValidPt = validPoint(latlon, opt.maxdist, t);
+    if (nearestValidPt.X() != kFloatMissing)
+      interpolatedValue = interpolateAtHeight(nearestValidPt, t, height, maxgap);
+  }
 
   if (interpolatedValue != kFloatMissing)
     retval = interpolatedValue;
@@ -3348,9 +3360,13 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
 
           if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
           {
-            interpolatedValue = interpolateAtPressure(opt.nearestpoint, t, pressure, maxgap);
-            if (interpolatedValue != kFloatMissing)
-              opt.lastpoint = opt.nearestpoint;
+            NFmiPoint nearestValidPt = validPoint(latlon, opt.maxdist, t);
+            if (nearestValidPt.X() != kFloatMissing)
+            {
+              interpolatedValue = interpolateAtPressure(nearestValidPt, t, pressure, maxgap);
+              if (interpolatedValue != kFloatMissing)
+                opt.lastpoint = nearestValidPt;
+            }
           }
 
           if (interpolatedValue == kFloatMissing)
@@ -3440,9 +3456,13 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
 
           if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
           {
-            interpolatedValue = interpolateAtHeight(opt.nearestpoint, t, height, maxgap);
-            if (interpolatedValue != kFloatMissing)
-              opt.lastpoint = opt.nearestpoint;
+            NFmiPoint nearestValidPt = validPoint(latlon, opt.maxdist, t);
+            if (nearestValidPt.X() != kFloatMissing)
+            {
+              interpolatedValue = interpolateAtHeight(nearestValidPt, t, height, maxgap);
+              if (interpolatedValue != kFloatMissing)
+                opt.lastpoint = nearestValidPt;
+            }
           }
 
           if (interpolatedValue == kFloatMissing)
@@ -3599,7 +3619,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                     param.outlocale,
                                     param.outzone,
                                     param.findnearestvalidpoint,
-                                    param.nearestpoint,
+                                    param.maxdist,
                                     param.lastpoint);
 
       TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
@@ -3654,7 +3674,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
                                     param.outlocale,
                                     param.outzone,
                                     param.findnearestvalidpoint,
-                                    param.nearestpoint,
+                                    param.maxdist,
                                     param.lastpoint);
 
       TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
@@ -3709,7 +3729,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                     param.outlocale,
                                     param.outzone,
                                     param.findnearestvalidpoint,
-                                    param.nearestpoint,
+                                    param.maxdist,
                                     param.lastpoint);
 
       TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
@@ -3752,7 +3772,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                     param.outlocale,
                                     param.outzone,
                                     param.findnearestvalidpoint,
-                                    param.nearestpoint,
+                                    param.maxdist,
                                     param.lastpoint);
 
       TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
@@ -3791,7 +3811,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
                                     param.outlocale,
                                     param.outzone,
                                     param.findnearestvalidpoint,
-                                    param.nearestpoint,
+                                    param.maxdist,
                                     param.lastpoint);
 
       TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
@@ -3830,7 +3850,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                     param.outlocale,
                                     param.outzone,
                                     param.findnearestvalidpoint,
-                                    param.nearestpoint,
+                                    param.maxdist,
                                     param.lastpoint);
 
       TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
@@ -3951,7 +3971,7 @@ Q QImpl::sample(const Spine::Parameter &theParameter,
                                  mylocale,
                                  "",
                                  false,
-                                 NFmiPoint(),
+                                 0.0,
                                  dummy);
 
         auto result = value(options, localdatetime);

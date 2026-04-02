@@ -40,7 +40,7 @@ struct ParameterOptions
                    const std::locale& theLocale,
                    const std::string& theZone,
                    const bool& theNearestPointFlag,
-                   const NFmiPoint& theNearestPoint,
+                   double theMaxDist,
                    NFmiPoint& theLastPoint);
 
   const Spine::Parameter& par;
@@ -54,7 +54,7 @@ struct ParameterOptions
   const std::locale& outlocale;
   const std::string& outzone;
   const bool& findnearestvalidpoint;
-  const NFmiPoint& nearestpoint;
+  double maxdist;
   NFmiPoint& lastpoint;
 };
 

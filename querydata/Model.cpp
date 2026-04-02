@@ -5,7 +5,6 @@
 // ======================================================================
 
 #include "Model.h"
-#include "ValidPoints.h"
 #include <macgyver/Exception.h>
 #include <macgyver/FileSystem.h>
 #include <macgyver/Hash.h>
@@ -33,7 +32,6 @@ namespace Querydata
 
 Model::Model(Private /* unused */,
              const std::filesystem::path& filename,
-             const std::string& validpointscachedir,
              Producer producer,
              std::string levelname,
              bool climatology,
@@ -88,25 +86,6 @@ Model::Model(Private /* unused */,
 
     itsQueryInfoPool.push_front(qinfo);
 
-    // This may be slow for huge data with missing values,
-    // hence we configure separately whether this initialization
-    // needs to be done or not. findvalidpoint acts accordingly.
-
-    if (!itsFullGrid && !validpointscachedir.empty())
-    {
-      // Use grid hash for static grids, full hash otherwise
-      auto hash = itsHashValue;
-      if (itsStaticGrid)
-      {
-        hash = Fmi::hash_value(itsProducer);
-        Fmi::hash_combine(hash, qinfo->GridHashValue());
-        // Ignoring modification, path etc since the grid is static
-      }
-
-      itsValidPoints =
-          std::make_shared<ValidPoints>(itsProducer, itsPath, *qinfo, validpointscachedir, hash);
-    }
-
     // Requesting the valid times repeatedly is slow if we have to do
     // a time conversion to Fmi::DateTime every time - hence we optimize
 
@@ -124,7 +103,6 @@ Model::Model(Private /* unused */,
 }
 
 std::shared_ptr<Model> Model::create(const std::filesystem::path& filename,
-                                     const std::string& validpointscachedir,
                                      const Producer& producer,
                                      const std::string& levelname,
                                      bool climatology,
@@ -137,7 +115,6 @@ std::shared_ptr<Model> Model::create(const std::filesystem::path& filename,
 {
   return std::make_shared<Model>(Private(),
                                  filename,
-                                 validpointscachedir,
                                  producer,
                                  levelname,
                                  climatology,
@@ -173,7 +150,6 @@ Model::Model(Private /* unused */,
       itsFullGrid(theModel.itsFullGrid),
       itsStaticGrid(theModel.itsStaticGrid),
       itsRelativeUV(theModel.itsRelativeUV),
-      itsValidPoints(theModel.itsValidPoints),
       itsValidTimeList(theModel.itsValidTimeList),
       itsQueryData(std::move(theData))
 {
@@ -366,13 +342,15 @@ bool Model::isRelativeUV() const
 /*!
  * \brief Find closest valid coordinate point within given radius (km)
  *
- * Returns (kFloatMissing,kFloatMissing) on failure
- *
- * TODO: REWRITE TO USE A NEARTREE OF VALID POINTS!!
+ * Returns (kFloatMissing,kFloatMissing) on failure. For full-grid models
+ * the nearest grid point is returned if it is within the given distance.
+ * For partial grids (e.g. sea-only wave models) the surrounding points
+ * are searched in expanding rings until a point with valid data at the
+ * given time is found or the distance limit is exceeded.
  */
 // ----------------------------------------------------------------------
 
-NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
+NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist, const NFmiMetTime& t) const
 {
   try
   {
@@ -393,11 +371,16 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
       return {kFloatMissing, kFloatMissing};
     }
 
-    // The model does not cover the entire grid, but for example
-    // only land or sea areas. We must search the nearest valid
-    // model point.
+    // The model does not cover the entire grid, but for example only land
+    // or sea areas. Search the nearest grid point that has valid data at
+    // the given time using an expanding ring pattern.
 
-    // Start an expanding search loop
+    if (!qi.FindNearestTime(t))
+      return {kFloatMissing, kFloatMissing};
+
+    // Save the origin location so PeekLocation offsets remain consistent
+    // throughout the loop (we temporarily move the current index for reads).
+    auto origin_idx = qi.LocationIndex();
 
     NFmiPoint bestpoint;
     bool ok = false;
@@ -418,13 +401,21 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist) const
         int i = (2 * (x % 2) - 1) * (x >> 1);  // 0,-1,1,-2,2,-3,3... NOLINT(hicpp-signed-bitwise)
 
         p = qi.PeekLocationLatLon(i, j);
-
         distance = NFmiGeoTools::GeoDistance(latlon.X(), latlon.Y(), p.X(), p.Y());
 
         if (distance > bestdistance)
           break;
 
-        if (itsValidPoints && itsValidPoints->isvalid(qi.PeekLocationIndex(i, j)))
+        // Check whether this point has any valid data at the given time.
+        qi.LocationIndex(qi.PeekLocationIndex(i, j));
+        bool hasdata = false;
+        for (qi.ResetParam(); qi.NextParam() && !hasdata;)
+          for (qi.ResetLevel(); qi.NextLevel() && !hasdata;)
+            if (qi.FloatValue() != kFloatMissing)
+              hasdata = true;
+        qi.LocationIndex(origin_idx);  // restore so PeekLocation offsets stay valid
+
+        if (hasdata)
         {
           ok = true;
           bestpoint = p;
@@ -517,8 +508,6 @@ std::size_t Model::gridHashValue() const
 
 void Model::uncache() const
 {
-  if (itsValidPoints)
-    itsValidPoints->uncache();
 }
 
 // ----------------------------------------------------------------------

@@ -18,7 +18,7 @@ ParameterOptions::ParameterOptions(const Spine::Parameter& theParam,
                                    const std::locale& theLocale,
                                    const std::string& theZone,
                                    const bool& theNearestPointFlag,
-                                   const NFmiPoint& theNearestPoint,
+                                   double theMaxDist,
                                    NFmiPoint& theLastPoint)
     : par(theParam),
       producer(theProducer),
@@ -31,7 +31,7 @@ ParameterOptions::ParameterOptions(const Spine::Parameter& theParam,
       outlocale(theLocale),
       outzone(theZone),
       findnearestvalidpoint(theNearestPointFlag),
-      nearestpoint(theNearestPoint),
+      maxdist(theMaxDist),
       lastpoint(theLastPoint)
 {
 }

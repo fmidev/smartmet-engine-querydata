@@ -31,7 +31,6 @@
 #include "Model.h"
 #include "Producer.h"
 #include "Repository.h"
-#include "ValidPoints.h"
 #include <boost/bind/bind.hpp>
 #include <macgyver/AnsiEscapeCodes.h>
 #include <macgyver/Exception.h>
@@ -195,17 +194,6 @@ RepoManager::RepoManager(const std::string& configfile)
 
       lookupHostSetting(itsConfig, itsMaxThreadCount, "maxthreads", hostname);
       lookupHostSetting(itsConfig, itsVerbose, "verbose", hostname);
-      lookupHostSetting(itsConfig, itsValidPointsCacheDir, "valid_points_cache_dir", hostname);
-      lookupHostSetting(
-          itsConfig, itsCleanValidPointsCacheDir, "clean_valid_points_cache_dir", hostname);
-
-      if (itsValidPointsCacheDir.empty())
-        std::cerr
-            << (Spine::log_time_str() + ANSI_FG_MAGENTA +
-                " [querydata] valid_points_cache_dir setting is empty, cache will not be created!" +
-                ANSI_FG_DEFAULT)
-            << '\n';
-
       itsRepo.verbose(itsVerbose);
 
       // Phase 1: Establish producer setting
@@ -631,7 +619,6 @@ void RepoManager::load(Producer producer,  // NOLINT(performance-unnecessary-val
           std::cout << Spine::log_time_str() + " QENGINE LOAD " + filename.string() << '\n';
 
         model = Model::create(filename,
-                              itsValidPointsCacheDir,
                               conf.producer,
                               conf.leveltype,
                               conf.isclimatology,
@@ -729,58 +716,6 @@ const ProducerConfig& RepoManager::producerConfig(const Producer& producer) cons
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Operation failed!");
-  }
-}
-
-void RepoManager::cleanValidPointsCache()
-{
-  if (!std::filesystem::exists(itsValidPointsCacheDir) ||
-      !std::filesystem::is_directory(itsValidPointsCacheDir))
-    return;
-
-  std::set<std::string> cachefiles;
-  for (const auto& producer : itsProducerList)
-  {
-    const auto shared_models = itsRepo.getAllModels(producer);
-    for (const auto& shared_model : shared_models)
-    {
-      if (shared_model.second->itsValidPoints)
-        cachefiles.insert(shared_model.second->itsValidPoints->cacheFile());
-    }
-  }
-
-  if (cachefiles.empty())
-    return;
-
-  // boost::system::error_code ec;
-  std::filesystem::directory_iterator end_itr;
-  for (std::filesystem::directory_iterator itr(itsValidPointsCacheDir); itr != end_itr; ++itr)
-  {
-    if (SmartMet::Spine::Reactor::isShuttingDown())
-      return;
-
-    if (is_regular_file(itr->status()))
-    {
-      std::string filename = (itsValidPointsCacheDir + "/" + itr->path().filename().string());
-      if (cachefiles.find(filename) == cachefiles.end())
-      {
-        if (itsCleanValidPointsCacheDir)
-        {
-          std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA +
-                        " [querydata] Deleting redundant valid points cache file '" + filename +
-                        "'" + ANSI_FG_DEFAULT)
-                    << '\n';
-          std::filesystem::remove(filename);
-        }
-        else
-        {
-          std::cerr << (Spine::log_time_str() + ANSI_FG_MAGENTA +
-                        " [querydata] Redundant valid points cache file detected '" + filename +
-                        "', consider deleting it!" + ANSI_FG_DEFAULT)
-                    << '\n';
-        }
-      }
-    }
   }
 }
 

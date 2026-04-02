@@ -31,8 +31,6 @@ namespace Engine
 {
 namespace Querydata
 {
-class ValidPoints;
-
 class Model : public boost::enable_shared_from_this<Model>
 {
   struct Private
@@ -42,7 +40,6 @@ class Model : public boost::enable_shared_from_this<Model>
  public:
   Model(Private /* unused */,
         const std::filesystem::path& filename,
-        const std::string& validpointscachedir,
         Producer producer,
         std::string levelname,
         bool climatology,
@@ -61,7 +58,6 @@ class Model : public boost::enable_shared_from_this<Model>
   Model(Private /* unused */, std::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
 
   static std::shared_ptr<Model> create(const std::filesystem::path& filename,
-                                       const std::string& validpointscachedir,
                                        const Producer& producer,
                                        const std::string& levelname,
                                        bool climatology,
@@ -103,7 +99,7 @@ class Model : public boost::enable_shared_from_this<Model>
   bool isStaticGrid() const;
   bool isRelativeUV() const;
 
-  NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist) const;
+  NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist, const NFmiMetTime& theTime) const;
 
   std::size_t gridHashValue() const;
 
@@ -135,7 +131,6 @@ class Model : public boost::enable_shared_from_this<Model>
   bool itsStaticGrid = false;
   bool itsRelativeUV = false;
 
-  std::shared_ptr<ValidPoints> itsValidPoints;
   std::shared_ptr<ValidTimeList> itsValidTimeList;
 
   // Constructing NFmiFastQueryInfo may be slow if there are many
