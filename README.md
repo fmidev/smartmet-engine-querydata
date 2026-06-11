@@ -140,6 +140,12 @@ translations:
 
 Unfortunately the translations for the more modern SmartSymbol are still hardcoded into the C++ code.
 
+### Derived parameters
+
+QEngine exposes several parameters that are not stored in the querydata files but computed on the fly from the underlying model fields. These include derived wind components, feels-like temperature, and weather symbol parameters.
+
+The most notable is **SmartSymbol**, a single integer code that summarises the dominant weather condition (clear, cloudy, fog, drizzle, rain, sleet, snow, hail, thunderstorm) at a location and time. It is computed from cloud cover, precipitation rate, precipitation form, precipitation type, fog intensity, and thunderstorm probability. A day/night variant is produced by adding 100 when solar position indicates darkness. See [docs/smartsymbol.md](docs/smartsymbol.md) for a full description of the logic and symbol values.
+
 ### Docker
 
 SmartMet Server can be dockerized. This [tutorial](docs/docker.md)
