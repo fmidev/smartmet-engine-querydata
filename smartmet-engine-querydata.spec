@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 26.4.13
+Version: 26.6.24
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -31,10 +31,10 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: %{smartmet_fmt_devel}
-BuildRequires: smartmet-library-timeseries-devel >= 26.4.13
-BuildRequires: smartmet-library-macgyver-devel >= 26.4.13
-BuildRequires: smartmet-library-newbase-devel >= 26.2.4
-BuildRequires: smartmet-library-spine-devel >= 26.4.13
+BuildRequires: smartmet-library-timeseries-devel >= 26.5.5
+BuildRequires: smartmet-library-macgyver-devel >= 26.6.15
+BuildRequires: smartmet-library-newbase-devel >= 26.6.24
+BuildRequires: smartmet-library-spine-devel >= 26.6.24
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -43,11 +43,11 @@ Requires: gdal312-libs
 Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 26.4.13
-Requires: smartmet-library-macgyver >= 26.4.13
-Requires: smartmet-library-newbase >= 26.2.4
-Requires: smartmet-library-spine >= 26.4.13
-#TestRequires: smartmet-utils-devel >= 26.2.4
+Requires: smartmet-library-timeseries >= 26.5.5
+Requires: smartmet-library-macgyver >= 26.6.15
+Requires: smartmet-library-newbase >= 26.6.24
+Requires: smartmet-library-spine >= 26.6.24
+#TestRequires: smartmet-utils-devel >= 26.6.17
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal312-devel
 #TestRequires: gcc-c++
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Jun 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.6.24-1.fmi
+- Mass rebuild
+
 * Mon Apr 13 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.4.13-1.fmi
 - Removed ValidPoints support, nearest points are now searched on the fly
 
