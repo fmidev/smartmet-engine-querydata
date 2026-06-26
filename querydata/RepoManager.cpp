@@ -36,6 +36,7 @@
 #include <macgyver/Exception.h>
 #include <macgyver/FileSystem.h>
 #include <macgyver/StringConversion.h>
+#include <macgyver/ThreadName.h>
 #include <macgyver/TypeName.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiQueryData.h>
@@ -286,8 +287,18 @@ void RepoManager::init()
       itsProducerMap.insert(ProducerMap::value_type(data_id, pinfo.producer));
     }
 
-    itsMonitorThread = boost::thread(boost::bind(&Fmi::DirectoryMonitor::run, &itsMonitor));
-    itsExpirationThread = boost::thread(boost::bind(&RepoManager::expirationLoop, this));
+    itsMonitorThread = boost::thread(
+        [this]()
+        {
+          Fmi::set_thread_name("upd-qd-mon");
+          itsMonitor.run();
+        });
+    itsExpirationThread = boost::thread(
+        [this]()
+        {
+          Fmi::set_thread_name("upd-qd-exp");
+          expirationLoop();
+        });
   }
   catch (...)
   {
@@ -531,7 +542,7 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
 			  << " " << filename << ANSI_FG_DEFAULT << '\n';
 #endif
     updateTasks->handle_finished();
-    updateTasks->add("RepoManager::load", std::bind(&RepoManager::load, this, producer, additions));
+    updateTasks->add("upd-qd", std::bind(&RepoManager::load, this, producer, additions));
   }
   catch (...)
   {

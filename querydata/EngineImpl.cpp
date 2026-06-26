@@ -19,6 +19,7 @@
 #include <macgyver/FileSystem.h>
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
+#include <macgyver/ThreadName.h>
 #include <spine/ConfigTools.h>
 #include <spine/Convenience.h>
 #include <spine/Exceptions.h>
@@ -258,7 +259,12 @@ void EngineImpl::init()
     lastConfigErrno = 0;
 
     // Start watcher thread to watch for configuration changes
-    configFileWatcher = boost::thread(&EngineImpl::configFileWatch, this);
+    configFileWatcher = boost::thread(
+        [this]()
+        {
+          Fmi::set_thread_name("upd-qd-cfg");
+          configFileWatch();
+        });
 
     SmartMet::Spine::Reactor* reactor = SmartMet::Spine::Reactor::instance;
     if (reactor)
