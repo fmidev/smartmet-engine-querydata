@@ -19,6 +19,8 @@
 
 #include <macgyver/LocalDateTime.h>
 
+#include <optional>
+
 #include "Producer.h"
 
 namespace SmartMet
@@ -56,6 +58,13 @@ struct ParameterOptions
   const bool& findnearestvalidpoint;
   double maxdist;
   NFmiPoint& lastpoint;
+
+  // Optional reference point for the 'distance' and 'direction' special parameters. When the query
+  // point is expanded into several nearby stations (numberofstations>1 for pointwise data), the
+  // location coordinates used for data extraction are the station's own coordinates, so distance
+  // and direction must instead be measured from the original query point. If unset, the location's
+  // own coordinates are used (the normal single-point behaviour).
+  std::optional<NFmiPoint> distanceReferencePoint;
 };
 
 }  // namespace Querydata

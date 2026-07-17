@@ -2846,6 +2846,20 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
   const std::string &pname = opt.par.name();
   const Spine::Location &loc = opt.loc;
 
+  // For pointwise (station) querydata the location-dependent special parameters below
+  // (stationname, distance, direction, wmo, fmisid, lpnn, rwsid, stationlongitude,
+  // stationlatitude) are read from the currently active location of the querydata.
+  //
+  // Data parameters move the active location to the nearest station as a side effect of
+  // interpolation, but a special parameter requested on its own -- or before any data
+  // parameter in the query -- would otherwise report whatever station happened to be active
+  // (typically the first station in the data). That caused e.g. 'distance' and 'stationname'
+  // to be wrong or fixed to a single station. Move to the nearest station explicitly here so
+  // that all metadata refers to the same station the data is extracted from. Gridded data must
+  // not be touched (it has no stations and uses spatial interpolation instead).
+  if (!isGrid())
+    itsInfo->Location(NFmiPoint(loc.longitude, loc.latitude));
+
   switch (opt.par.number())
   {
     case kFmiPlace:
@@ -3132,13 +3146,17 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     {
       if (isGrid())
         return TS::None();
-      return info()->Location()->Distance(NFmiPoint(loc.longitude, loc.latitude));
+      const NFmiPoint refpoint =
+          opt.distanceReferencePoint.value_or(NFmiPoint(loc.longitude, loc.latitude));
+      return info()->Location()->Distance(refpoint);
     }
     case kFmiDirection:
     {
       if (isGrid())
         return TS::None();
-      auto dir = info()->Location()->Direction(NFmiPoint(loc.longitude, loc.latitude));
+      const NFmiPoint refpoint =
+          opt.distanceReferencePoint.value_or(NFmiPoint(loc.longitude, loc.latitude));
+      auto dir = info()->Location()->Direction(refpoint);
       if (dir < 0)
         dir += 360;
       return dir;
@@ -3774,6 +3792,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
                                     param.findnearestvalidpoint,
                                     param.maxdist,
                                     param.lastpoint);
+      paramOptions.distanceReferencePoint = param.distanceReferencePoint;
 
       TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
@@ -3813,6 +3832,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
                                     param.findnearestvalidpoint,
                                     param.maxdist,
                                     param.lastpoint);
+      paramOptions.distanceReferencePoint = param.distanceReferencePoint;
 
       TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
@@ -3852,6 +3872,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
                                     param.findnearestvalidpoint,
                                     param.maxdist,
                                     param.lastpoint);
+      paramOptions.distanceReferencePoint = param.distanceReferencePoint;
 
       TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       TS::LonLat lonlat(loc->longitude, loc->latitude);

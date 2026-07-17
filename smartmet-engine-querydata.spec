@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 26.6.26
+Version: 26.7.17
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -92,6 +92,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Jul 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.17-1.fmi
+- Pointwise (station) querydata: location-dependent special parameters (stationname, distance,
+  direction, wmo, fmisid, lpnn, rwsid, stationlongitude/latitude) now refer to the nearest station
+  instead of an arbitrary one, and 'distance'/'direction' can be measured from a separate reference
+  point to support returning several nearby stations
+
 * Fri Jun 26 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.6.26-1.fmi
 - Thread naming: Named the config-watch, directory-monitor, expiration and data-load threads
 
