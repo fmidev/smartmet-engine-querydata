@@ -32,9 +32,9 @@ BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: smartmet-library-timeseries-devel >= 26.5.5
-BuildRequires: smartmet-library-macgyver-devel >= 26.6.26
-BuildRequires: smartmet-library-newbase-devel >= 26.6.24
-BuildRequires: smartmet-library-spine-devel >= 26.6.24
+BuildRequires: smartmet-library-macgyver-devel >= 26.7.9
+BuildRequires: smartmet-library-newbase-devel >= 26.7.14
+BuildRequires: smartmet-library-spine-devel >= 26.7.16
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -44,10 +44,10 @@ Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
 Requires: smartmet-library-timeseries >= 26.5.5
-Requires: smartmet-library-macgyver >= 26.6.26
-Requires: smartmet-library-newbase >= 26.6.24
-Requires: smartmet-library-spine >= 26.6.24
-#TestRequires: smartmet-utils-devel >= 26.6.17
+Requires: smartmet-library-macgyver >= 26.7.9
+Requires: smartmet-library-newbase >= 26.7.14
+Requires: smartmet-library-spine >= 26.7.16
+#TestRequires: smartmet-utils-devel >= 26.7.14
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal312-devel
 #TestRequires: gcc-c++
