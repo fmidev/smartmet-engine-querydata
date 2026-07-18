@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.7.18
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-2.fmi
+- Radar ODIM HDF5 support (RadarReader): Cartesian ODIM composites/images (object COMP/IMAGE/CVOL, both numbered /dataset1/data1 and unnumbered /dataset1/data layouts) are now decoded to querydata like the GeoTIFF path, reusing a vendored copy of qdtools' Fmi::HDF5::Hdf5File (GDAL HDF5 driver) and h5toqd's quantity->parameter mapping, projdef+corners area construction and gain/offset/nodata/undetect handling. Polar volumes (PVOL) are rejected. Producers are still selected by file extension (.h5/.hdf).
+
 * Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-1.fmi
 - Radar GeoTIFF support (RadarReader): producers whose files are GeoTIFF (.tif/.tiff, detected from the extension) are decoded on load into a scratch .sqd and served memory-mapped exactly like ordinary querydata, so monochrome radar can drive isoband and raster WMS layers with no plugin changes. The scratch file is owned by the model and removed on eviction/expiry; the kernel page cache manages resident memory. EPSG:3067 frames are served on a native transverse mercator area when newbase >= 26.7.18 is installed (PROJ-backed area otherwise). ODIM HDF5 reading is stubbed for a follow-up.
 

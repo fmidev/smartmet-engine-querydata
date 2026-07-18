@@ -6,10 +6,13 @@
 
 #include "RadarReader.h"
 
+#include "Hdf5File.h"
+
 #include <gdal_priv.h>
 #include <cpl_conv.h>
 #include <cpl_error.h>
 
+#include <gis/ProjInfo.h>
 #include <gis/SpatialReference.h>
 #include <macgyver/Exception.h>
 
@@ -478,6 +481,186 @@ std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
   return data;
 }
 
+// ---------------------------------------------------------------------------
+// ODIM HDF5 (Cartesian COMP / IMAGE / CVOL), following qdtools' h5toqd.
+// ---------------------------------------------------------------------------
+
+int operaQuantityToParamId(const std::string& product, const std::string& quantity)
+{
+  if (quantity == "DBZH" || quantity == "DBZHC")
+    return kFmiCorrectedReflectivity;
+  if (quantity == "TH" || quantity == "DBZ" || quantity == "DBZV")
+    return kFmiReflectivity;
+  if (quantity == "VRAD" || quantity == "VRADH" || quantity == "VRADV" || quantity == "VRADDH")
+    return kFmiRadialVelocity;
+  if (quantity == "WRAD" || quantity == "W")
+    return kFmiSpectralWidth;
+  if (quantity == "RATE")
+    return kFmiPrecipitationRate;
+  if (quantity == "ACRR")
+    return kFmiPrecipitationAmount;
+  if (quantity == "HGHT" || product == "ETOP")
+    return kFmiEchoTop;
+  return 0;
+}
+
+std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
+{
+  Fmi::HDF5::Hdf5File file(path.string());
+
+  const std::string object = file.get_attribute<std::string>("/what", "object");
+  if (object != "COMP" && object != "IMAGE" && object != "CVOL")
+    throw Fmi::Exception(BCP,
+                         "Only Cartesian ODIM (COMP/IMAGE/CVOL) is supported; got object=" + object +
+                             ": " + path.string());
+
+  // Projection + geographic corners (see h5toqd create_hdesc). projdef is the
+  // target CRS, its inverse the lon/lat CRS the corners are given in.
+  std::string projdef = file.get_attribute<std::string>("/where", "projdef");
+  Fmi::ProjInfo proj(projdef);
+  proj.erase("x_0");
+  proj.erase("y_0");
+  projdef = proj.projStr();
+  const std::string sphere = proj.inverseProjStr();
+
+  const long xsize = file.get_attribute<long>("/where", "xsize");
+  const long ysize = file.get_attribute<long>("/where", "ysize");
+
+  std::unique_ptr<NFmiArea> area;
+  CPLPushErrorHandler(CPLQuietErrorHandler);
+  if (!file.is_attribute<double>("/where", "LL_lon"))
+  {
+    // Latvian-style corners
+    const double LR_lon = file.get_attribute<double>("/where", "LR_lon");
+    const double LR_lat = file.get_attribute<double>("/where", "LR_lat");
+    const double UL_lon = file.get_attribute<double>("/where", "UL_lon");
+    const double UL_lat = file.get_attribute<double>("/where", "UL_lat");
+    area.reset(NFmiArea::CreateFromReverseCorners(
+        projdef, sphere, NFmiPoint(UL_lon, UL_lat), NFmiPoint(LR_lon, LR_lat)));
+  }
+  else
+  {
+    // FMI-style corners
+    const double LL_lon = file.get_attribute<double>("/where", "LL_lon");
+    const double LL_lat = file.get_attribute<double>("/where", "LL_lat");
+    const double UR_lon = file.get_attribute<double>("/where", "UR_lon");
+    const double UR_lat = file.get_attribute<double>("/where", "UR_lat");
+    area.reset(NFmiArea::CreateFromCorners(
+        projdef, sphere, NFmiPoint(LL_lon, LL_lat), NFmiPoint(UR_lon, UR_lat)));
+  }
+  CPLPopErrorHandler();
+  if (!area)
+    throw Fmi::Exception(BCP, "Failed to construct projection for ODIM file: " + path.string());
+
+  // Single Cartesian data slice. Numbered layout (/dataset1/data1, FMI Rack)
+  // or unnumbered (/dataset1/data). read_dataset(group) resolves group/data,
+  // and get_attribute_recursive walks up to /dataset1/what either way.
+  std::string dpath = "/dataset1/data1";
+  if (!file.is_group(dpath))
+    dpath = "/dataset1";
+  const std::string product = file.get_attribute_recursive<std::string>(dpath, "what", "product");
+  const std::string quantity = file.get_attribute_recursive<std::string>(dpath, "what", "quantity");
+  const std::optional<double> nodata =
+      file.get_optional_attribute_recursive<double>(dpath, "what", "nodata");
+  const std::optional<double> undetect =
+      file.get_optional_attribute_recursive<double>(dpath, "what", "undetect");
+  const std::optional<double> gain =
+      file.get_optional_attribute_recursive<double>(dpath, "what", "gain");
+  const std::optional<double> offset =
+      file.get_optional_attribute_recursive<double>(dpath, "what", "offset");
+  const double g = gain.value_or(1.0);
+  const double o = offset.value_or(0.0);
+
+  int paramId = operaQuantityToParamId(product, quantity);
+  std::string paramName;
+  if (paramId != 0)
+  {
+    NFmiEnumConverter conv;
+    paramName = conv.ToString(paramId);
+  }
+  else
+  {
+    paramId = 1;
+    paramName = quantity.empty() ? std::string{"RadarValue"} : quantity;
+  }
+
+  // Valid time: dataset end time, else the nominal /what time.
+  std::optional<std::string> sd =
+      file.get_optional_attribute<std::string>("/dataset1/what", "enddate");
+  if (!sd)
+    sd = file.get_optional_attribute<std::string>("/what", "date");
+  std::optional<std::string> st =
+      file.get_optional_attribute<std::string>("/dataset1/what", "endtime");
+  if (!st)
+    st = file.get_optional_attribute<std::string>("/what", "time");
+  NFmiMetTime validTime;
+  if (sd && st)
+    if (auto t = parseUtcStamp(*sd + *st))
+      validTime = *t;
+  NFmiMetTime originTime = validTime;
+  {
+    auto od = file.get_optional_attribute<std::string>("/what", "date");
+    auto ot = file.get_optional_attribute<std::string>("/what", "time");
+    if (od && ot)
+      if (auto t = parseUtcStamp(*od + *ot))
+        originTime = *t;
+  }
+
+  const std::vector<int> values = file.read_dataset<int>(dpath);
+  const std::size_t nx = static_cast<std::size_t>(xsize);
+  const std::size_t ny = static_cast<std::size_t>(ysize);
+  if (values.size() < nx * ny)
+    throw Fmi::Exception(BCP, "ODIM dataset smaller than xsize*ysize: " + path.string());
+
+  NFmiParam param(static_cast<unsigned long>(paramId), paramName);
+  param.InterpolationMethod(kLinearly);
+  NFmiParamBag pbag;
+  pbag.Add(NFmiDataIdent(param));
+  NFmiParamDescriptor pdesc(pbag);
+
+  NFmiTimeList tlist;
+  tlist.Add(new NFmiMetTime(validTime));
+  NFmiTimeDescriptor tdesc(originTime, tlist);
+
+  NFmiLevelBag lbag;
+  lbag.AddLevel(NFmiLevel(kFmiAnyLevelType, 0));
+  NFmiVPlaceDescriptor vdesc(lbag);
+
+  NFmiGrid grid(area.get(), static_cast<unsigned long>(nx), static_cast<unsigned long>(ny));
+  NFmiHPlaceDescriptor hdesc(grid);
+
+  NFmiFastQueryInfo qi(pdesc, tdesc, hdesc, vdesc);
+  std::shared_ptr<NFmiQueryData> data(NFmiQueryDataUtil::CreateEmptyData(qi));
+  if (!data)
+    throw Fmi::Exception(BCP, "Failed to allocate querydata for ODIM file: " + path.string());
+
+  NFmiFastQueryInfo info(data.get());
+  info.SetProducer(NFmiProducer(1014, "RADAR"));
+  info.FirstParam();
+  info.FirstLevel();
+  info.FirstTime();
+
+  // Same north-up -> bottom-up flip and nodata/undetect handling as GeoTIFF.
+  std::size_t pos = 0;
+  for (info.ResetLocation(); info.NextLocation(); ++pos)
+  {
+    const std::size_t i = pos % nx;
+    const std::size_t j = pos / nx;
+    const std::size_t srcRow = ny - 1 - j;
+    const double v = values[srcRow * nx + i];
+    float out = kFloatMissing;
+    if (nodata && v == *nodata)
+      out = kFloatMissing;
+    else if (undetect && v == *undetect)
+      out = static_cast<float>(o);
+    else
+      out = static_cast<float>(g * v + o);
+    info.FloatValue(out);
+  }
+
+  return data;
+}
+
 }  // namespace
 
 // ---------------------------------------------------------------------------
@@ -505,8 +688,7 @@ std::shared_ptr<NFmiQueryData> readRadarFile(const std::filesystem::path& path, 
       case RadarFormat::GeoTiff:
         return readGeoTiff(path);
       case RadarFormat::Odim:
-        throw Fmi::Exception(BCP, "ODIM HDF5 radar reading is not yet implemented: " +
-                                      path.string());
+        return readOdim(path);
       case RadarFormat::QueryData:
       case RadarFormat::Auto:
       default:

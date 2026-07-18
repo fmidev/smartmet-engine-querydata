@@ -127,6 +127,40 @@ int main(int argc, char** argv)
     std::remove(sqd.c_str());
   }
 
+  // --- ODIM HDF5 (Cartesian) path ---
+  {
+    const std::string opath = (argc > 2) ? argv[2] : "data/radar_test_odim_dbz.h5";
+    std::shared_ptr<NFmiQueryData> odim;
+    try
+    {
+      odim = readRadarFile(opath);
+    }
+    catch (const std::exception& e)
+    {
+      std::cerr << "  FAIL: readRadarFile(ODIM) threw: " << e.what() << "\n";
+      ++failures;
+    }
+    if (odim)
+    {
+      NFmiFastQueryInfo oi(odim.get());
+      check(oi.Grid() != nullptr && oi.Grid()->XNumber() == 500 && oi.Grid()->YNumber() == 500,
+            "ODIM grid is 500x500");
+      oi.FirstParam();
+      oi.FirstLevel();
+      oi.FirstTime();
+      check(oi.Param().GetParam()->GetIdent() == kFmiReflectivity,
+            "ODIM parameter is reflectivity (TH)");
+      const NFmiMetTime& ot = oi.ValidTime();
+      check(ot.GetYear() == 2011 && ot.GetMonth() == 9 && ot.GetDay() == 12 && ot.GetHour() == 6,
+            "ODIM valid time is 2011-09-12 06:xx UTC");
+      int nonmissing = 0;
+      for (oi.ResetLocation(); oi.NextLocation();)
+        if (oi.FloatValue() != kFloatMissing)
+          ++nonmissing;
+      check(nonmissing > 0, "ODIM has non-missing values");
+    }
+  }
+
   if (failures == 0)
     std::cout << "RadarReaderTest: ALL PASSED\n";
   else
