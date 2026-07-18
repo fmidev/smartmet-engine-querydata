@@ -18,6 +18,8 @@
 #include <newbase/NFmiQueryData.h>
 
 #include <cmath>
+#include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -99,6 +101,31 @@ int main(int argc, char** argv)
 
   // Orientation: south value must exceed the north value in the same column
   check(val(0, 0) > val(0, 2), "row flip correct (south warmer than north)");
+
+  // Scratch .sqd round-trip: write the decoded querydata and read it back,
+  // mirroring the engine's convert-to-scratch + memory-map step.
+  {
+    const std::string sqd = "radarreadertest_scratch.sqd";
+    {
+      std::ofstream out(sqd, std::ios::out | std::ios::binary | std::ios::trunc);
+      out << *data;
+    }
+    NFmiQueryData qd2(sqd, false);
+    NFmiFastQueryInfo info2(&qd2);
+    info2.FirstParam();
+    info2.FirstLevel();
+    info2.FirstTime();
+    auto val2 = [&](unsigned long i, unsigned long j) -> float
+    {
+      info2.LocationIndex(j * nx + i);
+      return info2.FloatValue();
+    };
+    check(close(val2(0, 0), -22.0f), "scratch round-trip preserves (0,0)");
+    check(val2(3, 0) == kFloatMissing, "scratch round-trip preserves nodata");
+    check(info2.Grid() != nullptr && info2.Grid()->XNumber() == 4 && info2.Grid()->YNumber() == 3,
+          "scratch round-trip preserves grid");
+    std::remove(sqd.c_str());
+  }
 
   if (failures == 0)
     std::cout << "RadarReaderTest: ALL PASSED\n";

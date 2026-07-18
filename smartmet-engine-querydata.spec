@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 26.7.17
+Version: 26.7.18
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-1.fmi
+- Radar GeoTIFF support (RadarReader): producers whose files are GeoTIFF (.tif/.tiff, detected from the extension) are decoded on load into a scratch .sqd and served memory-mapped exactly like ordinary querydata, so monochrome radar can drive isoband and raster WMS layers with no plugin changes. The scratch file is owned by the model and removed on eviction/expiry; the kernel page cache manages resident memory. EPSG:3067 frames are served on a native transverse mercator area when newbase >= 26.7.18 is installed (PROJ-backed area otherwise). ODIM HDF5 reading is stubbed for a follow-up.
+
 * Fri Jul 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.17-1.fmi
 - Pointwise (station) querydata: location-dependent special parameters (stationname, distance,
   direction, wmo, fmisid, lpnn, rwsid, stationlongitude/latitude) now refer to the nearest station

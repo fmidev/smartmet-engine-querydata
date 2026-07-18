@@ -102,6 +102,11 @@ struct RepoManager
   Fmi::DirectoryMonitor::Watcher id(const Producer& producer) const;
 
   int itsMaxThreadCount;
+
+  // Directory for decoded radar scratch .sqd files (GeoTIFF/ODIM producers).
+  // Should live on a real disk volume so the kernel page cache manages the
+  // memory-mapped decoded frames. TODO: make configurable via the config file.
+  std::filesystem::path itsRadarScratchDir{"/var/tmp/smartmet-qengine-radar"};
   boost::atomic<int> itsThreadCount;
 
   using LatLonCache = Fmi::Cache::Cache<std::size_t, std::shared_ptr<std::vector<NFmiPoint>>>;

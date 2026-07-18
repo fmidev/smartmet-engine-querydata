@@ -30,6 +30,7 @@
 #include "RepoManager.h"
 #include "Model.h"
 #include "Producer.h"
+#include "RadarReader.h"
 #include "Repository.h"
 #include <boost/bind/bind.hpp>
 #include <macgyver/AnsiEscapeCodes.h>
@@ -46,6 +47,7 @@
 #include <spine/Reactor.h>
 #include <cassert>
 #include <filesystem>
+#include <fstream>
 #include <memory>
 #include <set>
 #include <sstream>
@@ -58,6 +60,63 @@ namespace Engine
 {
 namespace Querydata
 {
+namespace
+{
+// Path of the decoded scratch .sqd for a radar source frame. Deterministic
+// (source stem + modification time) so a re-scan does not reconvert.
+std::filesystem::path radarScratchPath(const std::filesystem::path& scratchdir,
+                                       const Producer& producer,
+                                       const std::filesystem::path& source)
+{
+  std::error_code ec;
+  auto mtime = std::filesystem::last_write_time(source, ec);
+  const auto stamp =
+      ec ? 0LL
+         : static_cast<long long>(mtime.time_since_epoch().count());
+  const std::filesystem::path dir = scratchdir / producer;
+  return dir / (source.stem().string() + "_" + std::to_string(stamp) + ".sqd");
+}
+
+// Decode a radar GeoTIFF/ODIM source frame into the scratch .sqd if it is not
+// already present and current. Returns the scratch path. Writes atomically via
+// a temporary file + rename so a concurrent reader never sees a partial file.
+std::filesystem::path convertRadarToScratch(const std::filesystem::path& scratchdir,
+                                            const Producer& producer,
+                                            const std::filesystem::path& source,
+                                            RadarFormat format)
+{
+  const std::filesystem::path scratch = radarScratchPath(scratchdir, producer, source);
+
+  std::error_code ec;
+  if (std::filesystem::exists(scratch, ec))
+    return scratch;  // name embeds the source mtime, so an existing file is current
+
+  std::filesystem::create_directories(scratch.parent_path(), ec);
+
+  auto data = readRadarFile(source, format);
+  if (!data)
+    throw Fmi::Exception(BCP, "Radar decode produced no data: " + source.string());
+
+  const std::filesystem::path tmp =
+      scratch.string() + ".tmp." + std::to_string(reinterpret_cast<std::uintptr_t>(data.get()));
+  {
+    std::ofstream out(tmp, std::ios::out | std::ios::binary | std::ios::trunc);
+    if (!out)
+      throw Fmi::Exception(BCP, "Cannot open radar scratch file for writing: " + tmp.string());
+    out << *data;
+    if (!out)
+      throw Fmi::Exception(BCP, "Failed to write radar scratch file: " + tmp.string());
+  }
+  std::filesystem::rename(tmp, scratch, ec);
+  if (ec)
+  {
+    std::filesystem::remove(tmp, ec);
+    throw Fmi::Exception(BCP, "Failed to rename radar scratch file into place: " + scratch.string());
+  }
+  return scratch;
+}
+}  // namespace
+
 namespace
 {
 // ----------------------------------------------------------------------
@@ -629,16 +688,41 @@ void RepoManager::load(Producer producer,  // NOLINT(performance-unnecessary-val
         if (itsVerbose)
           std::cout << Spine::log_time_str() + " QENGINE LOAD " + filename.string() << '\n';
 
-        model = Model::create(filename,
-                              conf.producer,
-                              conf.leveltype,
-                              conf.isclimatology,
-                              conf.isfullgrid,
-                              conf.isstaticgrid,
-                              conf.isrelativeuv,
-                              conf.update_interval,
-                              conf.minimum_expires,
-                              conf.mmap);
+        const RadarFormat radarformat = detectRadarFormat(filename);
+        if (radarformat == RadarFormat::GeoTiff || radarformat == RadarFormat::Odim)
+        {
+          // Decode the radar frame into a scratch .sqd, then load it
+          // memory-mapped exactly like ordinary querydata. The model owns and
+          // deletes the scratch on eviction/expiry; identity (path, hash,
+          // modification time) stays with the source frame.
+          auto scratch =
+              convertRadarToScratch(itsRadarScratchDir, conf.producer, filename, radarformat);
+          model = Model::create(filename,
+                                scratch,
+                                conf.producer,
+                                conf.leveltype,
+                                conf.isclimatology,
+                                conf.isfullgrid,
+                                conf.isstaticgrid,
+                                conf.isrelativeuv,
+                                conf.update_interval,
+                                conf.minimum_expires,
+                                conf.mmap,
+                                /*ownsdatafile=*/true);
+        }
+        else
+        {
+          model = Model::create(filename,
+                                conf.producer,
+                                conf.leveltype,
+                                conf.isclimatology,
+                                conf.isfullgrid,
+                                conf.isstaticgrid,
+                                conf.isrelativeuv,
+                                conf.update_interval,
+                                conf.minimum_expires,
+                                conf.mmap);
+        }
 
         data_load_time = Fmi::SecondClock::universal_time();
       }
