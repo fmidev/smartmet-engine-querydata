@@ -313,6 +313,57 @@ RepoManager::RepoManager(const std::string& configfile)
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Delete radar scratch .sqd files left over from a previous run
+ *
+ * Decoded radar frames live under itsRadarScratchDir in per-producer subdirs
+ * and are normally unlinked by Model::~Model on eviction. A crash or kill skips
+ * destructors and leaks the files; because number_to_keep/the external cleaner
+ * eventually rotate the source frames away, those leaks would grow without
+ * bound.
+ *
+ * This is called exactly once per process, before init() starts scanning, so
+ * no Model yet holds a mapping. Every regular file in the (exclusively owned)
+ * scratch directory is therefore a stale orphan and is removed. We forgo the
+ * potential warm-cache reuse of still-valid frames in favour of a provably safe
+ * total reclaim: re-decoding number_to_keep frames costs well under a second.
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::cleanupOrphanedRadarScratch() const
+{
+  try
+  {
+    std::error_code ec;
+    if (!std::filesystem::exists(itsRadarScratchDir, ec))
+      return;
+
+    std::size_t removed = 0;
+    for (std::filesystem::recursive_directory_iterator it(itsRadarScratchDir, ec), end;
+         it != end && !ec;
+         it.increment(ec))
+    {
+      if (it->is_regular_file(ec))
+      {
+        std::error_code rmec;
+        if (std::filesystem::remove(it->path(), rmec))
+          ++removed;
+      }
+    }
+
+    if (removed > 0)
+      std::cout << Spine::log_time_str() + " [querydata] removed " + std::to_string(removed) +
+                       " orphaned radar scratch file(s) from " + itsRadarScratchDir.string()
+                << '\n';
+  }
+  catch (...)
+  {
+    // Startup cleanup is best effort: never block engine init on it.
+    std::cout << Fmi::Exception::Trace(BCP, "Failed to clean radar scratch directory") << '\n';
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Initialize the manager
  *
  * The constructor merely parses the configuration file, the actual

@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.7.18
-Release: 2%{?dist}.fmi
+Release: 3%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-3.fmi
+- Radar scratch cache cleanup: RepoManager::cleanupOrphanedRadarScratch() now wipes leftover decoded scratch .sqd files on engine startup, before the first scan, recovering disk from a previous crash/kill that skipped the Model destructors. It runs once per process (not on config hot-reload, where the previous manager still owns live scratch), and is safe because no data is mapped yet. Steady-state cleanup via the Model destructor is unchanged. See docs/radar.md for the recommended tmpfiles.d safety net.
+
 * Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-2.fmi
 - Radar ODIM HDF5 support (RadarReader): Cartesian ODIM composites/images (object COMP/IMAGE/CVOL, both numbered /dataset1/data1 and unnumbered /dataset1/data layouts) are now decoded to querydata like the GeoTIFF path, reusing a vendored copy of qdtools' Fmi::HDF5::Hdf5File (GDAL HDF5 driver) and h5toqd's quantity->parameter mapping, projdef+corners area construction and gain/offset/nodata/undetect handling. Polar volumes (PVOL) are rejected. Producers are still selected by file extension (.h5/.hdf).
 

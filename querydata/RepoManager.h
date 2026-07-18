@@ -58,6 +58,14 @@ struct RepoManager
   bool ready() const;
   void shutdown();
 
+  // Delete leftover decoded radar scratch .sqd files from a previous run.
+  // Must be called exactly once per process, before init() starts scanning:
+  // at that point no Model holds a mapping, so every file in the (exclusively
+  // owned) scratch directory is a crash orphan and can be safely removed. Not
+  // safe to call on a config hot-reload, where the previous RepoManager still
+  // owns live scratch files.
+  void cleanupOrphanedRadarScratch() const;
+
   // data members
 
   mutable Spine::MutexType itsMutex;  // mutexes should always be mutable

@@ -58,8 +58,40 @@ radar.scratch_directory = "/var/tmp/smartmet-qengine-radar";  # default; use a r
   to a synthetic parameter id and their quantity string as the name.
 - All parameters use linear interpolation; categorical products (e.g. HCLASS)
   should use nearest-point.
-- No startup cleanup of stale scratch files left by a crash (models clean up
-  their own scratch on normal eviction).
+
+## Scratch cache cleanup
+
+Decoded scratch `.sqd` files are cleaned by three mechanisms, in order of
+responsibility:
+
+1. **Steady state** — `Model::~Model` unlinks its own scratch when the model is
+   evicted by `number_to_keep` / `max_age`. When a source frame is overwritten
+   its scratch name changes (the name embeds the source mtime), the old model is
+   evicted, and its scratch is unlinked. Steady-state disk use is therefore
+   bounded to roughly `number_to_keep` frames per producer.
+2. **Startup reclamation** — on engine start, before the first scan,
+   `RepoManager::cleanupOrphanedRadarScratch()` deletes every file under the
+   scratch directory. This runs once per process (not on config hot-reload,
+   where the previous manager still owns live scratch). It recovers from a crash
+   or kill, which skips the model destructors: at startup nothing is mapped, so
+   every file present is provably a stale orphan. Re-decoding the current frames
+   costs well under a second, so a full reclaim is preferred over trying to
+   preserve still-valid frames for a warm restart.
+3. **External safety net (optional)** — because startup reclamation only runs
+   when the process restarts, a host that is powered off with the server never
+   restarting would retain orphans indefinitely. Ship a `tmpfiles.d` entry as a
+   backstop, with an age far larger than any producer's `max_age` so it can
+   never race a frame the server is still serving (e.g. during a stalled feed):
+
+   ```
+   # /etc/tmpfiles.d/smartmet-qengine-radar.conf
+   d /var/tmp/smartmet-qengine-radar 0755 smartmet smartmet -
+   e /var/tmp/smartmet-qengine-radar - - - 30d
+   ```
+
+Each server instance must use its own `radar.scratch_directory`; the startup
+reclamation and the deterministic scratch names both assume the directory is
+owned exclusively by one process.
 
 ## Testing
 
