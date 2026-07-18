@@ -8,9 +8,9 @@
 
 #include "Hdf5File.h"
 
-#include <gdal_priv.h>
 #include <cpl_conv.h>
 #include <cpl_error.h>
+#include <gdal_priv.h>
 
 #include <gis/ProjInfo.h>
 #include <gis/SpatialReference.h>
@@ -181,8 +181,15 @@ int quantityToParamId(const std::string& quantity)
       q.find("rainfall accumulation") != std::string::npos)
     return kFmiPrecipitationAmount;
   if (q.find("precipitation rate") != std::string::npos ||
-      q.find("rainfall rate") != std::string::npos)
+      q.find("rainfall rate") != std::string::npos ||
+      q.find("precipitation intensity") != std::string::npos)
     return kFmiPrecipitationRate;
+  // "corrected reflectivity" must be tested before the generic "reflectivity",
+  // and maps to kFmiCorrectedReflectivity (126) to match the ODIM DBZH path;
+  // otherwise GeoTIFF composites land on kFmiReflectivity (1103, uncorrected)
+  // and WMS layers asking for CorrectedReflectivity find no data.
+  if (q.find("corrected reflectivity") != std::string::npos)
+    return kFmiCorrectedReflectivity;
   if (q.find("reflectivity") != std::string::npos)
     return kFmiReflectivity;
   if (q.find("echo top") != std::string::npos)
@@ -255,8 +262,8 @@ std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
   {
     const bool geographic = minX >= -360.0 && maxX <= 360.0 && minY >= -90.001 && maxY <= 90.001;
     if (!geographic)
-      throw Fmi::Exception(BCP, "Radar GeoTIFF has no projection and a non-geographic extent: " +
-                                    filename);
+      throw Fmi::Exception(
+          BCP, "Radar GeoTIFF has no projection and a non-geographic extent: " + filename);
     assumedWgs84.SetWellKnownGeogCS("WGS84");
     assumedWgs84.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
     osr = &assumedWgs84;
@@ -442,9 +449,7 @@ std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
   lbag.AddLevel(NFmiLevel(kFmiAnyLevelType, 0));
   NFmiVPlaceDescriptor vdesc(lbag);
 
-  NFmiGrid grid(area.get(),
-                static_cast<unsigned long>(nx),
-                static_cast<unsigned long>(ny));
+  NFmiGrid grid(area.get(), static_cast<unsigned long>(nx), static_cast<unsigned long>(ny));
   NFmiHPlaceDescriptor hdesc(grid);
 
   NFmiFastQueryInfo qi(pdesc, tdesc, hdesc, vdesc);
@@ -511,8 +516,8 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
   const std::string object = file.get_attribute<std::string>("/what", "object");
   if (object != "COMP" && object != "IMAGE" && object != "CVOL")
     throw Fmi::Exception(BCP,
-                         "Only Cartesian ODIM (COMP/IMAGE/CVOL) is supported; got object=" + object +
-                             ": " + path.string());
+                         "Only Cartesian ODIM (COMP/IMAGE/CVOL) is supported; got object=" +
+                             object + ": " + path.string());
 
   // Projection + geographic corners (see h5toqd create_hdesc). projdef is the
   // target CRS, its inverse the lon/lat CRS the corners are given in.
@@ -668,7 +673,8 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
 RadarFormat detectRadarFormat(const std::filesystem::path& path)
 {
   std::string ext = path.extension().string();
-  std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
+  std::transform(
+      ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return std::tolower(c); });
   if (ext == ".tif" || ext == ".tiff")
     return RadarFormat::GeoTiff;
   if (ext == ".h5" || ext == ".hdf")
@@ -692,8 +698,7 @@ std::shared_ptr<NFmiQueryData> readRadarFile(const std::filesystem::path& path, 
       case RadarFormat::QueryData:
       case RadarFormat::Auto:
       default:
-        throw Fmi::Exception(
-            BCP, "Not a radar raster file requiring conversion: " + path.string());
+        throw Fmi::Exception(BCP, "Not a radar raster file requiring conversion: " + path.string());
     }
   }
   catch (...)

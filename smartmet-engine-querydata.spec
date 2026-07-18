@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.7.18
-Release: 3%{?dist}.fmi
+Release: 4%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-4.fmi
+- RadarReader GeoTIFF fix: 'Corrected reflectivity' now maps to kFmiCorrectedReflectivity (126, matching the ODIM DBZH path) instead of the generic kFmiReflectivity (1103, uncorrected); GeoTIFF is the production radar format, so dbz WMS layers asking for CorrectedReflectivity previously found no data. Also map 'Precipitation intensity' to kFmiPrecipitationRate. RadarReaderTest extended to decode real captured sample fixtures (smartmet-test-data radar/) and assert parameter + physical value ranges per quantity.
+
 * Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-3.fmi
 - Radar scratch cache cleanup: RepoManager::cleanupOrphanedRadarScratch() now wipes leftover decoded scratch .sqd files on engine startup, before the first scan, recovering disk from a previous crash/kill that skipped the Model destructors. It runs once per process (not on config hot-reload, where the previous manager still owns live scratch), and is safe because no data is mapped yet. Steady-state cleanup via the Model destructor is unchanged. See docs/radar.md for the recommended tmpfiles.d safety net.
 

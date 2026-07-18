@@ -17,11 +17,13 @@
 #include <newbase/NFmiGlobals.h>
 #include <newbase/NFmiQueryData.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace SmartMet::Engine::Querydata;
 
@@ -46,8 +48,7 @@ bool close(float a, float b)
 
 int main(int argc, char** argv)
 {
-  const std::string path =
-      (argc > 1) ? argv[1] : "data/202607181200_radar_test_dbz.tif";
+  const std::string path = (argc > 1) ? argv[1] : "data/202607181200_radar_test_dbz.tif";
 
   std::shared_ptr<NFmiQueryData> data;
   try
@@ -74,8 +75,9 @@ int main(int argc, char** argv)
   info.FirstLevel();
   info.FirstTime();
 
-  // Parameter (Quantity "Corrected reflectivity" -> kFmiReflectivity)
-  check(info.Param().GetParam()->GetIdent() == kFmiReflectivity, "parameter is reflectivity");
+  // Parameter (Quantity "Corrected reflectivity" -> kFmiCorrectedReflectivity)
+  check(info.Param().GetParam()->GetIdent() == kFmiCorrectedReflectivity,
+        "parameter is corrected reflectivity");
 
   // Valid time from the filename / metadata
   const NFmiMetTime& vt = info.ValidTime();
@@ -159,6 +161,107 @@ int main(int argc, char** argv)
           ++nonmissing;
       check(nonmissing > 0, "ODIM has non-missing values");
     }
+  }
+
+  // --- Real captured sample fixtures (smartmet-test-data radar/) ---
+  // Decode each product and check parameter + that gain/offset produce physical
+  // values inside the quantity's sane range (catches a wrong scaling).
+  {
+    const std::string base = (argc > 3) ? argv[3] : "/usr/share/smartmet/test/data/radar";
+
+    struct Case
+    {
+      std::string relpath;
+      int paramid;       // expected newbase parameter id
+      float pmin, pmax;  // expected physical bounds for any non-missing value
+      std::string label;
+    };
+    const std::vector<Case> cases = {
+        {"geotiff/radar_finland_dbz_3067/202607181820_radar_finland_dbz.tif",
+         kFmiCorrectedReflectivity,
+         -35.0f,
+         95.0f,
+         "finland dbz composite (dBZ)"},
+        {"geotiff/radar_finland_rr1h_3067/202607181800_radar_finland_rr1h.tif",
+         kFmiPrecipitationAmount,
+         0.0f,
+         700.0f,
+         "finland rr1h (mm)"},
+        {"geotiff/radar_anjalankoski_etop_3067/202607181820_radar_anjalankoski_etop_20dbz.tif",
+         kFmiEchoTop,
+         -0.1f,
+         30.0f,
+         "anjalankoski etop (km)"},
+        {"geotiff/radar_anjalankoski_hclass_3067/202607181815_radar_anjalankoski_hclass_3ddeg.tif",
+         0,
+         0.0f,
+         6.0f,
+         "anjalankoski hclass (1..6)"},
+        {"geotiff/radar_anjalankoski_rhohv-1_3067/202607181815_radar_anjalankoski_rhohv_3ddeg.tif",
+         0,
+         -0.01f,
+         1.05f,
+         "anjalankoski rhohv (0..1)"},
+        {"geotiff/radar_anjalankoski_vrad_3067/202607181815_radar_anjalankoski_vrad_7ddeg.tif",
+         kFmiRadialVelocity,
+         -50.0f,
+         50.0f,
+         "anjalankoski vrad (m/s)"},
+    };
+
+    // Only run if the fixtures are installed; otherwise skip silently.
+    std::ifstream probe(base + "/" + cases.front().relpath, std::ios::binary);
+    if (probe.good())
+    {
+      probe.close();
+      for (const auto& c : cases)
+      {
+        std::shared_ptr<NFmiQueryData> d;
+        try
+        {
+          d = readRadarFile(base + "/" + c.relpath);
+        }
+        catch (const std::exception& e)
+        {
+          std::cerr << "  FAIL: decode " << c.label << ": " << e.what() << "\n";
+          ++failures;
+          continue;
+        }
+        if (!d)
+        {
+          std::cerr << "  FAIL: no data for " << c.label << "\n";
+          ++failures;
+          continue;
+        }
+        NFmiFastQueryInfo fi(d.get());
+        fi.FirstParam();
+        fi.FirstLevel();
+        fi.FirstTime();
+        const int pid = fi.Param().GetParam()->GetIdent();
+        const std::string pname = fi.Param().GetParam()->GetName().CharPtr();
+        float mn = 1e30f, mx = -1e30f;
+        long nn = 0;
+        for (fi.ResetLocation(); fi.NextLocation();)
+        {
+          const float v = fi.FloatValue();
+          if (v != kFloatMissing)
+          {
+            ++nn;
+            mn = std::min(mn, v);
+            mx = std::max(mx, v);
+          }
+        }
+        std::cout << "  " << c.label << ": param=" << pid << " (" << pname << ") nonmiss=" << nn
+                  << " phys=[" << mn << ", " << mx << "]\n";
+        check(nn > 0, c.label + ": has non-missing values");
+        if (nn > 0)
+          check(mn >= c.pmin && mx <= c.pmax, c.label + ": physical values within expected range");
+        if (c.paramid != 0)
+          check(pid == c.paramid, c.label + ": parameter id matches");
+      }
+    }
+    else
+      std::cout << "  (real sample fixtures not installed at " << base << " - skipped)\n";
   }
 
   if (failures == 0)
