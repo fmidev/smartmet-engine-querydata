@@ -256,6 +256,13 @@ RepoManager::RepoManager(const std::string& configfile)
       lookupHostSetting(itsConfig, itsVerbose, "verbose", hostname);
       itsRepo.verbose(itsVerbose);
 
+      // Directory for decoded radar (GeoTIFF/ODIM) scratch .sqd files. Should be
+      // on a real disk volume so the kernel page cache manages the mapped frames.
+      std::string radar_scratch_dir;
+      if (itsConfig.lookupValue("radar.scratch_directory", radar_scratch_dir) &&
+          !radar_scratch_dir.empty())
+        itsRadarScratchDir = radar_scratch_dir;
+
       // Phase 1: Establish producer setting
 
       if (!itsConfig.exists("producers"))

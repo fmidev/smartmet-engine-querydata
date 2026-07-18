@@ -105,7 +105,8 @@ struct RepoManager
 
   // Directory for decoded radar scratch .sqd files (GeoTIFF/ODIM producers).
   // Should live on a real disk volume so the kernel page cache manages the
-  // memory-mapped decoded frames. TODO: make configurable via the config file.
+  // memory-mapped decoded frames. Overridable via config key
+  // radar.scratch_directory; default below.
   std::filesystem::path itsRadarScratchDir{"/var/tmp/smartmet-qengine-radar"};
   boost::atomic<int> itsThreadCount;
 
