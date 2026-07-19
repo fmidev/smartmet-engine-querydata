@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.7.18
-Release: 9%{?dist}.fmi
+Release: 10%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-10.fmi
+- Lazy radar loading, increment 4a (unload sweeper): the expiration loop now unloads cold lazy producers, which is what makes radar.cache_size actually bind. A lazy producer untouched for radar.idle_timeout seconds (new config key; 0 = never) is unloaded to free memory; and while the scratch cache exceeds radar.cache_size, the least-recently-accessed loaded lazy producer is unloaded (its scratch reclaimed via the Model destructor) until under budget. ensureLoaded() records per-producer access time (also on the hot path). Unloading is safe against in-flight queries (a live Q keeps its model alive until the request ends). Re-access re-decodes via ensureLoaded. Non-lazy producers unaffected.
+
 * Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-9.fmi
 - Lazy radar loading, increment 3 (on-access decode): a lazy producer is no longer eagerly decoded - the directory monitor keeps its catalogue fresh (and refreshes it if already hot), but a cold lazy producer's frames are decoded only on first access. EngineImpl::get() calls RepoManager::ensureLoaded(), which (for lazy producers only, via a fast set check) serialises per producer and decodes the newest number_to_keep catalogued frames into the repository, so a subsequent multifile get() sees the complete servable window. The core decode loop of load() was factored into loadModels(), shared by the monitor path and on-access loading. Non-lazy producers are entirely unaffected (fast-set early return; no config scan, no lock). NOTE: single-threaded path validated; concurrency (many request threads missing + a background refresher) needs a staging-server soak.
 

@@ -14,6 +14,7 @@
 #include <macgyver/Cache.h>
 #include <macgyver/DirectoryMonitor.h>
 #include <spine/Thread.h>
+#include <chrono>
 #include <filesystem>
 #include <map>
 #include <memory>
@@ -128,6 +129,11 @@ struct RepoManager
 
   bool producerHasModels(const Producer& producer) const;
   std::shared_ptr<std::mutex> lazyLoadMutex(const Producer& producer);
+  void unloadProducer(const Producer& producer);
+  // Unload cold lazy producers: those idle past radar.idle_timeout, and (while
+  // the scratch cache is over its byte budget) the least-recently-accessed
+  // loaded ones, so radar.cache_size actually binds. Called from expirationLoop.
+  void sweepLazyProducers();
 
   Fmi::DirectoryMonitor::Watcher id(const Producer& producer) const;
 
@@ -136,9 +142,15 @@ struct RepoManager
   // Producers configured lazy (radar). Checked on every get() via ensureLoaded,
   // so kept as a fast set to avoid a config scan for the non-lazy common case.
   std::set<Producer> itsLazyProducers;
-  // Per-producer locks serialising concurrent first-access decodes.
+  // Idle timeout (seconds) after which an untouched lazy producer is unloaded;
+  // 0 = never unload by idle (config key radar.idle_timeout).
+  unsigned int itsRadarIdleTimeout{0};
+  // Per-producer locks serialising concurrent first-access decodes, and the
+  // last-access time of each lazy producer (for idle + size-based unloading).
+  // Both guarded by itsLazyLoadMapMutex.
   std::mutex itsLazyLoadMapMutex;
   std::map<Producer, std::shared_ptr<std::mutex>> itsLazyLoadMutexes;
+  std::map<Producer, std::chrono::steady_clock::time_point> itsLazyLastAccess;
 
   // Directory for decoded radar scratch .sqd files (GeoTIFF/ODIM producers).
   // Should live on a real disk volume so the kernel page cache manages the

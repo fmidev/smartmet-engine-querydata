@@ -49,6 +49,7 @@
 #include <cassert>
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <memory>
 #include <set>
 #include <sstream>
@@ -273,6 +274,12 @@ RepoManager::RepoManager(const std::string& configfile)
       if (itsConfig.lookupValue("radar.cache_size", radar_cache_size) && radar_cache_size > 0)
         itsRadarCacheBytes = static_cast<std::uintmax_t>(radar_cache_size);
 
+      // Idle timeout (seconds) after which an untouched lazy producer is
+      // unloaded; 0 (default) = never unload by idle.
+      int radar_idle_timeout = 0;
+      if (itsConfig.lookupValue("radar.idle_timeout", radar_idle_timeout) && radar_idle_timeout > 0)
+        itsRadarIdleTimeout = static_cast<unsigned int>(radar_idle_timeout);
+
       // Phase 1: Establish producer setting
 
       if (!itsConfig.exists("producers"))
@@ -483,17 +490,11 @@ void RepoManager::expirationLoop()
       }
     }
 
-    // Enforce the radar scratch cache size budget. A source is pinned (not
-    // evicted) while it has live models; under the current eager load that is
-    // every configured radar source, so the budget mainly reclaims sources whose
-    // models have expired or that are no longer configured. Full working-set
-    // eviction of cold configured sources needs lazy per-source loading.
-    if (itsRadarCacheBytes > 0)
-    {
-      auto pinned = [this](const std::string& sourceId)
-      { return !itsRepo.getAllModels(sourceId).empty(); };
-      RadarCache(itsRadarScratchDir, itsRadarCacheBytes).enforceBudget(pinned);
-    }
+    // Unload cold lazy radar producers (idle timeout + size budget) and reclaim
+    // orphaned scratch. This is what makes radar.cache_size bind on the working
+    // set: the least-recently-accessed loaded producer is unloaded until the
+    // scratch cache is under budget.
+    sweepLazyProducers();
   }
 }
 
@@ -950,6 +951,14 @@ void RepoManager::ensureLoaded(const Producer& producer)
     // Fast path: only lazy producers are ever loaded on demand.
     if (itsLazyProducers.find(producer) == itsLazyProducers.end())
       return;
+
+    // Record the access time (for idle + size-based unloading), also on the
+    // already-loaded hot path so an actively-queried producer stays hot.
+    {
+      std::lock_guard<std::mutex> g(itsLazyLoadMapMutex);
+      itsLazyLastAccess[producer] = std::chrono::steady_clock::now();
+    }
+
     if (producerHasModels(producer))
       return;
 
@@ -975,6 +984,105 @@ void RepoManager::ensureLoaded(const Producer& producer)
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Lazy load failed for producer " + producer);
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Drop all models of a producer, freeing its memory and (radar) scratch
+ *
+ * A live Q keeps its model alive until the request finishes, so unloading during
+ * a request is safe; the scratch .sqd is deleted when the last reference drops.
+ * The producer will be re-decoded on its next access via ensureLoaded.
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::unloadProducer(const Producer& producer)
+{
+  try
+  {
+    Spine::WriteLock lock(itsMutex);
+    itsRepo.resize(producer, 0);
+  }
+  catch (...)
+  {
+    // Producer may have no models (race with expiry); nothing to unload.
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Unload cold lazy producers (idle timeout + size budget)
+ *
+ * Two pressures: a lazy producer untouched for radar.idle_timeout is unloaded to
+ * free memory; and while the scratch cache exceeds radar.cache_size, the
+ * least-recently-accessed loaded lazy producer is unloaded so its scratch is
+ * reclaimed - this is what makes the byte budget actually bind on the working
+ * set. Finally the cache reclaims any de-configured / orphaned scratch.
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::sweepLazyProducers()
+{
+  if (itsLazyProducers.empty())
+    return;
+
+  const auto now = std::chrono::steady_clock::now();
+
+  std::map<Producer, std::chrono::steady_clock::time_point> access;
+  {
+    std::lock_guard<std::mutex> g(itsLazyLoadMapMutex);
+    access = itsLazyLastAccess;
+  }
+
+  auto idleSeconds = [&](const Producer& p) -> long long
+  {
+    auto it = access.find(p);
+    if (it == access.end())
+      return std::numeric_limits<long long>::max();  // never accessed -> maximally idle
+    return std::chrono::duration_cast<std::chrono::seconds>(now - it->second).count();
+  };
+
+  // 1. Idle unload.
+  if (itsRadarIdleTimeout > 0)
+  {
+    for (const auto& p : itsLazyProducers)
+      if (idleSeconds(p) >= static_cast<long long>(itsRadarIdleTimeout) && producerHasModels(p))
+        unloadProducer(p);
+  }
+
+  // 2. Size-based unload: bound the working set to the byte budget by unloading
+  //    the least-recently-accessed loaded lazy producer until under budget.
+  if (itsRadarCacheBytes > 0)
+  {
+    RadarCache cache(itsRadarScratchDir, itsRadarCacheBytes);
+    while (cache.totalBytes() > itsRadarCacheBytes)
+    {
+      Producer victim;
+      long long victimIdle = -1;
+      for (const auto& p : itsLazyProducers)
+      {
+        if (!producerHasModels(p))
+          continue;
+        const long long idle = idleSeconds(p);
+        if (idle > victimIdle)  // most idle (oldest access) wins
+        {
+          victimIdle = idle;
+          victim = p;
+        }
+      }
+      if (victimIdle < 0)
+        break;  // nothing loaded left to unload
+      unloadProducer(victim);
+      access.erase(victim);  // do not reconsider (its models are gone)
+    }
+  }
+
+  // 3. Reclaim de-configured / orphaned scratch.
+  if (itsRadarCacheBytes > 0)
+  {
+    auto pinned = [this](const std::string& id) { return !itsRepo.getAllModels(id).empty(); };
+    RadarCache(itsRadarScratchDir, itsRadarCacheBytes).enforceBudget(pinned);
   }
 }
 
