@@ -59,39 +59,56 @@ radar.scratch_directory = "/var/tmp/smartmet-qengine-radar";  # default; use a r
 - All parameters use linear interpolation; categorical products (e.g. HCLASS)
   should use nearest-point.
 
-## Scratch cache cleanup
+## Scratch cache
 
-Decoded scratch `.sqd` files are cleaned by three mechanisms, in order of
-responsibility:
+Decoded scratch `.sqd` files live under `radar.scratch_directory` in one
+subdirectory per source (producer): `<dir>/<producer>/<stem>_<sourcemtime>.sqd`.
+The subdirectory is the unit of caching and eviction, because radar access is
+source-local: when a source is used its whole timeseries is wanted, so a
+per-file LRU would half-cache hot sources. The cache is managed by `RadarCache`.
+
+### Cleanup mechanisms
 
 1. **Steady state** — `Model::~Model` unlinks its own scratch when the model is
-   evicted by `number_to_keep` / `max_age`. When a source frame is overwritten
-   its scratch name changes (the name embeds the source mtime), the old model is
-   evicted, and its scratch is unlinked. Steady-state disk use is therefore
-   bounded to roughly `number_to_keep` frames per producer.
-2. **Startup reclamation** — on engine start, before the first scan,
-   `RepoManager::cleanupOrphanedRadarScratch()` deletes every file under the
-   scratch directory. This runs once per process (not on config hot-reload,
-   where the previous manager still owns live scratch). It recovers from a crash
-   or kill, which skips the model destructors: at startup nothing is mapped, so
-   every file present is provably a stale orphan. Re-decoding the current frames
-   costs well under a second, so a full reclaim is preferred over trying to
-   preserve still-valid frames for a warm restart.
-3. **External safety net (optional)** — because startup reclamation only runs
-   when the process restarts, a host that is powered off with the server never
-   restarting would retain orphans indefinitely. Ship a `tmpfiles.d` entry as a
-   backstop, with an age far larger than any producer's `max_age` so it can
-   never race a frame the server is still serving (e.g. during a stalled feed):
+   evicted by `number_to_keep` / `max_age`. As a source frame rotates, its
+   scratch name changes (the name embeds the source mtime), so per-source disk
+   use tracks the source frame count.
+2. **Startup reconcile** — before the first scan, `RepoManager::reconcileRadarCache()`
+   reconciles the on-disk cache against the configured sources instead of wiping
+   it: it removes crash residue (dot-prefixed temp files and any `.trash`), drops
+   frames whose source has rotated away and sources no longer configured, keeps
+   still-current frames so the restart is **warm**, and enforces the size budget.
+   Runs once per process (not on config hot-reload). Crash-safe by construction:
+   the tree is the source of truth, so a crash at any point converges on the next
+   reconcile. See the crash-resistance notes below.
+3. **Size budget** — `radar.cache_size` (bytes; `0` = unlimited) caps total cache
+   size. When exceeded, whole least-recently-accessed sources are evicted down to
+   a low-water mark. Recency is the mtime of a per-source `.accessed` marker
+   (touched, rate-limited, on access — an atomic metadata write). A source is
+   *pinned* (never evicted) while it has live models. **Caveat:** under the
+   current eager per-producer load, every configured radar source has live models
+   and is therefore pinned, so the budget currently reclaims only de-configured or
+   expired sources. Making it a true working-set limiter (evicting cold *configured*
+   sources and reloading them lazily on access) requires lazy per-source loading.
 
-   ```
-   # /etc/tmpfiles.d/smartmet-qengine-radar.conf
-   d /var/tmp/smartmet-qengine-radar 0755 smartmet smartmet -
-   e /var/tmp/smartmet-qengine-radar - - - 30d
-   ```
+### Crash resistance
 
-Each server instance must use its own `radar.scratch_directory`; the startup
-reclamation and the deterministic scratch names both assume the directory is
-owned exclusively by one process.
+The cache needs atomicity, not durability — it is a pure function of the source
+files, so anything lost is re-decoded. There is deliberately **no authoritative
+index file**: correctness state is the tree itself (filenames + source mtimes),
+recency is an atomic `.accessed` mtime, and eviction of a whole source renames its
+subdir into `.trash` (atomic) before removal. Dot-prefixed temps and markers are
+ignored by the newbase reader, so a half-written decode is never seen as data.
+
+### Configuration
+
+```
+radar.scratch_directory = "/var/tmp/smartmet-qengine-radar";  # per instance
+radar.cache_size        = 53687091200;  # 50 GiB budget; 0 = unlimited
+```
+
+Each server instance must use its own `radar.scratch_directory` (the naming and
+eviction assume exclusive ownership).
 
 ## Testing
 

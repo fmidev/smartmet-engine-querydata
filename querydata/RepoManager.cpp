@@ -30,6 +30,7 @@
 #include "RepoManager.h"
 #include "Model.h"
 #include "Producer.h"
+#include "RadarCache.h"
 #include "RadarReader.h"
 #include "Repository.h"
 #include <boost/bind/bind.hpp>
@@ -267,6 +268,11 @@ RepoManager::RepoManager(const std::string& configfile)
           !radar_scratch_dir.empty())
         itsRadarScratchDir = radar_scratch_dir;
 
+      // Byte budget for the radar scratch cache; 0 (default) = unlimited.
+      long long radar_cache_size = 0;
+      if (itsConfig.lookupValue("radar.cache_size", radar_cache_size) && radar_cache_size > 0)
+        itsRadarCacheBytes = static_cast<std::uintmax_t>(radar_cache_size);
+
       // Phase 1: Establish producer setting
 
       if (!itsConfig.exists("producers"))
@@ -317,52 +323,74 @@ RepoManager::RepoManager(const std::string& configfile)
 
 // ----------------------------------------------------------------------
 /*!
- * \brief Delete radar scratch .sqd files left over from a previous run
+ * \brief Reconcile the radar scratch cache at startup
  *
- * Decoded radar frames live under itsRadarScratchDir in per-producer subdirs
- * and are normally unlinked by Model::~Model on eviction. A crash or kill skips
- * destructors and leaks the files; because number_to_keep/the external cleaner
- * eventually rotate the source frames away, those leaks would grow without
- * bound.
+ * Decoded radar frames live under itsRadarScratchDir in per-source (producer)
+ * subdirs. Rather than wiping everything (which would discard a warm working
+ * set that is expensive to rebuild), this reconciles the on-disk cache against
+ * the configured sources: it removes crash residue (dot-prefixed temps, .trash),
+ * drops frames whose source has rotated away and sources no longer configured,
+ * keeps still-current frames so a restart is warm, and enforces the
+ * radar.cache_size budget by group-LRU eviction of whole sources. See RadarCache.
  *
- * This is called exactly once per process, before init() starts scanning, so
- * no Model yet holds a mapping. Every regular file in the (exclusively owned)
- * scratch directory is therefore a stale orphan and is removed. We forgo the
- * potential warm-cache reuse of still-valid frames in favour of a provably safe
- * total reclaim: re-decoding number_to_keep frames costs well under a second.
+ * Called once per process before init() starts scanning; not on a config
+ * hot-reload, where the previous RepoManager still owns live scratch.
  */
 // ----------------------------------------------------------------------
 
-void RepoManager::cleanupOrphanedRadarScratch() const
+void RepoManager::reconcileRadarCache() const
 {
   try
   {
-    std::error_code ec;
-    if (!std::filesystem::exists(itsRadarScratchDir, ec))
-      return;
+    RadarCache cache(itsRadarScratchDir, itsRadarCacheBytes);
 
-    std::size_t removed = 0;
-    for (std::filesystem::recursive_directory_iterator it(itsRadarScratchDir, ec), end;
-         it != end && !ec;
-         it.increment(ec))
+    // Map a source id (= producer subdir) to its configured source directory.
+    std::map<std::string, std::filesystem::path> sourceDirs;
+    for (const ProducerConfig& config : itsConfigList)
+      sourceDirs[config.producer] = config.directory;
+
+    // keepFile: a cached file is current iff a source frame still maps to it
+    // (same stem + mtime). The set of valid scratch names per producer is
+    // computed lazily from a one-time source-directory scan.
+    auto validNames = std::make_shared<std::map<std::string, std::set<std::string>>>();
+    auto keepFile = [this, sourceDirs, validNames](const std::string& sourceId,
+                                                   const std::string& filename) -> bool
     {
-      if (it->is_regular_file(ec))
+      auto dit = sourceDirs.find(sourceId);
+      if (dit == sourceDirs.end())
+        return false;  // producer no longer configured -> drop
+      auto vit = validNames->find(sourceId);
+      if (vit == validNames->end())
       {
-        std::error_code rmec;
-        if (std::filesystem::remove(it->path(), rmec))
-          ++removed;
+        std::set<std::string> names;
+        std::error_code ec;
+        for (std::filesystem::directory_iterator it(dit->second, ec), end; it != end && !ec;
+             it.increment(ec))
+        {
+          if (it->is_regular_file(ec))
+            names.insert(
+                radarScratchPath(itsRadarScratchDir, sourceId, it->path()).filename().string());
+        }
+        vit = validNames->emplace(sourceId, std::move(names)).first;
       }
-    }
+      return vit->second.count(filename) > 0;
+    };
 
-    if (removed > 0)
-      std::cout << Spine::log_time_str() + " [querydata] removed " + std::to_string(removed) +
-                       " orphaned radar scratch file(s) from " + itsRadarScratchDir.string()
-                << '\n';
+    // pinned: never evict a configured source (it would just be re-decoded on the
+    // eager load that follows) or one that already has live models.
+    auto pinned = [this, sourceDirs](const std::string& sourceId) -> bool
+    {
+      if (sourceDirs.count(sourceId) > 0)
+        return true;
+      return !itsRepo.getAllModels(sourceId).empty();
+    };
+
+    cache.reconcile(keepFile, pinned);
   }
   catch (...)
   {
-    // Startup cleanup is best effort: never block engine init on it.
-    std::cout << Fmi::Exception::Trace(BCP, "Failed to clean radar scratch directory") << '\n';
+    // Startup reconcile is best effort: never block engine init on it.
+    std::cout << Fmi::Exception::Trace(BCP, "Failed to reconcile radar scratch cache") << '\n';
   }
 }
 
@@ -451,6 +479,18 @@ void RepoManager::expirationLoop()
         Spine::WriteLock lock(itsMutex);
         itsRepo.expire(config.producer, config.max_age);
       }
+    }
+
+    // Enforce the radar scratch cache size budget. A source is pinned (not
+    // evicted) while it has live models; under the current eager load that is
+    // every configured radar source, so the budget mainly reclaims sources whose
+    // models have expired or that are no longer configured. Full working-set
+    // eviction of cold configured sources needs lazy per-source loading.
+    if (itsRadarCacheBytes > 0)
+    {
+      auto pinned = [this](const std::string& sourceId)
+      { return !itsRepo.getAllModels(sourceId).empty(); };
+      RadarCache(itsRadarScratchDir, itsRadarCacheBytes).enforceBudget(pinned);
     }
   }
 }
@@ -759,6 +799,8 @@ void RepoManager::load(Producer producer,  // NOLINT(performance-unnecessary-val
           // modification time) stays with the source frame.
           auto scratch =
               convertRadarToScratch(itsRadarScratchDir, conf.producer, filename, radarformat);
+          // Mark the source as recently accessed for the cache's group-LRU.
+          RadarCache(itsRadarScratchDir, itsRadarCacheBytes).markAccessed(conf.producer);
           model = Model::create(filename,
                                 scratch,
                                 conf.producer,

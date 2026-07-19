@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.7.18
-Release: 5%{?dist}.fmi
+Release: 6%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sun Jul 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-6.fmi
+- Size-bounded radar scratch cache (RadarCache): the decoded .sqd cache is now managed per source (producer subdirectory) with a byte budget (config radar.cache_size; 0 = unlimited). When over budget, whole least-recently-accessed sources are evicted to a low-water mark; recency is a per-source .accessed marker mtime and a source with live models is pinned. Startup now RECONCILES the cache instead of wiping it (RepoManager::reconcileRadarCache): crash residue (dot-prefixed temps, .trash) and stale/rotated/de-configured frames are removed while current frames are kept for a warm restart. Crash-safe by construction (filesystem is the source of truth, atomic subdir-rename eviction, no authoritative index file). Unit-tested by examples/RadarCacheTest.cpp. NOTE: under the current eager per-producer load every configured source is pinned, so the budget presently reclaims only expired/de-configured sources; a true working-set limit needs lazy per-source loading.
+
 * Sun Jul 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-5.fmi
 - Radar scratch: the temporary file written during decode is now dot-prefixed (.<name>.<id> in the target directory) instead of using a .tmp suffix, so the newbase querydata reader and directory scans automatically ignore a half-written temp left by a crash. The rename into place stays atomic (same directory).
 

@@ -248,10 +248,11 @@ void EngineImpl::init()
     // Init querydata manager
     auto repomanager = itsRepoManager.load();
 
-    // Reclaim radar scratch .sqd files leaked by a previous crash/kill. Safe
-    // here because this runs once per process before any data is mapped; a
-    // config hot-reload builds a fresh RepoManager but does not re-enter init().
-    repomanager->cleanupOrphanedRadarScratch();
+    // Reconcile the radar scratch cache (remove crash residue and stale frames,
+    // keep current frames warm, enforce the size budget). Safe here because this
+    // runs once per process before any data is mapped; a config hot-reload builds
+    // a fresh RepoManager but does not re-enter init().
+    repomanager->reconcileRadarCache();
 
     repomanager->init();
 

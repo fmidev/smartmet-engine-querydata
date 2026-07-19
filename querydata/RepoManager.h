@@ -58,13 +58,13 @@ struct RepoManager
   bool ready() const;
   void shutdown();
 
-  // Delete leftover decoded radar scratch .sqd files from a previous run.
-  // Must be called exactly once per process, before init() starts scanning:
-  // at that point no Model holds a mapping, so every file in the (exclusively
-  // owned) scratch directory is a crash orphan and can be safely removed. Not
-  // safe to call on a config hot-reload, where the previous RepoManager still
-  // owns live scratch files.
-  void cleanupOrphanedRadarScratch() const;
+  // Reconcile the radar scratch cache against the sources and the size budget.
+  // Called once per process before init() starts scanning: removes crash residue
+  // (dot-prefixed temps, .trash), drops stale/rotated frames and de-configured
+  // sources, keeps still-current frames for a warm restart, and enforces the
+  // radar.cache_size budget (group-LRU eviction of whole sources). Not for a
+  // config hot-reload, where the previous RepoManager still owns live scratch.
+  void reconcileRadarCache() const;
 
   // data members
 
@@ -116,6 +116,12 @@ struct RepoManager
   // memory-mapped decoded frames. Overridable via config key
   // radar.scratch_directory; default below.
   std::filesystem::path itsRadarScratchDir{"/var/tmp/smartmet-qengine-radar"};
+
+  // Total byte budget for the radar scratch cache; 0 = unlimited. Overridable
+  // via config key radar.cache_size. When exceeded, whole least-recently-accessed
+  // sources (producer subdirectories) are evicted (see RadarCache).
+  std::uintmax_t itsRadarCacheBytes{0};
+
   boost::atomic<int> itsThreadCount;
 
   using LatLonCache = Fmi::Cache::Cache<std::size_t, std::shared_ptr<std::vector<NFmiPoint>>>;
