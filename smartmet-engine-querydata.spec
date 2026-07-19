@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.7.18
-Release: 7%{?dist}.fmi
+Release: 8%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-8.fmi
+- Lazy radar loading, increment 2 (metadata catalog): new RadarCatalog builds, per producer, the header-only metadata (via readRadarMetadata) of every available frame so a source's full time dimension can be advertised in GetCapabilities without decoding. New per-producer config flag 'lazy'; when set, RepoManager populates the catalog on each scan (frames are still eagerly decoded for now - a later increment defers that to on-access). 'lazy' composes with 'multifile': a lazy+multifile radar producer catalogs the whole series cheaply and (in a later increment) decodes the whole servable window on access so the grouped multifile Q is complete; non-lazy observation/forecast producers are unaffected. Unit-tested by examples/RadarCatalogTest.cpp.
+
 * Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-7.fmi
 - RadarReader: stop constructing NFmiEnumConverter per frame (its constructor builds the whole enum<->name map); share one process-wide static instance via paramEnumConverter(), matching the existing codebase idiom, since its lookups never mutate state. Factored the valid/origin-time + parameter resolution into a shared helper. Added readRadarMetadata(), a header-only per-frame metadata read (time/param/grid/CRS/bbox, no RasterIO) so a whole radar source's time dimension can be built cheaply without decoding every frame - the foundation for lazy per-source loading with complete GetCapabilities. GeoTIFF is header-only; ODIM currently falls back to a full decode. RadarReaderTest cross-checks the metadata against the full decode.
 

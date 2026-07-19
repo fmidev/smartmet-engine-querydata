@@ -734,6 +734,13 @@ void RepoManager::load(Producer producer,  // NOLINT(performance-unnecessary-val
 
   const ProducerConfig& conf = producerConfig(producer);
 
+  // Lazy radar producer: catalogue the full time dimension (header-only, no pixel
+  // decode) so GetCapabilities can advertise every frame regardless of what is
+  // decoded. The frames are still eagerly decoded below for now; a later
+  // increment defers that to on-access.
+  if (conf.islazy)
+    itsRadarCatalog.update(conf.producer, files);
+
   // Try establishing old config
   std::optional<ProducerConfig> oldconf;
   try

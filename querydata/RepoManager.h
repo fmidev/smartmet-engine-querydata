@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "RadarCatalog.h"
 #include "Repository.h"
 #include <boost/atomic.hpp>
 #include <boost/thread.hpp>
@@ -94,6 +95,11 @@ struct RepoManager
   // loaded data, updated regularly
 
   Repository itsRepo;
+
+  // Cheap header-only metadata of every frame of each lazy radar producer, so
+  // GetCapabilities can advertise the full time dimension without decoding. The
+  // pixel decode is deferred to on-access (see RadarCatalog).
+  RadarCatalog itsRadarCatalog;
 
   std::time_t configModTime;  // Timestamp of configuration file loaded
   std::time_t getConfigModTime() const { return configModTime; }

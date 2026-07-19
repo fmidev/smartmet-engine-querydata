@@ -17,7 +17,7 @@ namespace Querydata
  */
 // ----------------------------------------------------------------------
 
-ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Setting &setting)
+ProducerConfig parse_producerinfo(const Producer& producer, const libconfig::Setting& setting)
 {
   std::string name;
   try
@@ -40,14 +40,14 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
         if (setting[i].isArray())
         {
           for (int j = 0; j < setting[i].getLength(); ++j)
-            pinfo.aliases.insert(static_cast<const char *>(setting[i][j]));
+            pinfo.aliases.insert(static_cast<const char*>(setting[i][j]));
         }
         else
-          pinfo.aliases.insert(static_cast<const char *>(setting[i]));
+          pinfo.aliases.insert(static_cast<const char*>(setting[i]));
       }
 
       else if (name == "directory")
-        pinfo.directory = std::filesystem::path(static_cast<const char *>(setting[i]));
+        pinfo.directory = std::filesystem::path(static_cast<const char*>(setting[i]));
 
       else if (name == "pattern")
       {
@@ -57,6 +57,9 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
 
       else if (name == "multifile")
         pinfo.ismultifile = setting[i];
+
+      else if (name == "lazy")
+        pinfo.islazy = setting[i];
 
       else if (name == "forecast")
         pinfo.isforecast = setting[i];
@@ -98,10 +101,10 @@ ProducerConfig parse_producerinfo(const Producer &producer, const libconfig::Set
         pinfo.mmap = setting[i];
 
       else if (name == "type")
-        pinfo.type = static_cast<const char *>(setting[i]);
+        pinfo.type = static_cast<const char*>(setting[i]);
 
       else if (name == "leveltype")
-        pinfo.leveltype = static_cast<const char *>(setting[i]);
+        pinfo.leveltype = static_cast<const char*>(setting[i]);
 
       else
         throw Fmi::Exception(BCP,
