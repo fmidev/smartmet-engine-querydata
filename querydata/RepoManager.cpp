@@ -301,6 +301,8 @@ RepoManager::RepoManager(const std::string& configfile)
 
         // Save the info
 
+        if (pinfo.islazy)
+          itsLazyProducers.insert(pinfo.producer);
         itsConfigList.push_back(pinfo);
       }
 
@@ -736,11 +738,40 @@ void RepoManager::load(Producer producer,  // NOLINT(performance-unnecessary-val
 
   // Lazy radar producer: catalogue the full time dimension (header-only, no pixel
   // decode) so GetCapabilities can advertise every frame regardless of what is
-  // decoded. The frames are still eagerly decoded below for now; a later
-  // increment defers that to on-access.
+  // decoded.
   if (conf.islazy)
+  {
     itsRadarCatalog.update(conf.producer, files);
+    // A cold lazy producer is catalogue-only: its frames are decoded on first
+    // access (ensureLoaded). A hot one (already loaded) keeps being refreshed
+    // here so a live animation stays current.
+    if (!producerHasModels(producer))
+    {
+      --itsThreadCount;
+      return;
+    }
+  }
 
+  loadModels(producer, files, conf);
+
+  --itsThreadCount;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Decode files into models and add them to the repository
+ *
+ * The core of load(): shared by the directory-monitor path and by on-access
+ * lazy loading (ensureLoaded). Loads the newest number_to_keep files. Does not
+ * touch itsThreadCount (the caller owns it) and expects files sorted newest
+ * first.
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::loadModels(const Producer& producer,
+                             const Files& files,
+                             const ProducerConfig& conf)
+{
   // Try establishing old config
   std::optional<ProducerConfig> oldconf;
   try
@@ -882,8 +913,69 @@ void RepoManager::load(Producer producer,  // NOLINT(performance-unnecessary-val
     Spine::WriteLock lock(itsMutex);
     itsRepo.updateProducerStatus(producer, data_load_time, itsRepo.getAllModels(producer).size());
   }
+}
 
-  --itsThreadCount;
+bool RepoManager::producerHasModels(const Producer& producer) const
+{
+  Spine::ReadLock lock(itsMutex);
+  return !itsRepo.getAllModels(producer).empty();
+}
+
+std::shared_ptr<std::mutex> RepoManager::lazyLoadMutex(const Producer& producer)
+{
+  std::lock_guard<std::mutex> guard(itsLazyLoadMapMutex);
+  auto& m = itsLazyLoadMutexes[producer];
+  if (!m)
+    m = std::make_shared<std::mutex>();
+  return m;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Ensure a lazy producer's servable window is decoded on first access
+ *
+ * No-op for non-lazy producers (fast set check) and for lazy producers already
+ * loaded. On a miss it serialises per producer, re-checks, and decodes the
+ * newest number_to_keep catalogued frames into the repository so a subsequent
+ * (possibly multifile) get() sees the complete servable window. It takes no lock
+ * across the decode except its own per-producer mutex; loadModels locks itsMutex
+ * internally, so this must run before the caller takes itsMutex for the get().
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::ensureLoaded(const Producer& producer)
+{
+  try
+  {
+    // Fast path: only lazy producers are ever loaded on demand.
+    if (itsLazyProducers.find(producer) == itsLazyProducers.end())
+      return;
+    if (producerHasModels(producer))
+      return;
+
+    // Serialise concurrent first-access decodes of the same producer.
+    auto lk = lazyLoadMutex(producer);
+    std::lock_guard<std::mutex> guard(*lk);
+    if (producerHasModels(producer))  // another thread just loaded it
+      return;
+
+    const ProducerConfig& conf = producerConfig(producer);
+
+    // Decode the servable window: all catalogued frames (loadModels keeps the
+    // newest number_to_keep). Sorted newest first to match load().
+    Files files;
+    for (const auto& frame : itsRadarCatalog.frames(producer))
+      files.push_back(frame.path);
+    if (files.empty())
+      return;
+    std::sort(files.rbegin(), files.rend());
+
+    loadModels(producer, files, conf);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Lazy load failed for producer " + producer);
+  }
 }
 
 // ----------------------------------------------------------------------

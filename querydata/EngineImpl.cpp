@@ -524,6 +524,9 @@ Q EngineImpl::get(const Producer& producer) const
   {
     auto repomanager = itsRepoManager.load();
 
+    // Decode a lazy producer's servable window on first access before reading it.
+    repomanager->ensureLoaded(producer);
+
     Spine::ReadLock lock(repomanager->itsMutex);
     auto q = repomanager->itsRepo.get(producer);
     q->setParameterTranslations(itsParameterTranslations.load());
@@ -547,6 +550,8 @@ Q EngineImpl::get(const Producer& producer, const Fmi::DateTime& origintime) con
   {
     auto repomanager = itsRepoManager.load();
 
+    repomanager->ensureLoaded(producer);
+
     Spine::ReadLock lock(repomanager->itsMutex);
     auto q = repomanager->itsRepo.get(producer, origintime);
     q->setParameterTranslations(itsParameterTranslations.load());
@@ -569,6 +574,8 @@ Q EngineImpl::get(const Producer& producer, const Fmi::TimePeriod& timePeriod) c
   try
   {
     auto repomanager = itsRepoManager.load();
+
+    repomanager->ensureLoaded(producer);
 
     Spine::ReadLock lock(repomanager->itsMutex);
     auto q = repomanager->itsRepo.get(producer, timePeriod);

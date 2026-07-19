@@ -15,7 +15,10 @@
 #include <macgyver/DirectoryMonitor.h>
 #include <spine/Thread.h>
 #include <filesystem>
+#include <map>
 #include <memory>
+#include <mutex>
+#include <set>
 
 namespace SmartMet
 {
@@ -67,6 +70,12 @@ struct RepoManager
   // config hot-reload, where the previous RepoManager still owns live scratch.
   void reconcileRadarCache() const;
 
+  // Ensure a lazy producer's servable window is decoded and in the repository,
+  // decoding it on first access if necessary. A no-op for non-lazy producers and
+  // for lazy producers already loaded. Safe to call from request threads; it does
+  // its own locking and must be called before taking itsMutex for a get().
+  void ensureLoaded(const Producer& producer);
+
   // data members
 
   mutable Spine::MutexType itsMutex;  // mutexes should always be mutable
@@ -111,11 +120,25 @@ struct RepoManager
 
  private:
   void load(Producer producer, Files files);
+  // Core of load(): decode the given files into models and add them to the repo.
+  // Shared by the directory-monitor path and by on-access lazy loading; does not
+  // touch itsThreadCount (the caller owns it).
+  void loadModels(const Producer& producer, const Files& files, const ProducerConfig& conf);
   void expirationLoop();
+
+  bool producerHasModels(const Producer& producer) const;
+  std::shared_ptr<std::mutex> lazyLoadMutex(const Producer& producer);
 
   Fmi::DirectoryMonitor::Watcher id(const Producer& producer) const;
 
   int itsMaxThreadCount;
+
+  // Producers configured lazy (radar). Checked on every get() via ensureLoaded,
+  // so kept as a fast set to avoid a config scan for the non-lazy common case.
+  std::set<Producer> itsLazyProducers;
+  // Per-producer locks serialising concurrent first-access decodes.
+  std::mutex itsLazyLoadMapMutex;
+  std::map<Producer, std::shared_ptr<std::mutex>> itsLazyLoadMutexes;
 
   // Directory for decoded radar scratch .sqd files (GeoTIFF/ODIM producers).
   // Should live on a real disk volume so the kernel page cache manages the

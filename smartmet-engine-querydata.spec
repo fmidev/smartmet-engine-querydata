@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.7.18
-Release: 8%{?dist}.fmi
+Release: 9%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-9.fmi
+- Lazy radar loading, increment 3 (on-access decode): a lazy producer is no longer eagerly decoded - the directory monitor keeps its catalogue fresh (and refreshes it if already hot), but a cold lazy producer's frames are decoded only on first access. EngineImpl::get() calls RepoManager::ensureLoaded(), which (for lazy producers only, via a fast set check) serialises per producer and decodes the newest number_to_keep catalogued frames into the repository, so a subsequent multifile get() sees the complete servable window. The core decode loop of load() was factored into loadModels(), shared by the monitor path and on-access loading. Non-lazy producers are entirely unaffected (fast-set early return; no config scan, no lock). NOTE: single-threaded path validated; concurrency (many request threads missing + a background refresher) needs a staging-server soak.
+
 * Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-8.fmi
 - Lazy radar loading, increment 2 (metadata catalog): new RadarCatalog builds, per producer, the header-only metadata (via readRadarMetadata) of every available frame so a source's full time dimension can be advertised in GetCapabilities without decoding. New per-producer config flag 'lazy'; when set, RepoManager populates the catalog on each scan (frames are still eagerly decoded for now - a later increment defers that to on-access). 'lazy' composes with 'multifile': a lazy+multifile radar producer catalogs the whole series cheaply and (in a later increment) decodes the whole servable window on access so the grouped multifile Q is complete; non-lazy observation/forecast producers are unaffected. Unit-tested by examples/RadarCatalogTest.cpp.
 
