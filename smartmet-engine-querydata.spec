@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.7.18
-Release: 4%{?dist}.fmi
+Release: 5%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sun Jul 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-5.fmi
+- Radar scratch: the temporary file written during decode is now dot-prefixed (.<name>.<id> in the target directory) instead of using a .tmp suffix, so the newbase querydata reader and directory scans automatically ignore a half-written temp left by a crash. The rename into place stays atomic (same directory).
+
 * Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-4.fmi
 - RadarReader GeoTIFF fix: 'Corrected reflectivity' now maps to kFmiCorrectedReflectivity (126, matching the ODIM DBZH path) instead of the generic kFmiReflectivity (1103, uncorrected); GeoTIFF is the production radar format, so dbz WMS layers asking for CorrectedReflectivity previously found no data. Also map 'Precipitation intensity' to kFmiPrecipitationRate. RadarReaderTest extended to decode real captured sample fixtures (smartmet-test-data radar/) and assert parameter + physical value ranges per quantity.
 

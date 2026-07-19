@@ -70,9 +70,7 @@ std::filesystem::path radarScratchPath(const std::filesystem::path& scratchdir,
 {
   std::error_code ec;
   auto mtime = std::filesystem::last_write_time(source, ec);
-  const auto stamp =
-      ec ? 0LL
-         : static_cast<long long>(mtime.time_since_epoch().count());
+  const auto stamp = ec ? 0LL : static_cast<long long>(mtime.time_since_epoch().count());
   const std::filesystem::path dir = scratchdir / producer;
   return dir / (source.stem().string() + "_" + std::to_string(stamp) + ".sqd");
 }
@@ -97,8 +95,13 @@ std::filesystem::path convertRadarToScratch(const std::filesystem::path& scratch
   if (!data)
     throw Fmi::Exception(BCP, "Radar decode produced no data: " + source.string());
 
+  // Write to a dot-prefixed temp name in the same directory (same filesystem, so
+  // the rename below is atomic). Leading-dot files are automatically ignored by
+  // the newbase querydata reader and by the directory scans, so a half-written
+  // temp left by a crash is never picked up as data.
   const std::filesystem::path tmp =
-      scratch.string() + ".tmp." + std::to_string(reinterpret_cast<std::uintptr_t>(data.get()));
+      scratch.parent_path() / ("." + scratch.filename().string() + "." +
+                               std::to_string(reinterpret_cast<std::uintptr_t>(data.get())));
   {
     std::ofstream out(tmp, std::ios::out | std::ios::binary | std::ios::trunc);
     if (!out)
@@ -111,7 +114,8 @@ std::filesystem::path convertRadarToScratch(const std::filesystem::path& scratch
   if (ec)
   {
     std::filesystem::remove(tmp, ec);
-    throw Fmi::Exception(BCP, "Failed to rename radar scratch file into place: " + scratch.string());
+    throw Fmi::Exception(BCP,
+                         "Failed to rename radar scratch file into place: " + scratch.string());
   }
   return scratch;
 }
