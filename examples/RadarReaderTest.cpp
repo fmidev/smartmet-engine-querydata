@@ -258,6 +258,16 @@ int main(int argc, char** argv)
           check(mn >= c.pmin && mx <= c.pmax, c.label + ": physical values within expected range");
         if (c.paramid != 0)
           check(pid == c.paramid, c.label + ": parameter id matches");
+
+        // Header-only metadata must agree with the full decode.
+        const auto meta = readRadarMetadata(base + "/" + c.relpath);
+        const std::size_t gnx = fi.Grid() != nullptr ? fi.Grid()->XNumber() : 0;
+        const std::size_t gny = fi.Grid() != nullptr ? fi.Grid()->YNumber() : 0;
+        check(meta.paramId == pid, c.label + ": metadata paramId matches decode");
+        check(meta.nx == gnx && meta.ny == gny, c.label + ": metadata grid size matches decode");
+        check(meta.validTime == fi.ValidTime(), c.label + ": metadata valid time matches decode");
+        check(meta.maxX > meta.minX && meta.maxY > meta.minY,
+              c.label + ": metadata has a non-empty bounding box");
       }
     }
     else

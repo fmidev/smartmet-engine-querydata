@@ -172,6 +172,18 @@ std::map<std::string, MetaItem> parseGdalMetadata(const std::string& xml)
   return out;
 }
 
+// NFmiEnumConverter's constructor builds the whole parameter enum<->name map,
+// so it must never be constructed per call. Its lookups (ToEnum/ToString) never
+// change state - they only read the maps built in the constructor (not marked
+// const only for legacy reasons) - so a single process-wide instance is safe to
+// share across threads. A function-local static builds it exactly once (C++11
+// thread-safe init); thread_local would wastefully build one full map per thread.
+NFmiEnumConverter& paramEnumConverter()
+{
+  static NFmiEnumConverter conv;
+  return conv;
+}
+
 int quantityToParamId(const std::string& quantity)
 {
   std::string q = quantity;
@@ -208,6 +220,82 @@ int labelToParamId(const std::string& label)
   if (label.find("dbz") != std::string::npos || label.find("refl") != std::string::npos)
     return kFmiReflectivity;
   return 0;
+}
+
+// Resolve valid/origin time and parameter from the parsed header metadata.
+// Shared by the full decoder and the header-only metadata reader so the two can
+// never disagree about a frame's time or parameter.
+struct RadarTimeParam
+{
+  NFmiMetTime validTime;
+  NFmiMetTime originTime;
+  int paramId = 0;
+  std::string paramName;
+};
+
+RadarTimeParam resolveRadarTimeAndParam(const std::map<std::string, MetaItem>& meta,
+                                        const std::string& forecastTimestamp,
+                                        const std::string& timestamp,
+                                        const std::string& odimQuantity,
+                                        const std::filesystem::path& path)
+{
+  const std::string filename = path.string();
+
+  // Valid time: Observation time -> ForecastTimestamp -> filename/mtime.
+  std::optional<NFmiMetTime> vt;
+  if (auto it = meta.find("Observation time"); it != meta.end())
+    vt = parseUtcStamp(it->second.value);
+  if (!vt)
+    vt = parseUtcStamp(forecastTimestamp);
+  RadarTimeParam out;
+  out.validTime = vt ? *vt : parseTimeFromName(filename);
+
+  // Origin time: ODIM Timestamp, or the first of two leading filename stamps,
+  // else the valid time.
+  out.originTime = out.validTime;
+  if (auto ot = parseUtcStamp(timestamp))
+    out.originTime = *ot;
+  else
+  {
+    const std::string base = path.filename().string();
+    static const std::regex re2(R"(^(\d{12,14})_(\d{12,14})_)");
+    std::smatch m2;
+    if (std::regex_search(base, m2, re2))
+      if (auto o = parseUtcStamp(m2[1]))
+        out.originTime = *o;
+  }
+
+  // Parameter naming: Quantity -> ODIM quantity -> filename label -> enum.
+  const std::string label = extractLabel(filename);
+  if (auto it = meta.find("Quantity"); it != meta.end())
+  {
+    out.paramName = it->second.value;
+    out.paramId = quantityToParamId(out.paramName);
+  }
+  else if (!odimQuantity.empty())
+  {
+    out.paramName = odimQuantity;
+    out.paramId = quantityToParamId(odimQuantity);
+  }
+  else
+  {
+    out.paramId = labelToParamId(label);
+    if (out.paramId == 0)
+    {
+      int id = paramEnumConverter().ToEnum(label.c_str());
+      if (id != 0)
+        out.paramId = id;
+    }
+    if (out.paramId != 0)
+      out.paramName = paramEnumConverter().ToString(out.paramId);
+    else
+      out.paramName = label.empty() ? std::string{"RadarValue"} : label;
+  }
+  // Querydata needs a numeric parameter id; synthesize one if unresolved.
+  if (out.paramId == 0)
+    out.paramId = 1;
+
+  return out;
 }
 
 struct Guard
@@ -293,65 +381,14 @@ std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
     return {};
   };
 
-  // Valid time: Observation time -> ForecastTimestamp -> filename/mtime.
-  std::optional<NFmiMetTime> vt;
-  if (auto it = meta.find("Observation time"); it != meta.end())
-    vt = parseUtcStamp(it->second.value);
-  if (!vt)
-    vt = parseUtcStamp(metaItem({"ForecastTimestamp"}));
-  const NFmiMetTime validTime = vt ? *vt : parseTimeFromName(filename);
-
-  // Origin time: ODIM Timestamp, or the first of two leading filename stamps,
-  // else the valid time.
-  NFmiMetTime originTime = validTime;
-  if (auto ot = parseUtcStamp(metaItem({"Timestamp"})))
-    originTime = *ot;
-  else
-  {
-    const std::string base = path.filename().string();
-    static const std::regex re2(R"(^(\d{12,14})_(\d{12,14})_)");
-    std::smatch m2;
-    if (std::regex_search(base, m2, re2))
-      if (auto o = parseUtcStamp(m2[1]))
-        originTime = *o;
-  }
-
-  // Parameter naming: Quantity -> ODIM quantity -> filename label -> enum.
-  const std::string label = extractLabel(filename);
-  int paramId = 0;
-  std::string paramName;
-  std::string odimQuantity = metaItem({"dataset1_data1_what_quantity", "what_quantity"});
-  if (auto it = meta.find("Quantity"); it != meta.end())
-  {
-    paramName = it->second.value;
-    paramId = quantityToParamId(paramName);
-  }
-  else if (!odimQuantity.empty())
-  {
-    paramName = odimQuantity;
-    paramId = quantityToParamId(odimQuantity);
-  }
-  else
-  {
-    paramId = labelToParamId(label);
-    if (paramId == 0)
-    {
-      NFmiEnumConverter conv;
-      int id = conv.ToEnum(label.c_str());
-      if (id != 0)
-        paramId = id;
-    }
-    if (paramId != 0)
-    {
-      NFmiEnumConverter conv;
-      paramName = conv.ToString(paramId);
-    }
-    else
-      paramName = label.empty() ? std::string{"RadarValue"} : label;
-  }
-  // Querydata needs a numeric parameter id; synthesize one if unresolved.
-  if (paramId == 0)
-    paramId = 1;
+  // Valid/origin time + parameter (shared with the header-only metadata reader).
+  const std::string odimQuantity = metaItem({"dataset1_data1_what_quantity", "what_quantity"});
+  const RadarTimeParam tp = resolveRadarTimeAndParam(
+      meta, metaItem({"ForecastTimestamp"}), metaItem({"Timestamp"}), odimQuantity, path);
+  const NFmiMetTime validTime = tp.validTime;
+  const NFmiMetTime originTime = tp.originTime;
+  const int paramId = tp.paramId;
+  const std::string& paramName = tp.paramName;
 
   // Gain / offset / nodata / undetect.
   double gain = 1.0;
@@ -580,8 +617,7 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
   std::string paramName;
   if (paramId != 0)
   {
-    NFmiEnumConverter conv;
-    paramName = conv.ToString(paramId);
+    paramName = paramEnumConverter().ToString(paramId);
   }
   else
   {
@@ -666,6 +702,64 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
   return data;
 }
 
+// Header-only metadata for a GeoTIFF radar frame: dims, geotransform bbox, CRS,
+// time and parameter — no RasterIO, so a whole source's time dimension can be
+// built cheaply. Reuses the same time/parameter resolution as the full decoder.
+RadarFrameInfo readGeoTiffMetadata(const std::filesystem::path& path)
+{
+  const std::string filename = path.string();
+  GDALAllRegister();
+  auto* ds = static_cast<GDALDataset*>(GDALOpen(filename.c_str(), GA_ReadOnly));
+  if (ds == nullptr)
+    throw Fmi::Exception(BCP, "GDAL failed to open radar GeoTIFF: " + filename);
+  Guard guard{ds};
+
+  RadarFrameInfo info;
+  info.nx = static_cast<std::size_t>(ds->GetRasterXSize());
+  info.ny = static_cast<std::size_t>(ds->GetRasterYSize());
+
+  double gt[6] = {};
+  if (ds->GetGeoTransform(gt) == CE_None)
+  {
+    const double xa = gt[0];
+    const double xb = gt[0] + static_cast<double>(info.nx) * gt[1];
+    const double ya = gt[3];
+    const double yb = gt[3] + static_cast<double>(info.ny) * gt[5];
+    info.minX = std::min(xa, xb);
+    info.maxX = std::max(xa, xb);
+    info.minY = std::min(ya, yb);
+    info.maxY = std::max(ya, yb);
+  }
+
+  if (const OGRSpatialReference* osr = ds->GetSpatialRef())
+  {
+    char* wkt = nullptr;
+    if (osr->exportToWkt(&wkt) == OGRERR_NONE && wkt != nullptr)
+      info.crsWKT = wkt;
+    CPLFree(wkt);
+  }
+
+  std::map<std::string, MetaItem> meta;
+  if (const char* blob = ds->GetMetadataItem("GDAL_METADATA"))
+    meta = parseGdalMetadata(blob);
+  auto metaItem = [&](std::initializer_list<const char*> keys) -> std::string
+  {
+    for (const char* k : keys)
+      if (const char* v = ds->GetMetadataItem(k); v != nullptr && *v != '\0')
+        return v;
+    return {};
+  };
+
+  const std::string odimQuantity = metaItem({"dataset1_data1_what_quantity", "what_quantity"});
+  const RadarTimeParam tp = resolveRadarTimeAndParam(
+      meta, metaItem({"ForecastTimestamp"}), metaItem({"Timestamp"}), odimQuantity, path);
+  info.validTime = tp.validTime;
+  info.originTime = tp.originTime;
+  info.paramId = tp.paramId;
+  info.paramName = tp.paramName;
+  return info;
+}
+
 }  // namespace
 
 // ---------------------------------------------------------------------------
@@ -704,6 +798,57 @@ std::shared_ptr<NFmiQueryData> readRadarFile(const std::filesystem::path& path, 
   catch (...)
   {
     throw Fmi::Exception::Trace(BCP, "Reading radar file failed: " + path.string());
+  }
+}
+
+RadarFrameInfo readRadarMetadata(const std::filesystem::path& path, RadarFormat format)
+{
+  try
+  {
+    const RadarFormat fmt = (format == RadarFormat::Auto) ? detectRadarFormat(path) : format;
+    switch (fmt)
+    {
+      case RadarFormat::GeoTiff:
+        return readGeoTiffMetadata(path);
+      case RadarFormat::Odim:
+      {
+        // TODO: read the ODIM /what + /where + first data /what groups header-only.
+        // Interim: decode fully and extract the metadata (correct, not yet cheap).
+        auto data = readOdim(path);
+        NFmiFastQueryInfo qi(data.get());
+        qi.FirstParam();
+        qi.FirstLevel();
+        qi.FirstTime();
+        RadarFrameInfo info;
+        info.validTime = qi.ValidTime();
+        info.originTime = qi.OriginTime();
+        info.paramId = qi.Param().GetParam()->GetIdent();
+        info.paramName = qi.Param().GetParam()->GetName().CharPtr();
+        if (qi.Grid() != nullptr)
+        {
+          info.nx = qi.Grid()->XNumber();
+          info.ny = qi.Grid()->YNumber();
+          if (const NFmiArea* area = qi.Grid()->Area())
+          {
+            info.crsWKT = area->WKT();
+            const NFmiRect& r = area->WorldRect();
+            info.minX = r.Left();
+            info.maxX = r.Right();
+            info.minY = std::min(r.Top(), r.Bottom());
+            info.maxY = std::max(r.Top(), r.Bottom());
+          }
+        }
+        return info;
+      }
+      case RadarFormat::QueryData:
+      case RadarFormat::Auto:
+      default:
+        throw Fmi::Exception(BCP, "Not a radar raster file: " + path.string());
+    }
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Reading radar metadata failed: " + path.string());
   }
 }
 

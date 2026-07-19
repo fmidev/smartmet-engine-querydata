@@ -15,8 +15,10 @@
 
 #pragma once
 
+#include <newbase/NFmiMetTime.h>
 #include <filesystem>
 #include <memory>
+#include <string>
 
 class NFmiQueryData;
 
@@ -28,10 +30,10 @@ namespace Querydata
 {
 enum class RadarFormat
 {
-  Auto,       // detect from the filename extension
-  GeoTiff,    // .tif / .tiff
-  Odim,       // .h5 / .hdf  (not yet implemented)
-  QueryData   // .sqd  (no conversion needed)
+  Auto,      // detect from the filename extension
+  GeoTiff,   // .tif / .tiff
+  Odim,      // .h5 / .hdf  (not yet implemented)
+  QueryData  // .sqd  (no conversion needed)
 };
 
 //! Detect the radar file format from the filename extension.
@@ -48,6 +50,29 @@ RadarFormat detectRadarFormat(const std::filesystem::path& path);
  */
 std::shared_ptr<NFmiQueryData> readRadarFile(const std::filesystem::path& path,
                                              RadarFormat format = RadarFormat::Auto);
+
+//! Lightweight per-frame metadata read WITHOUT decoding the pixel data.
+/*!
+ * Enough to advertise a frame in GetCapabilities and to place it on the map
+ * (valid/origin time, parameter, grid size, native CRS + bounding box) — read
+ * from the file header only, so a whole radar source's time dimension can be
+ * built cheaply without decoding every frame. GeoTIFF is header-only; ODIM
+ * currently falls back to a full decode (see the .cpp TODO).
+ */
+struct RadarFrameInfo
+{
+  NFmiMetTime validTime;
+  NFmiMetTime originTime;
+  int paramId = 0;
+  std::string paramName;
+  std::size_t nx = 0;
+  std::size_t ny = 0;
+  std::string crsWKT;                             // native CRS
+  double minX = 0, minY = 0, maxX = 0, maxY = 0;  // native bounding box
+};
+
+RadarFrameInfo readRadarMetadata(const std::filesystem::path& path,
+                                 RadarFormat format = RadarFormat::Auto);
 
 }  // namespace Querydata
 }  // namespace Engine

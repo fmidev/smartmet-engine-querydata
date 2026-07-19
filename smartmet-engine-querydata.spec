@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.7.18
-Release: 6%{?dist}.fmi
+Release: 7%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-7.fmi
+- RadarReader: stop constructing NFmiEnumConverter per frame (its constructor builds the whole enum<->name map); share one process-wide static instance via paramEnumConverter(), matching the existing codebase idiom, since its lookups never mutate state. Factored the valid/origin-time + parameter resolution into a shared helper. Added readRadarMetadata(), a header-only per-frame metadata read (time/param/grid/CRS/bbox, no RasterIO) so a whole radar source's time dimension can be built cheaply without decoding every frame - the foundation for lazy per-source loading with complete GetCapabilities. GeoTIFF is header-only; ODIM currently falls back to a full decode. RadarReaderTest cross-checks the metadata against the full decode.
+
 * Sun Jul 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-6.fmi
 - Size-bounded radar scratch cache (RadarCache): the decoded .sqd cache is now managed per source (producer subdirectory) with a byte budget (config radar.cache_size; 0 = unlimited). When over budget, whole least-recently-accessed sources are evicted to a low-water mark; recency is a per-source .accessed marker mtime and a source with live models is pinned. Startup now RECONCILES the cache instead of wiping it (RepoManager::reconcileRadarCache): crash residue (dot-prefixed temps, .trash) and stale/rotated/de-configured frames are removed while current frames are kept for a warm restart. Crash-safe by construction (filesystem is the source of truth, atomic subdir-rename eviction, no authoritative index file). Unit-tested by examples/RadarCacheTest.cpp. NOTE: under the current eager per-producer load every configured source is pinned, so the budget presently reclaims only expired/de-configured sources; a true working-set limit needs lazy per-source loading.
 
