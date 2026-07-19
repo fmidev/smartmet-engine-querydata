@@ -4,6 +4,7 @@
 #include "Producer.h"
 #include "RepoManager.h"
 #include "Repository.h"
+#include "ValidTimeList.h"
 #include <gis/CoordinateMatrix.h>
 #include <macgyver/Cache.h>
 #include <spine/SmartMetEngine.h>
@@ -32,6 +33,18 @@ struct CacheReportingStruct
   std::size_t values_cache_size;
 };
 
+// Decode-free capabilities metadata for a lazy radar producer, built from the
+// RadarCatalog (header-only) so GetCapabilities can advertise the full time
+// dimension without decoding any frame. valid == false if the producer is not a
+// catalogued lazy producer (the caller should then use the normal Q path).
+struct RadarLayerMetaData
+{
+  std::shared_ptr<ValidTimeList> validtimes;
+  double west = 0, east = 0, south = 0, north = 0;  // WGS84 bounding box
+  Fmi::DateTime modificationTime{Fmi::DateTime::NOT_A_DATE_TIME};
+  bool valid = false;
+};
+
 class Engine : public Spine::SmartMetEngine
 {
  public:
@@ -53,6 +66,11 @@ class Engine : public Spine::SmartMetEngine
    *   @brief Return available origintimes
    **/
   virtual OriginTimes origintimes(const Producer& producer) const;
+
+  // Decode-free capabilities metadata for a lazy radar producer (from the
+  // catalog). Returns {valid=false} for non-lazy / non-catalogued producers and
+  // for the disabled base engine.
+  virtual RadarLayerMetaData getRadarLayerMetaData(const Producer& producer) const;
 
   virtual bool hasProducer(const Producer& producer) const;
 

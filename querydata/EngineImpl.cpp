@@ -512,6 +512,73 @@ OriginTimes EngineImpl::origintimes(const Producer& producer) const
   }
 }
 
+RadarLayerMetaData EngineImpl::getRadarLayerMetaData(const Producer& producer) const
+{
+  try
+  {
+    RadarLayerMetaData md;
+    auto repomanager = itsRepoManager.load();
+    const auto frames = repomanager->itsRadarCatalog.frames(producer);
+    if (frames.empty())
+      return md;  // not a catalogued lazy producer -> valid == false
+
+    // Full time dimension from the catalogue (header-only, no decode). Frames are
+    // sorted by valid time, so back() is the newest.
+    md.validtimes = std::make_shared<ValidTimeList>();
+    for (const auto& f : frames)
+      md.validtimes->push_back(f.info.validTime);
+    md.validtimes->sort();
+    md.validtimes->unique();
+    md.modificationTime = frames.back().info.validTime;
+
+    // WGS84 bounding box: reproject the native extent of a representative frame,
+    // sampling the boundary (corners + edge midpoints) so a curved TM edge is
+    // covered. Failure leaves the box at zero but keeps the (essential) times.
+    const auto& fi = frames.front().info;
+    try
+    {
+      Fmi::SpatialReference src(fi.crsWKT.empty() ? std::string("EPSG:4326") : fi.crsWKT);
+      Fmi::SpatialReference wgs84("WGS84");
+      Fmi::CoordinateTransformation xf(src, wgs84);
+      const double xs[3] = {fi.minX, 0.5 * (fi.minX + fi.maxX), fi.maxX};
+      const double ys[3] = {fi.minY, 0.5 * (fi.minY + fi.maxY), fi.maxY};
+      bool first = true;
+      for (double x : xs)
+        for (double y : ys)
+        {
+          double lon = x, lat = y;
+          if (xf.transform(lon, lat))
+          {
+            if (first)
+            {
+              md.west = md.east = lon;
+              md.south = md.north = lat;
+              first = false;
+            }
+            else
+            {
+              md.west = std::min(md.west, lon);
+              md.east = std::max(md.east, lon);
+              md.south = std::min(md.south, lat);
+              md.north = std::max(md.north, lat);
+            }
+          }
+        }
+    }
+    catch (...)
+    {
+      // leave the bounding box at zero; the time dimension is what matters
+    }
+
+    md.valid = true;
+    return md;
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "getRadarLayerMetaData failed for producer " + producer);
+  }
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Get data for the given producer

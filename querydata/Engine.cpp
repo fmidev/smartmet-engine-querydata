@@ -17,7 +17,7 @@ using namespace SmartMet::Engine::Querydata;
 
 namespace
 {
-  const ProducerList emptyProducerList;
+const ProducerList emptyProducerList;
 }
 
 Engine::Engine() = default;
@@ -32,6 +32,11 @@ const ProducerList& Engine::producers() const
 OriginTimes Engine::origintimes(const Producer& /* producer */) const
 {
   REPORT_DISABLED;
+}
+
+RadarLayerMetaData Engine::getRadarLayerMetaData(const Producer& /* producer */) const
+{
+  return {};  // valid == false; the disabled base engine has no catalogue
 }
 
 bool Engine::hasProducer(const Producer& /* producer */) const

@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.7.18
-Release: 10%{?dist}.fmi
+Release: 11%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-11.fmi
+- Lazy radar loading, increment 4b engine side (decode-free capabilities): new Engine::getRadarLayerMetaData(producer) returns a lazy producer's full valid-time list (from RadarCatalog) plus a WGS84 bounding box (reprojected from the catalogued native extent) and modification time, all header-only with no pixel decode. This lets the WMS plugin advertise a lazy radar producer's complete time dimension in GetCapabilities without decoding any frame (previously get() would have triggered an on-access decode of every producer during capabilities). Returns valid=false for non-lazy / non-catalogued producers (and the disabled base engine), so callers fall back to the normal Q path.
+
 * Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-10.fmi
 - Lazy radar loading, increment 4a (unload sweeper): the expiration loop now unloads cold lazy producers, which is what makes radar.cache_size actually bind. A lazy producer untouched for radar.idle_timeout seconds (new config key; 0 = never) is unloaded to free memory; and while the scratch cache exceeds radar.cache_size, the least-recently-accessed loaded lazy producer is unloaded (its scratch reclaimed via the Model destructor) until under budget. ensureLoaded() records per-producer access time (also on the hot path). Unloading is safe against in-flight queries (a live Q keeps its model alive until the request ends). Re-access re-decodes via ensureLoaded. Non-lazy producers unaffected.
 
