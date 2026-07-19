@@ -100,15 +100,22 @@ recency is an atomic `.accessed` mtime, and eviction of a whole source renames i
 subdir into `.trash` (atomic) before removal. Dot-prefixed temps and markers are
 ignored by the newbase reader, so a half-written decode is never seen as data.
 
-### Configuration
+### Storage and configuration
+
+Decoded frames are stored as plain float32 querydata (querydata has no reliable
+non-float value pool). There is deliberately **no compression and no
+transparently-compressed filesystem** — the cache is meant to live on a dedicated
+fast-disk volume (e.g. 1 TB) where simplicity and mmap performance matter more
+than footprint, and the byte budget keeps total usage in check.
 
 ```
-radar.scratch_directory = "/var/tmp/smartmet-qengine-radar";  # per instance
-radar.cache_size        = 53687091200;  # 50 GiB budget; 0 = unlimited
+radar.scratch_directory = "/radar-cache";       # dedicated fast-disk volume, per instance
+radar.cache_size        = 966367641600;          # ~900 GiB safety cap; 0 = unlimited
 ```
 
-Each server instance must use its own `radar.scratch_directory` (the naming and
-eviction assume exclusive ownership).
+Point `radar.scratch_directory` at the fast-disk volume and set `radar.cache_size`
+a little below its capacity as a safety cap. Each server instance must use its own
+directory (the naming and eviction assume exclusive ownership).
 
 ## Testing
 
