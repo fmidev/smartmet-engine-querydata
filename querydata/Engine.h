@@ -88,6 +88,23 @@ class Engine : public Spine::SmartMetEngine
   virtual Q get(const Producer& producer, const Fmi::TimePeriod& timePeriod) const;
 
   /**
+   *   @brief Hash value and expiration time of the data get() would return
+   *
+   *   Returns the same hash value as hash_value(get(...)), but constructs no Q.
+   *   Constructing one takes an NFmiFastQueryInfo from the pool of the model,
+   *   which for large models costs several microseconds of work for a value
+   *   which is already known. Used when only the identity of the data matters,
+   *   for example while calculating the ETag of a WMS product.
+   */
+  virtual ModelHashValue getModelHashValue(const Producer& producer) const;
+
+  virtual ModelHashValue getModelHashValue(const Producer& producer,
+                                           const OriginTime& origintime) const;
+
+  virtual ModelHashValue getModelHashValue(const Producer& producer,
+                                           const Fmi::TimePeriod& timePeriod) const;
+
+  /**
    *  @brief Get detailed info of current producers
    */
   virtual Repository::ContentTable getProducerInfo(

@@ -14,6 +14,7 @@
 #include <spine/Convenience.h>
 #include <spine/TableFormatter.h>
 #include <timeseries/ParameterFactory.h>
+#include <algorithm>
 #include <cassert>
 #include <sstream>
 #include <stdexcept>
@@ -27,6 +28,51 @@ namespace Querydata
 namespace
 {
 const Repository::SharedModels gNoModels;  // empty global so we can return a reference to it
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Construct a Q from the selected models
+ *
+ * A single model is given to the single model constructor, since a view over one
+ * model is not equivalent to the model itself: the hash values differ.
+ */
+// ----------------------------------------------------------------------
+
+Q make_q(const Repository::Selection& theSelection)
+{
+  if (theSelection.single)
+    return std::make_shared<QImpl>(theSelection.models.front());
+
+  return std::make_shared<QImpl>(theSelection.models);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Hash value and expiration time of the selected models
+ *
+ * The hash values must match the ones the constructors of QImpl calculate, and
+ * the expiration time must match QImpl::expirationTime().
+ */
+// ----------------------------------------------------------------------
+
+ModelHashValue hash_of(const Repository::Selection& theSelection)
+{
+  ModelHashValue ret;
+
+  if (theSelection.models.empty())
+    throw Fmi::Exception(BCP, "Cannot hash an empty selection of models");
+
+  if (theSelection.single)
+    ret.hash = hash_value(theSelection.models.front());
+  else
+    ret.hash = hash_value(theSelection.models);
+
+  ret.expirationTime = theSelection.models.front()->expirationTime();
+  for (std::size_t i = 1; i < theSelection.models.size(); i++)
+    ret.expirationTime = std::max(ret.expirationTime, theSelection.models[i]->expirationTime());
+
+  return ret;
+}
 
 bool latest_model_age_ok(const Repository::SharedModels& time_models, unsigned int max_latest_age)
 {
@@ -277,19 +323,19 @@ const Repository::SharedModels& Repository::findProducer(const std::string& prod
  */
 // ----------------------------------------------------------------------
 
-Q Repository::get(const Producer& producer) const
+Repository::Selection Repository::select(const Producer& producer) const
 {
   try
   {
-    // If the data is multifile return all of them instead of just the latest file
+    // If the data is multifile select all of them instead of just the latest file
     const auto prod_config = itsProducerConfigs.find(producer);
     if (prod_config != itsProducerConfigs.end())
     {
       if (prod_config->second.ismultifile)
-        return getAll(producer);
+        return selectAll(producer);
     }
 
-    // Return the latest model only
+    // Select the latest model only
 
     const auto& models = findProducer(producer);
 
@@ -303,7 +349,19 @@ Q Repository::get(const Producer& producer) const
     // newest origintime is at the end
     auto last = --models.end();
 
-    return std::make_shared<QImpl>(last->second);
+    return {{last->second}, true};
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+Q Repository::get(const Producer& producer) const
+{
+  try
+  {
+    return make_q(select(producer));
   }
   catch (...)
   {
@@ -317,7 +375,8 @@ Q Repository::get(const Producer& producer) const
  */
 // ----------------------------------------------------------------------
 
-Q Repository::get(const Producer& producer, const OriginTime& origintime) const
+Repository::Selection Repository::select(const Producer& producer,
+                                         const OriginTime& origintime) const
 {
   try
   {
@@ -334,23 +393,35 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
     {
       // newest origintime is at the end
       auto iter = --models.end();
-      return std::make_shared<QImpl>(iter->second);
+      return {{iter->second}, true};
     }
     if (origintime.is_neg_infinity())
     {
       // oldest origintime is at the beginning
       auto iter = models.begin();
-      return std::make_shared<QImpl>(iter->second);
+      return {{iter->second}, true};
     }
 
     auto iter = models.find(origintime);
     if (iter != models.end())
-      return std::make_shared<QImpl>(iter->second);
+      return {{iter->second}, true};
 
     throw Fmi::Exception(BCP,
                          "Repository get: No data available for producer '" + producer +
                              "' with origintime == " + to_simple_string(origintime))
         .disableStackTrace();
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+Q Repository::get(const Producer& producer, const OriginTime& origintime) const
+{
+  try
+  {
+    return make_q(select(producer, origintime));
   }
   catch (...)
   {
@@ -364,7 +435,7 @@ Q Repository::get(const Producer& producer, const OriginTime& origintime) const
  */
 // ----------------------------------------------------------------------
 
-Q Repository::getAll(const Producer& producer) const
+Repository::Selection Repository::selectAll(const Producer& producer) const
 {
   try
   {
@@ -378,7 +449,7 @@ Q Repository::getAll(const Producer& producer) const
           .disableStackTrace();
     }
 
-    // Construct a vector of datas with similar grids only
+    // Collect datas with similar grids only
 
     std::vector<SharedModel> okmodels;
     std::optional<std::size_t> hash;
@@ -392,9 +463,19 @@ Q Repository::getAll(const Producer& producer) const
       hash = tmphash;
     }
 
-    // Construct a view of the data
+    return {okmodels, false};
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
 
-    return std::make_shared<QImpl>(okmodels);
+Q Repository::getAll(const Producer& producer) const
+{
+  try
+  {
+    return make_q(selectAll(producer));
   }
   catch (...)
   {
@@ -408,7 +489,8 @@ Q Repository::getAll(const Producer& producer) const
  */
 // ----------------------------------------------------------------------
 
-Q Repository::get(const Producer& producer, const Fmi::TimePeriod& timeperiod) const
+Repository::Selection Repository::select(const Producer& producer,
+                                         const Fmi::TimePeriod& timeperiod) const
 {
   try
   {
@@ -417,7 +499,7 @@ Q Repository::get(const Producer& producer, const Fmi::TimePeriod& timeperiod) c
     if (prod_config != itsProducerConfigs.end())
     {
       if (!prod_config->second.ismultifile)
-        return get(producer);
+        return select(producer);
     }
 
     // Find the models
@@ -454,9 +536,71 @@ Q Repository::get(const Producer& producer, const Fmi::TimePeriod& timeperiod) c
     }
 
     if (okmodels.empty())
-      return getAll(producer);  // Attempt to interpolate instead
+      return selectAll(producer);  // Attempt to interpolate instead
 
-    return std::make_shared<QImpl>(okmodels);
+    return {okmodels, false};
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+Q Repository::get(const Producer& producer, const Fmi::TimePeriod& timeperiod) const
+{
+  try
+  {
+    return make_q(select(producer, timeperiod));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Get the hash value and the expiration time of the data
+ *
+ * The hash value is the one hash_value(get(...)) would return, but no Q is
+ * constructed: constructing one takes an NFmiFastQueryInfo from the pool of the
+ * model, and for large models that is several microseconds of work for a value
+ * which is already known. Only the identity of the data is needed when the WMS
+ * plugin calculates the ETag of a product.
+ */
+// ----------------------------------------------------------------------
+
+ModelHashValue Repository::getModelHashValue(const Producer& producer) const
+{
+  try
+  {
+    return hash_of(select(producer));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+ModelHashValue Repository::getModelHashValue(const Producer& producer,
+                                             const OriginTime& origintime) const
+{
+  try
+  {
+    return hash_of(select(producer, origintime));
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+ModelHashValue Repository::getModelHashValue(const Producer& producer,
+                                             const Fmi::TimePeriod& timeperiod) const
+{
+  try
+  {
+    return hash_of(select(producer, timeperiod));
   }
   catch (...)
   {

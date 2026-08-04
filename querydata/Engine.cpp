@@ -78,6 +78,23 @@ Q Engine::get(const Producer& /* producer */, const Fmi::TimePeriod& /* timePeri
   REPORT_DISABLED;
 }
 
+ModelHashValue Engine::getModelHashValue(const Producer& /* producer */) const
+{
+  REPORT_DISABLED;
+}
+
+ModelHashValue Engine::getModelHashValue(const Producer& /* producer */,
+                                         const OriginTime& /* origintime */) const
+{
+  REPORT_DISABLED;
+}
+
+ModelHashValue Engine::getModelHashValue(const Producer& /* producer */,
+                                         const Fmi::TimePeriod& /* timePeriod */) const
+{
+  REPORT_DISABLED;
+}
+
 Repository::ContentTable Engine::getProducerInfo(
     const std::string& /* timeFormat */, const std::optional<std::string>& /* producer */) const
 {

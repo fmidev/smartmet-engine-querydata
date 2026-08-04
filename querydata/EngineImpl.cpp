@@ -576,6 +576,63 @@ Q EngineImpl::get(const Producer& producer, const Fmi::TimePeriod& timePeriod) c
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Get the hash value and the expiration time of the data
+ *
+ * These select the models exactly as the get() methods above do, but construct
+ * no Q. Should the model selection of get() ever change, the corresponding
+ * variant here follows automatically: both use Repository::select().
+ */
+// ----------------------------------------------------------------------
+
+ModelHashValue EngineImpl::getModelHashValue(const Producer& producer) const
+{
+  try
+  {
+    auto repomanager = itsRepoManager.load();
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+    return repomanager->itsRepo.getModelHashValue(producer);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+ModelHashValue EngineImpl::getModelHashValue(const Producer& producer,
+                                             const OriginTime& origintime) const
+{
+  try
+  {
+    auto repomanager = itsRepoManager.load();
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+    return repomanager->itsRepo.getModelHashValue(producer, origintime);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+ModelHashValue EngineImpl::getModelHashValue(const Producer& producer,
+                                             const Fmi::TimePeriod& timePeriod) const
+{
+  try
+  {
+    auto repomanager = itsRepoManager.load();
+
+    Spine::ReadLock lock(repomanager->itsMutex);
+    return repomanager->itsRepo.getModelHashValue(producer, timePeriod);
+  }
+  catch (...)
+  {
+    throw Fmi::Exception::Trace(BCP, "Operation failed!");
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Select first model which covers the given point
  *
  * Returns empty producer if there are no matches.

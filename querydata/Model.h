@@ -155,6 +155,16 @@ inline std::size_t hash_value(const SharedModel& theModel)
   return hash_value(*theModel);
 }
 
+// Hash value of the models a Q would be viewing, and the expiration time of the
+// data. Returned by the engine when only the identity of the data is needed, for
+// example when calculating an ETag, so that no Q needs to be constructed.
+
+struct ModelHashValue
+{
+  std::size_t hash = 0;
+  Fmi::DateTime expirationTime;
+};
+
 }  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet

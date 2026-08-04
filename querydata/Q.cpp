@@ -1143,7 +1143,11 @@ QImpl::QImpl(const SharedModel &theModel)
   {
     itsModels.emplace_back(theModel);
     itsInfos.push_back(theModel->info());
-    itsInfo = theModel->info();
+
+    // Note: itsInfo must be the very same info the destructor returns to the
+    // pool. Fetching a second one from the pool would leak it out of the pool
+    // and force a new NFmiFastQueryInfo to be constructed for every Q.
+    itsInfo = itsInfos.front();
 
     itsValidTimes = theModel->validTimes();
 
@@ -1178,11 +1182,7 @@ QImpl::QImpl(const std::vector<SharedModel> &theModels)
       itsInfo = itsInfos[0];
 
     // Establish hash value
-    itsHashValue = 0;
-    for (const auto &model : itsModels)
-    {
-      Fmi::hash_combine(itsHashValue, Fmi::hash_value(model));
-    }
+    itsHashValue = hash_value(itsModels);
 
     // Establish unique valid times
     std::set<Fmi::DateTime> uniquetimes;
@@ -4079,6 +4079,26 @@ std::size_t hash_value(const Q &theQ)
   if (theQ)
     return theQ->hashValue();
   return 666U;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Hash value of a view over multiple models
+ *
+ * Used by the constructor of QImpl and by the engine when only the hash value
+ * of the data is needed. Note that the value differs from hash_value(model) for
+ * a single model, and hence a view over one model does not have the same hash
+ * value as the model itself. Both variants must be reproduced exactly, or ETag
+ * values would change for no reason.
+ */
+// ----------------------------------------------------------------------
+
+std::size_t hash_value(const std::vector<SharedModel> &theModels)
+{
+  std::size_t hash = 0;
+  for (const auto &model : theModels)
+    Fmi::hash_combine(hash, Fmi::hash_value(model));
+  return hash;
 }
 
 }  // namespace Querydata

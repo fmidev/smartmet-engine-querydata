@@ -106,6 +106,12 @@ class EngineImpl final : public Engine
 
   Q get(const Producer& producer, const Fmi::TimePeriod& timePeriod) const override;
 
+  ModelHashValue getModelHashValue(const Producer& producer) const override;
+  ModelHashValue getModelHashValue(const Producer& producer,
+                                   const OriginTime& origintime) const override;
+  ModelHashValue getModelHashValue(const Producer& producer,
+                                   const Fmi::TimePeriod& timePeriod) const override;
+
   // Get detailed info of current producers
   Repository::ContentTable getProducerInfo(
       const std::string& timeFormat, const std::optional<std::string>& producer) const override;

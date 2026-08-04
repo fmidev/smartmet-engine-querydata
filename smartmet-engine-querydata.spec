@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 26.7.17
+Version: 26.8.24
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Aug 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.8.24-1.fmi
+- Fixed QImpl to keep the NFmiFastQueryInfo of a single model view in the pool of the model: one info per Q was never returned, so a new one was constructed for every get()
+- Added getModelHashValue for obtaining the hash value and the expiration time of the data without constructing a Q
 * Fri Jul 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.17-1.fmi
 - Pointwise (station) querydata: location-dependent special parameters (stationname, distance,
   direction, wmo, fmisid, lpnn, rwsid, stationlongitude/latitude) now refer to the nearest station

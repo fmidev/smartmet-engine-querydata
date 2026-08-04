@@ -62,12 +62,35 @@ class Repository
 
   bool hasProducer(const Producer& producer) const;
 
+  // The models a Q would be constructed from. Public only because the helpers
+  // turning a selection into a Q or into a hash value live in Repository.cpp.
+  struct Selection
+  {
+    std::vector<SharedModel> models;
+    // True if QImpl would be constructed from a single model instead of a view
+    // over several ones. The two constructors calculate the hash value in
+    // different ways, hence the distinction matters.
+    bool single = false;
+  };
+
+  Selection select(const Producer& producer) const;
+  Selection select(const Producer& producer, const OriginTime& origintime) const;
+  Selection select(const Producer& producer, const Fmi::TimePeriod& timeperiod) const;
+  Selection selectAll(const Producer& producer) const;
+
   // Must not use aliases for these!
   Q get(const Producer& producer) const;
   Q get(const Producer& producer, const OriginTime& origintime) const;
   Q get(const Producer& producer, const Fmi::TimePeriod& timeperiod) const;
 
   Q getAll(const Producer& producer) const;
+
+  // Hash value and expiration time of the data get() would return, without
+  // constructing a Q. Used for ETag calculation.
+  ModelHashValue getModelHashValue(const Producer& producer) const;
+  ModelHashValue getModelHashValue(const Producer& producer, const OriginTime& origintime) const;
+  ModelHashValue getModelHashValue(const Producer& producer,
+                                   const Fmi::TimePeriod& timeperiod) const;
 
   using ContentTable = std::unique_ptr<Spine::Table>;
   using SharedModels = std::map<OriginTime, SharedModel>;
