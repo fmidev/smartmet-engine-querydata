@@ -290,6 +290,10 @@ using QList = std::list<Q>;
 
 std::size_t hash_value(const Q& theQ);
 
+// Hash value of a view over the given models, as calculated by the corresponding
+// constructor of QImpl
+std::size_t hash_value(const std::vector<SharedModel>& theModels);
+
 }  // namespace Querydata
 }  // namespace Engine
 }  // namespace SmartMet

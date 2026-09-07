@@ -32,9 +32,9 @@ BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: smartmet-library-timeseries-devel >= 26.5.5
-BuildRequires: smartmet-library-macgyver-devel >= 26.6.26
-BuildRequires: smartmet-library-newbase-devel >= 26.6.24
-BuildRequires: smartmet-library-spine-devel >= 26.6.24
+BuildRequires: smartmet-library-macgyver-devel >= 26.7.9
+BuildRequires: smartmet-library-newbase-devel >= 26.7.14
+BuildRequires: smartmet-library-spine-devel >= 26.7.16
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -44,10 +44,10 @@ Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
 Requires: smartmet-library-timeseries >= 26.5.5
-Requires: smartmet-library-macgyver >= 26.6.26
-Requires: smartmet-library-newbase >= 26.6.24
-Requires: smartmet-library-spine >= 26.6.24
-#TestRequires: smartmet-utils-devel >= 26.6.17
+Requires: smartmet-library-macgyver >= 26.7.9
+Requires: smartmet-library-newbase >= 26.7.14
+Requires: smartmet-library-spine >= 26.7.16
+#TestRequires: smartmet-utils-devel >= 26.7.14
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal312-devel
 #TestRequires: gcc-c++
@@ -95,6 +95,10 @@ rm -rf $RPM_BUILD_ROOT
 * Mon Sep  7 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.7-1.fmi
 - Fixed a startup crash (SIGSEGV in GDAL driver registration) when several radar producers are loaded concurrently: GDALAllRegister() is not safe to call from multiple threads at once, so the GeoTIFF and ODIM readers now register the GDAL drivers exactly once via a shared call_once helper.
 - Fixed the georeferencing of decoded radar GeoTIFFs: the geotransform origin is the outer corner of the first pixel (pixel-is-area) whereas a newbase grid is point-valued at the cell centres. The reader now builds the area from pixel centres, so the decoded grid keeps the raster's cell size (250 m for the national composite instead of 250.05 m) and is no longer shifted by half a pixel.
+
+* Mon Aug 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.8.24-1.fmi
+- Fixed QImpl to keep the NFmiFastQueryInfo of a single model view in the pool of the model: one info per Q was never returned, so a new one was constructed for every get()
+- Added getModelHashValue for obtaining the hash value and the expiration time of the data without constructing a Q
 
 * Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-11.fmi
 - Lazy radar loading, increment 4b engine side (decode-free capabilities): new Engine::getRadarLayerMetaData(producer) returns a lazy producer's full valid-time list (from RadarCatalog) plus a WGS84 bounding box (reprojected from the catalogued native extent) and modification time, all header-only with no pixel decode. This lets the WMS plugin advertise a lazy radar producer's complete time dimension in GetCapabilities without decoding any frame (previously get() would have triggered an on-access decode of every producer during capabilities). Returns valid=false for non-lazy / non-catalogued producers (and the disabled base engine), so callers fall back to the normal Q path.
