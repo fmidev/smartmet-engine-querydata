@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 26.7.18
-Release: 11%{?dist}.fmi
+Version: 26.9.7
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Sep  7 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.7-1.fmi
+- Fixed a startup crash (SIGSEGV in GDAL driver registration) when several radar producers are loaded concurrently: GDALAllRegister() is not safe to call from multiple threads at once, so the GeoTIFF and ODIM readers now register the GDAL drivers exactly once via a shared call_once helper.
+- Fixed the georeferencing of decoded radar GeoTIFFs: the geotransform origin is the outer corner of the first pixel (pixel-is-area) whereas a newbase grid is point-valued at the cell centres. The reader now builds the area from pixel centres, so the decoded grid keeps the raster's cell size (250 m for the national composite instead of 250.05 m) and is no longer shifted by half a pixel.
+
 * Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-11.fmi
 - Lazy radar loading, increment 4b engine side (decode-free capabilities): new Engine::getRadarLayerMetaData(producer) returns a lazy producer's full valid-time list (from RadarCatalog) plus a WGS84 bounding box (reprojected from the catalogued native extent) and modification time, all header-only with no pixel decode. This lets the WMS plugin advertise a lazy radar producer's complete time dimension in GetCapabilities without decoding any frame (previously get() would have triggered an on-access decode of every producer during capabilities). Returns valid=false for non-lazy / non-catalogued producers (and the disabled base engine), so callers fall back to the normal Q path.
 

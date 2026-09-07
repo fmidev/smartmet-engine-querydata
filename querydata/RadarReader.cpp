@@ -314,7 +314,7 @@ std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
 {
   const std::string filename = path.string();
 
-  GDALAllRegister();
+  Fmi::HDF5::ensureGdalRegistered();
   auto* ds = static_cast<GDALDataset*>(GDALOpen(filename.c_str(), GA_ReadOnly));
   if (ds == nullptr)
     throw Fmi::Exception(BCP, "GDAL failed to open radar GeoTIFF: " + filename);
@@ -335,10 +335,14 @@ std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
   const double pixelW = gt[1];
   const double originY = gt[3];
   const double pixelH = gt[5];  // negative for north-up
-  const double x0 = originX;
-  const double y0 = originY;
-  const double x1 = originX + static_cast<double>(nx) * pixelW;
-  const double y1 = originY + static_cast<double>(ny) * pixelH;
+  // The geotransform origin is the outer corner of the first pixel (pixel-is-area),
+  // whereas a newbase grid is point-valued: the area corners are the centres of the
+  // corner cells. Use pixel centres so the decoded grid keeps the raster's cell size
+  // and is not shifted by half a pixel.
+  const double x0 = originX + 0.5 * pixelW;
+  const double y0 = originY + 0.5 * pixelH;
+  const double x1 = originX + (static_cast<double>(nx) - 0.5) * pixelW;
+  const double y1 = originY + (static_cast<double>(ny) - 0.5) * pixelH;
   const double minX = std::min(x0, x1);
   const double maxX = std::max(x0, x1);
   const double minY = std::min(y0, y1);
@@ -708,7 +712,7 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
 RadarFrameInfo readGeoTiffMetadata(const std::filesystem::path& path)
 {
   const std::string filename = path.string();
-  GDALAllRegister();
+  Fmi::HDF5::ensureGdalRegistered();
   auto* ds = static_cast<GDALDataset*>(GDALOpen(filename.c_str(), GA_ReadOnly));
   if (ds == nullptr)
     throw Fmi::Exception(BCP, "GDAL failed to open radar GeoTIFF: " + filename);

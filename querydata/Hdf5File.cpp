@@ -2,12 +2,19 @@
 
 #include <gdal_priv.h>
 #include <algorithm>
+#include <mutex>
 #include <stdexcept>
 
 namespace Fmi
 {
 namespace HDF5
 {
+void ensureGdalRegistered()
+{
+    static std::once_flag flag;
+    std::call_once(flag, [] { GDALAllRegister(); });
+}
+
 
 // Convert HDF5 path to GDAL metadata key prefix.
 // Strips leading '/' and replaces remaining '/' with '_'.
@@ -48,7 +55,7 @@ bool Hdf5File::try_parse_double(const std::string& s, double& out) noexcept
 Hdf5File::Hdf5File(const std::string& path)
 try
 {
-    GDALAllRegister();
+    ensureGdalRegistered();
 
     gdal_ds = static_cast<GDALDataset*>(GDALOpen(path.c_str(), GA_ReadOnly));
     if (!gdal_ds)

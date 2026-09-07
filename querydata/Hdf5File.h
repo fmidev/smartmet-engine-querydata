@@ -19,6 +19,11 @@ namespace Fmi
 {
 namespace HDF5
 {
+// Register the GDAL drivers exactly once. GDALAllRegister() is not safe to call
+// concurrently (driver registration mutates global driver managers), and the
+// querydata engine loads each producer in its own thread.
+void ensureGdalRegistered();
+
 
 namespace detail
 {
