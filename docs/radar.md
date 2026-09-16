@@ -33,10 +33,24 @@ radar_finland_dbz:
     directory             = "/smartmet/radar/geotiff/radar_finland_dbz_3067";
     pattern               = ".*_radar_finland_dbz\.tif$";
     type                  = "grid";
+    forecast              = false;
+    multifile             = true; # one frame per file, see below
+    lazy                  = true; # catalogue headers at startup, decode on first access
     number_to_keep        = 50;   # also the animation window / scratch retention
     refresh_interval_secs = 60;
 };
 ```
+
+`multifile = true` is essential: every GeoTIFF/ODIM frame becomes its own model with a
+single valid time, and for a producer that is not multifile the engine ignores the
+requested time period and serves the newest file only. A WMS animation of such a
+producer then renders nothing except at the newest time. With `multifile` the models of
+the loaded window are combined, so any time in the window can be requested.
+
+`lazy = true` keeps a header-only catalogue of all frames (used by WMS GetCapabilities
+through `Engine::getRadarLayerMetaData`) and decodes the newest `number_to_keep` frames
+only when the producer is first accessed; see the scratch cache section for
+`radar.idle_timeout` and `radar.cache_size`.
 
 ODIM producers are identical but point at an `.h5` directory with an `.h5`
 pattern. The valid time comes from the file (GeoTIFF `Observation time` metadata
