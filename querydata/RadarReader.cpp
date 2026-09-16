@@ -16,6 +16,7 @@
 #include <gis/SpatialReference.h>
 #include <macgyver/Exception.h>
 
+#include <boost/regex.hpp>
 #include <newbase/NFmiArea.h>
 #include <newbase/NFmiDataIdent.h>
 #include <newbase/NFmiEnumConverter.h>
@@ -41,7 +42,6 @@
 #include <limits>
 #include <map>
 #include <optional>
-#include <regex>
 #include <string>
 #include <vector>
 
@@ -87,14 +87,14 @@ NFmiMetTime parseTimeFromName(const std::string& filename)
 {
   const std::string base = std::filesystem::path(filename).filename().string();
   // `<origin>_<validtime>_<product>` -> prefer the second (valid) stamp.
-  static const std::regex re2(R"(^(\d{12,14})_(\d{12,14})_)");
-  std::smatch m2;
-  if (std::regex_search(base, m2, re2))
+  static const boost::regex re2(R"(^(\d{12,14})_(\d{12,14})_)");
+  boost::smatch m2;
+  if (boost::regex_search(base, m2, re2))
     if (auto t = parseUtcStamp(m2[2]))
       return *t;
-  static const std::regex re(R"((\d{12,14}))");
-  std::smatch m;
-  if (std::regex_search(base, m, re))
+  static const boost::regex re(R"((\d{12,14}))");
+  boost::smatch m;
+  if (boost::regex_search(base, m, re))
     if (auto t = parseUtcStamp(m[1]))
       return *t;
   std::error_code ec;
@@ -117,9 +117,9 @@ NFmiMetTime parseTimeFromName(const std::string& filename)
 std::string extractLabel(const std::string& filename)
 {
   std::string base = std::filesystem::path(filename).stem().string();
-  static const std::regex re(R"(^(?:\d{12,14}_){1,2}(.*)$)");
-  std::smatch m;
-  if (std::regex_search(base, m, re))
+  static const boost::regex re(R"(^(?:\d{12,14}_){1,2}(.*)$)");
+  boost::smatch m;
+  if (boost::regex_search(base, m, re))
     return m[1];
   return base;
 }
@@ -151,21 +151,21 @@ std::map<std::string, MetaItem> parseGdalMetadata(const std::string& xml)
   std::map<std::string, MetaItem> out;
   if (xml.empty())
     return out;
-  static const std::regex itemRe(R"(<Item\s+([^>]*?)>([^<]*)</Item>)", std::regex::ECMAScript);
-  static const std::regex nameRe(R"x(name="([^"]*)")x");
-  static const std::regex unitRe(R"x(unit="([^"]*)")x");
-  auto begin = std::sregex_iterator(xml.begin(), xml.end(), itemRe);
-  for (auto it = begin; it != std::sregex_iterator(); ++it)
+  static const boost::regex itemRe(R"(<Item\s+([^>]*?)>([^<]*)</Item>)", boost::regex::ECMAScript);
+  static const boost::regex nameRe(R"x(name="([^"]*)")x");
+  static const boost::regex unitRe(R"x(unit="([^"]*)")x");
+  auto begin = boost::sregex_iterator(xml.begin(), xml.end(), itemRe);
+  for (auto it = begin; it != boost::sregex_iterator(); ++it)
   {
     const std::string attrs = (*it)[1].str();
     const std::string value = unescapeXml((*it)[2].str());
-    std::smatch nm;
-    if (!std::regex_search(attrs, nm, nameRe))
+    boost::smatch nm;
+    if (!boost::regex_search(attrs, nm, nameRe))
       continue;
     MetaItem mi;
     mi.value = value;
-    std::smatch um;
-    if (std::regex_search(attrs, um, unitRe))
+    boost::smatch um;
+    if (boost::regex_search(attrs, um, unitRe))
       mi.unit = um[1].str();
     out[nm[1].str()] = std::move(mi);
   }
@@ -258,9 +258,9 @@ RadarTimeParam resolveRadarTimeAndParam(const std::map<std::string, MetaItem>& m
   else
   {
     const std::string base = path.filename().string();
-    static const std::regex re2(R"(^(\d{12,14})_(\d{12,14})_)");
-    std::smatch m2;
-    if (std::regex_search(base, m2, re2))
+    static const boost::regex re2(R"(^(\d{12,14})_(\d{12,14})_)");
+    boost::smatch m2;
+    if (boost::regex_search(base, m2, re2))
       if (auto o = parseUtcStamp(m2[1]))
         out.originTime = *o;
   }

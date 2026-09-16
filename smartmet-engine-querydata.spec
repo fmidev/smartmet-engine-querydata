@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.9.16
-Release: 2%{?dist}.fmi
+Release: 3%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.16-3.fmi
+- RadarReader: use boost::regex instead of std::regex for the file name time stamps, the product label and the GDAL metadata items; libstdc++'s std::regex crashed the server on radar producer load
+
 * Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.16-2.fmi
 - Fixed a startup crash (SIGSEGV in GDAL driver registration) when several radar producers are loaded concurrently: GDALAllRegister() is not safe to call from multiple threads at once, so the GeoTIFF and ODIM readers now register the GDAL drivers exactly once via a shared call_once helper.
 - Fixed the georeferencing of decoded radar GeoTIFFs: the geotransform origin is the outer corner of the first pixel (pixel-is-area) whereas a newbase grid is point-valued at the cell centres. The reader now builds the area from pixel centres, so the decoded grid keeps the raster's cell size (250 m for the national composite instead of 250.05 m) and is no longer shifted by half a pixel
