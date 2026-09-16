@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "RadarCatalog.h"
 #include "Repository.h"
 #include <boost/atomic.hpp>
 #include <boost/thread.hpp>
@@ -13,8 +14,12 @@
 #include <macgyver/Cache.h>
 #include <macgyver/DirectoryMonitor.h>
 #include <spine/Thread.h>
+#include <chrono>
 #include <filesystem>
+#include <map>
 #include <memory>
+#include <mutex>
+#include <set>
 
 namespace SmartMet
 {
@@ -58,6 +63,20 @@ struct RepoManager
   bool ready() const;
   void shutdown();
 
+  // Reconcile the radar scratch cache against the sources and the size budget.
+  // Called once per process before init() starts scanning: removes crash residue
+  // (dot-prefixed temps, .trash), drops stale/rotated frames and de-configured
+  // sources, keeps still-current frames for a warm restart, and enforces the
+  // radar.cache_size budget (group-LRU eviction of whole sources). Not for a
+  // config hot-reload, where the previous RepoManager still owns live scratch.
+  void reconcileRadarCache() const;
+
+  // Ensure a lazy producer's servable window is decoded and in the repository,
+  // decoding it on first access if necessary. A no-op for non-lazy producers and
+  // for lazy producers already loaded. Safe to call from request threads; it does
+  // its own locking and must be called before taking itsMutex for a get().
+  void ensureLoaded(const Producer& producer);
+
   // data members
 
   mutable Spine::MutexType itsMutex;  // mutexes should always be mutable
@@ -87,6 +106,11 @@ struct RepoManager
 
   Repository itsRepo;
 
+  // Cheap header-only metadata of every frame of each lazy radar producer, so
+  // GetCapabilities can advertise the full time dimension without decoding. The
+  // pixel decode is deferred to on-access (see RadarCatalog).
+  RadarCatalog itsRadarCatalog;
+
   std::time_t configModTime;  // Timestamp of configuration file loaded
   std::time_t getConfigModTime() const { return configModTime; }
 
@@ -97,11 +121,48 @@ struct RepoManager
 
  private:
   void load(Producer producer, Files files);
+  // Core of load(): decode the given files into models and add them to the repo.
+  // Shared by the directory-monitor path and by on-access lazy loading; does not
+  // touch itsThreadCount (the caller owns it).
+  void loadModels(const Producer& producer, const Files& files, const ProducerConfig& conf);
   void expirationLoop();
+
+  bool producerHasModels(const Producer& producer) const;
+  std::shared_ptr<std::mutex> lazyLoadMutex(const Producer& producer);
+  void unloadProducer(const Producer& producer);
+  // Unload cold lazy producers: those idle past radar.idle_timeout, and (while
+  // the scratch cache is over its byte budget) the least-recently-accessed
+  // loaded ones, so radar.cache_size actually binds. Called from expirationLoop.
+  void sweepLazyProducers();
 
   Fmi::DirectoryMonitor::Watcher id(const Producer& producer) const;
 
   int itsMaxThreadCount;
+
+  // Producers configured lazy (radar). Checked on every get() via ensureLoaded,
+  // so kept as a fast set to avoid a config scan for the non-lazy common case.
+  std::set<Producer> itsLazyProducers;
+  // Idle timeout (seconds) after which an untouched lazy producer is unloaded;
+  // 0 = never unload by idle (config key radar.idle_timeout).
+  unsigned int itsRadarIdleTimeout{0};
+  // Per-producer locks serialising concurrent first-access decodes, and the
+  // last-access time of each lazy producer (for idle + size-based unloading).
+  // Both guarded by itsLazyLoadMapMutex.
+  std::mutex itsLazyLoadMapMutex;
+  std::map<Producer, std::shared_ptr<std::mutex>> itsLazyLoadMutexes;
+  std::map<Producer, std::chrono::steady_clock::time_point> itsLazyLastAccess;
+
+  // Directory for decoded radar scratch .sqd files (GeoTIFF/ODIM producers).
+  // Should live on a real disk volume so the kernel page cache manages the
+  // memory-mapped decoded frames. Overridable via config key
+  // radar.scratch_directory; default below.
+  std::filesystem::path itsRadarScratchDir{"/var/tmp/smartmet-qengine-radar"};
+
+  // Total byte budget for the radar scratch cache; 0 = unlimited. Overridable
+  // via config key radar.cache_size. When exceeded, whole least-recently-accessed
+  // sources (producer subdirectories) are evicted (see RadarCache).
+  std::uintmax_t itsRadarCacheBytes{0};
+
   boost::atomic<int> itsThreadCount;
 
   using LatLonCache = Fmi::Cache::Cache<std::size_t, std::shared_ptr<std::vector<NFmiPoint>>>;

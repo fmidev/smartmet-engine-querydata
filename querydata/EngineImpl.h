@@ -80,6 +80,7 @@ class EngineImpl final : public Engine
   // request available information
   const ProducerList& producers() const override;                    // available producers
   OriginTimes origintimes(const Producer& producer) const override;  // available origintimes
+  RadarLayerMetaData getRadarLayerMetaData(const Producer& producer) const override;
 
   bool hasProducer(const Producer& producer) const override;
 

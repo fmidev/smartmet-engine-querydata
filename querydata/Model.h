@@ -39,7 +39,8 @@ class Model : public boost::enable_shared_from_this<Model>
   };  // Dummy structure to disable public constructors
  public:
   Model(Private /* unused */,
-        const std::filesystem::path& filename,
+        const std::filesystem::path& sourcepath,
+        const std::filesystem::path& datafile,
         Producer producer,
         std::string levelname,
         bool climatology,
@@ -48,7 +49,8 @@ class Model : public boost::enable_shared_from_this<Model>
         bool relativeuv,
         unsigned int update_interval,
         unsigned int minimum_expiration_time,
-        bool mmap);
+        bool mmap,
+        bool ownsdatafile);
 
   Model(Private /* unused */,
         const Model& theModel,
@@ -68,13 +70,31 @@ class Model : public boost::enable_shared_from_this<Model>
                                        unsigned int minimum_expiration_time,
                                        bool mmap);
 
+  // Create a model whose identity (path, hash, modification time) comes from
+  // sourcepath but whose querydata is read from datafile. Used for radar
+  // producers: the source is a GeoTIFF/ODIM frame, datafile is the decoded
+  // scratch .sqd. When ownsdatafile is true the model deletes datafile when
+  // it is destroyed (eviction / expiry).
+  static std::shared_ptr<Model> create(const std::filesystem::path& sourcepath,
+                                       const std::filesystem::path& datafile,
+                                       const Producer& producer,
+                                       const std::string& levelname,
+                                       bool climatology,
+                                       bool full,
+                                       bool staticgrid,
+                                       bool relativeuv,
+                                       unsigned int update_interval,
+                                       unsigned int minimum_expiration_time,
+                                       bool mmap,
+                                       bool ownsdatafile);
+
   static std::shared_ptr<Model> create(const Model& theModel,
                                        std::shared_ptr<NFmiQueryData> theData,
                                        std::size_t theHash);
 
   static std::shared_ptr<Model> create(std::shared_ptr<NFmiQueryData> theData, std::size_t theHash);
 
-  ~Model() = default;
+  ~Model();
   Model() = delete;
   Model(const Model& theModel) = delete;
   Model& operator=(const Model& theModel) = delete;
@@ -121,6 +141,9 @@ class Model : public boost::enable_shared_from_this<Model>
   Fmi::DateTime itsOriginTime;
   Fmi::DateTime itsLoadTime;
   std::filesystem::path itsPath;
+  // For radar producers: the decoded scratch .sqd this model was read from and
+  // is responsible for deleting on destruction. Empty for ordinary querydata.
+  std::filesystem::path itsScratchFile;
   Fmi::DateTime itsModificationTime;
   Producer itsProducer;
   std::string itsLevelName;

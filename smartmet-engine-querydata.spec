@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.9.16
-Release: 1%{?dist}.fmi
+Release: 2%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,12 +92,50 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Mon Sep  7 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.16-2.fmi
+- Fixed a startup crash (SIGSEGV in GDAL driver registration) when several radar producers are loaded concurrently: GDALAllRegister() is not safe to call from multiple threads at once, so the GeoTIFF and ODIM readers now register the GDAL drivers exactly once via a shared call_once helper.
+- Fixed the georeferencing of decoded radar GeoTIFFs: the geotransform origin is the outer corner of the first pixel (pixel-is-area) whereas a newbase grid is point-valued at the cell centres. The reader now builds the area from pixel centres, so the decoded grid keeps the raster's cell size (250 m for the national composite instead of 250.05 m) and is no longer shifted by half a pixel
+
 * Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.16-1.fmi
 - Repackaged due to Fmi::Cache::Cache locking changes
 
 * Mon Aug 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.8.24-1.fmi
 - Fixed QImpl to keep the NFmiFastQueryInfo of a single model view in the pool of the model: one info per Q was never returned, so a new one was constructed for every get()
 - Added getModelHashValue for obtaining the hash value and the expiration time of the data without constructing a Q
+
+* Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-11.fmi
+- Lazy radar loading, increment 4b engine side (decode-free capabilities): new Engine::getRadarLayerMetaData(producer) returns a lazy producer's full valid-time list (from RadarCatalog) plus a WGS84 bounding box (reprojected from the catalogued native extent) and modification time, all header-only with no pixel decode. This lets the WMS plugin advertise a lazy radar producer's complete time dimension in GetCapabilities without decoding any frame (previously get() would have triggered an on-access decode of every producer during capabilities). Returns valid=false for non-lazy / non-catalogued producers (and the disabled base engine), so callers fall back to the normal Q path.
+
+* Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-10.fmi
+- Lazy radar loading, increment 4a (unload sweeper): the expiration loop now unloads cold lazy producers, which is what makes radar.cache_size actually bind. A lazy producer untouched for radar.idle_timeout seconds (new config key; 0 = never) is unloaded to free memory; and while the scratch cache exceeds radar.cache_size, the least-recently-accessed loaded lazy producer is unloaded (its scratch reclaimed via the Model destructor) until under budget. ensureLoaded() records per-producer access time (also on the hot path). Unloading is safe against in-flight queries (a live Q keeps its model alive until the request ends). Re-access re-decodes via ensureLoaded. Non-lazy producers unaffected.
+
+* Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-9.fmi
+- Lazy radar loading, increment 3 (on-access decode): a lazy producer is no longer eagerly decoded - the directory monitor keeps its catalogue fresh (and refreshes it if already hot), but a cold lazy producer's frames are decoded only on first access. EngineImpl::get() calls RepoManager::ensureLoaded(), which (for lazy producers only, via a fast set check) serialises per producer and decodes the newest number_to_keep catalogued frames into the repository, so a subsequent multifile get() sees the complete servable window. The core decode loop of load() was factored into loadModels(), shared by the monitor path and on-access loading. Non-lazy producers are entirely unaffected (fast-set early return; no config scan, no lock). NOTE: single-threaded path validated; concurrency (many request threads missing + a background refresher) needs a staging-server soak.
+
+* Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-8.fmi
+- Lazy radar loading, increment 2 (metadata catalog): new RadarCatalog builds, per producer, the header-only metadata (via readRadarMetadata) of every available frame so a source's full time dimension can be advertised in GetCapabilities without decoding. New per-producer config flag 'lazy'; when set, RepoManager populates the catalog on each scan (frames are still eagerly decoded for now - a later increment defers that to on-access). 'lazy' composes with 'multifile': a lazy+multifile radar producer catalogs the whole series cheaply and (in a later increment) decodes the whole servable window on access so the grouped multifile Q is complete; non-lazy observation/forecast producers are unaffected. Unit-tested by examples/RadarCatalogTest.cpp.
+
+* Mon Jul 20 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-7.fmi
+- RadarReader: stop constructing NFmiEnumConverter per frame (its constructor builds the whole enum<->name map); share one process-wide static instance via paramEnumConverter(), matching the existing codebase idiom, since its lookups never mutate state. Factored the valid/origin-time + parameter resolution into a shared helper. Added readRadarMetadata(), a header-only per-frame metadata read (time/param/grid/CRS/bbox, no RasterIO) so a whole radar source's time dimension can be built cheaply without decoding every frame - the foundation for lazy per-source loading with complete GetCapabilities. GeoTIFF is header-only; ODIM currently falls back to a full decode. RadarReaderTest cross-checks the metadata against the full decode.
+
+* Sun Jul 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-6.fmi
+- Size-bounded radar scratch cache (RadarCache): the decoded .sqd cache is now managed per source (producer subdirectory) with a byte budget (config radar.cache_size; 0 = unlimited). When over budget, whole least-recently-accessed sources are evicted to a low-water mark; recency is a per-source .accessed marker mtime and a source with live models is pinned. Startup now RECONCILES the cache instead of wiping it (RepoManager::reconcileRadarCache): crash residue (dot-prefixed temps, .trash) and stale/rotated/de-configured frames are removed while current frames are kept for a warm restart. Crash-safe by construction (filesystem is the source of truth, atomic subdir-rename eviction, no authoritative index file). Unit-tested by examples/RadarCacheTest.cpp. NOTE: under the current eager per-producer load every configured source is pinned, so the budget presently reclaims only expired/de-configured sources; a true working-set limit needs lazy per-source loading.
+
+* Sun Jul 19 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-5.fmi
+- Radar scratch: the temporary file written during decode is now dot-prefixed (.<name>.<id> in the target directory) instead of using a .tmp suffix, so the newbase querydata reader and directory scans automatically ignore a half-written temp left by a crash. The rename into place stays atomic (same directory).
+
+* Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-4.fmi
+- RadarReader GeoTIFF fix: 'Corrected reflectivity' now maps to kFmiCorrectedReflectivity (126, matching the ODIM DBZH path) instead of the generic kFmiReflectivity (1103, uncorrected); GeoTIFF is the production radar format, so dbz WMS layers asking for CorrectedReflectivity previously found no data. Also map 'Precipitation intensity' to kFmiPrecipitationRate. RadarReaderTest extended to decode real captured sample fixtures (smartmet-test-data radar/) and assert parameter + physical value ranges per quantity.
+
+* Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-3.fmi
+- Radar scratch cache cleanup: RepoManager::cleanupOrphanedRadarScratch() now wipes leftover decoded scratch .sqd files on engine startup, before the first scan, recovering disk from a previous crash/kill that skipped the Model destructors. It runs once per process (not on config hot-reload, where the previous manager still owns live scratch), and is safe because no data is mapped yet. Steady-state cleanup via the Model destructor is unchanged. See docs/radar.md for the recommended tmpfiles.d safety net.
+
+* Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-2.fmi
+- Radar ODIM HDF5 support (RadarReader): Cartesian ODIM composites/images (object COMP/IMAGE/CVOL, both numbered /dataset1/data1 and unnumbered /dataset1/data layouts) are now decoded to querydata like the GeoTIFF path, reusing a vendored copy of qdtools' Fmi::HDF5::Hdf5File (GDAL HDF5 driver) and h5toqd's quantity->parameter mapping, projdef+corners area construction and gain/offset/nodata/undetect handling. Polar volumes (PVOL) are rejected. Producers are still selected by file extension (.h5/.hdf).
+
+* Sat Jul 18 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.18-1.fmi
+- Radar GeoTIFF support (RadarReader): producers whose files are GeoTIFF (.tif/.tiff, detected from the extension) are decoded on load into a scratch .sqd and served memory-mapped exactly like ordinary querydata, so monochrome radar can drive isoband and raster WMS layers with no plugin changes. The scratch file is owned by the model and removed on eviction/expiry; the kernel page cache manages resident memory. EPSG:3067 frames are served on a native transverse mercator area when newbase >= 26.7.18 is installed (PROJ-backed area otherwise). ODIM HDF5 reading is stubbed for a follow-up.
+
 * Fri Jul 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.7.17-1.fmi
 - Pointwise (station) querydata: location-dependent special parameters (stationname, distance,
   direction, wmo, fmisid, lpnn, rwsid, stationlongitude/latitude) now refer to the nearest station

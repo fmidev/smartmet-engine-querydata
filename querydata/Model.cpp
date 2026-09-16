@@ -31,7 +31,8 @@ namespace Querydata
 // ----------------------------------------------------------------------
 
 Model::Model(Private /* unused */,
-             const std::filesystem::path& filename,
+             const std::filesystem::path& sourcepath,
+             const std::filesystem::path& datafile,
              Producer producer,
              std::string levelname,
              bool climatology,
@@ -40,8 +41,10 @@ Model::Model(Private /* unused */,
              bool relativeuv,
              unsigned int update_interval,
              unsigned int minimum_expiration_time,
-             bool mmap)
-    : itsPath(filename),
+             bool mmap,
+             bool ownsdatafile)
+    : itsPath(sourcepath),
+      itsScratchFile(ownsdatafile ? datafile : std::filesystem::path()),
       itsProducer(std::move(producer)),
       itsLevelName(std::move(levelname)),
       itsUpdateInterval(update_interval),
@@ -51,19 +54,20 @@ Model::Model(Private /* unused */,
       itsStaticGrid(staticgrid),
       itsRelativeUV(relativeuv),
       itsValidTimeList(new ValidTimeList()),
-      itsQueryData(new NFmiQueryData(filename.string(), mmap))
+      itsQueryData(new NFmiQueryData(datafile.string(), mmap))
 {
   try
   {
     if (!itsQueryData)
       throw Fmi::Exception(
-          BCP, "Failed to initialize NFmiQueryData object from '" + filename.string() + "'!");
+          BCP, "Failed to initialize NFmiQueryData object from '" + datafile.string() + "'!");
 
     itsOriginTime = itsQueryData->OriginTime();
     itsLoadTime = Fmi::SecondClock::universal_time();
 
-    // May throw if file is gone
-    itsModificationTime = Fmi::date_time::from_time_t(Fmi::last_write_time(filename));
+    // Identity and modification time come from the source file, not the data
+    // file (which may be a decoded scratch .sqd). May throw if file is gone.
+    itsModificationTime = Fmi::date_time::from_time_t(Fmi::last_write_time(sourcepath));
 
     // Unique hash value for this model
 
@@ -115,6 +119,7 @@ std::shared_ptr<Model> Model::create(const std::filesystem::path& filename,
 {
   return std::make_shared<Model>(Private(),
                                  filename,
+                                 filename,
                                  producer,
                                  levelname,
                                  climatology,
@@ -123,7 +128,56 @@ std::shared_ptr<Model> Model::create(const std::filesystem::path& filename,
                                  relativeuv,
                                  update_interval,
                                  minimum_expiration_time,
-                                 mmap);
+                                 mmap,
+                                 /*ownsdatafile=*/false);
+}
+
+std::shared_ptr<Model> Model::create(const std::filesystem::path& sourcepath,
+                                     const std::filesystem::path& datafile,
+                                     const Producer& producer,
+                                     const std::string& levelname,
+                                     bool climatology,
+                                     bool full,
+                                     bool staticgrid,
+                                     bool relativeuv,
+                                     unsigned int update_interval,
+                                     unsigned int minimum_expiration_time,
+                                     bool mmap,
+                                     bool ownsdatafile)
+{
+  return std::make_shared<Model>(Private(),
+                                 sourcepath,
+                                 datafile,
+                                 producer,
+                                 levelname,
+                                 climatology,
+                                 full,
+                                 staticgrid,
+                                 relativeuv,
+                                 update_interval,
+                                 minimum_expiration_time,
+                                 mmap,
+                                 ownsdatafile);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Destructor
+ *
+ * Deletes the decoded scratch .sqd file for radar producers. The file may
+ * still be memory-mapped by itsQueryData at this point; on Linux the inode
+ * survives until the mapping is released (itsQueryData is destroyed after
+ * this body runs), so removing the directory entry here is safe.
+ */
+// ----------------------------------------------------------------------
+
+Model::~Model()
+{
+  if (!itsScratchFile.empty())
+  {
+    std::error_code ec;
+    std::filesystem::remove(itsScratchFile, ec);
+  }
 }
 
 // ----------------------------------------------------------------------
