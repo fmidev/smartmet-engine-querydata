@@ -4,7 +4,7 @@
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
 Version: 26.9.16
-Release: 3%{?dist}.fmi
+Release: 4%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.16-4.fmi
+- Lazy radar producers are also loaded by getModelHashValue(), not only by get(): the WMS plugin computes the layer hash before fetching the data, so an untouched lazy producer answered "No data available" and every request for it failed
+
 * Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.16-3.fmi
 - RadarReader: use boost::regex instead of std::regex for the file name time stamps, the product label and the GDAL metadata items; libstdc++'s std::regex crashed the server on radar producer load
 

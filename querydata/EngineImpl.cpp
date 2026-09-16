@@ -671,6 +671,10 @@ ModelHashValue EngineImpl::getModelHashValue(const Producer& producer) const
   {
     auto repomanager = itsRepoManager.load();
 
+    // A lazy producer must be loaded here too: callers (e.g. WMS ETag hashing) use the
+    // hash value before get(), and an unloaded producer has no models to hash.
+    repomanager->ensureLoaded(producer);
+
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsRepo.getModelHashValue(producer);
   }
@@ -687,6 +691,10 @@ ModelHashValue EngineImpl::getModelHashValue(const Producer& producer,
   {
     auto repomanager = itsRepoManager.load();
 
+    // A lazy producer must be loaded here too: callers (e.g. WMS ETag hashing) use the
+    // hash value before get(), and an unloaded producer has no models to hash.
+    repomanager->ensureLoaded(producer);
+
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsRepo.getModelHashValue(producer, origintime);
   }
@@ -702,6 +710,10 @@ ModelHashValue EngineImpl::getModelHashValue(const Producer& producer,
   try
   {
     auto repomanager = itsRepoManager.load();
+
+    // A lazy producer must be loaded here too: callers (e.g. WMS ETag hashing) use the
+    // hash value before get(), and an unloaded producer has no models to hash.
+    repomanager->ensureLoaded(producer);
 
     Spine::ReadLock lock(repomanager->itsMutex);
     return repomanager->itsRepo.getModelHashValue(producer, timePeriod);
