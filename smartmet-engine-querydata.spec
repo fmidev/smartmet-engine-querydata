@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 26.8.24
+Version: 26.9.16
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -32,7 +32,7 @@ BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: smartmet-library-timeseries-devel >= 26.5.5
-BuildRequires: smartmet-library-macgyver-devel >= 26.7.9
+BuildRequires: smartmet-library-macgyver-devel >= 26.9.16
 BuildRequires: smartmet-library-newbase-devel >= 26.7.14
 BuildRequires: smartmet-library-spine-devel >= 26.7.16
 Requires: %{smartmet_boost}-iostreams
@@ -44,7 +44,7 @@ Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
 Requires: smartmet-library-timeseries >= 26.5.5
-Requires: smartmet-library-macgyver >= 26.7.9
+Requires: smartmet-library-macgyver >= 26.9.16
 Requires: smartmet-library-newbase >= 26.7.14
 Requires: smartmet-library-spine >= 26.7.16
 #TestRequires: smartmet-utils-devel >= 26.7.14
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.9.16-1.fmi
+- Repackaged due to Fmi::Cache::Cache locking changes
+
 * Mon Aug 24 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> 26.8.24-1.fmi
 - Fixed QImpl to keep the NFmiFastQueryInfo of a single model view in the pool of the model: one info per Q was never returned, so a new one was constructed for every get()
 - Added getModelHashValue for obtaining the hash value and the expiration time of the data without constructing a Q
