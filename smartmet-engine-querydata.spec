@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 26.9.16
-Release: 4%{?dist}.fmi
+Version: 26.9.23
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -31,10 +31,10 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: %{smartmet_fmt_devel}
-BuildRequires: smartmet-library-timeseries-devel >= 26.5.5
-BuildRequires: smartmet-library-macgyver-devel >= 26.9.16
-BuildRequires: smartmet-library-newbase-devel >= 26.7.14
-BuildRequires: smartmet-library-spine-devel >= 26.7.16
+BuildRequires: smartmet-library-timeseries-devel >= 26.9.16
+BuildRequires: smartmet-library-macgyver-devel >= 26.9.23
+BuildRequires: smartmet-library-newbase-devel >= 26.9.23
+BuildRequires: smartmet-library-spine-devel >= 26.9.23
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -43,11 +43,11 @@ Requires: gdal312-libs
 Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 26.5.5
-Requires: smartmet-library-macgyver >= 26.9.16
-Requires: smartmet-library-newbase >= 26.7.14
-Requires: smartmet-library-spine >= 26.7.16
-#TestRequires: smartmet-utils-devel >= 26.7.14
+Requires: smartmet-library-timeseries >= 26.9.16
+Requires: smartmet-library-macgyver >= 26.9.23
+Requires: smartmet-library-newbase >= 26.9.23
+Requires: smartmet-library-spine >= 26.9.23
+#TestRequires: smartmet-utils-devel >= 26.9.3
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal312-devel
 #TestRequires: gcc-c++
@@ -92,6 +92,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Wed Sep 23 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.23-1.fmi
+- Repackaged due to base library ABi changes
+
 * Wed Sep 16 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.16-4.fmi
 - Lazy radar producers are also loaded by getModelHashValue(), not only by get(): the WMS plugin computes the layer hash before fetching the data, so an untouched lazy producer answered "No data available" and every request for it failed
 
