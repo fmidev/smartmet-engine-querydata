@@ -31,7 +31,7 @@ namespace Engine
 {
 namespace Querydata
 {
-class Model : public boost::enable_shared_from_this<Model>
+class Model : public std::enable_shared_from_this<Model>
 {
   struct Private
   {
@@ -119,7 +119,9 @@ class Model : public boost::enable_shared_from_this<Model>
   bool isStaticGrid() const;
   bool isRelativeUV() const;
 
-  NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist, const NFmiMetTime& theTime) const;
+  NFmiPoint validPoint(const NFmiPoint& theLatLon,
+                       double theMaxDist,
+                       const NFmiMetTime& theTime) const;
 
   std::size_t gridHashValue() const;
 

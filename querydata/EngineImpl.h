@@ -9,13 +9,12 @@
 #include "Engine.h"
 #include "Producer.h"
 #include "Repository.h"
-#include <boost/atomic.hpp>
-#include <boost/smart_ptr/atomic_shared_ptr.hpp>
 #include <gis/CoordinateMatrix.h>
 #include <macgyver/AtomicSharedPtr.h>
 #include <macgyver/Cache.h>
 #include <spine/ParameterTranslations.h>
 #include <spine/SmartMetEngine.h>
+#include <atomic>
 #include <filesystem>
 #include <future>
 #include <memory>
@@ -164,7 +163,7 @@ class EngineImpl final : public Engine
   void init() override;
   void shutdown() override;
   std::time_t getConfigModTime();
-  boost::atomic<int> lastConfigErrno = 0;
+  std::atomic<int> lastConfigErrno = 0;
   int getLastConfigErrno();
 
  private:

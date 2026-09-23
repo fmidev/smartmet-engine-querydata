@@ -43,7 +43,7 @@ namespace Engine
 {
 namespace Querydata
 {
-class QImpl : public boost::enable_shared_from_this<QImpl>
+class QImpl : public std::enable_shared_from_this<QImpl>
 {
  public:
   ~QImpl();
@@ -70,7 +70,9 @@ class QImpl : public boost::enable_shared_from_this<QImpl>
   std::size_t hashValue() const;
   std::size_t gridHashValue() const;
 
-  NFmiPoint validPoint(const NFmiPoint& theLatLon, double theMaxDist, const NFmiMetTime& theTime) const;
+  NFmiPoint validPoint(const NFmiPoint& theLatLon,
+                       double theMaxDist,
+                       const NFmiMetTime& theTime) const;
 
   // API correspondence with NFmiFastQueryInfo
 
