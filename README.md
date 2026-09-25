@@ -152,6 +152,11 @@ SmartMet Server can be dockerized. This [tutorial](docs/docker.md)
 explains how to explains how to configure the querydata engine
 (QEngine) of the SmartMet Server when using Docker.
 
+## Documentation
+
+- [Developer guide](docs/developer-guide.md) — models and producers, the plugin API, producer search, hash values and expiration, caches, reload, binary compatibility
+- [Radar producers](docs/radar.md)
+
 ## License
 
 MIT — see [LICENSE](LICENSE)

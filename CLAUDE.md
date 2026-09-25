@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The **querydata engine** (QEngine) for SmartMet Server. It provides shared access to gridded weather forecast data in FMI's QueryData format. The engine memory-maps data files from disk/NFS, supports spatial and temporal interpolation, DEM-based temperature correction, and automatic producer selection for a requested geographic region. It is loaded as a shared object (`querydata.so`) by the SmartMet Server daemon at runtime.
 
+Full developer documentation: `docs/developer-guide.md`.
+
 ## Build commands
 
 ```bash
