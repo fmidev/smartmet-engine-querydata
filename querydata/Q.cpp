@@ -204,8 +204,8 @@ TS::Value WindUMS(QImpl &q,
       return TS::None();
 
     auto u = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                           ? q.interpolateAtPressure(latlon, ldt, *level, maxgap)
+                           : q.interpolateAtHeight(latlon, ldt, *level, maxgap))
                     : q.interpolate(latlon, ldt, maxgap));
 
     if (angle == 0)
@@ -215,8 +215,8 @@ TS::Value WindUMS(QImpl &q,
       return TS::None();
 
     auto v = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                           ? q.interpolateAtPressure(latlon, ldt, *level, maxgap)
+                           : q.interpolateAtHeight(latlon, ldt, *level, maxgap))
                     : q.interpolate(latlon, ldt, maxgap));
 
     if (u == kFloatMissing || v == kFloatMissing)
@@ -263,8 +263,8 @@ TS::Value WindVMS(QImpl &q,
     NFmiMetTime t(ldt);
 
     auto v = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                           ? q.interpolateAtPressure(latlon, ldt, *level, maxgap)
+                           : q.interpolateAtHeight(latlon, ldt, *level, maxgap))
                     : q.interpolate(latlon, ldt, maxgap));
 
     if (angle == 0)
@@ -274,8 +274,8 @@ TS::Value WindVMS(QImpl &q,
       return TS::None();
 
     auto u = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, maxgap, *level)
-                           : q.interpolateAtHeight(latlon, ldt, maxgap, *level))
+                           ? q.interpolateAtPressure(latlon, ldt, *level, maxgap)
+                           : q.interpolateAtHeight(latlon, ldt, *level, maxgap))
                     : q.interpolate(latlon, ldt, maxgap));
 
     if (u == kFloatMissing || v == kFloatMissing)
