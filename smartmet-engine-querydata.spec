@@ -3,8 +3,8 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 26.9.23
-Release: 3%{?dist}.fmi
+Version: 26.10.2
+Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
 URL: https://github.com/fmidev/smartmet-engine-querydata
@@ -32,7 +32,7 @@ BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: smartmet-library-timeseries-devel >= 26.9.16
-BuildRequires: smartmet-library-macgyver-devel >= 26.9.23
+BuildRequires: smartmet-library-macgyver-devel >= 26.10.2
 BuildRequires: smartmet-library-newbase-devel >= 26.9.23
 BuildRequires: smartmet-library-spine-devel >= 26.9.23
 Requires: %{smartmet_boost}-iostreams
@@ -44,7 +44,7 @@ Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
 Requires: smartmet-library-timeseries >= 26.9.16
-Requires: smartmet-library-macgyver >= 26.9.23
+Requires: smartmet-library-macgyver >= 26.10.2
 Requires: smartmet-library-newbase >= 26.9.23
 Requires: smartmet-library-spine >= 26.9.23
 #TestRequires: smartmet-utils-devel >= 26.9.3
@@ -92,6 +92,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-1.fmi
+- Rebuilt against macgyver 26.10.2 where Fmi::Cache::Cache uses CLOCK eviction instead of LRU.
+  CLOCK is faster than LRU since a cache hit only takes a shared lock (ABI change)
+
 * Wed Sep 23 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.9.23-3.fmi
 - Use std::enable_shared_from_this instead of the Boost version
 
