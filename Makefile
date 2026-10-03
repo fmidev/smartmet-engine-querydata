@@ -94,6 +94,7 @@ obj/%.o: %.cpp
 
 obj/Engine.o obj/EngineImpl.o: CFLAGS += -Wno-deprecated-declarations
 
+.PHONY: test
 test:
 	cd test && $(MAKE) test
 
