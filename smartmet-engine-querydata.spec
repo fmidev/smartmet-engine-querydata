@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 26.10.2
+Version: 26.10.3
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -31,10 +31,10 @@ BuildRequires: make
 BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: %{smartmet_fmt_devel}
-BuildRequires: smartmet-library-timeseries-devel >= 26.9.16
-BuildRequires: smartmet-library-macgyver-devel >= 26.10.2
-BuildRequires: smartmet-library-newbase-devel >= 26.9.23
-BuildRequires: smartmet-library-spine-devel >= 26.9.23
+BuildRequires: smartmet-library-timeseries-devel >= 26.10.3
+BuildRequires: smartmet-library-macgyver-devel >= 26.10.3
+BuildRequires: smartmet-library-newbase-devel >= 26.10.3
+BuildRequires: smartmet-library-spine-devel >= 26.10.3
 Requires: %{smartmet_boost}-iostreams
 Requires: %{smartmet_boost}-serialization
 Requires: %{smartmet_boost}-system
@@ -43,10 +43,10 @@ Requires: gdal312-libs
 Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
-Requires: smartmet-library-timeseries >= 26.9.16
-Requires: smartmet-library-macgyver >= 26.10.2
-Requires: smartmet-library-newbase >= 26.9.23
-Requires: smartmet-library-spine >= 26.9.23
+Requires: smartmet-library-timeseries >= 26.10.3
+Requires: smartmet-library-macgyver >= 26.10.3
+Requires: smartmet-library-newbase >= 26.10.3
+Requires: smartmet-library-spine >= 26.10.3
 #TestRequires: smartmet-utils-devel >= 26.9.3
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal312-devel
@@ -58,10 +58,10 @@ Requires: smartmet-library-spine >= 26.9.23
 #TestRequires: zlib-devel
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-library-gis-devel
-#TestRequires: smartmet-library-macgyver-devel >= 26.10.2
-#TestRequires: smartmet-library-newbase-devel >= 26.9.23
-#TestRequires: smartmet-library-spine-devel >= 26.9.23
-#TestRequires: smartmet-library-timeseries-devel >= 26.9.16
+#TestRequires: smartmet-library-macgyver-devel >= 26.10.3
+#TestRequires: smartmet-library-newbase-devel >= 26.10.3
+#TestRequires: smartmet-library-spine-devel >= 26.10.3
+#TestRequires: smartmet-library-timeseries-devel >= 26.10.3
 #TestRequires: smartmet-test-data
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
@@ -104,6 +104,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Sat Oct 03 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.3-1.fmi
+- Make the test target phony since a test directory now exists
+- Add automated engine tests
+- Fix swapped level and maxgap arguments in true north WindUMS/WindVMS
+
 * Fri Oct 02 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.2-1.fmi
 - Rebuilt against macgyver 26.10.2 where Fmi::Cache::Cache uses CLOCK eviction instead of LRU.
   CLOCK is faster than LRU since a cache hit only takes a shared lock (ABI change)
