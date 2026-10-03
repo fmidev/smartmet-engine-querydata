@@ -51,6 +51,18 @@ Requires: smartmet-library-spine >= 26.9.23
 #TestRequires: jsoncpp-devel >= 1.8.4
 #TestRequires: gdal312-devel
 #TestRequires: gcc-c++
+#TestRequires: make
+#TestRequires: %{smartmet_boost}-devel
+#TestRequires: %{smartmet_fmt_devel}
+#TestRequires: bzip2-devel
+#TestRequires: zlib-devel
+#TestRequires: smartmet-library-regression
+#TestRequires: smartmet-library-gis-devel
+#TestRequires: smartmet-library-macgyver-devel >= 26.10.2
+#TestRequires: smartmet-library-newbase-devel >= 26.9.23
+#TestRequires: smartmet-library-spine-devel >= 26.9.23
+#TestRequires: smartmet-library-timeseries-devel >= 26.9.16
+#TestRequires: smartmet-test-data
 Provides: %{LIBNAME}
 Obsoletes: smartmet-brainstorm-qengine < 16.11.1
 Obsoletes: smartmet-brainstorm-qengine-debuginfo < 16.11.1

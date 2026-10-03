@@ -95,8 +95,6 @@ obj/%.o: %.cpp
 obj/Engine.o obj/EngineImpl.o: CFLAGS += -Wno-deprecated-declarations
 
 test:
-	@echo Querydata engine has no automatically runnable tests as for now
-	@echo There are some tests under test subdirectory but remain unautomated
-	@test "$$CI" = "true" && true || false
+	cd test && $(MAKE) test
 
 -include $(wildcard obj/*.d)

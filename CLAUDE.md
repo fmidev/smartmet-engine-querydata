@@ -18,7 +18,7 @@ make rpm            # Build RPM package (cleans first)
 make install        # Install headers to $(includedir)/smartmet/engines/querydata/ and .so to $(enginedir)
 ```
 
-There are no automated tests (`make test` exits with a message that tests are unautomated). The `examples/` directory contains standalone test programs (`QueryDataTest.cpp`, `SmartmetTest.cpp`, `StackAllocationTest.cpp`) that can be built and run manually:
+`make test` builds and runs `test/EngineTest`, which loads the engine through a reactor using `test/cnf/` and the smartmet-test-data files. The `examples/` directory contains standalone test programs (`QueryDataTest.cpp`, `SmartmetTest.cpp`, `StackAllocationTest.cpp`) that can be built and run manually:
 
 ```bash
 cd examples && make          # Build example test executables
