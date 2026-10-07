@@ -42,13 +42,18 @@ overrides:
 
 ### Disabling engine
 
-QEngine can be loaded but disabled when only required to satisfy externel symbols in plugins, but not actually used
-due to plugin configuration. There are several ways to specify, that QEngine is disabled:
-* by providing configuration parameter `disabled = true`
-* by not providing configuration at all
-** setting  `configfile` is missing in engine section
-** empty string is provided as the value of the `configfile` setting in engine section
-A log message is generated in case of disabled engine
+The engine can be loaded in a dummy mode when it is needed only because a plugin looks it
+up at startup, and the plugin is not configured to use querydata. The dummy reads no
+data: it reports an empty producer list, `hasProducer()` returns false, and data access
+throws. There are several ways to enable it:
+
+* set `disabled = true` in the engine's configuration file (no other settings are read)
+* leave `configfile` out of the `engines.querydata` section of the server configuration
+* set `configfile = "";` in that section
+
+A log message is printed when the engine is disabled. Setting `disabled = true` in the
+server's `engines.querydata` section is different: the server then does not load
+`querydata.so` at all, and plugins that require the engine fail at startup.
 
 ### Producers
 

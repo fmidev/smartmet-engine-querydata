@@ -199,6 +199,10 @@ one group per producer:
 Top-level `verbose`, the `cache.*` and `radar.*` settings, and host-specific
 `overrides` (a list of `{ name = [hosts]; setting = value; }` groups) complete it.
 
+`EngineImpl::create()` returns the base `Engine` (dummy mode: no producers, data access
+throws) when the configuration file name is empty or the file sets `disabled = true`; see
+the README.
+
 ## 10. Configuration reload
 
 A watcher thread checks the configuration file's modification time. When it changes, a
