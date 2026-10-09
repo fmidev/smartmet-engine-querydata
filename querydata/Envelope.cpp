@@ -51,7 +51,10 @@ WGS84Envelope::WGS84Envelope(const std::shared_ptr<NFmiFastQueryInfo>& info)
     for (info->ResetLocation(); info->NextLocation();)
     {
       NFmiPoint point = info->LatLon();
-      if (point.X() != kFloatMissing && point.Y() != kFloatMissing)
+      // Stations with invalid coordinates (e.g. a longitude 7145 instead of 71.45) are not
+      // included in the envelope
+      if (point.X() != kFloatMissing && point.Y() != kFloatMissing && point.X() >= -180 &&
+          point.X() <= 180 && point.Y() >= -90 && point.Y() <= 90)
       {
         if (first)
         {
