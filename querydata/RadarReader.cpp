@@ -554,7 +554,7 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
 {
   Fmi::HDF5::Hdf5File file(path.string());
 
-  const std::string object = file.get_attribute<std::string>("/what", "object");
+  const auto object = file.get_attribute<std::string>("/what", "object");
   if (object != "COMP" && object != "IMAGE" && object != "CVOL")
     throw Fmi::Exception(BCP,
                          "Only Cartesian ODIM (COMP/IMAGE/CVOL) is supported; got object=" +
@@ -562,7 +562,7 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
 
   // Projection + geographic corners (see h5toqd create_hdesc). projdef is the
   // target CRS, its inverse the lon/lat CRS the corners are given in.
-  std::string projdef = file.get_attribute<std::string>("/where", "projdef");
+  auto projdef = file.get_attribute<std::string>("/where", "projdef");
   Fmi::ProjInfo proj(projdef);
   proj.erase("x_0");
   proj.erase("y_0");
@@ -577,20 +577,20 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
   if (!file.is_attribute<double>("/where", "LL_lon"))
   {
     // Latvian-style corners
-    const double LR_lon = file.get_attribute<double>("/where", "LR_lon");
-    const double LR_lat = file.get_attribute<double>("/where", "LR_lat");
-    const double UL_lon = file.get_attribute<double>("/where", "UL_lon");
-    const double UL_lat = file.get_attribute<double>("/where", "UL_lat");
+    const auto LR_lon = file.get_attribute<double>("/where", "LR_lon");
+    const auto LR_lat = file.get_attribute<double>("/where", "LR_lat");
+    const auto UL_lon = file.get_attribute<double>("/where", "UL_lon");
+    const auto UL_lat = file.get_attribute<double>("/where", "UL_lat");
     area.reset(NFmiArea::CreateFromReverseCorners(
         projdef, sphere, NFmiPoint(UL_lon, UL_lat), NFmiPoint(LR_lon, LR_lat)));
   }
   else
   {
     // FMI-style corners
-    const double LL_lon = file.get_attribute<double>("/where", "LL_lon");
-    const double LL_lat = file.get_attribute<double>("/where", "LL_lat");
-    const double UR_lon = file.get_attribute<double>("/where", "UR_lon");
-    const double UR_lat = file.get_attribute<double>("/where", "UR_lat");
+    const auto LL_lon = file.get_attribute<double>("/where", "LL_lon");
+    const auto LL_lat = file.get_attribute<double>("/where", "LL_lat");
+    const auto UR_lon = file.get_attribute<double>("/where", "UR_lon");
+    const auto UR_lat = file.get_attribute<double>("/where", "UR_lat");
     area.reset(NFmiArea::CreateFromCorners(
         projdef, sphere, NFmiPoint(LL_lon, LL_lat), NFmiPoint(UR_lon, UR_lat)));
   }
@@ -604,8 +604,8 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
   std::string dpath = "/dataset1/data1";
   if (!file.is_group(dpath))
     dpath = "/dataset1";
-  const std::string product = file.get_attribute_recursive<std::string>(dpath, "what", "product");
-  const std::string quantity = file.get_attribute_recursive<std::string>(dpath, "what", "quantity");
+  const auto product = file.get_attribute_recursive<std::string>(dpath, "what", "product");
+  const auto quantity = file.get_attribute_recursive<std::string>(dpath, "what", "quantity");
   const std::optional<double> nodata =
       file.get_optional_attribute_recursive<double>(dpath, "what", "nodata");
   const std::optional<double> undetect =
@@ -652,8 +652,8 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
   }
 
   const std::vector<int> values = file.read_dataset<int>(dpath);
-  const std::size_t nx = static_cast<std::size_t>(xsize);
-  const std::size_t ny = static_cast<std::size_t>(ysize);
+  const auto nx = static_cast<std::size_t>(xsize);
+  const auto ny = static_cast<std::size_t>(ysize);
   if (values.size() < nx * ny)
     throw Fmi::Exception(BCP, "ODIM dataset smaller than xsize*ysize: " + path.string());
 
