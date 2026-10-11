@@ -343,6 +343,29 @@ void metadata()
 
 // ----------------------------------------------------------------------
 
+void pointenvelope()
+{
+  // The test data has a station with the invalid longitude 7145, it must not be included in
+  // the envelope of the point data
+  for (const auto& meta : qengine->getEngineMetadata())
+  {
+    if (meta.producer != "ecmwf_maailma_piste")
+      continue;
+    const auto& lon = meta.wgs84Envelope.getRangeLon();
+    const auto& lat = meta.wgs84Envelope.getRangeLat();
+    if (lon.getMin() < -180 || lon.getMax() > 180 || lat.getMin() < -90 || lat.getMax() > 90)
+      TEST_FAILED(fmt::format("ecmwf_maailma_piste envelope [{},{}]x[{},{}] is invalid",
+                              lon.getMin(),
+                              lon.getMax(),
+                              lat.getMin(),
+                              lat.getMax()));
+    TEST_PASSED();
+  }
+  TEST_FAILED("No metadata for ecmwf_maailma_piste");
+}
+
+// ----------------------------------------------------------------------
+
 class tests : public tframe::tests
 {
   const char* error_message_prefix() const override { return "\n\t"; }
@@ -359,6 +382,7 @@ class tests : public tframe::tests
     TEST(hashes);
     TEST(grids);
     TEST(metadata);
+    TEST(pointenvelope);
   }
 };
 
