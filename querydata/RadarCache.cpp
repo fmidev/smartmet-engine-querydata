@@ -220,7 +220,9 @@ void RadarCache::reconcile(const KeepFn& keepFile, const PinnedFn& pinned) const
   // 1. Remove interrupted-eviction residue.
   fs::remove_all(itsDir / kTrashDir, ec);
 
-  std::size_t droppedTemps = 0, droppedStale = 0, droppedSources = 0;
+  std::size_t droppedTemps = 0;
+  std::size_t droppedStale = 0;
+  std::size_t droppedSources = 0;
 
   for (fs::directory_iterator it(itsDir, ec), end; it != end && !ec; it.increment(ec))
   {

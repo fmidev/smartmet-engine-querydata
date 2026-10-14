@@ -69,6 +69,31 @@ enum class InterpolationMethod
   SURFACE
 };
 
+// Interpolate the active parameter at the given level, or normally if there is no level
+float interpolate_at_level(QImpl &q,
+                           const NFmiPoint &latlon,
+                           const NFmiMetTime &t,
+                           std::optional<float> level,
+                           InterpolationMethod method,
+                           int theMaxGap)
+{
+  if (!level)
+    return q.interpolate(latlon, t, theMaxGap);
+  if (method == InterpolationMethod::PRESSURE)
+    return q.interpolateAtPressure(latlon, t, *level, theMaxGap);
+  return q.interpolateAtHeight(latlon, t, *level, theMaxGap);
+}
+
+// Class 0, 1 or 2 of a value given two increasing class limits
+int classify(float value, float limit1, float limit2)
+{
+  if (value < limit1)
+    return 0;
+  if (value < limit2)
+    return 1;
+  return 2;
+}
+
 const char *level_name(FmiLevelType theLevel)
 {
   try
@@ -203,10 +228,7 @@ TS::Value WindUMS(QImpl &q,
     if (!q.param(kFmiWindUMS))
       return TS::None();
 
-    auto u = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, *level, maxgap)
-                           : q.interpolateAtHeight(latlon, ldt, *level, maxgap))
-                    : q.interpolate(latlon, ldt, maxgap));
+    auto u = interpolate_at_level(q, latlon, ldt, level, method, maxgap);
 
     if (angle == 0)
       return u;
@@ -214,10 +236,7 @@ TS::Value WindUMS(QImpl &q,
     if (!q.param(kFmiWindVMS))
       return TS::None();
 
-    auto v = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, *level, maxgap)
-                           : q.interpolateAtHeight(latlon, ldt, *level, maxgap))
-                    : q.interpolate(latlon, ldt, maxgap));
+    auto v = interpolate_at_level(q, latlon, ldt, level, method, maxgap);
 
     if (u == kFloatMissing || v == kFloatMissing)
       return TS::None();
@@ -262,10 +281,7 @@ TS::Value WindVMS(QImpl &q,
 
     NFmiMetTime t(ldt);
 
-    auto v = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, *level, maxgap)
-                           : q.interpolateAtHeight(latlon, ldt, *level, maxgap))
-                    : q.interpolate(latlon, ldt, maxgap));
+    auto v = interpolate_at_level(q, latlon, ldt, level, method, maxgap);
 
     if (angle == 0)
       return v;
@@ -273,10 +289,7 @@ TS::Value WindVMS(QImpl &q,
     if (!q.param(kFmiWindUMS))
       return TS::None();
 
-    auto u = (level ? (method == InterpolationMethod::PRESSURE
-                           ? q.interpolateAtPressure(latlon, ldt, *level, maxgap)
-                           : q.interpolateAtHeight(latlon, ldt, *level, maxgap))
-                    : q.interpolate(latlon, ldt, maxgap));
+    auto u = interpolate_at_level(q, latlon, ldt, level, method, maxgap);
 
     if (u == kFloatMissing || v == kFloatMissing)
       return TS::None();
@@ -790,7 +803,7 @@ std::optional<int> calc_smart_symbol(QImpl &q,
 
       if (thunder >= thunder_limit1 && thunder != kFloatMissing)
       {
-        int nclass = (n < cloud_limit6 ? 0 : (n < cloud_limit8 ? 1 : 2));
+        int nclass = classify(n, cloud_limit6, cloud_limit8);
         return 71 + 3 * nclass;  // 71,74,77
       }
     }
@@ -851,7 +864,7 @@ std::optional<int> calc_smart_symbol(QImpl &q,
     // only water, sleet and snow left. Cloudiness limits
     // are the same for them, precipitation limits are not.
 
-    int nclass = (n < cloud_limit6 ? 0 : (n < cloud_limit8 ? 1 : 2));
+    int nclass = classify(n, cloud_limit6, cloud_limit8);
 
     if (rform == 6)  // hail
       return 61 + 3 * nclass;
@@ -867,13 +880,13 @@ std::optional<int> calc_smart_symbol(QImpl &q,
         return 21 + 3 * nclass;  // 21, 24, 27 for showers
 
       // rtype=1:large scale precipitation (or rtype is missing)
-      int rclass = (rain < rain_limit3 ? 0 : (rain < rain_limit6 ? 1 : 2));
+      int rclass = classify(rain, rain_limit3, rain_limit6);
       return 31 + 3 * nclass + rclass;  // 31-39 for precipitation
     }
 
     // rform=2:sleet and rform=3:snow map to 41-49 and 51-59 respectively
 
-    int rclass = (rain < rain_limit3 ? 0 : (rain < rain_limit4 ? 1 : 2));
+    int rclass = classify(rain, rain_limit3, rain_limit4);
     return (10 * rform + 21 + 3 * nclass + rclass);
   }
   catch (...)

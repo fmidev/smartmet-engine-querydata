@@ -546,7 +546,8 @@ RadarLayerMetaData EngineImpl::getRadarLayerMetaData(const Producer& producer) c
       for (double x : xs)
         for (double y : ys)
         {
-          double lon = x, lat = y;
+          double lon = x;
+          double lat = y;
           if (xf.transform(lon, lat))
           {
             if (first)
