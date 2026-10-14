@@ -175,7 +175,7 @@ void Repository::add(const Producer& producer, const SharedModel& model)
 
     // Establish the model map for the producer
 
-    bool ok;
+    bool ok = false;
     if (producer_model == itsProducers.end())
     {
       // Insert an empty map of models for a new producer
