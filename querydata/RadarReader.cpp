@@ -306,6 +306,9 @@ struct Guard
     if (p != nullptr)
       GDALClose(p);
   }
+  explicit Guard(GDALDataset* ds) : p(ds) {}
+  Guard(const Guard&) = delete;
+  Guard& operator=(const Guard&) = delete;
 };
 
 // ---------------------------------------------------------------------------
