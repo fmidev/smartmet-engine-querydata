@@ -924,7 +924,7 @@ bool RepoManager::producerHasModels(const Producer& producer) const
 
 std::shared_ptr<std::mutex> RepoManager::lazyLoadMutex(const Producer& producer)
 {
-  std::lock_guard<std::mutex> guard(itsLazyLoadMapMutex);
+  std::scoped_lock guard(itsLazyLoadMapMutex);
   auto& m = itsLazyLoadMutexes[producer];
   if (!m)
     m = std::make_shared<std::mutex>();
@@ -955,7 +955,7 @@ void RepoManager::ensureLoaded(const Producer& producer)
     // Record the access time (for idle + size-based unloading), also on the
     // already-loaded hot path so an actively-queried producer stays hot.
     {
-      std::lock_guard<std::mutex> g(itsLazyLoadMapMutex);
+      std::scoped_lock g(itsLazyLoadMapMutex);
       itsLazyLastAccess[producer] = std::chrono::steady_clock::now();
     }
 
@@ -964,7 +964,7 @@ void RepoManager::ensureLoaded(const Producer& producer)
 
     // Serialise concurrent first-access decodes of the same producer.
     auto lk = lazyLoadMutex(producer);
-    std::lock_guard<std::mutex> guard(*lk);
+    std::scoped_lock guard(*lk);
     if (producerHasModels(producer))  // another thread just loaded it
       return;
 
@@ -1031,7 +1031,7 @@ void RepoManager::sweepLazyProducers()
 
   std::map<Producer, std::chrono::steady_clock::time_point> access;
   {
-    std::lock_guard<std::mutex> g(itsLazyLoadMapMutex);
+    std::scoped_lock g(itsLazyLoadMapMutex);
     access = itsLazyLastAccess;
   }
 

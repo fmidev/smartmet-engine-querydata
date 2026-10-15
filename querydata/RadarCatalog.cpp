@@ -28,7 +28,7 @@ std::size_t RadarCatalog::update(const std::string& producer, const std::vector<
   // are unchanged so a rescan does not re-read the header of every frame.
   std::vector<Entry> existing;
   {
-    std::lock_guard<std::mutex> lock(itsMutex);
+    std::scoped_lock lock(itsMutex);
     auto it = itsCatalog.find(producer);
     if (it != itsCatalog.end())
       existing = it->second;
@@ -78,7 +78,7 @@ std::size_t RadarCatalog::update(const std::string& producer, const std::vector<
 
   const std::size_t count = fresh.size();
   {
-    std::lock_guard<std::mutex> lock(itsMutex);
+    std::scoped_lock lock(itsMutex);
     if (fresh.empty())
       itsCatalog.erase(producer);
     else
@@ -89,7 +89,7 @@ std::size_t RadarCatalog::update(const std::string& producer, const std::vector<
 
 std::vector<RadarCatalog::Frame> RadarCatalog::frames(const std::string& producer) const
 {
-  std::lock_guard<std::mutex> lock(itsMutex);
+  std::scoped_lock lock(itsMutex);
   std::vector<Frame> out;
   auto it = itsCatalog.find(producer);
   if (it != itsCatalog.end())
@@ -103,20 +103,20 @@ std::vector<RadarCatalog::Frame> RadarCatalog::frames(const std::string& produce
 
 std::size_t RadarCatalog::frameCount(const std::string& producer) const
 {
-  std::lock_guard<std::mutex> lock(itsMutex);
+  std::scoped_lock lock(itsMutex);
   auto it = itsCatalog.find(producer);
   return it != itsCatalog.end() ? it->second.size() : 0;
 }
 
 void RadarCatalog::remove(const std::string& producer)
 {
-  std::lock_guard<std::mutex> lock(itsMutex);
+  std::scoped_lock lock(itsMutex);
   itsCatalog.erase(producer);
 }
 
 std::vector<std::string> RadarCatalog::producers() const
 {
-  std::lock_guard<std::mutex> lock(itsMutex);
+  std::scoped_lock lock(itsMutex);
   std::vector<std::string> out;
   out.reserve(itsCatalog.size());
   for (const auto& kv : itsCatalog)
