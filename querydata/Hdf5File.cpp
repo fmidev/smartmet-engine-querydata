@@ -53,8 +53,10 @@ bool Hdf5File::try_parse_double(const std::string& s, double& out) noexcept
 }
 
 Hdf5File::Hdf5File(const std::string& path)
-try
 {
+  // A function try block handler must not use members, they are already destroyed
+  try
+  {
     ensureGdalRegistered();
 
     gdal_ds = static_cast<GDALDataset*>(GDALOpen(path.c_str(), GA_ReadOnly));
@@ -98,11 +100,12 @@ try
             subdatasets[hdf5_path] = gdal_name;
         }
     }
-}
-catch (...)
-{
+  }
+  catch (...)
+  {
     if (gdal_ds) { GDALClose(gdal_ds); gdal_ds = nullptr; }
     throw;
+  }
 }
 
 Hdf5File::~Hdf5File()
