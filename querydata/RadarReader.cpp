@@ -311,23 +311,21 @@ struct Guard
   Guard& operator=(const Guard&) = delete;
 };
 
-// ---------------------------------------------------------------------------
-
-std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
+// The value in a metadata item, the first non-empty one of the keys
+std::string gdalMetaItem(GDALDataset& ds, std::initializer_list<const char*> keys)
 {
-  const std::string filename = path.string();
+  for (const char* k : keys)
+    if (const char* v = ds.GetMetadataItem(k); v != nullptr && *v != '\0')
+      return v;
+  return {};
+}
 
-  Fmi::HDF5::ensureGdalRegistered();
-  auto* ds = static_cast<GDALDataset*>(GDALOpen(filename.c_str(), GA_ReadOnly));
-  if (ds == nullptr)
-    throw Fmi::Exception(BCP, "GDAL failed to open radar GeoTIFF: " + filename);
-  Guard guard{ds};
-
-  const auto nx = static_cast<std::size_t>(ds->GetRasterXSize());
-  const auto ny = static_cast<std::size_t>(ds->GetRasterYSize());
-  if (nx == 0 || ny == 0)
-    throw Fmi::Exception(BCP, "Empty radar raster: " + filename);
-
+// The projected area of a GeoTIFF from its geotransform
+std::unique_ptr<NFmiArea> geotiffArea(GDALDataset* ds,
+                                      std::size_t nx,
+                                      std::size_t ny,
+                                      const std::string& filename)
+{
   double gt[6] = {};
   if (ds->GetGeoTransform(gt) != CE_None)
     throw Fmi::Exception(BCP, "Radar GeoTIFF has no geotransform: " + filename);
@@ -374,30 +372,12 @@ std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
   CPLPopErrorHandler();
   if (!area)
     throw Fmi::Exception(BCP, "Failed to construct projection for radar GeoTIFF: " + filename);
+  return area;
+}
 
-  // ODIM-style GDAL_METADATA XML blob (TIFF tag 42112).
-  std::map<std::string, MetaItem> meta;
-  if (const char* blob = ds->GetMetadataItem("GDAL_METADATA"))
-    meta = parseGdalMetadata(blob);
-
-  auto metaItem = [&](std::initializer_list<const char*> keys) -> std::string
-  {
-    for (const char* k : keys)
-      if (const char* v = ds->GetMetadataItem(k); v != nullptr && *v != '\0')
-        return v;
-    return {};
-  };
-
-  // Valid/origin time + parameter (shared with the header-only metadata reader).
-  const std::string odimQuantity = metaItem({"dataset1_data1_what_quantity", "what_quantity"});
-  const RadarTimeParam tp = resolveRadarTimeAndParam(
-      meta, metaItem({"ForecastTimestamp"}), metaItem({"Timestamp"}), odimQuantity, path);
-  const NFmiMetTime validTime = tp.validTime;
-  const NFmiMetTime originTime = tp.originTime;
-  const int paramId = tp.paramId;
-  const std::string& paramName = tp.paramName;
-
-  // Gain / offset / nodata / undetect.
+// Gain / offset / nodata / undetect of radar values
+struct RadarScaling
+{
   double gain = 1.0;
   double offset = 0.0;
   double nodata = 0.0;
@@ -406,58 +386,117 @@ std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
   bool hasOffset = false;
   bool hasNodata = false;
   bool hasUndetect = false;
+
+  // nodata -> missing; undetect -> physical floor (gain*0+offset), matching h5toqd.
+  float scale(double v) const
+  {
+    float out = kFloatMissing;
+    if (hasNodata && v == nodata)
+      out = kFloatMissing;
+    else if (hasUndetect && v == undetect)
+      out = static_cast<float>(offset);
+    else
+      out = static_cast<float>(gain * v + offset);
+    return out;
+  }
+};
+
+// Parse a double, setting the flag on success
+void parseScalingValue(const std::string& value, double& out, bool& has)
+{
+  try
+  {
+    out = std::stod(value);
+    has = true;
+  }
+  catch (...)
+  {
+  }
+}
+
+// Read the scaling first from GDAL_METADATA, then from ODIM metadata items and finally the
+// nodata value from the band
+RadarScaling readGeoTiffScaling(GDALDataset& ds, const std::map<std::string, MetaItem>& meta)
+{
+  RadarScaling sc;
   auto fetchDouble = [&](const char* key, double& out, bool& has)
   {
     auto it = meta.find(key);
-    if (it == meta.end())
-      return;
-    try
-    {
-      out = std::stod(it->second.value);
-      has = true;
-    }
-    catch (...)
-    {
-    }
+    if (it != meta.end())
+      parseScalingValue(it->second.value, out, has);
   };
-  fetchDouble("Gain", gain, hasGain);
-  fetchDouble("Offset", offset, hasOffset);
-  fetchDouble("Nodata", nodata, hasNodata);
-  fetchDouble("Undetect", undetect, hasUndetect);
+  fetchDouble("Gain", sc.gain, sc.hasGain);
+  fetchDouble("Offset", sc.offset, sc.hasOffset);
+  fetchDouble("Nodata", sc.nodata, sc.hasNodata);
+  fetchDouble("Undetect", sc.undetect, sc.hasUndetect);
   auto fetchMetaDouble = [&](std::initializer_list<const char*> keys, double& out, bool& has)
   {
     if (has)
       return;
-    const std::string v = metaItem(keys);
-    if (v.empty())
-      return;
-    try
-    {
-      out = std::stod(v);
-      has = true;
-    }
-    catch (...)
-    {
-    }
+    const std::string v = gdalMetaItem(ds, keys);
+    if (!v.empty())
+      parseScalingValue(v, out, has);
   };
-  fetchMetaDouble({"dataset1_data1_what_gain", "what_gain"}, gain, hasGain);
-  fetchMetaDouble({"dataset1_data1_what_offset", "what_offset"}, offset, hasOffset);
-  fetchMetaDouble({"dataset1_data1_what_nodata", "what_nodata"}, nodata, hasNodata);
-  fetchMetaDouble({"dataset1_data1_what_undetect", "what_undetect"}, undetect, hasUndetect);
-  if (!hasGain)
-    gain = 1.0;
-  if (!hasOffset)
-    offset = 0.0;
-  if (!hasNodata)
+  fetchMetaDouble({"dataset1_data1_what_gain", "what_gain"}, sc.gain, sc.hasGain);
+  fetchMetaDouble({"dataset1_data1_what_offset", "what_offset"}, sc.offset, sc.hasOffset);
+  fetchMetaDouble({"dataset1_data1_what_nodata", "what_nodata"}, sc.nodata, sc.hasNodata);
+  fetchMetaDouble({"dataset1_data1_what_undetect", "what_undetect"}, sc.undetect, sc.hasUndetect);
+  if (!sc.hasGain)
+    sc.gain = 1.0;
+  if (!sc.hasOffset)
+    sc.offset = 0.0;
+  if (!sc.hasNodata)
   {
     int has = 0;
-    double v = ds->GetRasterBand(1)->GetNoDataValue(&has);
+    double v = ds.GetRasterBand(1)->GetNoDataValue(&has);
     if (has != 0)
     {
-      nodata = v;
-      hasNodata = true;
+      sc.nodata = v;
+      sc.hasNodata = true;
     }
   }
+  return sc;
+}
+
+// ---------------------------------------------------------------------------
+
+std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
+{
+  const std::string filename = path.string();
+
+  Fmi::HDF5::ensureGdalRegistered();
+  auto* ds = static_cast<GDALDataset*>(GDALOpen(filename.c_str(), GA_ReadOnly));
+  if (ds == nullptr)
+    throw Fmi::Exception(BCP, "GDAL failed to open radar GeoTIFF: " + filename);
+  Guard guard{ds};
+
+  const auto nx = static_cast<std::size_t>(ds->GetRasterXSize());
+  const auto ny = static_cast<std::size_t>(ds->GetRasterYSize());
+  if (nx == 0 || ny == 0)
+    throw Fmi::Exception(BCP, "Empty radar raster: " + filename);
+
+  std::unique_ptr<NFmiArea> area = geotiffArea(ds, nx, ny, filename);
+
+  // ODIM-style GDAL_METADATA XML blob (TIFF tag 42112).
+  std::map<std::string, MetaItem> meta;
+  if (const char* blob = ds->GetMetadataItem("GDAL_METADATA"))
+    meta = parseGdalMetadata(blob);
+
+  // Valid/origin time + parameter (shared with the header-only metadata reader).
+  const std::string odimQuantity =
+      gdalMetaItem(*ds, {"dataset1_data1_what_quantity", "what_quantity"});
+  const RadarTimeParam tp = resolveRadarTimeAndParam(meta,
+                                                     gdalMetaItem(*ds, {"ForecastTimestamp"}),
+                                                     gdalMetaItem(*ds, {"Timestamp"}),
+                                                     odimQuantity,
+                                                     path);
+  const NFmiMetTime validTime = tp.validTime;
+  const NFmiMetTime originTime = tp.originTime;
+  const int paramId = tp.paramId;
+  const std::string& paramName = tp.paramName;
+
+  // Gain / offset / nodata / undetect.
+  const RadarScaling scaling = readGeoTiffScaling(*ds, meta);
 
   // Read the raster band as float (GDAL converts Byte / UInt16 uniformly).
   GDALRasterBand* band = ds->GetRasterBand(1);
@@ -517,14 +556,7 @@ std::shared_ptr<NFmiQueryData> readGeoTiff(const std::filesystem::path& path)
     const std::size_t j = pos / nx;
     const std::size_t srcRow = ny - 1 - j;
     const double v = raw[srcRow * nx + i];
-    float out = kFloatMissing;
-    if (hasNodata && v == nodata)
-      out = kFloatMissing;
-    else if (hasUndetect && v == undetect)
-      out = static_cast<float>(offset);
-    else
-      out = static_cast<float>(gain * v + offset);
-    info.FloatValue(out);
+    info.FloatValue(scaling.scale(v));
   }
 
   return data;
