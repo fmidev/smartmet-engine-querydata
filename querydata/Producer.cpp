@@ -11,6 +11,82 @@ namespace Engine
 {
 namespace Querydata
 {
+namespace
+{
+// Parse a boolean producer setting. Returns false if the setting is not one.
+bool parse_flag_setting(const std::string& name,
+                        const libconfig::Setting& setting,
+                        ProducerConfig& pinfo)
+{
+  if (name == "multifile")
+    pinfo.ismultifile = setting;
+  else if (name == "lazy")
+    pinfo.islazy = setting;
+  else if (name == "forecast")
+    pinfo.isforecast = setting;
+  else if (name == "climatology")
+    pinfo.isclimatology = setting;
+  else if (name == "fullgrid")
+    pinfo.isfullgrid = setting;
+  else if (name == "staticgrid")
+    pinfo.isstaticgrid = setting;
+  else if (name == "relative_uv")
+    pinfo.isrelativeuv = setting;
+  else if (name == "mmap")
+    pinfo.mmap = setting;
+  else
+    return false;
+  return true;
+}
+
+// Parse a duration producer setting. Returns false if the setting is not one.
+bool parse_duration_setting(const std::string& name,
+                            const libconfig::Setting& setting,
+                            ProducerConfig& pinfo)
+{
+  if (name == "max_age")
+    pinfo.max_age = Fmi::TimeParser::parse_duration(setting).total_seconds();
+  else if (name == "max_latest_age")
+    pinfo.max_latest_age = Fmi::TimeParser::parse_duration(setting).total_seconds();
+  else if (name == "update_interval")
+    pinfo.update_interval = Fmi::TimeParser::parse_duration(setting).total_seconds();
+  else if (name == "minimum_expires")
+    pinfo.minimum_expires = Fmi::TimeParser::parse_duration(setting).total_seconds();
+  else
+    return false;
+  return true;
+}
+
+// Sanity checks of the producer settings
+void check_producerinfo(const ProducerConfig& pinfo, const Producer& producer)
+{
+  if (pinfo.directory.empty())
+    throw Fmi::Exception(BCP, "No directory specified for producer " + producer);
+
+  if (pinfo.pattern_str.empty())
+    throw Fmi::Exception(BCP, "No pattern specified for producer " + producer);
+
+  if (pinfo.refresh_interval_secs < 1)
+    throw Fmi::Exception(BCP, "Refresh interval for producer " + producer + " must be > 0");
+
+  if (pinfo.number_to_keep < 1)
+    throw Fmi::Exception(BCP,
+                         "Number of files to keep for producer " + producer + " must be > 0");
+
+  if (pinfo.number_to_keep >= 1000000)
+    throw Fmi::Exception(
+        BCP, "Number of files to keep for producer " + producer + " must be < 1,000,000");
+
+  if (pinfo.maxdistance >= 10000)
+    throw Fmi::Exception(
+        BCP, "Maximum search radius for producer " + producer + " must be < 10000 km");
+
+  if (pinfo.update_interval < 60)
+    throw Fmi::Exception(BCP,
+                         "Minimum update interval for producer " + producer + " is 60 seconds");
+}
+}  // namespace
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Extract producer settings from configuration file
@@ -55,26 +131,8 @@ ProducerConfig parse_producerinfo(const Producer& producer, const libconfig::Set
         pinfo.pattern_str = setting[i].c_str();
       }
 
-      else if (name == "multifile")
-        pinfo.ismultifile = setting[i];
-
-      else if (name == "lazy")
-        pinfo.islazy = setting[i];
-
-      else if (name == "forecast")
-        pinfo.isforecast = setting[i];
-
-      else if (name == "climatology")
-        pinfo.isclimatology = setting[i];
-
-      else if (name == "fullgrid")
-        pinfo.isfullgrid = setting[i];
-
-      else if (name == "staticgrid")
-        pinfo.isstaticgrid = setting[i];
-
-      else if (name == "relative_uv")
-        pinfo.isrelativeuv = setting[i];
+      else if (parse_flag_setting(name, setting[i], pinfo))
+        ;
 
       else if (name == "refresh_interval_secs")
         pinfo.refresh_interval_secs = setting[i];
@@ -82,23 +140,11 @@ ProducerConfig parse_producerinfo(const Producer& producer, const libconfig::Set
       else if (name == "number_to_keep")
         pinfo.number_to_keep = setting[i];
 
-      else if (name == "max_age")
-        pinfo.max_age = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
-
-      else if (name == "max_latest_age")
-        pinfo.max_latest_age = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
-
-      else if (name == "update_interval")
-        pinfo.update_interval = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
-
-      else if (name == "minimum_expires")
-        pinfo.minimum_expires = Fmi::TimeParser::parse_duration(setting[i]).total_seconds();
+      else if (parse_duration_setting(name, setting[i], pinfo))
+        ;
 
       else if (name == "maxdistance")
         pinfo.maxdistance = setting[i];
-
-      else if (name == "mmap")
-        pinfo.mmap = setting[i];
 
       else if (name == "type")
         pinfo.type = static_cast<const char*>(setting[i]);
@@ -116,30 +162,7 @@ ProducerConfig parse_producerinfo(const Producer& producer, const libconfig::Set
 
     // Sanity checks
 
-    if (pinfo.directory.empty())
-      throw Fmi::Exception(BCP, "No directory specified for producer " + producer);
-
-    if (pinfo.pattern_str.empty())
-      throw Fmi::Exception(BCP, "No pattern specified for producer " + producer);
-
-    if (pinfo.refresh_interval_secs < 1)
-      throw Fmi::Exception(BCP, "Refresh interval for producer " + producer + " must be > 0");
-
-    if (pinfo.number_to_keep < 1)
-      throw Fmi::Exception(BCP,
-                           "Number of files to keep for producer " + producer + " must be > 0");
-
-    if (pinfo.number_to_keep >= 1000000)
-      throw Fmi::Exception(
-          BCP, "Number of files to keep for producer " + producer + " must be < 1,000,000");
-
-    if (pinfo.maxdistance >= 10000)
-      throw Fmi::Exception(
-          BCP, "Maximum search radius for producer " + producer + " must be < 10000 km");
-
-    if (pinfo.update_interval < 60)
-      throw Fmi::Exception(BCP,
-                           "Minimum update interval for producer " + producer + " is 60 seconds");
+    check_producerinfo(pinfo, producer);
 
     return pinfo;
   }
