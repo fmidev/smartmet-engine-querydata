@@ -553,28 +553,11 @@ int operaQuantityToParamId(const std::string& product, const std::string& quanti
   return 0;
 }
 
-std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
+// The projected area of an ODIM file from its corner coordinates
+std::unique_ptr<NFmiArea> odimArea(const Fmi::HDF5::Hdf5File& file,
+                                   const std::string& projdef,
+                                   const std::string& sphere)
 {
-  Fmi::HDF5::Hdf5File file(path.string());
-
-  const auto object = file.get_attribute<std::string>("/what", "object");
-  if (object != "COMP" && object != "IMAGE" && object != "CVOL")
-    throw Fmi::Exception(BCP,
-                         "Only Cartesian ODIM (COMP/IMAGE/CVOL) is supported; got object=" +
-                             object + ": " + path.string());
-
-  // Projection + geographic corners (see h5toqd create_hdesc). projdef is the
-  // target CRS, its inverse the lon/lat CRS the corners are given in.
-  auto projdef = file.get_attribute<std::string>("/where", "projdef");
-  Fmi::ProjInfo proj(projdef);
-  proj.erase("x_0");
-  proj.erase("y_0");
-  projdef = proj.projStr();
-  const std::string sphere = proj.inverseProjStr();
-
-  const long xsize = file.get_attribute<long>("/where", "xsize");
-  const long ysize = file.get_attribute<long>("/where", "ysize");
-
   std::unique_ptr<NFmiArea> area;
   CPLPushErrorHandler(CPLQuietErrorHandler);
   if (!file.is_attribute<double>("/where", "LL_lon"))
@@ -598,6 +581,57 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
         projdef, sphere, NFmiPoint(LL_lon, LL_lat), NFmiPoint(UR_lon, UR_lat)));
   }
   CPLPopErrorHandler();
+  return area;
+}
+
+// The valid and origin times of an ODIM file
+void odimTimes(const Fmi::HDF5::Hdf5File& file, NFmiMetTime& validTime, NFmiMetTime& originTime)
+{
+  // Valid time: dataset end time, else the nominal /what time.
+  std::optional<std::string> sd =
+      file.get_optional_attribute<std::string>("/dataset1/what", "enddate");
+  if (!sd)
+    sd = file.get_optional_attribute<std::string>("/what", "date");
+  std::optional<std::string> st =
+      file.get_optional_attribute<std::string>("/dataset1/what", "endtime");
+  if (!st)
+    st = file.get_optional_attribute<std::string>("/what", "time");
+  if (sd && st)
+    if (auto t = parseUtcStamp(*sd + *st))
+      validTime = *t;
+  originTime = validTime;
+  {
+    auto od = file.get_optional_attribute<std::string>("/what", "date");
+    auto ot = file.get_optional_attribute<std::string>("/what", "time");
+    if (od && ot)
+      if (auto t = parseUtcStamp(*od + *ot))
+        originTime = *t;
+  }
+}
+
+std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
+{
+  Fmi::HDF5::Hdf5File file(path.string());
+
+  const auto object = file.get_attribute<std::string>("/what", "object");
+  if (object != "COMP" && object != "IMAGE" && object != "CVOL")
+    throw Fmi::Exception(BCP,
+                         "Only Cartesian ODIM (COMP/IMAGE/CVOL) is supported; got object=" +
+                             object + ": " + path.string());
+
+  // Projection + geographic corners (see h5toqd create_hdesc). projdef is the
+  // target CRS, its inverse the lon/lat CRS the corners are given in.
+  auto projdef = file.get_attribute<std::string>("/where", "projdef");
+  Fmi::ProjInfo proj(projdef);
+  proj.erase("x_0");
+  proj.erase("y_0");
+  projdef = proj.projStr();
+  const std::string sphere = proj.inverseProjStr();
+
+  const long xsize = file.get_attribute<long>("/where", "xsize");
+  const long ysize = file.get_attribute<long>("/where", "ysize");
+
+  std::unique_ptr<NFmiArea> area = odimArea(file, projdef, sphere);
   if (!area)
     throw Fmi::Exception(BCP, "Failed to construct projection for ODIM file: " + path.string());
 
@@ -632,27 +666,9 @@ std::shared_ptr<NFmiQueryData> readOdim(const std::filesystem::path& path)
     paramName = quantity.empty() ? std::string{"RadarValue"} : quantity;
   }
 
-  // Valid time: dataset end time, else the nominal /what time.
-  std::optional<std::string> sd =
-      file.get_optional_attribute<std::string>("/dataset1/what", "enddate");
-  if (!sd)
-    sd = file.get_optional_attribute<std::string>("/what", "date");
-  std::optional<std::string> st =
-      file.get_optional_attribute<std::string>("/dataset1/what", "endtime");
-  if (!st)
-    st = file.get_optional_attribute<std::string>("/what", "time");
   NFmiMetTime validTime;
-  if (sd && st)
-    if (auto t = parseUtcStamp(*sd + *st))
-      validTime = *t;
-  NFmiMetTime originTime = validTime;
-  {
-    auto od = file.get_optional_attribute<std::string>("/what", "date");
-    auto ot = file.get_optional_attribute<std::string>("/what", "time");
-    if (od && ot)
-      if (auto t = parseUtcStamp(*od + *ot))
-        originTime = *t;
-  }
+  NFmiMetTime originTime;
+  odimTimes(file, validTime, originTime);
 
   const std::vector<int> values = file.read_dataset<int>(dpath);
   const auto nx = static_cast<std::size_t>(xsize);
