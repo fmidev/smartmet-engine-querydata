@@ -392,6 +392,20 @@ bool Model::isRelativeUV() const
   return itsRelativeUV;
 }
 
+namespace
+{
+// Test whether any parameter or level has a valid value at the current location and time
+bool has_valid_data(NFmiFastQueryInfo& qi)
+{
+  bool hasdata = false;
+  for (qi.ResetParam(); qi.NextParam() && !hasdata;)
+    for (qi.ResetLevel(); qi.NextLevel() && !hasdata;)
+      if (qi.FloatValue() != kFloatMissing)
+        hasdata = true;
+  return hasdata;
+}
+}  // namespace
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Find closest valid coordinate point within given radius (km)
@@ -462,11 +476,7 @@ NFmiPoint Model::validPoint(const NFmiPoint& latlon, double maxdist, const NFmiM
 
         // Check whether this point has any valid data at the given time.
         qi.LocationIndex(qi.PeekLocationIndex(i, j));
-        bool hasdata = false;
-        for (qi.ResetParam(); qi.NextParam() && !hasdata;)
-          for (qi.ResetLevel(); qi.NextLevel() && !hasdata;)
-            if (qi.FloatValue() != kFloatMissing)
-              hasdata = true;
+        bool hasdata = has_valid_data(qi);
         qi.LocationIndex(origin_idx);  // restore so PeekLocation offsets stay valid
 
         if (hasdata)
