@@ -611,6 +611,12 @@ ModelHashValue Repository::getModelHashValue(const Producer& producer,
 // ----------------------------------------------------------------------
 /*!
  * \brief Remove the specified model
+ *
+ * Removing a file which is not loaded is not an error: the model may
+ * already have been expired (max_age), dropped by resize (number_to_keep)
+ * or never loaded at all. Throwing here used to make the directory
+ * monitor callback fail permanently for the producer, since the monitor
+ * retries the same failed change set on every scan.
  */
 // ----------------------------------------------------------------------
 
@@ -621,16 +627,9 @@ void Repository::remove(const Producer& producer, const std::filesystem::path& p
     auto producer_model = itsProducers.find(producer);
 
     if (producer_model == itsProducers.end())
-      throw Fmi::Exception(BCP,
-                           "Repository remove: No data available for producer '" + producer + "'")
-          .disableStackTrace();
+      return;
 
     SharedModels& models = producer_model->second;
-
-    if (models.empty())
-      throw Fmi::Exception(BCP,
-                           "Repository remove: No data available for producer '" + producer + "'")
-          .disableStackTrace();
 
     for (auto time_model = models.begin(), end = models.end(); time_model != end; ++time_model)
     {

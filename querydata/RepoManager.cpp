@@ -436,7 +436,7 @@ void RepoManager::init()
                            boost::bind(&RepoManager::error, this, _1, _2, _3, _4),
                            pinfo.refresh_interval_secs,
                            Fmi::DirectoryMonitor::CREATE | Fmi::DirectoryMonitor::DELETE |
-                               Fmi::DirectoryMonitor::SCAN);
+                               Fmi::DirectoryMonitor::SCAN | Fmi::DirectoryMonitor::ERROR);
 
       // Save the info
 
@@ -726,11 +726,17 @@ void RepoManager::update(Fmi::DirectoryMonitor::Watcher id,
 void RepoManager::load(Producer producer,  // NOLINT(performance-unnecessary-value-param)
                        Files files)        // NOLINT(performance-unnecessary-value-param)
 {
-  if (Spine::Reactor::isShuttingDown())
+  // update() incremented the count when scheduling this task. Decrement it on
+  // every exit path including exceptions, or update() would eventually block
+  // the directory monitor thread forever waiting for a free slot.
+  struct ThreadCountGuard
   {
-    --itsThreadCount;
+    boost::atomic<int>& count;
+    ~ThreadCountGuard() { --count; }
+  } guard{itsThreadCount};
+
+  if (Spine::Reactor::isShuttingDown())
     return;
-  }
 
   // We expect timestamps and want the newest file first
   std::sort(files.rbegin(), files.rend());
@@ -747,15 +753,10 @@ void RepoManager::load(Producer producer,  // NOLINT(performance-unnecessary-val
     // access (ensureLoaded). A hot one (already loaded) keeps being refreshed
     // here so a live animation stays current.
     if (!producerHasModels(producer))
-    {
-      --itsThreadCount;
       return;
-    }
   }
 
   loadModels(producer, files, conf);
-
-  --itsThreadCount;
 }
 
 // ----------------------------------------------------------------------
