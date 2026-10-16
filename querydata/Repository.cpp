@@ -786,6 +786,32 @@ void Repository::expire(const Producer& producer, std::size_t max_age)
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Test whether the latest model age is acceptable and the models contain the point
+ *
+ * The data maxdistance is used if allowed and it is set.
+ */
+// ----------------------------------------------------------------------
+
+bool Repository::acceptsPoint(const SharedModels& models,
+                              const ProducerConfig& conf,
+                              double lon,
+                              double lat,
+                              double maxdist,
+                              bool usedatamaxdist,
+                              const std::string& leveltype,
+                              bool checkLatestModelAge)
+{
+  // Use data maxdistance if allowed and it is set
+  double chosenmaxdist = (usedatamaxdist && conf.maxdistance > 0 ? conf.maxdistance : maxdist);
+
+  if (checkLatestModelAge && !latest_model_age_ok(models, conf.max_latest_age))
+    return false;
+
+  return contains(models, lon, lat, chosenmaxdist, leveltype);
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Find the model containing the given point
  */
 // ----------------------------------------------------------------------
@@ -809,16 +835,14 @@ Producer Repository::find(const ProducerList& producerlist,
       if (producer_model != itsProducers.end())
       {
         const auto prod_config = itsProducerConfigs.find(producer);
-        // Use data maxdistance if allowed and it is set
-        double chosenmaxdist =
-            (usedatamaxdist && prod_config->second.maxdistance > 0 ? prod_config->second.maxdistance
-                                                                   : maxdist);
-
-        if (checkLatestModelAge &&
-            !latest_model_age_ok(producer_model->second, prod_config->second.max_latest_age))
-          continue;
-
-        if (contains(producer_model->second, lon, lat, chosenmaxdist, leveltype))
+        if (acceptsPoint(producer_model->second,
+                         prod_config->second,
+                         lon,
+                         lat,
+                         maxdist,
+                         usedatamaxdist,
+                         leveltype,
+                         checkLatestModelAge))
           return producer;
       }
     }
@@ -831,28 +855,23 @@ Producer Repository::find(const ProducerList& producerlist,
       if (prod_config == itsProducerConfigs.end())
         continue;
 
-      // Use data maxdistance if allowed and it is set
-      double chosenmaxdist =
-          (usedatamaxdist && prod_config->second.maxdistance > 0 ? prod_config->second.maxdistance
-                                                                 : maxdist);
-
       const auto& aliases = prod_config->second.aliases;
 
       for (const Producer& alias : producerlist)
       {
-        if (aliases.find(alias) != aliases.end())
-        {
-          const auto producer_model = itsProducers.find(producer);
-          if (producer_model != itsProducers.end())
-          {
-            if (checkLatestModelAge &&
-                !latest_model_age_ok(producer_model->second, prod_config->second.max_latest_age))
-              continue;
+        if (aliases.find(alias) == aliases.end())
+          continue;
 
-            if (contains(producer_model->second, lon, lat, chosenmaxdist, leveltype))
-              return producer;
-          }
-        }
+        const auto producer_model = itsProducers.find(producer);
+        if (producer_model != itsProducers.end() && acceptsPoint(producer_model->second,
+                                                                 prod_config->second,
+                                                                 lon,
+                                                                 lat,
+                                                                 maxdist,
+                                                                 usedatamaxdist,
+                                                                 leveltype,
+                                                                 checkLatestModelAge))
+          return producer;
       }
     }
 

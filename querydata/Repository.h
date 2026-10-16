@@ -136,6 +136,14 @@ class Repository
                        double lat,
                        double maxdist,
                        const std::string& levelname);
+  static bool acceptsPoint(const SharedModels& models,
+                           const ProducerConfig& conf,
+                           double lon,
+                           double lat,
+                           double maxdist,
+                           bool usedatamaxdist,
+                           const std::string& leveltype,
+                           bool checkLatestModelAge);
 
   // Each uniquely named producer has a number of models, which are sorted by their origin times
 
