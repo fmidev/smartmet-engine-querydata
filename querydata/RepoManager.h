@@ -125,6 +125,9 @@ struct RepoManager
   // Shared by the directory-monitor path and by on-access lazy loading; does not
   // touch itsThreadCount (the caller owns it).
   void loadModels(const Producer& producer, const Files& files, const ProducerConfig& conf);
+  SharedModel findOldModel(const Producer& producer, const std::filesystem::path& filename);
+  SharedModel loadModel(const std::filesystem::path& filename, const ProducerConfig& conf);
+  void updateLatLonCache(const SharedModel& model);
   void expirationLoop();
 
   bool producerHasModels(const Producer& producer) const;

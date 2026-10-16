@@ -772,6 +772,93 @@ void RepoManager::load(Producer producer,  // NOLINT(performance-unnecessary-val
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Update latlon-cache if necessary. In any case make sure model cache is up to date
+ *
+ * WARNING: DEPRECATED CODE BLOCK IN WGS84 MODE - THE RETURNED SHARED_PTR IS EMPTY
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::updateLatLonCache(const SharedModel& model)
+{
+  auto hash = model->gridHashValue();
+  auto latlons = itsLatLonCache.find(hash);  // cached coordinates, if any
+  if (!latlons)
+    itsLatLonCache.insert(hash, model->makeLatLonCache());  // request latlons and cache them
+  else
+    model->setLatLonCache(*latlons);  // set model cache from our cache
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Get an already loaded model from the old repository, if available
+ */
+// ----------------------------------------------------------------------
+
+SharedModel RepoManager::findOldModel(const Producer& producer,
+                                      const std::filesystem::path& filename)
+{
+  SharedModel model;
+  Spine::ReadLock lock(itsOldRepoManager->itsMutex);
+
+  // Failure to get old data is not an error here
+  try
+  {
+    model = itsOldRepoManager->itsRepo.getModel(producer, filename);
+  }
+  catch (...)
+  {
+  }
+  return model;
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Load a model from a querydata file or a radar frame
+ */
+// ----------------------------------------------------------------------
+
+SharedModel RepoManager::loadModel(const std::filesystem::path& filename,
+                                   const ProducerConfig& conf)
+{
+  const RadarFormat radarformat = detectRadarFormat(filename);
+  if (radarformat == RadarFormat::GeoTiff || radarformat == RadarFormat::Odim)
+  {
+    // Decode the radar frame into a scratch .sqd, then load it
+    // memory-mapped exactly like ordinary querydata. The model owns and
+    // deletes the scratch on eviction/expiry; identity (path, hash,
+    // modification time) stays with the source frame.
+    auto scratch =
+        convertRadarToScratch(itsRadarScratchDir, conf.producer, filename, radarformat);
+    // Mark the source as recently accessed for the cache's group-LRU.
+    RadarCache(itsRadarScratchDir, itsRadarCacheBytes).markAccessed(conf.producer);
+    return Model::create(filename,
+                         scratch,
+                         conf.producer,
+                         conf.leveltype,
+                         conf.isclimatology,
+                         conf.isfullgrid,
+                         conf.isstaticgrid,
+                         conf.isrelativeuv,
+                         conf.update_interval,
+                         conf.minimum_expires,
+                         conf.mmap,
+                         /*ownsdatafile=*/true);
+  }
+
+  return Model::create(filename,
+                       conf.producer,
+                       conf.leveltype,
+                       conf.isclimatology,
+                       conf.isfullgrid,
+                       conf.isstaticgrid,
+                       conf.isrelativeuv,
+                       conf.update_interval,
+                       conf.minimum_expires,
+                       conf.mmap);
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Decode files into models and add them to the repository
  *
  * The core of load(): shared by the directory-monitor path and by on-access
@@ -820,18 +907,7 @@ void RepoManager::loadModels(const Producer& producer,
       // Try using the old repo if it is available
 
       if (try_old_repo)
-      {
-        Spine::ReadLock lock(itsOldRepoManager->itsMutex);
-
-        // Failure to get old data is not an error here
-        try
-        {
-          model = itsOldRepoManager->itsRepo.getModel(producer, filename);
-        }
-        catch (...)
-        {
-        }
-      }
+        model = findOldModel(producer, filename);
 
       const bool load_new_data = !model;
 
@@ -841,43 +917,7 @@ void RepoManager::loadModels(const Producer& producer,
         if (itsVerbose)
           std::cout << Spine::log_time_str() + " QENGINE LOAD " + filename.string() << '\n';
 
-        const RadarFormat radarformat = detectRadarFormat(filename);
-        if (radarformat == RadarFormat::GeoTiff || radarformat == RadarFormat::Odim)
-        {
-          // Decode the radar frame into a scratch .sqd, then load it
-          // memory-mapped exactly like ordinary querydata. The model owns and
-          // deletes the scratch on eviction/expiry; identity (path, hash,
-          // modification time) stays with the source frame.
-          auto scratch =
-              convertRadarToScratch(itsRadarScratchDir, conf.producer, filename, radarformat);
-          // Mark the source as recently accessed for the cache's group-LRU.
-          RadarCache(itsRadarScratchDir, itsRadarCacheBytes).markAccessed(conf.producer);
-          model = Model::create(filename,
-                                scratch,
-                                conf.producer,
-                                conf.leveltype,
-                                conf.isclimatology,
-                                conf.isfullgrid,
-                                conf.isstaticgrid,
-                                conf.isrelativeuv,
-                                conf.update_interval,
-                                conf.minimum_expires,
-                                conf.mmap,
-                                /*ownsdatafile=*/true);
-        }
-        else
-        {
-          model = Model::create(filename,
-                                conf.producer,
-                                conf.leveltype,
-                                conf.isclimatology,
-                                conf.isfullgrid,
-                                conf.isstaticgrid,
-                                conf.isrelativeuv,
-                                conf.update_interval,
-                                conf.minimum_expires,
-                                conf.mmap);
-        }
+        model = loadModel(filename, conf);
 
         data_load_time = Fmi::SecondClock::universal_time();
       }
@@ -891,15 +931,7 @@ void RepoManager::loadModels(const Producer& producer,
         std::cout << msg.str() << std::flush;
       }
 
-      // Update latlon-cache if necessary. In any case make sure model cache is up to date
-      // WARNING: DEPRECATED CODE BLOCK IN WGS84 MODE - THE RETURNED SHARED_PTR IS EMPTY
-
-      auto hash = model->gridHashValue();
-      auto latlons = itsLatLonCache.find(hash);  // cached coordinates, if any
-      if (!latlons)
-        itsLatLonCache.insert(hash, model->makeLatLonCache());  // request latlons and cache them
-      else
-        model->setLatLonCache(*latlons);  // set model cache from our cache
+      updateLatLonCache(model);
 
       {
         // update structures safely
