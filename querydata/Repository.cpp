@@ -135,6 +135,49 @@ bool leveltype_ok(const std::string& modeltype, const std::string& wantedtype)
   }
 }
 
+// Get the parameter names (or numbers if unnamed) and descriptions of the querydata
+void get_parameter_names(NFmiFastQueryInfo& qi,
+                         std::list<std::string>& params,
+                         std::list<std::string>& descriptions)
+{
+  for (qi.ResetParam(); qi.NextParam(false);)
+  {
+    int paramID = boost::numeric_cast<int>(qi.Param().GetParamIdent());
+    std::string paramName = TimeSeries::ParameterFactory::instance().name(paramID);
+    if (!paramName.empty())
+      params.push_back(paramName);
+    else
+      params.emplace_back(Fmi::to_string(paramID));
+
+    descriptions.emplace_back(qi.Param().GetParamName().CharPtr());
+  }
+}
+
+// Get the available level values of the querydata, "-" for missing values
+std::list<std::string> get_level_names(NFmiFastQueryInfo& qi)
+{
+  std::list<std::string> levels;
+  for (qi.ResetLevel(); qi.NextLevel();)
+  {
+    float level = qi.Level()->LevelValue();
+    if (level != kFloatMissing)
+      levels.emplace_back(Fmi::to_string(level));
+    else
+      levels.emplace_back("-");
+  }
+  return levels;
+}
+
+// Get the projection of the querydata as WKT or a PROJ string, "nan" if there is none
+std::string get_projection_text(const NFmiFastQueryInfo& qi, const std::string& projectionFormat)
+{
+  if (qi.Area() == nullptr)
+    return "nan";
+  if (projectionFormat == "wkt")
+    return qi.Area()->WKT();
+  return qi.Area()->ProjStr();
+}
+
 }  // namespace
 
 // ----------------------------------------------------------------------
@@ -1078,37 +1121,13 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
         // Get the parameter list from querydatainfo
         std::list<std::string> params;
         std::list<std::string> descriptions;
-        for (qi->ResetParam(); qi->NextParam(false);)
-        {
-          int paramID = boost::numeric_cast<int>(qi->Param().GetParamIdent());
-          std::string paramName = TimeSeries::ParameterFactory::instance().name(paramID);
-          if (!paramName.empty())
-            params.push_back(paramName);
-          else
-            params.emplace_back(Fmi::to_string(paramID));
-
-          descriptions.emplace_back(qi->Param().GetParamName().CharPtr());
-        }
+        get_parameter_names(*qi, params, descriptions);
 
         // Get the available levelvalues
-        std::list<std::string> levels;
-        for (qi->ResetLevel(); qi->NextLevel();)
-        {
-          float level = qi->Level()->LevelValue();
-          if (level != kFloatMissing)
-            levels.emplace_back(Fmi::to_string(level));
-          else
-            levels.emplace_back("-");
-        }
+        std::list<std::string> levels = get_level_names(*qi);
 
         // Get projection string
-        std::string projectionText;
-        if (qi->Area() == nullptr)
-          projectionText = "nan";
-        else if (projectionFormat == "wkt")
-          projectionText = qi->Area()->WKT();
-        else
-          projectionText = qi->Area()->ProjStr();
+        std::string projectionText = get_projection_text(*qi, projectionFormat);
 
         // For nicer output in browsers we replace for example ",PROJCS" with ", PROJCS"
         boost::regex rex(",([A-Z])");
