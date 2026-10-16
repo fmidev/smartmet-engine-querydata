@@ -307,6 +307,64 @@ void EngineImpl::init()
 
 // ----------------------------------------------------------------------
 /*!
+ * \brief Wait until the config file modification time no longer changes
+ */
+// ----------------------------------------------------------------------
+
+void EngineImpl::waitForStableConfig(std::time_t& filetime,
+                                     std::time_t& newfiletime,
+                                     std::error_code& ec)
+{
+  while (newfiletime != filetime && !Spine::Reactor::isShuttingDown())
+  {
+    std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
+                     " updated, rereading\n";
+    filetime = newfiletime;
+    boost::this_thread::sleep_for(boost::chrono::seconds(3));
+    newfiletime = Fmi::last_write_time(itsConfigFile, ec);
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Replace the repository manager by one using the new configuration
+ */
+// ----------------------------------------------------------------------
+
+void EngineImpl::reloadRepoManager()
+{
+  // Generate new repomanager according to new configs
+  std::shared_ptr<RepoManager> newrepomanager =
+      std::make_shared<RepoManager>(itsConfigFile);
+
+  // The old manager can be used to initialize common data faster
+  auto oldrepomanager = itsRepoManager.load();
+  newrepomanager->setOldManager(oldrepomanager);
+  newrepomanager->init();
+
+  // Wait until all initial data has been loaded
+  while (!newrepomanager->ready() && !Spine::Reactor::isShuttingDown())
+  {
+    boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
+  }
+
+  newrepomanager->removeOldManager();
+
+  if (!Spine::Reactor::isShuttingDown())
+  {
+    // Update current repomanager
+    itsRepoManager.store(newrepomanager);
+    std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
+                     " update done\n";
+    lastConfigErrno = 0;
+    // Before poll cycling again, wait to avoid constant reload if the file changes many
+    // times
+    boost::this_thread::sleep_for(boost::chrono::seconds(2));
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
  * \brief Watch the config file to change
  * Should be run in a separate thread
  */
@@ -345,46 +403,10 @@ void EngineImpl::configFileWatch()
 
       try
       {
-        while (newfiletime != filetime && !Spine::Reactor::isShuttingDown())
-        {
-          std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
-                           " updated, rereading\n";
-          filetime = newfiletime;
-          boost::this_thread::sleep_for(boost::chrono::seconds(3));
-          newfiletime = Fmi::last_write_time(itsConfigFile, ec);
-        }
+        waitForStableConfig(filetime, newfiletime, ec);
 
         if (!Spine::Reactor::isShuttingDown())
-        {
-          // Generate new repomanager according to new configs
-          std::shared_ptr<RepoManager> newrepomanager =
-              std::make_shared<RepoManager>(itsConfigFile);
-
-          // The old manager can be used to initialize common data faster
-          auto oldrepomanager = itsRepoManager.load();
-          newrepomanager->setOldManager(oldrepomanager);
-          newrepomanager->init();
-
-          // Wait until all initial data has been loaded
-          while (!newrepomanager->ready() && !Spine::Reactor::isShuttingDown())
-          {
-            boost::this_thread::sleep_for(boost::chrono::milliseconds(100));
-          }
-
-          newrepomanager->removeOldManager();
-
-          if (!Spine::Reactor::isShuttingDown())
-          {
-            // Update current repomanager
-            itsRepoManager.store(newrepomanager);
-            std::cout << Spine::log_time_str() + " Querydata config " + itsConfigFile +
-                             " update done\n";
-            lastConfigErrno = 0;
-            // Before poll cycling again, wait to avoid constant reload if the file changes many
-            // times
-            boost::this_thread::sleep_for(boost::chrono::seconds(2));
-          }
-        }
+          reloadRepoManager();
       }
       catch (const std::exception& e)
       {

@@ -169,6 +169,8 @@ class EngineImpl final : public Engine
  private:
   boost::thread configFileWatcher;  // A thread watching for config file changes
   void configFileWatch();           // A function in separate thread checking the config file
+  void reloadRepoManager();         // Replace the repository manager after a config change
+  void waitForStableConfig(std::time_t& filetime, std::time_t& newfiletime, std::error_code& ec);
   Fmi::Cache::CacheStatistics getCacheStats() const override;  // Get cache statistics
 
   std::unique_ptr<SmartMet::Spine::Table> requestQEngineStatus(
