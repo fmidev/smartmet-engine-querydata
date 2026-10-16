@@ -1161,6 +1161,68 @@ TS::Value GridNorth(const QImpl &q, const Spine::Location &loc)
   }
 }
 
+// ----------------------------------------------------------------------
+/*!
+ * \brief Interpolate the active parameter at a pressure or height level
+ *
+ * If there is no value and the proper flag is on, the nearest point with
+ * valid values is used instead.
+ */
+// ----------------------------------------------------------------------
+
+TS::Value interpolated_level_value(QImpl &q,
+                                   const ParameterOptions &opt,
+                                   const NFmiPoint &latlon,
+                                   const Fmi::LocalDateTime &ldt,
+                                   float level,
+                                   InterpolationMethod method)
+{
+  NFmiMetTime t = ldt;
+
+  float interpolatedValue = interpolate_at_level(q, latlon, t, level, method, maxgap);
+
+  // If we got no value and the proper flag is on,
+  // find the nearest point with valid values and use
+  // the values from that point
+
+  if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
+  {
+    NFmiPoint nearestValidPt = q.validPoint(latlon, opt.maxdist, t);
+    if (nearestValidPt.X() != kFloatMissing)
+    {
+      interpolatedValue = interpolate_at_level(q, nearestValidPt, t, level, method, maxgap);
+      if (interpolatedValue != kFloatMissing)
+        opt.lastpoint = nearestValidPt;
+    }
+  }
+
+  if (interpolatedValue == kFloatMissing)
+    return TS::None();
+  return interpolatedValue;
+}
+
+// Value of a location derived parameter (latitude, longitude, latlon, lonlat), if it is one
+std::optional<TS::Value> location_parameter_value(int num, const Spine::Location &loc)
+{
+  if (num == kFmiLatitude)
+    return TS::Value(loc.latitude);
+  if (num == kFmiLongitude)
+    return TS::Value(loc.longitude);
+  if (num == kFmiLatLon || num == kFmiLonLat)
+    return TS::Value(TS::LonLat(loc.longitude, loc.latitude));
+  return std::nullopt;
+}
+
+// Replace a missing double value by TS::None
+void missing_to_none(TS::Value &value)
+{
+  if (const auto *ptr = std::get_if<double>(&value))
+  {
+    if (*ptr == kFloatMissing)
+      value = TS::None();
+  }
+}
+
 }  // namespace
 
 // ----------------------------------------------------------------------
@@ -3411,55 +3473,25 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
         opt.lastpoint = latlon;
 
         if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
-        {
-          NFmiMetTime t = ldt;
-
-          float interpolatedValue = interpolateAtPressure(latlon, t, pressure, maxgap);
-
-          // If we got no value and the proper flag is on,
-          // find the nearest point with valid values and use
-          // the values from that point
-
-          if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
-          {
-            NFmiPoint nearestValidPt = validPoint(latlon, opt.maxdist, t);
-            if (nearestValidPt.X() != kFloatMissing)
-            {
-              interpolatedValue = interpolateAtPressure(nearestValidPt, t, pressure, maxgap);
-              if (interpolatedValue != kFloatMissing)
-                opt.lastpoint = nearestValidPt;
-            }
-          }
-
-          if (interpolatedValue == kFloatMissing)
-            retval = TS::None();
-          else
-            retval = interpolatedValue;
-        }
+          retval = interpolated_level_value(
+              *this, opt, latlon, ldt, pressure, InterpolationMethod::PRESSURE);
 
         break;
       }
       case Spine::Parameter::Type::DataDerived:
       {
         auto num = opt.par.number();
-        if (num == kFmiLatitude)
-          retval = loc.latitude;
-        else if (num == kFmiLongitude)
-          retval = loc.longitude;
-        else if (num == kFmiLatLon || num == kFmiLonLat)
-          retval = TS::LonLat(loc.longitude, loc.latitude);
-        else if (num == kFmiWindUMS || num == kFmiWindVMS)
+        if (auto locvalue = location_parameter_value(num, loc))
+          retval = *locvalue;
+        else if ((num == kFmiWindUMS || num == kFmiWindVMS) && param(opt.par.number()) &&
+                 (itsModels[0]->levelName() != "surface") && !isClimatology())
         {
-          if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") &&
-              !isClimatology())
-          {
-            if (isRelativeUV())
-              retval = (num == kFmiWindUMS
-                            ? WindUMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE)
-                            : WindVMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE));
-            else
-              retval = dataValueAtPressure(opt, latlon, ldt, pressure);
-          }
+          if (isRelativeUV())
+            retval = (num == kFmiWindUMS
+                          ? WindUMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE)
+                          : WindVMS(*this, loc, ldt, pressure, InterpolationMethod::PRESSURE));
+          else
+            retval = dataValueAtPressure(opt, latlon, ldt, pressure);
         }
         break;
       }
@@ -3470,11 +3502,7 @@ TS::Value QImpl::valueAtPressure(const ParameterOptions &opt,
       }
     }
 
-    if (const auto *ptr = std::get_if<double>(&retval))
-    {
-      if (*ptr == kFloatMissing)
-        retval = TS::None();
-    }
+    missing_to_none(retval);
 
     return retval;
   }
@@ -3507,57 +3535,26 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
         opt.lastpoint = latlon;
 
         if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") && !isClimatology())
-        {
-          NFmiMetTime t = ldt;
-
-          float interpolatedValue = interpolateAtHeight(latlon, t, height, maxgap);
-
-          // If we got no value and the proper flag is on,
-          // find the nearest point with valid values and use
-          // the values from that point
-
-          if (interpolatedValue == kFloatMissing && opt.findnearestvalidpoint)
-          {
-            NFmiPoint nearestValidPt = validPoint(latlon, opt.maxdist, t);
-            if (nearestValidPt.X() != kFloatMissing)
-            {
-              interpolatedValue = interpolateAtHeight(nearestValidPt, t, height, maxgap);
-              if (interpolatedValue != kFloatMissing)
-                opt.lastpoint = nearestValidPt;
-            }
-          }
-
-          if (interpolatedValue == kFloatMissing)
-            retval = TS::None();
-          else
-            retval = interpolatedValue;
-        }
+          retval = interpolated_level_value(
+              *this, opt, latlon, ldt, height, InterpolationMethod::HEIGHT);
 
         break;
       }
       case Spine::Parameter::Type::DataDerived:
       {
         auto num = opt.par.number();
-        if (num == kFmiLatitude)
-          retval = loc.latitude;
-        else if (num == kFmiLongitude)
-          retval = loc.longitude;
-        else if (num == kFmiLatLon || num == kFmiLonLat)
-          retval = TS::LonLat(loc.longitude, loc.latitude);
-        else if (num == kFmiWindUMS || num == kFmiWindVMS)
+        if (auto locvalue = location_parameter_value(num, loc))
+          retval = *locvalue;
+        else if ((num == kFmiWindUMS || num == kFmiWindVMS) && param(opt.par.number()) &&
+                 (itsModels[0]->levelName() != "surface") && !isClimatology())
         {
-          if (param(opt.par.number()) && (itsModels[0]->levelName() != "surface") &&
-              !isClimatology())
-          {
-            if (isRelativeUV())
-              retval = (num == kFmiWindUMS
-                            ? WindUMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT)
-                            : WindVMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT));
-            else
-              retval = dataValueAtHeight(opt, latlon, ldt, height);
-          }
+          if (isRelativeUV())
+            retval = (num == kFmiWindUMS
+                          ? WindUMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT)
+                          : WindVMS(*this, loc, ldt, height, InterpolationMethod::HEIGHT));
+          else
+            retval = dataValueAtHeight(opt, latlon, ldt, height);
         }
-
         break;
       }
       case Spine::Parameter::Type::DataIndependent:
@@ -3567,11 +3564,7 @@ TS::Value QImpl::valueAtHeight(const ParameterOptions &opt,
       }
     }
 
-    if (const auto *ptr = std::get_if<double>(&retval))
-    {
-      if (*ptr == kFloatMissing)
-        retval = TS::None();
-    }
+    missing_to_none(retval);
 
     return retval;
   }
