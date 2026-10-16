@@ -771,6 +771,53 @@ TS::Value WeatherText(QImpl &q,
   }
 }
 
+// Test whether the thunder probability is high enough for a thunder symbol
+bool has_thunder(float thunder)
+{
+  return (thunder >= thunder_limit1 && thunder != kFloatMissing);
+}
+
+// The smart symbol when there is no precipitation: fog or cloudiness
+int dry_smart_symbol(QImpl &q, const NFmiPoint &latlon, const NFmiMetTime &t, float n)
+{
+  // No precipitation. Now we need only fog/cloudiness
+
+  if (q.param(kFmiFogIntensity))
+  {
+    const auto fog = q.interpolate(latlon, t, maxgap);
+    if (fog > 0 && fog != kFloatMissing)
+      return 9;  // fog
+  }
+
+  // no rain, no fog (or not available), only cloudiness
+  if (n < cloud_limit2)
+    return 1;  // clear
+  if (n < cloud_limit3)
+    return 2;  // mostly clear
+  if (n < cloud_limit6)
+    return 4;  // partly cloudy
+  if (n < cloud_limit8)
+    return 6;  // mostly cloudy
+  return 7;    // overcast
+}
+
+// The smart symbol for water (rain or showers)
+int water_smart_symbol(
+    QImpl &q, const NFmiPoint &latlon, const NFmiMetTime &t, float rain, int nclass)
+{
+  // Now we need precipitation type too
+  int rtype = 1;  // large scale by default
+  if (q.param(kFmiPotentialPrecipitationType) || q.param(kFmiPrecipitationType))
+    rtype = static_cast<int>(q.interpolate(latlon, t, maxgap));
+
+  if (rtype == 2)            // convective
+    return 21 + 3 * nclass;  // 21, 24, 27 for showers
+
+  // rtype=1:large scale precipitation (or rtype is missing)
+  int rclass = classify(rain, rain_limit3, rain_limit6);
+  return 31 + 3 * nclass + rclass;  // 31-39 for precipitation
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Calculate the smart weather symbol if possible
@@ -797,15 +844,10 @@ std::optional<int> calc_smart_symbol(QImpl &q,
 
     // The first parameter we need always is POT. We allow it to be missing though.
 
-    if (q.param(kFmiProbabilityThunderstorm))
+    if (q.param(kFmiProbabilityThunderstorm) && has_thunder(q.interpolate(latlon, t, maxgap)))
     {
-      const auto thunder = q.interpolate(latlon, t, maxgap);
-
-      if (thunder >= thunder_limit1 && thunder != kFloatMissing)
-      {
-        int nclass = classify(n, cloud_limit6, cloud_limit8);
-        return 71 + 3 * nclass;  // 71,74,77
-      }
+      int nclass = classify(n, cloud_limit6, cloud_limit8);
+      return 71 + 3 * nclass;  // 71,74,77
     }
 
     // No thunder (or not available). Then we always need precipitation rate
@@ -819,27 +861,7 @@ std::optional<int> calc_smart_symbol(QImpl &q,
       return {};
 
     if (rain < rain_limit1)
-    {
-      // No precipitation. Now we need only fog/cloudiness
-
-      if (q.param(kFmiFogIntensity))
-      {
-        const auto fog = q.interpolate(latlon, t, maxgap);
-        if (fog > 0 && fog != kFloatMissing)
-          return 9;  // fog
-      }
-
-      // no rain, no fog (or not available), only cloudiness
-      if (n < cloud_limit2)
-        return 1;  // clear
-      if (n < cloud_limit3)
-        return 2;  // mostly clear
-      if (n < cloud_limit6)
-        return 4;  // partly cloudy
-      if (n < cloud_limit8)
-        return 6;  // mostly cloudy
-      return 7;    // overcast
-    }
+      return dry_smart_symbol(q, latlon, t, n);
 
     // Since we have precipitation, we always need precipitation form
     int rform = static_cast<int>(kFloatMissing);
@@ -870,19 +892,7 @@ std::optional<int> calc_smart_symbol(QImpl &q,
       return 61 + 3 * nclass;
 
     if (rform == 1)  // water
-    {
-      // Now we need precipitation type too
-      int rtype = 1;  // large scale by default
-      if (q.param(kFmiPotentialPrecipitationType) || q.param(kFmiPrecipitationType))
-        rtype = static_cast<int>(q.interpolate(latlon, t, maxgap));
-
-      if (rtype == 2)            // convective
-        return 21 + 3 * nclass;  // 21, 24, 27 for showers
-
-      // rtype=1:large scale precipitation (or rtype is missing)
-      int rclass = classify(rain, rain_limit3, rain_limit6);
-      return 31 + 3 * nclass + rclass;  // 31-39 for precipitation
-    }
+      return water_smart_symbol(q, latlon, t, rain, nclass);
 
     // rform=2:sleet and rform=3:snow map to 41-49 and 51-59 respectively
 
