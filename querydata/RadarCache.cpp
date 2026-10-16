@@ -211,6 +211,42 @@ std::uintmax_t RadarCache::enforceBudget(const PinnedFn& pinned) const
   return freed;
 }
 
+// Remove the temp leftovers and stale files of one source. Returns the number of live files.
+std::size_t RadarCache::reconcileFiles(const fs::path& sourceDir,
+                                       const std::string& id,
+                                       const KeepFn& keepFile,
+                                       std::error_code& ec,
+                                       std::size_t& droppedTemps,
+                                       std::size_t& droppedStale)
+{
+  std::size_t liveFiles = 0;
+  std::vector<fs::path> toRemove;
+  std::error_code fec;
+  for (fs::directory_iterator fit(sourceDir, fec), fend; fit != fend && !fec; fit.increment(fec))
+  {
+    const std::string name = fit->path().filename().string();
+    if (isMarker(name))
+      continue;
+    if (isDotTemp(name))
+    {
+      toRemove.push_back(fit->path());  // half-written temp from a crash
+      ++droppedTemps;
+      continue;
+    }
+    // A real cached data file: keep only if its source frame is still current.
+    if (keepFile && !keepFile(id, name))
+    {
+      toRemove.push_back(fit->path());
+      ++droppedStale;
+    }
+    else
+      ++liveFiles;
+  }
+  for (const auto& p : toRemove)
+    fs::remove(p, ec);
+  return liveFiles;
+}
+
 void RadarCache::reconcile(const KeepFn& keepFile, const PinnedFn& pinned) const
 {
   std::error_code ec;
@@ -232,31 +268,8 @@ void RadarCache::reconcile(const KeepFn& keepFile, const PinnedFn& pinned) const
     if (id == kTrashDir)
       continue;
 
-    std::size_t liveFiles = 0;
-    std::vector<fs::path> toRemove;
-    std::error_code fec;
-    for (fs::directory_iterator fit(it->path(), fec), fend; fit != fend && !fec; fit.increment(fec))
-    {
-      const std::string name = fit->path().filename().string();
-      if (isMarker(name))
-        continue;
-      if (isDotTemp(name))
-      {
-        toRemove.push_back(fit->path());  // half-written temp from a crash
-        ++droppedTemps;
-        continue;
-      }
-      // A real cached data file: keep only if its source frame is still current.
-      if (keepFile && !keepFile(id, name))
-      {
-        toRemove.push_back(fit->path());
-        ++droppedStale;
-      }
-      else
-        ++liveFiles;
-    }
-    for (const auto& p : toRemove)
-      fs::remove(p, ec);
+    const std::size_t liveFiles =
+        reconcileFiles(it->path(), id, keepFile, ec, droppedTemps, droppedStale);
 
     // A source with no current data files is not really cached; drop it unless pinned.
     if (liveFiles == 0 && !(pinned && pinned(id)))

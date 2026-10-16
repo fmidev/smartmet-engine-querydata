@@ -78,6 +78,12 @@ class RadarCache
 
   std::vector<Entry> scan() const;
   void evictSource(const std::string& id) const;
+  static std::size_t reconcileFiles(const std::filesystem::path& sourceDir,
+                                    const std::string& id,
+                                    const KeepFn& keepFile,
+                                    std::error_code& ec,
+                                    std::size_t& droppedTemps,
+                                    std::size_t& droppedStale);
 
   static bool isMarker(const std::string& name);   // ".accessed" / ".protected"
   static bool isDotTemp(const std::string& name);  // dot-prefixed, not a marker
