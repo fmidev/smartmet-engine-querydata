@@ -1387,6 +1387,15 @@ TS::Value station_value(QImpl &q,
   }
 }
 
+// Call func(i, j) for all grid points of the given matrix
+template <typename F>
+void for_each_grid_point(const NFmiDataMatrix<float> &shape, F func)
+{
+  for (std::size_t j = 0; j < shape.NY(); ++j)
+    for (std::size_t i = 0; i < shape.NX(); ++i)
+      func(i, j);
+}
+
 }  // namespace
 
 // ----------------------------------------------------------------------
@@ -2689,9 +2698,9 @@ NFmiDataMatrix<float> QImpl::calculatedValues(const Spine::Parameter &theParam,
           auto t2m = values(theInterpolatedTime);
           param(kFmiWindSpeedMS);
           auto wspd = values(theInterpolatedTime);
-          for (std::size_t j = 0; j < t2m.NY(); ++j)
-            for (std::size_t i = 0; i < t2m.NX(); ++i)
-              ret[i][j] = FmiWindChill(wspd[i][j], t2m[i][j]);
+          for_each_grid_point(t2m,
+                              [&](std::size_t i, std::size_t j)
+                              { ret[i][j] = FmiWindChill(wspd[i][j], t2m[i][j]); });
         }
         break;
       }
@@ -2702,9 +2711,9 @@ NFmiDataMatrix<float> QImpl::calculatedValues(const Spine::Parameter &theParam,
           auto t2m = values(theInterpolatedTime);
           param(kFmiHumidity);
           auto rh = values(theInterpolatedTime);
-          for (std::size_t j = 0; j < t2m.NY(); ++j)
-            for (std::size_t i = 0; i < t2m.NX(); ++i)
-              ret[i][j] = FmiSummerSimmerIndex(rh[i][j], t2m[i][j]);
+          for_each_grid_point(t2m,
+                              [&](std::size_t i, std::size_t j)
+                              { ret[i][j] = FmiSummerSimmerIndex(rh[i][j], t2m[i][j]); });
         }
         break;
       }
@@ -2721,10 +2730,11 @@ NFmiDataMatrix<float> QImpl::calculatedValues(const Spine::Parameter &theParam,
           bool has_radiation = param(kFmiRadiationGlobal);
           if (has_radiation)
             ret = values(theInterpolatedTime);  // Using ret as temporary storage for radiation
-          for (std::size_t j = 0; j < t2m.NY(); ++j)
-            for (std::size_t i = 0; i < t2m.NX(); ++i)
-              if (has_radiation)
-                ret[i][j] = FmiFeelsLikeTemperature(wpsd[i][j], rh[i][j], t2m[i][j], ret[i][j]);
+          // Radiation is permitted to be missing
+          for_each_grid_point(
+              t2m,
+              [&](std::size_t i, std::size_t j)
+              { ret[i][j] = FmiFeelsLikeTemperature(wpsd[i][j], rh[i][j], t2m[i][j], ret[i][j]); });
         }
         break;
       }
@@ -2737,9 +2747,10 @@ NFmiDataMatrix<float> QImpl::calculatedValues(const Spine::Parameter &theParam,
           auto rh = values(theInterpolatedTime);
           param(kFmiWindSpeedMS);
           auto wpsd = values(theInterpolatedTime);
-          for (std::size_t j = 0; j < t2m.NY(); ++j)
-            for (std::size_t i = 0; i < t2m.NX(); ++i)
-              ret[i][j] = FmiApparentTemperature(wpsd[i][j], rh[i][j], t2m[i][j]);
+          for_each_grid_point(
+              t2m,
+              [&](std::size_t i, std::size_t j)
+              { ret[i][j] = FmiApparentTemperature(wpsd[i][j], rh[i][j], t2m[i][j]); });
         }
         break;
       }
