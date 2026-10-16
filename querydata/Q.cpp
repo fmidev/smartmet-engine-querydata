@@ -895,6 +895,73 @@ std::optional<int> calc_smart_symbol(QImpl &q,
   }
 }
 
+// Cloudiness class 0-8, 9 if missing
+int cloudiness_class(float n)
+{
+  int n_class = 9;  // missing
+  if (n == kFloatMissing)
+    n_class = 9;
+  else if (n < cloud_limit1)
+    n_class = 0;
+  else if (n < cloud_limit2)
+    n_class = 1;
+  else if (n < cloud_limit3)
+    n_class = 2;
+  else if (n < cloud_limit4)
+    n_class = 3;
+  else if (n < cloud_limit5)
+    n_class = 4;
+  else if (n < cloud_limit6)
+    n_class = 5;
+  else if (n < cloud_limit7)
+    n_class = 6;
+  else if (n < cloud_limit8)
+    n_class = 7;
+  else
+    n_class = 8;
+  return n_class;
+}
+
+// Precipitation class 0-7, 9 if missing
+int precipitation_class(float rain)
+{
+  int rain_class = 9;  // missing
+  if (rain == kFloatMissing)
+    rain_class = 9;
+  else if (rain < rain_limit1)
+    rain_class = 0;
+  else if (rain < rain_limit2)
+    rain_class = 1;
+  else if (rain < rain_limit3)
+    rain_class = 2;
+  else if (rain < rain_limit4)
+    rain_class = 3;
+  else if (rain < rain_limit5)
+    rain_class = 4;
+  else if (rain < rain_limit6)
+    rain_class = 5;
+  else if (rain < rain_limit7)
+    rain_class = 6;
+  else
+    rain_class = 7;
+  return rain_class;
+}
+
+// Thunder probability class 0-2, 9 if missing
+int thunder_probability_class(float thunder)
+{
+  int thunder_class = 9;
+  if (thunder == kFloatMissing)
+    thunder_class = 9;
+  else if (thunder < thunder_limit1)
+    thunder_class = 0;
+  else if (thunder < thunder_limit2)
+    thunder_class = 1;
+  else
+    thunder_class = 2;
+  return thunder_class;
+}
+
 // ----------------------------------------------------------------------
 /*!
  * \brief Calculate the weather number used as basis for SmartSymbol
@@ -914,52 +981,14 @@ std::optional<int> calc_weather_number(QImpl &q,
     if (q.param(kFmiTotalCloudCover))
       n = q.interpolate(latlon, t, maxgap);
 
-    int n_class = 9;  // missing
-    if (n == kFloatMissing)
-      n_class = 9;
-    else if (n < cloud_limit1)
-      n_class = 0;
-    else if (n < cloud_limit2)
-      n_class = 1;
-    else if (n < cloud_limit3)
-      n_class = 2;
-    else if (n < cloud_limit4)
-      n_class = 3;
-    else if (n < cloud_limit5)
-      n_class = 4;
-    else if (n < cloud_limit6)
-      n_class = 5;
-    else if (n < cloud_limit7)
-      n_class = 6;
-    else if (n < cloud_limit8)
-      n_class = 7;
-    else
-      n_class = 8;
+    int n_class = cloudiness_class(n);
 
     // Precipitation is optional
     float rain = kFloatMissing;
     if (q.param(kFmiPrecipitation1h))
       rain = q.interpolate(latlon, t, maxgap);
 
-    int rain_class = 9;  // missing
-    if (rain == kFloatMissing)
-      rain_class = 9;
-    else if (rain < rain_limit1)
-      rain_class = 0;
-    else if (rain < rain_limit2)
-      rain_class = 1;
-    else if (rain < rain_limit3)
-      rain_class = 2;
-    else if (rain < rain_limit4)
-      rain_class = 3;
-    else if (rain < rain_limit5)
-      rain_class = 4;
-    else if (rain < rain_limit6)
-      rain_class = 5;
-    else if (rain < rain_limit7)
-      rain_class = 6;
-    else
-      rain_class = 7;
+    int rain_class = precipitation_class(rain);
 
     // Precipitation form is optional
     float rform = kFloatMissing;
@@ -980,15 +1009,7 @@ std::optional<int> calc_weather_number(QImpl &q,
     if (q.param(kFmiProbabilityThunderstorm))
       thunder = q.interpolate(latlon, t, maxgap);
 
-    int thunder_class = 9;
-    if (thunder == kFloatMissing)
-      thunder_class = 9;
-    else if (thunder < thunder_limit1)
-      thunder_class = 0;
-    else if (thunder < thunder_limit2)
-      thunder_class = 1;
-    else
-      thunder_class = 2;
+    int thunder_class = thunder_probability_class(thunder);
 
     // Fog is optional
     float fog = kFloatMissing;
