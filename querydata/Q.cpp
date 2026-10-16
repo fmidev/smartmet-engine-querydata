@@ -1223,6 +1223,170 @@ void missing_to_none(TS::Value &value)
   }
 }
 
+// ----------------------------------------------------------------------
+/*!
+ * \brief Origin time of the data valid at the given time
+ */
+// ----------------------------------------------------------------------
+
+TS::Value origin_time_value(QImpl &q, const ParameterOptions &opt, const Fmi::LocalDateTime &ldt)
+{
+  if (!q.time(ldt.utc_time()))
+  {
+    // Search first valid time after the desired time, and choose that origintime
+    bool ok = false;
+    for (q.resetTime(); !ok && q.nextTime();)
+      ok = (Fmi::DateTime(q.validTime()) > ldt.utc_time());
+    if (!ok)
+      return TS::None();
+  }
+  Fmi::DateTime utc = q.originTime();
+  Fmi::LocalDateTime localt(utc, ldt.zone());
+  return opt.timeformatter.format(localt);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Lunar parameter values
+ */
+// ----------------------------------------------------------------------
+
+TS::Value lunar_value(int number,
+                      const ParameterOptions &opt,
+                      const Fmi::LocalDateTime &ldt,
+                      const Spine::Location &loc)
+{
+  auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
+
+  switch (number)
+  {
+    case kFmiMoonrise:
+    {
+      return opt.timeformatter.format(ltime.moonrise.local_time());
+    }
+    case kFmiMoonrise2:
+    {
+      if (ltime.moonrise2_today())
+        return opt.timeformatter.format(ltime.moonrise2.local_time());
+
+      return std::string("");
+    }
+    case kFmiMoonset:
+    {
+      return opt.timeformatter.format(ltime.moonset.local_time());
+    }
+    case kFmiMoonset2:
+    {
+      if (ltime.moonset2_today())
+        return opt.timeformatter.format(ltime.moonset2.local_time());
+      return std::string("");
+    }
+    case kFmiMoonriseToday:
+    {
+      return Fmi::to_string(static_cast<int>(ltime.moonrise_today()));
+    }
+    case kFmiMoonrise2Today:
+    {
+      return Fmi::to_string(static_cast<int>(ltime.moonrise2_today()));
+    }
+    case kFmiMoonsetToday:
+    {
+      return Fmi::to_string(static_cast<int>(ltime.moonset_today()));
+    }
+    case kFmiMoonset2Today:
+    {
+      return Fmi::to_string(static_cast<int>(ltime.moonset2_today()));
+    }
+    case kFmiMoonUp24h:
+    {
+      return Fmi::to_string(static_cast<int>(ltime.above_horizont_24h()));
+    }
+    case kFmiMoonDown24h:
+    {
+      return Fmi::to_string(static_cast<int>(!ltime.moonrise_today() && !ltime.moonset_today() &&
+                                             !ltime.above_horizont_24h()));
+    }
+    default:
+      return TS::None();
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Station parameter values for pointwise querydata
+ */
+// ----------------------------------------------------------------------
+
+TS::Value station_value(QImpl &q,
+                        int number,
+                        const ParameterOptions &opt,
+                        const Spine::Location &loc)
+{
+  switch (number)
+  {
+    case kFmiStationLongitude:
+    {
+      if (loc.fmisid)
+        return loc.longitude;
+      if (!q.isGrid())
+        return q.latLon().X();
+      return TS::None();
+    }
+    case kFmiStationLatitude:
+    {
+      if (loc.fmisid)
+        return loc.latitude;
+      if (!q.isGrid())
+        return q.latLon().Y();
+      return TS::None();
+    }
+    case kFmiStationName:
+    {
+      if (q.isGrid())
+        return TS::None();
+      return q.info()->Location()->GetName().CharPtr();
+    }
+    case kFmiFMISID:
+    {
+      if (loc.fmisid)
+        return *loc.fmisid;
+      if (!q.isGrid())
+        return q.info()->Location()->GetIdent();
+      return TS::None();
+    }
+    case kFmiWmoStationNumber:
+    case kFmiLPNN:
+    case kFmiRWSID:
+    {
+      if (!q.isGrid())
+        return q.info()->Location()->GetIdent();
+      return TS::None();
+    }
+
+    case kFmiDistance:
+    {
+      if (q.isGrid())
+        return TS::None();
+      const NFmiPoint refpoint =
+          opt.distanceReferencePoint.value_or(NFmiPoint(loc.longitude, loc.latitude));
+      return q.info()->Location()->Distance(refpoint);
+    }
+    case kFmiDirection:
+    {
+      if (q.isGrid())
+        return TS::None();
+      const NFmiPoint refpoint =
+          opt.distanceReferencePoint.value_or(NFmiPoint(loc.longitude, loc.latitude));
+      auto dir = q.info()->Location()->Direction(refpoint);
+      if (dir < 0)
+        dir += 360;
+      return dir;
+    }
+    default:
+      return TS::None();
+  }
+}
+
 }  // namespace
 
 // ----------------------------------------------------------------------
@@ -3058,20 +3222,7 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       return Fmi::to_string(diff.total_seconds());
     }
     case kFmiOriginTime:
-    {
-      if (!time(ldt.utc_time()))
-      {
-        // Search first valid time after the desired time, and choose that origintime
-        bool ok = false;
-        for (resetTime(); !ok && nextTime();)
-          ok = (Fmi::DateTime(validTime()) > ldt.utc_time());
-        if (!ok)
-          return TS::None();
-      }
-      Fmi::DateTime utc = originTime();
-      Fmi::LocalDateTime localt(utc, ldt.zone());
-      return opt.timeformatter.format(localt);
-    }
+      return origin_time_value(*this, opt, ldt);
     case kFmiModTime:
     {
       Fmi::DateTime utc = modificationTime();
@@ -3086,62 +3237,16 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     case kFmiMoonPhase:
       return Fmi::Astronomy::moonphase(ldt.utc_time());
     case kFmiMoonrise:
-    {
-      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      return opt.timeformatter.format(ltime.moonrise.local_time());
-    }
     case kFmiMoonrise2:
-    {
-      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-
-      if (ltime.moonrise2_today())
-        return opt.timeformatter.format(ltime.moonrise2.local_time());
-
-      return std::string("");
-    }
     case kFmiMoonset:
-    {
-      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      return opt.timeformatter.format(ltime.moonset.local_time());
-    }
     case kFmiMoonset2:
-    {
-      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      if (ltime.moonset2_today())
-        return opt.timeformatter.format(ltime.moonset2.local_time());
-      return std::string("");
-    }
     case kFmiMoonriseToday:
-    {
-      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      return Fmi::to_string(static_cast<int>(ltime.moonrise_today()));
-    }
     case kFmiMoonrise2Today:
-    {
-      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      return Fmi::to_string(static_cast<int>(ltime.moonrise2_today()));
-    }
     case kFmiMoonsetToday:
-    {
-      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      return Fmi::to_string(static_cast<int>(ltime.moonset_today()));
-    }
     case kFmiMoonset2Today:
-    {
-      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      return Fmi::to_string(static_cast<int>(ltime.moonset2_today()));
-    }
     case kFmiMoonUp24h:
-    {
-      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      return Fmi::to_string(static_cast<int>(ltime.above_horizont_24h()));
-    }
     case kFmiMoonDown24h:
-    {
-      auto ltime = Fmi::Astronomy::lunar_time(ldt, loc.longitude, loc.latitude);
-      return Fmi::to_string(static_cast<int>(!ltime.moonrise_today() && !ltime.moonset_today() &&
-                                             !ltime.above_horizont_24h()));
-    }
+      return lunar_value(opt.par.number(), opt, ldt, loc);
     case kFmiSunrise:
     {
       auto stime = Fmi::Astronomy::solar_time(ldt, loc.longitude, loc.latitude);
@@ -3210,63 +3315,15 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       // Later on support was added for pointwise querydata.
 
     case kFmiStationLongitude:
-    {
-      if (loc.fmisid)
-        return loc.longitude;
-      if (!isGrid())
-        return latLon().X();
-      return TS::None();
-    }
     case kFmiStationLatitude:
-    {
-      if (loc.fmisid)
-        return loc.latitude;
-      if (!isGrid())
-        return latLon().Y();
-      return TS::None();
-    }
     case kFmiStationName:
-    {
-      if (isGrid())
-        return TS::None();
-      return info()->Location()->GetName().CharPtr();
-    }
     case kFmiFMISID:
-    {
-      if (loc.fmisid)
-        return *loc.fmisid;
-      if (!isGrid())
-        return info()->Location()->GetIdent();
-      return TS::None();
-    }
     case kFmiWmoStationNumber:
     case kFmiLPNN:
     case kFmiRWSID:
-    {
-      if (!isGrid())
-        return info()->Location()->GetIdent();
-      return TS::None();
-    }
-
     case kFmiDistance:
-    {
-      if (isGrid())
-        return TS::None();
-      const NFmiPoint refpoint =
-          opt.distanceReferencePoint.value_or(NFmiPoint(loc.longitude, loc.latitude));
-      return info()->Location()->Distance(refpoint);
-    }
     case kFmiDirection:
-    {
-      if (isGrid())
-        return TS::None();
-      const NFmiPoint refpoint =
-          opt.distanceReferencePoint.value_or(NFmiPoint(loc.longitude, loc.latitude));
-      auto dir = info()->Location()->Direction(refpoint);
-      if (dir < 0)
-        dir += 360;
-      return dir;
-    }
+      return station_value(*this, opt.par.number(), opt, loc);
     case kFmiStationType:
     case kFmiStationary:
     case kFmiSensorNo:
