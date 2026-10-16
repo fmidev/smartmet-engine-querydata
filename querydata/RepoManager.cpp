@@ -121,6 +121,17 @@ std::filesystem::path convertRadarToScratch(const std::filesystem::path& scratch
   }
   return scratch;
 }
+// Seconds since the producer was last accessed, maximal if it has never been accessed
+long long idle_seconds(const std::map<Producer, std::chrono::steady_clock::time_point>& access,
+                       const Producer& p,
+                       std::chrono::steady_clock::time_point now)
+{
+  auto it = access.find(p);
+  if (it == access.end())
+    return std::numeric_limits<long long>::max();  // never accessed -> maximally idle
+  return std::chrono::duration_cast<std::chrono::seconds>(now - it->second).count();
+}
+
 }  // namespace
 
 namespace
@@ -1030,60 +1041,74 @@ void RepoManager::sweepLazyProducers()
 
   const auto now = std::chrono::steady_clock::now();
 
-  std::map<Producer, std::chrono::steady_clock::time_point> access;
+  LazyAccessTimes access;
   {
     std::scoped_lock g(itsLazyLoadMapMutex);
     access = itsLazyLastAccess;
   }
 
-  auto idleSeconds = [&](const Producer& p) -> long long
-  {
-    auto it = access.find(p);
-    if (it == access.end())
-      return std::numeric_limits<long long>::max();  // never accessed -> maximally idle
-    return std::chrono::duration_cast<std::chrono::seconds>(now - it->second).count();
-  };
-
   // 1. Idle unload.
   if (itsRadarIdleTimeout > 0)
-  {
-    for (const auto& p : itsLazyProducers)
-      if (idleSeconds(p) >= static_cast<long long>(itsRadarIdleTimeout) && producerHasModels(p))
-        unloadProducer(p);
-  }
+    unloadIdleLazyProducers(access, now);
 
   // 2. Size-based unload: bound the working set to the byte budget by unloading
   //    the least-recently-accessed loaded lazy producer until under budget.
   if (itsRadarCacheBytes > 0)
-  {
-    RadarCache cache(itsRadarScratchDir, itsRadarCacheBytes);
-    while (cache.totalBytes() > itsRadarCacheBytes)
-    {
-      Producer victim;
-      long long victimIdle = -1;
-      for (const auto& p : itsLazyProducers)
-      {
-        if (!producerHasModels(p))
-          continue;
-        const long long idle = idleSeconds(p);
-        if (idle > victimIdle)  // most idle (oldest access) wins
-        {
-          victimIdle = idle;
-          victim = p;
-        }
-      }
-      if (victimIdle < 0)
-        break;  // nothing loaded left to unload
-      unloadProducer(victim);
-      access.erase(victim);  // do not reconsider (its models are gone)
-    }
-  }
+    unloadLazyProducersOverBudget(access, now);
 
   // 3. Reclaim de-configured / orphaned scratch.
   if (itsRadarCacheBytes > 0)
   {
     auto pinned = [this](const std::string& id) { return !itsRepo.getAllModels(id).empty(); };
     RadarCache(itsRadarScratchDir, itsRadarCacheBytes).enforceBudget(pinned);
+  }
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Unload the loaded lazy producers idle past radar.idle_timeout
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::unloadIdleLazyProducers(const LazyAccessTimes& access,
+                                          std::chrono::steady_clock::time_point now)
+{
+  for (const auto& p : itsLazyProducers)
+    if (idle_seconds(access, p, now) >= static_cast<long long>(itsRadarIdleTimeout) &&
+        producerHasModels(p))
+      unloadProducer(p);
+}
+
+// ----------------------------------------------------------------------
+/*!
+ * \brief Unload the least-recently-accessed loaded lazy producers until the
+ *        scratch cache is within its byte budget
+ */
+// ----------------------------------------------------------------------
+
+void RepoManager::unloadLazyProducersOverBudget(LazyAccessTimes& access,
+                                                std::chrono::steady_clock::time_point now)
+{
+  RadarCache cache(itsRadarScratchDir, itsRadarCacheBytes);
+  while (cache.totalBytes() > itsRadarCacheBytes)
+  {
+    Producer victim;
+    long long victimIdle = -1;
+    for (const auto& p : itsLazyProducers)
+    {
+      if (!producerHasModels(p))
+        continue;
+      const long long idle = idle_seconds(access, p, now);
+      if (idle > victimIdle)  // most idle (oldest access) wins
+      {
+        victimIdle = idle;
+        victim = p;
+      }
+    }
+    if (victimIdle < 0)
+      break;  // nothing loaded left to unload
+    unloadProducer(victim);
+    access.erase(victim);  // do not reconsider (its models are gone)
   }
 }
 

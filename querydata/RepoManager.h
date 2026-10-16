@@ -134,6 +134,11 @@ struct RepoManager
   // the scratch cache is over its byte budget) the least-recently-accessed
   // loaded ones, so radar.cache_size actually binds. Called from expirationLoop.
   void sweepLazyProducers();
+  using LazyAccessTimes = std::map<Producer, std::chrono::steady_clock::time_point>;
+  void unloadIdleLazyProducers(const LazyAccessTimes& access,
+                               std::chrono::steady_clock::time_point now);
+  void unloadLazyProducersOverBudget(LazyAccessTimes& access,
+                                     std::chrono::steady_clock::time_point now);
 
   Fmi::DirectoryMonitor::Watcher id(const Producer& producer) const;
 
