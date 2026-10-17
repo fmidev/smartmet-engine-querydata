@@ -97,7 +97,7 @@ The individual settings are as follows
 * `forecast` - true for forecasts, false for observations
 * `climatology` - false by default. If true, the data can be queried for any year, only the date part matters
 * `type` - grid, points. Some operations are permitted only for grids or points.
-* `leveltype` - surface, pressure, model, points
+* `leveltype` - surface, pressure, model, points, or ensemble for legacy ensembles whose members are stored as levels (the EDR plugin then lists the levels as ensemble members)
 * `fullgrid` - true if data is valid for all points, saves speed when server starts
 * `refresh_interval_secs` - (default: 60) How often to check the directory for changes
 * `number_to_keep` - (default: 2) How many newest models to keep in the engine. Should be at least two for directories that change over time in server clusters. If the data is static and never updates, the value can be set to 1. When using "multifile mode" this value should be greater than two, or if old data is otherwise often requested using origintime-settings.

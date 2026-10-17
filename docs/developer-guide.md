@@ -182,7 +182,7 @@ one group per producer:
 |-----|---------|---------|
 | `alias` | | Other names for the producer. |
 | `directory`, `pattern` | | Where the files are, and a regex for their names. |
-| `type`, `leveltype` | `grid`, `surface` | Data type and level type (for `find()`). |
+| `type`, `leveltype` | `grid`, `surface` | Data type and level type (for `find()`). `leveltype = "ensemble"` marks legacy ensembles whose members are stored as levels; the EDR plugin lists such levels as ensemble members. |
 | `refresh_interval_secs` | 60 | Directory rescan interval. |
 | `number_to_keep` | 2 | Model runs kept. Keep at least 2: with 1, backends switching models at different times have no common content. |
 | `update_interval` | 3600 | Expected interval between model runs (expiration time). |
