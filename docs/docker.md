@@ -75,18 +75,7 @@ Some details and possible values of the producer:
 ```
 maxthreads = n;
 ```
-4. Configuring **synchronization (optional)** is useful if there are many backends. It defines settings querydata-engines use to keep their content in sync with others.
-
-```
-//Synchronization configuration (optional)
-
-synchro:
-  {
-       port            = portaddress;
-       hostname        ="host"  //Hostname is optional
- };
-```
-5. You can test querydata by query below that can be used to obtain the information about the currently loaded querydata:
+4. You can test querydata by query below that can be used to obtain the information about the currently loaded querydata:
 ```
 http://hostname:8080/admin?what=qengine
 ```

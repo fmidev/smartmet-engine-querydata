@@ -18,7 +18,7 @@ make rpm            # Build RPM package (cleans first)
 make install        # Install headers to $(includedir)/smartmet/engines/querydata/ and .so to $(enginedir)
 ```
 
-`make test` builds and runs `test/EngineTest`, which loads the engine through a reactor using `test/cnf/` and the smartmet-test-data files. The `examples/` directory contains standalone test programs (`QueryDataTest.cpp`, `SmartmetTest.cpp`, `StackAllocationTest.cpp`) that can be built and run manually:
+`make test` builds and runs `test/EngineTest`, which loads the engine through a reactor using `test/cnf/` and the smartmet-test-data files, and `test/RepositoryTest`. The `examples/` directory contains standalone test programs (`QueryDataTest.cpp`, `SmartmetTest.cpp`, `StackAllocationTest.cpp`, and the radar programs `RadarReaderTest.cpp`, `RadarCatalogTest.cpp`, `RadarCacheTest.cpp`) that can be built and run manually:
 
 ```bash
 cd examples && make          # Build example test executables
@@ -31,7 +31,7 @@ cd examples && make test     # Build and run them (requires querydata.so and a c
 
 The engine uses a base class + implementation split to support a "disabled" mode:
 
-- **`Engine`** (base) — inherits `Spine::SmartMetEngine`. All virtual methods throw "engine is disabled" by default. This allows the engine to be loaded but non-functional when not configured.
+- **`Engine`** (base) — inherits `Spine::SmartMetEngine`. Data access methods throw "engine is disabled" by default, while the listing methods report nothing (an empty producer list, `hasProducer()` false). This allows the engine to be loaded but non-functional when not configured.
 - **`EngineImpl`** (final) — the real implementation. Created via `EngineImpl::create(configfile)` factory method. Overrides all virtuals with actual logic.
 
 Plugins obtain a pointer to the base `Engine` class from the server reactor and call its virtual API. They never know about `EngineImpl`.
@@ -62,7 +62,7 @@ Two LRU caches in `EngineImpl`:
 - **CoordinateCache** — projected grid coordinates keyed by hash
 - **ValuesCache** — interpolated grid values keyed by hash
 
-Sizes configurable via `cache.coordinates_size` and `cache.values_size` in the config file.
+Sizes configurable via `cache.coordinates_size` and `cache.values_size` in the config file. `RepoManager` keeps a third one for the lat/lon coordinates of the grids (`cache.lat_lon_size`), and lazy radar producers decode their frames into a disk scratch cache (`radar.*`, see `docs/radar.md`).
 
 ## Key dependencies
 

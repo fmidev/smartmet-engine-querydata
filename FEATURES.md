@@ -146,9 +146,9 @@ Two LRU caches inside `EngineImpl`:
 - **`ValuesCache`** — interpolated grid values keyed by hash. Sized
   via `cache.values_size` (default 5000).
 - **`cache.lat_lon_size`** — latlon grid cache size (default 500).
-- **`valid_points_cache_dir`** — filesystem cache for per-grid
-  valid-point bitmaps; `clean_valid_points_cache_dir` cleans it on
-  startup.
+- **Radar scratch cache** — decoded radar frames on disk
+  (`radar.scratch_directory`, `radar.cache_size`, `radar.idle_timeout`),
+  see `docs/radar.md`.
 
 ## 10. DEM-based correction
 
@@ -175,20 +175,27 @@ Generic settings (in the libconfig main file):
 
 - **`verbose`** — report newly loaded data.
 - **`maxthreads`** — startup load parallelism.
-- **`valid_points_cache_dir`** / **`clean_valid_points_cache_dir`**.
 - **`cache.values_size`**, **`cache.coordinates_size`**,
   **`cache.lat_lon_size`**.
+- **`radar.scratch_directory`**, **`radar.cache_size`**,
+  **`radar.idle_timeout`**.
+- **`translations`** / **`parameter_translations`** and **`language`**
+  — WeatherText and SmartSymbolText translations.
+- **`disabled`** — load the engine in dummy mode.
 
-Per-producer (within `producers:( … )`):
+Per-producer (a group named after each producer in the `producers`
+list):
 
-- **`directory`**, **`pattern`**, **`pattern_str`**.
+- **`alias`**, **`directory`**, **`pattern`**.
 - **`leveltype`**, **`type`**.
 - **`refresh_interval_secs`**, **`update_interval`**,
-  **`number_to_keep`**, **`max_age`**, **`minimum_expires`**.
-- **`mmap`**.
-- **`forecast_type`**, **`forecast_number`**.
+  **`number_to_keep`**, **`max_age`**, **`max_latest_age`**,
+  **`minimum_expires`**, **`maxdistance`**.
+- **`forecast`**, **`climatology`**, **`fullgrid`**, **`staticgrid`**,
+  **`multifile`**, **`lazy`**, **`relative_uv`**, **`mmap`**.
 
-Per-host overrides via the `overrides:( … )` group.
+Per-host overrides of `maxthreads` and `verbose` via the
+`overrides:( … )` group.
 
 ## 13. Examples
 
@@ -198,11 +205,17 @@ Under `examples/` (build standalone with `make` inside `examples/`):
 - **`SmartmetTest.cpp`** — exercises the full engine via a SmartMet
   reactor.
 - **`StackAllocationTest.cpp`** — internal allocation experiment.
+- **`RadarReaderTest.cpp`**, **`RadarCatalogTest.cpp`**,
+  **`RadarCacheTest.cpp`** — radar GeoTIFF / ODIM reading, cataloguing
+  and the scratch cache, with sample files in `examples/data/`.
 - **Sample configs** — `querydata.conf` and `smartmet.conf`.
 
 ## 14. Documentation
 
 - **`docs/docker.md`** — running the engine in Docker.
+- **`docs/developer-guide.md`** — internals and the plugin API.
+- **`docs/radar.md`** — radar producers and the scratch cache.
+- **`docs/smartsymbol.md`** — the SmartSymbol logic.
 
 ## 15. Build & integration
 
@@ -215,8 +228,9 @@ Under `examples/` (build standalone with `make` inside `examples/`):
   `$(includedir)/smartmet/engines/querydata/`, library under
   `$(enginedir)`.
 - **RPM**: `make rpm` (cleans first).
-- **No automated test target** — `examples/` programs are run
-  manually as smoke tests.
+- **Tests**: `make test` runs `test/EngineTest` and
+  `test/RepositoryTest`; the `examples/` programs are run manually as
+  smoke tests.
 - **Linked libraries**: `smartmet-library-newbase`,
   `smartmet-library-spine`, `smartmet-library-gis`,
   `smartmet-library-macgyver`, `smartmet-library-timeseries`.

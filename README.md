@@ -12,8 +12,6 @@ The querydata engine (QEngine) provides shared access to gridded weather forecas
 
 * `verbose = true/false` - in verbose mode the engine will report newly loaded data
 * `maxthreads = N` - the number of threads used to read data on start up
-* `valid_points_cache_dir = "path"` - directory where to cache information on the grids
-* `clean_valid_points_cache_dir = true/false` - whether to automatically clean the above directory on start up or not
 
 ### Cache settings
 
@@ -23,7 +21,7 @@ The querydata engine (QEngine) provides shared access to gridded weather forecas
 
 ### Overriding generic settings
 
-Settings can be overridden for groups of hosts using an `overrides` group. Sample configuration:
+The `maxthreads` and `verbose` settings can be overridden for groups of hosts using an `overrides` group. Sample configuration:
 
 ```
 overrides:
@@ -96,15 +94,20 @@ The individual settings are as follows
 * `pattern` - required filename pattern
 * `forecast` - true for forecasts, false for observations
 * `climatology` - false by default. If true, the data can be queried for any year, only the date part matters
-* `type` - grid, points. Some operations are permitted only for grids or points.
-* `leveltype` - surface, pressure, model, points, or ensemble for legacy ensembles whose members are stored as levels (the EDR plugin then lists the levels as ensemble members)
-* `fullgrid` - true if data is valid for all points, saves speed when server starts
+* `type` - (default: grid) grid, points. Some operations are permitted only for grids or points.
+* `leveltype` - (default: surface) surface, pressure, model, points, or ensemble for legacy ensembles whose members are stored as levels (the EDR plugin then lists the levels as ensemble members)
+* `fullgrid` - (default: true) true if data is valid for all points, saves speed when server starts
+* `staticgrid` - (default: false) true if the valid grid points never change, for example a land-only model, as opposed to data whose valid points change with the season
+* `multifile` - (default: false) treat all the files as one data set, for example observations split into daily files
+* `lazy` - (default: false) catalogue the files cheaply at start up and decode the data only when first accessed, used for radar producers, see [docs/radar.md](docs/radar.md)
+* `maxdistance` - (default: -1, not set) producer specific maximum distance in kilometers when searching for a producer for a location, used when the caller allows it
 * `refresh_interval_secs` - (default: 60) How often to check the directory for changes
 * `number_to_keep` - (default: 2) How many newest models to keep in the engine. Should be at least two for directories that change over time in server clusters. If the data is static and never updates, the value can be set to 1. When using "multifile mode" this value should be greater than two, or if old data is otherwise often requested using origintime-settings.
-* `update_interval` - (default: 3600) Estimated update interval for the data, used for expiration headers
+* `update_interval` - (default: 3600, minimum 60) Estimated update interval for the data, used for expiration headers
 * `minimum_expires` - (default: 600) Minimum expiration header even though the model might be just a minute or two late
 * `mmap` - true by default, often set to false for the most important local model
 * `max_age` - time when the data should be dropped from the engine even if it still exists on the disk
+* `max_latest_age` - (default: off) the producer is skipped when searching for a producer for a location if its latest model is older than this
 * `relative_uv` - are wind U- and V-components relative to the local grid orientation or east/north components
 
 For historical reasons durations can be specified using ISO8601 or as simple offsets:
@@ -113,7 +116,7 @@ For historical reasons durations can be specified using ISO8601 or as simple off
 
 ### Translations for specific weather parameters
 
-The Querydata Engine enables converting a numeric WeatherSymbol3 to a textual WeatherText parameter on the fly. The code assumes the translations are defined in the configuration for specific ISO2 language codes as follows:
+The Querydata Engine enables converting a numeric WeatherSymbol3 to a textual WeatherText parameter, and a SmartSymbol to a textual SmartSymbolText parameter, on the fly. The code assumes the translations are defined in the engine configuration for specific ISO2 language codes as follows (`parameter_translations` is accepted as the name of the group too):
 
 ```
 language = "fi";
@@ -143,7 +146,7 @@ translations:
                 ...
 ```
 
-Unfortunately the translations for the more modern SmartSymbol are still hardcoded into the C++ code.
+The SmartSymbolText translations are given the same way in a `SmartSymbolText` list. A value without a translation for the requested language is translated to the default `language` instead, and is missing if there is no translation for that either.
 
 ### Derived parameters
 

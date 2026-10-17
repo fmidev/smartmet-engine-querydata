@@ -196,8 +196,11 @@ one group per producer:
 | `relative_uv` | false | U/V wind components are relative to the grid orientation. |
 | `mmap` | true | Memory-map instead of reading into memory. |
 
-Top-level `verbose`, the `cache.*` and `radar.*` settings, and host-specific
-`overrides` (a list of `{ name = [hosts]; setting = value; }` groups) complete it.
+Top-level `verbose`, `maxthreads` (loader threads at start up), the `cache.*` and
+`radar.*` settings, the WeatherText and SmartSymbolText translations (`translations` or
+`parameter_translations`, with a default `language`), and host-specific `overrides` of
+`maxthreads` and `verbose` (a list of `{ name = [host name prefixes]; setting = value; }`
+groups) complete it.
 
 `EngineImpl::create()` returns the base `Engine` (dummy mode: no producers, data access
 throws) when the configuration file name is empty or the file sets `disabled = true`; see
