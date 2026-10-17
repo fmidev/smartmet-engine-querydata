@@ -105,6 +105,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 * Sat Oct 17 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.10.17-1.fmi
+- Fixed a crash in the metadata of point data that has an area but no grid, such as observed
+  soundings
 - Split functions with a cognitive complexity above 25 into smaller helpers, no functional changes
 - ABI change: new or changed members in installed headers, dependent packages must be rebuilt
 

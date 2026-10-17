@@ -1621,7 +1621,10 @@ MetaData QImpl::metaData()
 
     // Get querydata grid info
 
+    // Point data may have an area but no grid
     const NFmiGrid *g = qi.Grid();
+    if (g == nullptr)
+      return meta;
     meta.xNumber = boost::numeric_cast<unsigned int>(g->XNumber());
     meta.yNumber = boost::numeric_cast<unsigned int>(g->YNumber());
 
