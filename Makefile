@@ -4,7 +4,7 @@ INCDIR = smartmet/engines/$(SUBNAME)
 
 REQUIRES = gdal jsoncpp configpp fmt
 
-include $(shell echo $${PREFIX-/usr})/share/smartmet/devel/makefile.inc
+include $(or $(PREFIX),$(shell smartbuildcfg --prefix))/share/smartmet/devel/makefile.inc
 
 enginedir = $(datadir)/smartmet/engines
 
