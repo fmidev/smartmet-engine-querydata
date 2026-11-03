@@ -30,6 +30,7 @@
 #include <ogr_spatialref.h>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 
 namespace SmartMet
 {
@@ -3652,6 +3653,7 @@ TS::TimeSeriesPtr QImpl::values(const ParameterOptions &param,
   try
   {
     TS::TimeSeriesPtr ret(new TS::TimeSeries);
+    ret->reserve(tlist.size());
 
     for (const Fmi::LocalDateTime &ldt : tlist)
     {
@@ -3672,6 +3674,7 @@ TS::TimeSeriesPtr QImpl::valuesAtPressure(const ParameterOptions &param,
   try
   {
     TS::TimeSeriesPtr ret(new TS::TimeSeries);
+    ret->reserve(tlist.size());
 
     for (const Fmi::LocalDateTime &ldt : tlist)
     {
@@ -3692,6 +3695,7 @@ TS::TimeSeriesPtr QImpl::valuesAtHeight(const ParameterOptions &param,
   try
   {
     TS::TimeSeriesPtr ret(new TS::TimeSeries);
+    ret->reserve(tlist.size());
 
     for (const Fmi::LocalDateTime &ldt : tlist)
     {
@@ -3714,6 +3718,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
   try
   {
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
+    ret->reserve(indexmask.size());
 
     for (const auto &mask : indexmask)
     {
@@ -3751,7 +3756,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       TS::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->emplace_back(lonlat, *timeseries);
+      ret->emplace_back(lonlat, std::move(*timeseries));
     }
 
     return ret;
@@ -3769,6 +3774,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
   try
   {
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
+    ret->reserve(indexmask.size());
 
     for (const auto &mask : indexmask)
     {
@@ -3806,7 +3812,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       TS::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->emplace_back(lonlat, *timeseries);
+      ret->emplace_back(lonlat, std::move(*timeseries));
     }
 
     return ret;
@@ -3824,6 +3830,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
   try
   {
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
+    ret->reserve(indexmask.size());
 
     for (const auto &mask : indexmask)
     {
@@ -3861,7 +3868,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       TS::LonLat lonlat(latlon.X(), latlon.Y());
 
-      ret->emplace_back(lonlat, *timeseries);
+      ret->emplace_back(lonlat, std::move(*timeseries));
     }
 
     return ret;
@@ -3884,6 +3891,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
   try
   {
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
+    ret->reserve(llist.size());
 
     for (const Spine::LocationPtr &loc : llist)
     {
@@ -3905,7 +3913,7 @@ TS::TimeSeriesGroupPtr QImpl::values(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = values(paramOptions, tlist);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->emplace_back(lonlat, *timeseries);
+      ret->emplace_back(lonlat, std::move(*timeseries));
     }
 
     return ret;
@@ -3924,6 +3932,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
   try
   {
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
+    ret->reserve(llist.size());
 
     for (const Spine::LocationPtr &loc : llist)
     {
@@ -3945,7 +3954,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtPressure(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = valuesAtPressure(paramOptions, tlist, pressure);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->emplace_back(lonlat, *timeseries);
+      ret->emplace_back(lonlat, std::move(*timeseries));
     }
 
     return ret;
@@ -3964,6 +3973,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
   try
   {
     TS::TimeSeriesGroupPtr ret(new TS::TimeSeriesGroup);
+    ret->reserve(llist.size());
 
     for (const Spine::LocationPtr &loc : llist)
     {
@@ -3985,7 +3995,7 @@ TS::TimeSeriesGroupPtr QImpl::valuesAtHeight(const ParameterOptions &param,
       TS::TimeSeriesPtr timeseries = valuesAtHeight(paramOptions, tlist, height);
       TS::LonLat lonlat(loc->longitude, loc->latitude);
 
-      ret->emplace_back(lonlat, *timeseries);
+      ret->emplace_back(lonlat, std::move(*timeseries));
     }
 
     return ret;
