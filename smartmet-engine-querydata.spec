@@ -3,7 +3,7 @@
 %define SPECNAME smartmet-engine-%{DIRNAME}
 Summary: SmartMet qengine engine
 Name: %{SPECNAME}
-Version: 26.11.5
+Version: 26.11.6
 Release: 1%{?dist}.fmi
 License: MIT
 Group: SmartMet/Engines
@@ -32,7 +32,7 @@ BuildRequires: rpm-build
 BuildRequires: zlib-devel
 BuildRequires: %{smartmet_fmt_devel}
 BuildRequires: smartmet-library-timeseries-devel >= 26.11.4
-BuildRequires: smartmet-library-macgyver-devel >= 26.11.3
+BuildRequires: smartmet-library-macgyver-devel >= 26.11.6
 BuildRequires: smartmet-library-newbase-devel >= 26.10.16
 BuildRequires: smartmet-library-spine-devel >= 26.11.4
 Requires: %{smartmet_boost}-iostreams
@@ -44,7 +44,7 @@ Requires: jsoncpp >= 1.8.4
 Requires: %{smartmet_fmt}
 Requires: zlib
 Requires: smartmet-library-timeseries >= 26.11.4
-Requires: smartmet-library-macgyver >= 26.10.16
+Requires: smartmet-library-macgyver >= 26.11.6
 Requires: smartmet-library-newbase >= 26.10.17
 Requires: smartmet-library-spine >= 26.11.4
 #TestRequires: smartmet-utils-devel >= 26.9.3
@@ -58,7 +58,7 @@ Requires: smartmet-library-spine >= 26.11.4
 #TestRequires: zlib-devel
 #TestRequires: smartmet-library-regression
 #TestRequires: smartmet-library-gis-devel
-#TestRequires: smartmet-library-macgyver-devel >= 26.11.3
+#TestRequires: smartmet-library-macgyver-devel >= 26.11.6
 #TestRequires: smartmet-library-newbase-devel >= 26.10.16
 #TestRequires: smartmet-library-spine-devel >= 26.11.4
 #TestRequires: smartmet-library-timeseries-devel >= 26.11.4
@@ -104,6 +104,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/smartmet/engines/%{DIRNAME}/*.h
 
 %changelog
+* Fri Nov 6 2026 Mika Heiskanen <mika.heiskanen@fmi.fi> - 26.11.6-1.fmi
+- Include the headers used directly instead of relying on transitive includes
+- Rebuilt against the new macgyver AsyncTaskGroup ABI
+
 * Thu Nov  5 2026 Andris Pavēnis <andris.pavenis@fmi.fi> 26.11.5-1.fmi
 - Memory use optimization
 

@@ -9,6 +9,7 @@
 #include "RepoManager.h"
 #include "Repository.h"
 #include "WGS84EnvelopeFactory.h"
+#include <spine/ConfigBase.h>
 #include <boost/thread.hpp>
 #include <gis/CoordinateTransformation.h>
 #include <gis/OGR.h>
