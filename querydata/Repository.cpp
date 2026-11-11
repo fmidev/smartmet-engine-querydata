@@ -1204,7 +1204,7 @@ Repository::ContentTable Repository::getRepoContents(const std::string& producer
         resultTable->set(column, row, timeFormatter->format(time2));
         ++column;
 
-        // Insert file laod time
+        // Insert file load time
         resultTable->set(column, row, timeFormatter->format(time3));
         ++column;
 

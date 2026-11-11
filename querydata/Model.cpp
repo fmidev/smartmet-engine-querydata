@@ -81,7 +81,7 @@ Model::Model(Private /* unused */,
     Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsStaticGrid));
     Fmi::hash_combine(itsHashValue, Fmi::hash_value(itsRelativeUV));
 
-    // We need an info object to intialize some data members
+    // We need an info object to initialize some data members
 
     std::shared_ptr<NFmiFastQueryInfo> qinfo =
         std::make_shared<NFmiFastQueryInfo>(itsQueryData.get());
@@ -230,7 +230,7 @@ Model::Model(Private /* unused */, std::shared_ptr<NFmiQueryData> theData, std::
 {
   try
   {
-    // We need an info object to intialize some data members
+    // We need an info object to initialize some data members
 
     std::shared_ptr<NFmiFastQueryInfo> qinfo =
         std::make_shared<NFmiFastQueryInfo>(itsQueryData.get());

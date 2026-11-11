@@ -3171,7 +3171,7 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
       // This reintroduces an older bug/feature where the name of the location is given as a
       // region if it doesn't belong to any administrative region. (i.e. Helsinki doesn't have
       // region, Kumpula has.) Also checking whether the loc.name has valid data, if it's empty as
-      // well - which shoudn't occur - we return nan
+      // well - which shouldn't occur - we return nan
 
       if (!loc.area.empty())
         return loc.area;  // Administrative region known.
@@ -3324,7 +3324,7 @@ TS::Value QImpl::dataIndependentValue(const ParameterOptions &opt,
     case kFmiHour:
       return Fmi::to_string(ldt.local_time().time_of_day().hours());
 
-      // The following parameters are added for for obsengine compability reasons
+      // The following parameters are added for for obsengine compatibility reasons
       // so that we can have e.g. fmisid identifier for observations in query which
       // has both observations and forecasts.
       // Later on support was added for pointwise querydata.
