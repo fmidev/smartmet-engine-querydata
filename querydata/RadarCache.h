@@ -27,10 +27,13 @@
 
 #pragma once
 
+#include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <filesystem>
 #include <functional>
 #include <string>
+#include <system_error>
 #include <vector>
 
 namespace SmartMet

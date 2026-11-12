@@ -3,7 +3,6 @@
 #include "Producer.h"
 #include <macgyver/Exception.h>
 #include <macgyver/TimeParser.h>
-#include <stdexcept>
 
 namespace SmartMet
 {

@@ -6,18 +6,32 @@
 
 #include "Repository.h"
 #include "MetaQueryFilters.h"
+#include "MetaQueryOptions.h"
 #include <boost/algorithm/string/join.hpp>
+#include <boost/numeric/conversion/cast.hpp>
+#include <boost/range/adaptors.hpp>
 #include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
+#include <macgyver/TimeFormatter.h>
+#include <newbase/NFmiArea.h>
+#include <newbase/NFmiDataIdent.h>
+#include <newbase/NFmiEnumConverter.h>
 #include <newbase/NFmiFastQueryInfo.h>
-#include <newbase/NFmiQueryData.h>
-#include <spine/Convenience.h>
+#include <newbase/NFmiGlobals.h>
+#include <newbase/NFmiLevel.h>
+#include <newbase/NFmiMetTime.h>
+#include <newbase/NFmiParameterName.h>
+#include <newbase/NFmiPoint.h>
+#include <newbase/NFmiString.h>
 #include <spine/TableFormatter.h>
 #include <timeseries/ParameterFactory.h>
 #include <algorithm>
 #include <cassert>
-#include <sstream>
-#include <stdexcept>
+#include <iostream>
+#include <optional>
+#include <set>
+#include <tuple>
+#include <utility>
 
 namespace SmartMet
 {

@@ -14,26 +14,45 @@
 
 #include "MetaData.h"
 #include "Model.h"
-#include "ParameterOptions.h"
 #include "ValidTimeList.h"
 #include <gis/CoordinateMatrix.h>
 #include <macgyver/DateTime.h>
+#include <macgyver/LocalDateTime.h>
+#include <newbase/NFmiDataMatrix.h>
+#include <newbase/NFmiGlobals.h>
+#include <newbase/NFmiGrid.h>
+#include <newbase/NFmiLevelType.h>
 #include <newbase/NFmiParameterName.h>
-#include <spine/ParameterTranslations.h>
-#include <spine/Thread.h>
+#include <spine/Location.h>
+#include <timeseries/TimeSeries.h>
+#include <timeseries/TimeSeriesGenerator.h>
 #include <timeseries/TimeSeriesInclude.h>
+#include <cstddef>
 #include <list>
 #include <memory>
+#include <string>
+#include <vector>
 
 class NFmiArea;
+class NFmiDataIdent;
+class NFmiFastQueryInfo;
+class NFmiIndexMask;
+class NFmiLevel;
 class NFmiMetTime;
 class NFmiPoint;
-class NFmiFastQueryInfo;
+class NFmiQueryInfo;
+namespace SmartMet::Engine::Querydata
+{
+struct ParameterOptions;
+}  // namespace SmartMet::Engine::Querydata
+namespace SmartMet::Spine
+{
+class Parameter;
+class ParameterTranslations;
+}  // namespace SmartMet::Spine
 
 namespace Fmi
 {
-class DEM;
-class LandCover;
 class SpatialReference;
 }  // namespace Fmi
 

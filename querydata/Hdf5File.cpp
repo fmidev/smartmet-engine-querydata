@@ -1,7 +1,7 @@
 #include "Hdf5File.h"
-
-#include <gdal_priv.h>
 #include <algorithm>
+#include <cctype>
+#include <gdal_priv.h>
 #include <mutex>
 #include <stdexcept>
 

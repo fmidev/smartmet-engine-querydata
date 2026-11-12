@@ -7,40 +7,41 @@
 #pragma once
 
 #include "Engine.h"
+#include "OriginTime.h"
 #include "Producer.h"
+#include "Q.h"
 #include "Repository.h"
+#include <boost/thread.hpp>
 #include <gis/CoordinateMatrix.h>
 #include <macgyver/AtomicSharedPtr.h>
 #include <macgyver/Cache.h>
-#include <spine/ParameterTranslations.h>
-#include <spine/SmartMetEngine.h>
+#include <macgyver/CacheStats.h>
+#include <macgyver/DateTime.h>
+#include <newbase/NFmiDataMatrix.h>
+#include <spine/Table.h>
 #include <atomic>
-#include <filesystem>
+#include <ctime>
 #include <future>
 #include <memory>
-#include <optional>
 #include <string>
 #include <system_error>
 
-class NFmiPoint;
-class OGRSpatialReference;
+namespace SmartMet::Spine::HTTP
+{
+class Request;
+}  // namespace SmartMet::Spine::HTTP
+namespace SmartMet::Spine
+{
+class ParameterTranslations;
+}  // namespace SmartMet::Spine
 
 using CoordinatesPtr = std::shared_ptr<Fmi::CoordinateMatrix>;
 
 using Values = NFmiDataMatrix<float>;
 using ValuesPtr = std::shared_ptr<Values>;
 
-namespace Fmi
-{
-class SpatialReference;
-}
-
 namespace SmartMet
 {
-namespace Spine
-{
-class Reactor;
-}
 
 namespace Engine
 {

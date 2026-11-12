@@ -15,10 +15,15 @@
 #include "ValidTimeList.h"
 #include <macgyver/DateTime.h>
 #include <newbase/NFmiFastQueryInfo.h>
+#include <newbase/NFmiMetTime.h>
 #include <spine/Thread.h>
+#include <cstddef>
 #include <filesystem>
 #include <list>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 class NFmiPoint;
 class NFmiQueryData;

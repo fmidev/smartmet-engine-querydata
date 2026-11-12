@@ -1,4 +1,5 @@
 #include "Range.h"
+#include <algorithm>
 
 namespace SmartMet
 {

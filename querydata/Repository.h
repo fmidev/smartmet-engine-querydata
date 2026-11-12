@@ -7,21 +7,24 @@
 #pragma once
 
 #include "MetaData.h"
-#include "MetaQueryOptions.h"
 #include "Model.h"
 #include "OriginTime.h"
 #include "Producer.h"
 #include "Q.h"
-
 #include <macgyver/DateTime.h>
-#include <memory>
-#include <set>
-#include <string>
-#include <utility>
-
-#include <macgyver/TimeFormatter.h>
 #include <spine/Table.h>
-#include <spine/TableFormatter.h>
+#include <cstddef>
+#include <filesystem>
+#include <list>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace SmartMet::Engine::Querydata
+{
+class MetaQueryOptions;
+}  // namespace SmartMet::Engine::Querydata
 
 namespace SmartMet
 {

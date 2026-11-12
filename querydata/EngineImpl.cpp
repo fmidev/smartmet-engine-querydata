@@ -5,14 +5,15 @@
 // ======================================================================
 
 #include "EngineImpl.h"
-#include "MetaQueryFilters.h"
+#include "Model.h"
+#include "RadarCatalog.h"
+#include "RadarReader.h"
 #include "RepoManager.h"
 #include "Repository.h"
+#include "ValidTimeList.h"
 #include "WGS84EnvelopeFactory.h"
-#include <spine/ConfigBase.h>
 #include <boost/thread.hpp>
 #include <gis/CoordinateTransformation.h>
-#include <gis/OGR.h>
 #include <gis/SpatialReference.h>
 #include <json/reader.h>
 #include <macgyver/AnsiEscapeCodes.h>
@@ -21,17 +22,36 @@
 #include <macgyver/Hash.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/ThreadName.h>
+#include <newbase/NFmiFastQueryInfo.h>
+#include <newbase/NFmiGlobals.h>
+#include <newbase/NFmiMetTime.h>
+#include <spine/ConfigBase.h>
 #include <spine/ConfigTools.h>
 #include <spine/Convenience.h>
-#include <spine/Exceptions.h>
+#include <spine/HTTP.h>
+#include <spine/ParameterTranslations.h>
 #include <spine/Reactor.h>
-#include <chrono>
+#include <spine/Thread.h>
+#include <algorithm>
+#include <cerrno>
+#include <cstring>
 #include <exception>
-#include <iomanip>
+#include <filesystem>
+#include <functional>
+#include <iostream>
 #include <libconfig.h++>
+#include <limits>
+#include <list>
 #include <memory>
 #include <ogr_spatialref.h>
+#include <optional>
 #include <system_error>
+#include <vector>
+
+namespace SmartMet::Spine
+{
+class Parameter;
+}  // namespace SmartMet::Spine
 
 #define CHECK_LATEST_MODEL_AGE true
 

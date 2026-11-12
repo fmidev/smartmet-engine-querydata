@@ -7,18 +7,35 @@
  */
 // ======================================================================
 
+#include "../querydata/Engine.h"
+#include "../querydata/Envelope.h"
+#include "../querydata/MetaData.h"
+#include "../querydata/Model.h"
+#include "../querydata/OriginTime.h"
+#include "../querydata/Producer.h"
+#include "../querydata/Q.h"
+#include "../querydata/Range.h"
 #include "Engine.h"
 #include "Q.h"
 #include "Range.h"
 #include <fmt/format.h>
+#include <gis/CoordinateMatrix.h>
 #include <macgyver/DateTime.h>
+#include <newbase/NFmiDataMatrix.h>
+#include <newbase/NFmiGlobals.h>
+#include <newbase/NFmiGrid.h>
 #include <newbase/NFmiMetTime.h>
+#include <newbase/NFmiParameterName.h>
 #include <newbase/NFmiPoint.h>
 #include <regression/tframe.h>
 #include <spine/Options.h>
 #include <spine/Reactor.h>
 #include <cmath>
 #include <iostream>
+#include <list>
+#include <memory>
+#include <set>
+#include <string>
 
 using namespace std;
 using SmartMet::Engine::Querydata::OriginTime;

@@ -7,21 +7,21 @@
 
 #pragma once
 
-#include <spine/Location.h>
-#include <spine/Parameter.h>
-#include <timeseries/TimeSeriesInclude.h>
-
-#include <newbase/NFmiFastQueryInfo.h>
-#include <newbase/NFmiIndexMask.h>
-#include <newbase/NFmiPoint.h>
-
-#include <macgyver/TimeFormatter.h>
-
-#include <macgyver/LocalDateTime.h>
-
-#include <optional>
-
 #include "Producer.h"
+#include <newbase/NFmiPoint.h>
+#include <locale>
+#include <optional>
+#include <string>
+
+namespace Fmi
+{
+class TimeFormatter;
+}  // namespace Fmi
+namespace SmartMet::Spine
+{
+class Location;
+class Parameter;
+}  // namespace SmartMet::Spine
 
 namespace SmartMet
 {

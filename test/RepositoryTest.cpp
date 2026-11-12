@@ -1,7 +1,11 @@
 #define BOOST_TEST_MODULE RepositoryTest
-#include <boost/test/included/unit_test.hpp>
-
+#include "../querydata/Model.h"
+#include "../querydata/Producer.h"
+#include "../querydata/Repository.h"
 #include "Repository.h"
+#include <boost/test/included/unit_test.hpp>
+#include <filesystem>
+#include <string>
 
 using namespace SmartMet::Engine::Querydata;
 

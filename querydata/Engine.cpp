@@ -2,6 +2,15 @@
 #include <macgyver/Exception.h>
 #include <macgyver/TypeName.h>
 
+namespace SmartMet::Engine::Querydata
+{
+class MetaQueryOptions;
+}  // namespace SmartMet::Engine::Querydata
+namespace SmartMet::Spine
+{
+class Parameter;
+}  // namespace SmartMet::Spine
+
 #define DEBUG_ENGINE_DISABLING
 
 #ifdef DEBUG_ENGINE_DISABLING

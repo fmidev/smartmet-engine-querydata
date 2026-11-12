@@ -1,5 +1,9 @@
 #include "Envelope.h"
 #include <newbase/NFmiFastQueryInfo.h>
+#include <newbase/NFmiGlobals.h>
+#include <newbase/NFmiPoint.h>
+#include <algorithm>
+#include <cstddef>
 
 namespace SmartMet
 {

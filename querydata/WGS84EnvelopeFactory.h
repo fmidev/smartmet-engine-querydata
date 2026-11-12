@@ -1,7 +1,9 @@
 #pragma once
+#include <macgyver/CacheStats.h>
+#include <cstddef>
 #include <memory>
-#include <macgyver/Cache.h>
-#include <newbase/NFmiFastQueryInfo.h>
+
+class NFmiFastQueryInfo;
 
 namespace SmartMet
 {

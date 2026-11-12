@@ -6,20 +6,34 @@
 
 #pragma once
 
+#include "Model.h"
+#include "Producer.h"
 #include "RadarCatalog.h"
 #include "Repository.h"
+#include <boost/asio.hpp>
 #include <boost/atomic.hpp>
 #include <boost/thread.hpp>
-#include <macgyver/AsyncTaskGroup.h>
 #include <macgyver/Cache.h>
+#include <macgyver/CacheStats.h>
 #include <macgyver/DirectoryMonitor.h>
+#include <newbase/NFmiPoint.h>
 #include <spine/Thread.h>
 #include <chrono>
+#include <cstdint>
+#include <ctime>
 #include <filesystem>
+#include <list>
 #include <map>
 #include <memory>
 #include <mutex>
 #include <set>
+#include <string>
+#include <vector>
+
+namespace Fmi
+{
+class AsyncTaskGroup;
+}  // namespace Fmi
 
 namespace SmartMet
 {

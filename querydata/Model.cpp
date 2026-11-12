@@ -10,8 +10,11 @@
 #include <macgyver/Hash.h>
 #include <newbase/NFmiFastQueryInfo.h>
 #include <newbase/NFmiGeoTools.h>
+#include <newbase/NFmiGlobals.h>
+#include <newbase/NFmiPoint.h>
 #include <newbase/NFmiQueryData.h>
-#include <spine/Convenience.h>
+#include <algorithm>
+#include <system_error>
 
 namespace SmartMet
 {

@@ -1,8 +1,14 @@
 
 #include "MetaQueryFilters.h"
+#include "MetaData.h"
+#include "MetaQueryOptions.h"
 #include <boost/geometry/geometry.hpp>
 #include <macgyver/Exception.h>
+#include <newbase/NFmiPoint.h>
 #include <spine/Convenience.h>
+#include <algorithm>
+#include <list>
+#include <string>
 
 namespace SmartMet
 {

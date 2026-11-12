@@ -2,7 +2,8 @@
 
 #include "Range.h"
 #include <memory>
-#include <newbase/NFmiFastQueryInfo.h>
+
+class NFmiFastQueryInfo;
 
 namespace SmartMet
 {

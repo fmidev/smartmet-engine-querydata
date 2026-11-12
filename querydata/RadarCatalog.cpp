@@ -5,13 +5,12 @@
 // ======================================================================
 
 #include "RadarCatalog.h"
-
-#include <macgyver/Exception.h>
+#include <newbase/NFmiMetTime.h>
 #include <spine/Convenience.h>
-
 #include <algorithm>
 #include <iostream>
-#include <set>
+#include <system_error>
+#include <utility>
 
 namespace fs = std::filesystem;
 

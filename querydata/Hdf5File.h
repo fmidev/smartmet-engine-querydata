@@ -1,16 +1,19 @@
 #pragma once
 
 #include <macgyver/Exception.h>
+#include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <filesystem>
 #include <gdal.h>
 #include <map>
-#include <cmath>
 #include <optional>
 #include <set>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 // Forward declaration - full definition in gdal_priv.h (included in Hdf5File.cpp)

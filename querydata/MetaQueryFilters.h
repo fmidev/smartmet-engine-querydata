@@ -1,11 +1,14 @@
 
 #pragma once
 
-#include "MetaData.h"
-#include "MetaQueryOptions.h"
-
 #include <macgyver/DateTime.h>
 #include <vector>
+
+namespace SmartMet::Engine::Querydata
+{
+class MetaQueryOptions;
+struct MetaData;
+}  // namespace SmartMet::Engine::Querydata
 
 namespace SmartMet
 {

@@ -1,6 +1,16 @@
 
 #include "ParameterOptions.h"
 
+namespace Fmi
+{
+class TimeFormatter;
+}  // namespace Fmi
+namespace SmartMet::Spine
+{
+class Location;
+class Parameter;
+}  // namespace SmartMet::Spine
+
 namespace SmartMet
 {
 namespace Engine

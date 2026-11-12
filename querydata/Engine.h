@@ -1,13 +1,31 @@
 #pragma once
 
+#include "MetaData.h"
+#include "Model.h"
 #include "OriginTime.h"
 #include "Producer.h"
-#include "RepoManager.h"
+#include "Q.h"
 #include "Repository.h"
 #include "ValidTimeList.h"
 #include <gis/CoordinateMatrix.h>
-#include <macgyver/Cache.h>
+#include <gis/SpatialReference.h>
+#include <macgyver/DateTime.h>
+#include <newbase/NFmiDataMatrix.h>
 #include <spine/SmartMetEngine.h>
+#include <cstddef>
+#include <list>
+#include <memory>
+#include <optional>
+#include <string>
+
+namespace SmartMet::Engine::Querydata
+{
+class MetaQueryOptions;
+}  // namespace SmartMet::Engine::Querydata
+namespace SmartMet::Spine
+{
+class Parameter;
+}  // namespace SmartMet::Spine
 
 using CoordinatesPtr = std::shared_ptr<Fmi::CoordinateMatrix>;
 
@@ -16,10 +34,6 @@ using ValuesPtr = std::shared_ptr<Values>;
 
 namespace SmartMet
 {
-namespace Spine
-{
-class Reactor;
-}
 
 namespace Engine
 {

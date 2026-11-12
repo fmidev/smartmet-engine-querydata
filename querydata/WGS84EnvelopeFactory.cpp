@@ -1,5 +1,8 @@
 #include "WGS84EnvelopeFactory.h"
 #include "Envelope.h"
+#include <macgyver/Cache.h>
+#include <newbase/NFmiFastQueryInfo.h>
+#include <optional>
 
 namespace SmartMet
 {

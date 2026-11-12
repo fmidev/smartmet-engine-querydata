@@ -5,13 +5,11 @@
 // ======================================================================
 
 #include "RadarCache.h"
-
-#include <macgyver/Exception.h>
 #include <spine/Convenience.h>
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <utility>
 
 namespace fs = std::filesystem;
 

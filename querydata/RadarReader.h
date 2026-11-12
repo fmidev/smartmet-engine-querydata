@@ -16,6 +16,7 @@
 #pragma once
 
 #include <newbase/NFmiMetTime.h>
+#include <cstddef>
 #include <filesystem>
 #include <memory>
 #include <string>

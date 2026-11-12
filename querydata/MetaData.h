@@ -3,8 +3,8 @@
 #include "Envelope.h"
 #include "Producer.h"
 #include <macgyver/DateTime.h>
-
 #include <list>
+#include <string>
 
 namespace SmartMet
 {
