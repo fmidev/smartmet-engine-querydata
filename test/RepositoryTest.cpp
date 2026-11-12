@@ -1,7 +1,6 @@
 #define BOOST_TEST_MODULE RepositoryTest
 #include "../querydata/Model.h"
 #include "../querydata/Producer.h"
-#include "../querydata/Repository.h"
 #include "Repository.h"
 #include <boost/test/included/unit_test.hpp>
 #include <filesystem>

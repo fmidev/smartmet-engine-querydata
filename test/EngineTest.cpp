@@ -7,14 +7,11 @@
  */
 // ======================================================================
 
-#include "../querydata/Engine.h"
 #include "../querydata/Envelope.h"
 #include "../querydata/MetaData.h"
 #include "../querydata/Model.h"
 #include "../querydata/OriginTime.h"
 #include "../querydata/Producer.h"
-#include "../querydata/Q.h"
-#include "../querydata/Range.h"
 #include "Engine.h"
 #include "Q.h"
 #include "Range.h"
