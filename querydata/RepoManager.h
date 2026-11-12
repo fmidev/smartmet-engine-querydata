@@ -10,7 +10,6 @@
 #include "Producer.h"
 #include "RadarCatalog.h"
 #include "Repository.h"
-#include <boost/asio.hpp>
 #include <boost/atomic.hpp>
 #include <boost/thread.hpp>
 #include <macgyver/Cache.h>
