@@ -9,6 +9,7 @@
 #include "MetaQueryOptions.h"
 #include <boost/algorithm/string/join.hpp>
 #include <boost/numeric/conversion/cast.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <macgyver/Exception.h>
 #include <macgyver/StringConversion.h>
 #include <macgyver/TimeFormatter.h>
